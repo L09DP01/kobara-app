@@ -3,7 +3,8 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle2, Home, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -52,12 +53,16 @@ function SuccessContent() {
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-3 pb-8">
-            <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 font-semibold shadow-lg shadow-emerald-200 transition-all">
-              <Link href="/">
-                Retour à l'accueil
-                <Home className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
+            <Link 
+              href="/" 
+              className={cn(
+                buttonVariants({ variant: "default", size: "lg" }),
+                "w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 text-base font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-emerald-200"
+              )}
+            >
+              Retour à l'accueil
+              <Home className="ml-2 w-4 h-4" />
+            </Link>
             <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest font-bold">
               Sécurisé par Kobara
             </p>
