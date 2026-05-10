@@ -23,17 +23,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = JSON.parse(rawBody);
-    const { reference, status, amount, transaction_id } = body;
+    // Bazik might use reference or referenceId
+    const reference = body.reference || body.referenceId || body.reference_id;
+    const status = body.status;
+    const transaction_id = body.transaction_id || body.transactionId || body.id;
 
     if (!reference) {
+      console.error("Webhook error: Missing reference in body", body);
       return NextResponse.json({ error: "Missing reference" }, { status: 400 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-    // We must use the service role key to bypass RLS, because the webhook comes from Bazik,
-    // not from an authenticated merchant user session.
     const supabaseAdmin = createServerClient(supabaseUrl, supabaseServiceKey, {
       cookies: {
         getAll() { return [] },
@@ -49,19 +51,20 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (fetchError || !payment) {
+      console.error(`Webhook error: Payment not found for reference ${reference}`);
       return NextResponse.json({ error: "Payment not found" }, { status: 404 });
     }
 
     // Determine new status
-    // Map Bazik statuses to Kobara statuses. Assuming Bazik sends "SUCCESS", "FAILED", etc.
     let newStatus = payment.status;
     let paidAt = payment.paid_at;
 
     const bazikStatus = String(status).toUpperCase();
-    if (bazikStatus === "SUCCESS" || bazikStatus === "COMPLETED" || bazikStatus === "SUCCESSFUL") {
+    // SUCCESS, COMPLETED, SUCCESSFUL, or just true if boolean
+    if (bazikStatus === "SUCCESS" || bazikStatus === "COMPLETED" || bazikStatus === "SUCCESSFUL" || status === true) {
       newStatus = "succeeded";
       paidAt = new Date().toISOString();
-    } else if (bazikStatus === "FAILED" || bazikStatus === "CANCELLED") {
+    } else if (bazikStatus === "FAILED" || bazikStatus === "CANCELLED" || status === false) {
       newStatus = "failed";
     }
 
@@ -79,25 +82,42 @@ export async function POST(request: NextRequest) {
       throw updateError;
     }
 
-    // If payment succeeded, update the merchant's available balance
+    // If payment succeeded, update the merchant's available balance and send notification
     if (newStatus === "succeeded" && payment.status !== "succeeded") {
-      // Need to fetch current balance and add net_amount
+      // 1. Update Merchant Balance
+      // Using direct SQL increment logic via RPC or simple update if RPC not available.
+      // For MVP, we fetch and update.
       const { data: merchant } = await supabaseAdmin
         .from('merchants')
-        .select('available_balance')
+        .select('available_balance, business_name')
         .eq('id', payment.merchant_id)
         .single();
       
       if (merchant) {
-        await supabaseAdmin
+        const currentBalance = Number(merchant.available_balance || 0);
+        const netAmount = Number(payment.net_amount || 0);
+        
+        const { error: balanceError } = await supabaseAdmin
           .from('merchants')
           .update({
-            available_balance: Number(merchant.available_balance) + Number(payment.net_amount)
+            available_balance: currentBalance + netAmount
           })
           .eq('id', payment.merchant_id);
+          
+        if (balanceError) {
+          console.error("Balance update error:", balanceError);
+        }
       }
 
-      // 4. Send outbound webhooks to merchant endpoints
+      // 2. Create Notification for Merchant
+      await supabaseAdmin.from('notifications').insert({
+        merchant_id: payment.merchant_id,
+        type: 'payment_received',
+        title: '💰 Nouveau paiement reçu',
+        message: `Vous avez reçu un paiement de ${payment.amount} HTG de ${merchant?.business_name || 'votre client'}. Référence: ${payment.kobara_reference}`
+      });
+
+      // 3. Send outbound webhooks to merchant endpoints
       const { data: endpoints } = await supabaseAdmin
         .from('webhook_endpoints')
         .select('*')
@@ -105,9 +125,8 @@ export async function POST(request: NextRequest) {
         .eq('status', 'active');
 
       if (endpoints && endpoints.length > 0) {
-        // Create the event payload
         const eventPayload = {
-          event: `payment.${newStatus}`, // e.g., payment.succeeded
+          event: `payment.${newStatus}`,
           data: {
             id: payment.id,
             reference: payment.kobara_reference,
@@ -119,11 +138,8 @@ export async function POST(request: NextRequest) {
           }
         };
 
-        // Note: For MVP we send synchronously. In prod, use a queue or Edge Functions background tasks.
         for (const endpoint of endpoints) {
           try {
-            // Compute HMAC signature
-            const crypto = require('crypto');
             const signature = crypto.createHmac('sha256', endpoint.secret)
               .update(JSON.stringify(eventPayload))
               .digest('hex');
@@ -137,15 +153,11 @@ export async function POST(request: NextRequest) {
               },
               body: JSON.stringify(eventPayload)
             });
-
-            // Log event success (Optional MVP step)
           } catch (err) {
             console.error(`Failed to send webhook to ${endpoint.url}:`, err);
-            // Log event failure for retries (Optional MVP step)
           }
         }
       }
-
     }
 
     return NextResponse.json({ received: true });

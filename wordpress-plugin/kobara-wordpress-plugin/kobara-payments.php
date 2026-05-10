@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('KOBARA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('KOBARA_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('KOBARA_API_BASE_URL', 'https://api.kobara.com/api/v1');
+define('KOBARA_API_BASE_URL', 'https://kobara.app/api/v1');
 
 // Initialize the plugin when WooCommerce is loaded
 add_action('plugins_loaded', 'kobara_init_gateway_class');

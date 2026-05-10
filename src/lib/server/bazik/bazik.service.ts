@@ -67,7 +67,7 @@ export const BazikService = {
         userID: BAZIK_USER_ID,
         referenceId: params.reference,
         description: params.description || "Paiement Kobara",
-        successUrl: process.env.NEXT_PUBLIC_APP_URL, // Optional
+        successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/success?reference=${params.reference}&amount=${params.amount}`,
       }),
     });
 
