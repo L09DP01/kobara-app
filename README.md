@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kobara.app — Infrastructure SaaS Fintech pour Haïti 🇭🇹
 
-## Getting Started
+Kobara est une plateforme de paiement moderne conçue pour permettre aux entrepreneurs, développeurs et entreprises en Haïti d'accepter des paiements **MonCash** via une API robuste, des liens de paiement et des intégrations prêtes à l'emploi.
 
-First, run the development server:
+## 🚀 Vision du Produit
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Kobara fonctionne comme un "Stripe pour Haïti", offrant une expérience développeur premium et une interface intuitive pour gérer les transactions financières en temps réel.
+
+### Fonctionnalités Clés
+- **Paiements API** : Intégration directe via des requêtes sécurisées.
+- **Liens de Paiement** : Créez des liens partageables pour vos clients (WhatsApp, Social Media).
+- **Dashboard Marchand** : Suivi des transactions, revenus, frais et retraits.
+- **Sécurité Avancée** : Clés API hachées (SHA-256) avec préfixe `kbr_sk_`.
+- **Système de Webhooks** : Notifications en temps réel des succès de paiement.
+- **Frais Transparents** : Commission fixe de 2.9% par transaction.
+
+---
+
+## 🛠 Stack Technique
+
+- **Frontend** : Next.js 15+ (App Router), TypeScript, Tailwind CSS 4, Framer Motion.
+- **Backend** : Server Actions & API Routes (Next.js), Supabase (Auth & PostgreSQL).
+- **Sécurité** : Row Level Security (RLS), Hachage SHA-256 pour les credentials.
+- **Passerelle** : Intégration via Bazik API pour le traitement MonCash.
+
+---
+
+## 📦 Écosystème Kobara
+
+Le projet est composé de plusieurs sous-systèmes :
+
+1. **[Kobara App](./)** (Ce dépôt) : Le cœur de la plateforme (Dashboard, API, Onboarding).
+2. **[Kobara SDK JS](./kobara-js)** : Bibliothèque cliente pour intégrer Kobara dans des applications JavaScript/TypeScript.
+3. **[WordPress Plugin](./wordpress-plugin/kobara-wordpress-plugin)** : Extension WooCommerce pour accepter MonCash en quelques clics.
+
+---
+
+## 🔑 Sécurité des Clés API
+
+Kobara utilise une stratégie de sécurité "Default-Deny" :
+- Les clés sont identifiées par le préfixe `kbr_sk_test_` ou `kbr_sk_live_`.
+- **Aucune clé n'est stockée en clair** dans la base de données. Seuls les hashs SHA-256 sont conservés.
+- L'authentification se fait via le header `Authorization: Bearer kbr_sk_...`.
+
+---
+
+## 🚀 Installation & Développement
+
+### 1. Prérequis
+- Node.js 20+
+- Un projet Supabase configuré (voir les migrations dans `/supabase/migrations`).
+
+### 2. Configuration
+Copiez le fichier `.env.example` en `.env.local` et remplissez les variables :
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+BAZIK_API_KEY=...
+BAZIK_WEBHOOK_SECRET=...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Lancement
+```bash
+npm install
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📖 API & Documentation
 
-## Learn More
+La documentation complète est disponible directement dans le dashboard sous l'onglet `/docs`.
 
-To learn more about Next.js, take a look at the following resources:
+### Exemple de création de paiement (cURL) :
+```bash
+curl -X POST https://kobara.app/api/v1/payments \
+  -H "Authorization: Bearer kbr_sk_live_votre_cle" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 500,
+    "currency": "HTG",
+    "description": "Achat Test",
+    "successUrl": "https://votresite.com/success"
+  }'
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 Licence
+Propriété de Kobara.app. Tous droits réservés.
