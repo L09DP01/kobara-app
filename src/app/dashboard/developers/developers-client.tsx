@@ -288,7 +288,7 @@ export function DevelopersClient({
                 <p className="text-body-sm font-medium text-text-primary">Authorization</p>
                 <div className="bg-surface-container-low border border-border-subtle rounded-lg px-4 py-2.5 flex items-center gap-2">
                   <span className="text-text-secondary text-sm">Bearer</span>
-                  <code className="text-sm font-mono-code text-text-primary truncate flex-1">{isTestMode ? 'kobara_sk_test_...' : 'kobara_sk_live_...'}</code>
+                  <code className="text-sm font-mono-code text-text-primary truncate flex-1">{isTestMode ? 'kbr_sk_test_...' : 'kbr_sk_live_...'}</code>
                 </div>
               </div>
               
@@ -344,7 +344,7 @@ export function DevelopersClient({
                 {activeTab === 'curl' && (
                   <>
                     <span className="text-[#56b6c2]">curl</span> -X POST https://api.kobara.com/api/v1/payments \{'\n'}
-                    {'  '}-H <span className="text-[#98c379]" >"Authorization: Bearer {isTestMode ? 'kobara_sk_test_xxx' : 'kobara_sk_live_xxx'}"</span> \{'\n'}
+                    {'  '}-H <span className="text-[#98c379]" >"Authorization: Bearer {isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}"</span> \{'\n'}
                     {'  '}-H <span className="text-[#98c379]" >"Content-Type: application/json"</span> \{'\n'}
                     {'  '}-d <span className="text-[#98c379]">'{'{'}
   "amount": 1000,
@@ -361,7 +361,7 @@ export function DevelopersClient({
                 )}
                 {activeTab === 'javascript' && (
                   <>
-                    <span className="text-[#c678dd]">const</span> <span className="text-[#e5c07b]">kobara</span> = <span className="text-[#61afef]">require</span>(<span className="text-[#98c379]">'@kobara/node'</span>)(<span className="text-[#98c379]">'{isTestMode ? 'kobara_sk_test_xxx' : 'kobara_sk_live_xxx'}'</span>);{'\n\n'}
+                    <span className="text-[#c678dd]">const</span> <span className="text-[#e5c07b]">kobara</span> = <span className="text-[#61afef]">require</span>(<span className="text-[#98c379]">'@kobara/node'</span>)(<span className="text-[#98c379]">'{isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}'</span>);{'\n\n'}
                     <span className="text-[#c678dd]">const</span> <span className="text-[#e5c07b]">payment</span> = <span className="text-[#c678dd]">await</span> kobara.payments.<span className="text-[#61afef]">create</span>({'{'}{'\n'}
                     {'  '}amount: <span className="text-[#d19a66]">1000</span>,{'\n'}
                     {'  '}currency: <span className="text-[#98c379]">'HTG'</span>,{'\n'}
@@ -378,7 +378,7 @@ export function DevelopersClient({
                 {activeTab === 'python' && (
                   <>
                     <span className="text-[#c678dd]">import</span> kobara{'\n\n'}
-                    kobara.api_key = <span className="text-[#98c379]">"{isTestMode ? 'kobara_sk_test_xxx' : 'kobara_sk_live_xxx'}"</span>{'\n\n'}
+                    kobara.api_key = <span className="text-[#98c379]">"{isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}"</span>{'\n\n'}
                     payment = kobara.Payment.<span className="text-[#61afef]">create</span>({'\n'}
                     {'  '}amount=<span className="text-[#d19a66]">1000</span>,{'\n'}
                     {'  '}currency=<span className="text-[#98c379]">"HTG"</span>,{'\n'}
@@ -394,7 +394,7 @@ export function DevelopersClient({
                 )}
                 {activeTab === 'php' && (
                   <>
-                    <span className="text-[#e5c07b]">$kobara</span> = <span className="text-[#c678dd]">new</span> \Kobara\Client(<span className="text-[#98c379]">'{isTestMode ? 'kobara_sk_test_xxx' : 'kobara_sk_live_xxx'}'</span>);{'\n\n'}
+                    <span className="text-[#e5c07b]">$kobara</span> = <span className="text-[#c678dd]">new</span> \Kobara\Client(<span className="text-[#98c379]">'{isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}'</span>);{'\n\n'}
                     <span className="text-[#e5c07b]">$payment</span> = <span className="text-[#e5c07b]">$kobara</span><span className="text-[#56b6c2]">-&gt;</span>payments<span className="text-[#56b6c2]">-&gt;</span><span className="text-[#61afef]">create</span>([{'\n'}
                     {'  '}<span className="text-[#98c379]">'amount'</span> =&gt; <span className="text-[#d19a66]">1000</span>,{'\n'}
                     {'  '}<span className="text-[#98c379]">'currency'</span> =&gt; <span className="text-[#98c379]">'HTG'</span>,{'\n'}

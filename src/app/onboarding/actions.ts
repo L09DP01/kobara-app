@@ -68,18 +68,28 @@ export async function completeOnboarding(formData: {
     .single();
 
   if (merchant) {
-    const crypto = require('crypto');
+    const { ApiKeySecurity } = require("@/lib/server/security/api-keys");
     // Generate Test Key
-    const testKeyRaw = "kobara_sk_test_" + crypto.randomBytes(24).toString('hex');
-    const testKeyHash = crypto.createHash('sha256').update(testKeyRaw).digest('hex');
+    const { rawKey: testKeyRaw, keyHash: testKeyHash } = ApiKeySecurity.generateKey("kbr_sk_test_");
     
     // Generate Live Key
-    const liveKeyRaw = "kobara_sk_live_" + crypto.randomBytes(24).toString('hex');
-    const liveKeyHash = crypto.createHash('sha256').update(liveKeyRaw).digest('hex');
+    const { rawKey: liveKeyRaw, keyHash: liveKeyHash } = ApiKeySecurity.generateKey("kbr_sk_live_");
 
     await supabase.from('api_keys').insert([
-      { merchant_id: merchant.id, name: 'Clé Test par défaut', key_hash: testKeyHash },
-      { merchant_id: merchant.id, name: 'Clé Live par défaut', key_hash: liveKeyHash }
+      { 
+        merchant_id: merchant.id, 
+        name: 'Clé Test par défaut', 
+        prefix: 'kbr_sk_test_', 
+        key_hash: testKeyHash, 
+        environment: 'test' 
+      },
+      { 
+        merchant_id: merchant.id, 
+        name: 'Clé Live par défaut', 
+        prefix: 'kbr_sk_live_', 
+        key_hash: liveKeyHash, 
+        environment: 'live' 
+      }
     ]);
   }
 

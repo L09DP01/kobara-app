@@ -220,7 +220,7 @@ export function DocsClient({
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold font-mono-code text-sm">2</div>
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Sécuriser votre environnement</h3>
-                  <p className="text-text-secondary text-sm leading-relaxed">Vos clés secrètes (<code className="text-xs bg-surface-container px-1 py-0.5 rounded">kobara_sk_...</code>) doivent être stockées dans vos variables d'environnement serveur. <strong>Ne les exposez jamais côté client.</strong> Utilisez l'en-tête <code className="text-xs bg-surface-container px-1 py-0.5 rounded">Authorization: Bearer</code>.</p>
+                  <p className="text-text-secondary text-sm leading-relaxed">Vos clés secrètes (<code className="text-xs bg-surface-container px-1 py-0.5 rounded">kbr_sk_...</code>) doivent être stockées dans vos variables d'environnement serveur. <strong>Ne les exposez jamais côté client.</strong> Utilisez l'en-tête <code className="text-xs bg-surface-container px-1 py-0.5 rounded">Authorization: Bearer</code>.</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -273,7 +273,7 @@ export function DocsClient({
                   <span className="material-symbols-outlined text-status-success text-[20px]">public</span> 
                   Clés Publiques
                 </h4>
-                <p className="text-sm text-text-secondary mb-3">Préfixes : <code className="text-xs bg-surface-container px-1 py-0.5 rounded">kobara_pk_test_</code> ou <code className="text-xs bg-surface-container px-1 py-0.5 rounded">_live_</code></p>
+                <p className="text-sm text-text-secondary mb-3">Préfixes : <code className="text-xs bg-surface-container px-1 py-0.5 rounded">kbr_pk_test_</code> ou <code className="text-xs bg-surface-container px-1 py-0.5 rounded">_live_</code></p>
                 <p className="text-xs text-text-secondary">Peuvent être exposées côté client (ex: React, mobile) de manière sécurisée pour initialiser l'interface de paiement.</p>
               </div>
               <div className="bg-surface-card border border-border-subtle p-5 rounded-xl">
@@ -281,7 +281,7 @@ export function DocsClient({
                   <span className="material-symbols-outlined text-status-error text-[20px]">vpn_key</span> 
                   Clés Secrètes
                 </h4>
-                <p className="text-sm text-text-secondary mb-3">Préfixes : <code className="text-xs bg-surface-container px-1 py-0.5 rounded">kobara_sk_test_</code> ou <code className="text-xs bg-surface-container px-1 py-0.5 rounded">_live_</code></p>
+                <p className="text-sm text-text-secondary mb-3">Préfixes : <code className="text-xs bg-surface-container px-1 py-0.5 rounded">kbr_sk_test_</code> ou <code className="text-xs bg-surface-container px-1 py-0.5 rounded">_live_</code></p>
                 <p className="text-xs text-text-secondary">Permettent d'effectuer toute action sur votre compte (créer un paiement, rembourser). À conserver jalousement côté serveur.</p>
               </div>
             </div>
@@ -505,7 +505,7 @@ CONSIGNES STRICTES :
 3. Crée un tunnel de paiement : crée une intention avec POST /api/v1/payments (côté serveur).
 4. Gère les statuts 'pending', 'succeeded', 'failed' et 'expired' en base de données.
 5. Configure un endpoint webhook sécurisé, vérifie systématiquement la signature 'Kobara-Signature'.
-6. Utilise les variables d'environnement pour les clés secrètes Kobara (kobara_sk_...) et ne les expose JAMAIS côté client.`} 
+6. Utilise les variables d'environnement pour les clés secrètes Kobara (kbr_sk_...) et ne les expose JAMAIS côté client.`} 
             />
           </section>
 

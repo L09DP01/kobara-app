@@ -52,12 +52,9 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
   }
 
   // Generate a random key
-  const prefix = environment === 'live' ? "kobara_sk_live_" : "kobara_sk_test_";
-  const randomString = crypto.randomBytes(24).toString('hex');
-  const rawKey = `${prefix}${randomString}`;
-
-  // We store a sha256 hash
-  const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+  const { ApiKeySecurity } = require("@/lib/server/security/api-keys");
+  const prefix = environment === 'live' ? "kbr_sk_live_" : "kbr_sk_test_";
+  const { rawKey, keyHash } = ApiKeySecurity.generateKey(prefix);
 
   const { error } = await supabase
     .from('api_keys')

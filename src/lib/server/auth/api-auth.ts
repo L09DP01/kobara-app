@@ -1,21 +1,16 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-// Need service role client to bypass RLS for API key verification if needed, 
-// but normal client might work if we have no RLS blocking reading api keys by hash.
-// For now, let's just use the server client.
 import { createServerClient } from "@supabase/ssr";
+import { ApiKeySecurity } from "@/lib/server/security/api-keys";
 
 export async function authenticateApiRequest(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");
   
-  if (authHeader && authHeader.startsWith("Bearer kobara_sk_")) {
+  if (authHeader && authHeader.startsWith("Bearer kbr_sk_")) {
     const apiKey = authHeader.replace("Bearer ", "");
-    // TODO: implement API Key hash verification.
-    // In a real scenario, you hash the key, check the DB `api_keys` table.
+    const keyHash = ApiKeySecurity.hashKey(apiKey);
     
-    // For MVP, we will instantiate a service role client to fetch the merchant
-    // associated with this key.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
     
@@ -26,10 +21,35 @@ export async function authenticateApiRequest(request: NextRequest) {
           setAll() { }
         }
       });
-      // In production, we'd do: .eq('key_hash', hash(apiKey))
-      // For this step, we just mock the validation to avoid hashing complexity right now.
-      // But we need the merchant. 
-      return { merchantId: null, error: "API Keys not fully implemented in MVP yet." };
+      
+      const { data: keyRecord, error: keyError } = await supabaseAdmin
+        .from('api_keys')
+        .select('merchant_id, environment, revoked_at')
+        .eq('key_hash', keyHash)
+        .single();
+
+      if (keyError || !keyRecord) {
+        return { merchantId: null, error: "Invalid API Key" };
+      }
+
+      if (keyRecord.revoked_at) {
+        return { merchantId: null, error: "API Key has been revoked" };
+      }
+
+      // Update last used timestamp (non-blocking)
+      supabaseAdmin
+        .from('api_keys')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('key_hash', keyHash)
+        .then(({ error }) => {
+          if (error) console.error("Failed to update API key last_used_at:", error);
+        });
+
+      return { 
+        merchantId: keyRecord.merchant_id, 
+        environment: keyRecord.environment, 
+        error: null 
+      };
     }
   }
 

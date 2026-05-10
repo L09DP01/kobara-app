@@ -12,9 +12,9 @@ export default async function DocsPage() {
 
   // We do NOT fetch real keys for the documentation.
   // We use standard mock keys for documentation examples.
-  const testPublicKey = 'kobara_pk_test_a1b2c3d4e5f6';
-  const livePublicKey = 'kobara_pk_live_a1b2c3d4e5f6';
-  const testSecretKey = 'kobara_sk_test_a1b2c3d4e5f6g7h8i9j0';
+  const testPublicKey = 'kbr_pk_test_a1b2c3d4e5f6';
+  const livePublicKey = 'kbr_pk_live_a1b2c3d4e5f6';
+  const testSecretKey = 'kbr_sk_test_a1b2c3d4e5f6g7h8i9j0';
 
   return (
     <div className="min-h-screen bg-background">
