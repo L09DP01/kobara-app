@@ -85,13 +85,24 @@ export async function POST(request: NextRequest) {
     // If payment succeeded, update the merchant's available balance and send notification
     if (newStatus === "succeeded" && payment.status !== "succeeded") {
       // 1. Update Merchant Balance
-      // Using direct SQL increment logic via RPC or simple update if RPC not available.
-      // For MVP, we fetch and update.
       const { data: merchant } = await supabaseAdmin
         .from('merchants')
         .select('available_balance, business_name')
         .eq('id', payment.merchant_id)
         .single();
+      
+      // Fetch Customer Name for notification
+      let customerName = "un client";
+      if (payment.customer_id) {
+        const { data: customer } = await supabaseAdmin
+          .from('customers')
+          .select('name')
+          .eq('id', payment.customer_id)
+          .single();
+        if (customer?.name) {
+          customerName = customer.name;
+        }
+      }
       
       if (merchant) {
         const currentBalance = Number(merchant.available_balance || 0);
@@ -114,7 +125,7 @@ export async function POST(request: NextRequest) {
         merchant_id: payment.merchant_id,
         type: 'payment_received',
         title: '💰 Nouveau paiement reçu',
-        message: `Vous avez reçu un paiement de ${payment.amount} HTG de ${merchant?.business_name || 'votre client'}. Référence: ${payment.kobara_reference}`
+        message: `Vous avez reçu un paiement de ${payment.amount} HTG de la part de ${customerName}. Référence: ${payment.kobara_reference}`
       });
 
       // 3. Send outbound webhooks to merchant endpoints
