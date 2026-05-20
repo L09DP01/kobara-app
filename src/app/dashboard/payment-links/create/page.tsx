@@ -1,38 +1,9 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import Link from "next/link";
 import { createPaymentLink } from "../actions";
 
 export default async function CreatePaymentLinkPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Vérifier le marchand
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (!merchant) {
-    const { data: member } = await supabase
-      .from('merchant_members')
-      .select('merchant_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
-    
-    if (!member) {
-      redirect('/login');
-    }
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   return (
     <div className="max-w-[800px] mx-auto w-full space-y-8 pb-12">

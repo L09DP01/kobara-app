@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 class WC_Gateway_Kobara extends WC_Payment_Gateway {
     public function __construct() {
         $this->id = 'kobara';
-        $this->icon = ''; // URL vers l'icône MonCash/Kobara
+        $this->icon = 'kobara-wordpress-plugin/moncashicon.png'; // URL vers l'icône MonCash/Kobara
         $this->has_fields = false;
         $this->method_title = 'Kobara (MonCash)';
         $this->method_description = 'Acceptez les paiements MonCash via Kobara.';

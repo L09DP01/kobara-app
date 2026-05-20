@@ -4,6 +4,7 @@ import { BazikService } from "@/lib/server/bazik/bazik.service";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { apiLimiter } from "@/lib/server/security/rate-limit";
 
 const PaymentSchema = z.object({
   amount: z.number().positive(),
@@ -23,6 +24,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError || "Unauthorized" }, { status: 401 });
     }
 
+    const { success } = await apiLimiter.limit(`api_payments_${merchantId}`);
+    if (!success) {
+      return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
+    }
+
     let body;
     try {
       body = await request.json();
@@ -38,8 +44,8 @@ export async function POST(request: NextRequest) {
     const { amount, currency, description, successUrl, errorUrl, metadata } = validationResult.data;
 
     // Connect to Supabase
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const { createAdminClient } = require("@/utils/supabase/admin");
+    const supabase = createAdminClient();
 
     // 1. Generate a unique Kobara Reference
     const kobaraReference = `KOB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -100,8 +106,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: authError || "Unauthorized" }, { status: 401 });
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const { success } = await apiLimiter.limit(`api_payments_get_${merchantId}`);
+    if (!success) {
+      return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
+    }
+
+    const { createAdminClient } = require("@/utils/supabase/admin");
+    const supabase = createAdminClient();
 
     // Get search params
     const { searchParams } = new URL(request.url);

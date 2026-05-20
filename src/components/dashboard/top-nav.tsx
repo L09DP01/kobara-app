@@ -4,8 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { signOut } from 'next-auth/react';
 
-export default function TopNav({ onToggleSidebar, merchant }: { onToggleSidebar: () => void, merchant?: any }) {
+export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSidebar: () => void, merchant?: any, user?: any }) {
   const router = useRouter();
   const supabase = createClient();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -29,25 +30,34 @@ export default function TopNav({ onToggleSidebar, merchant }: { onToggleSidebar:
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
+    await signOut({ callbackUrl: '/login' });
   };
 
   return (
     <header className="bg-surface/80 backdrop-blur-md dark:bg-primary/80 text-primary dark:text-on-primary font-headline-md text-headline-md docked full-width top-0 sticky border-b border-border-subtle dark:border-outline-variant flat flex justify-between items-center h-20 px-container-padding z-30 transition-all duration-200 ease-in-out">
       {/* Left: Greeting / Search */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 md:gap-6">
         {/* Mobile menu toggle */}
         <button 
           onClick={onToggleSidebar}
-          className="md:hidden text-text-secondary hover:text-primary transition-colors"
+          className="md:hidden text-text-secondary hover:text-primary transition-colors shrink-0"
         >
           <span className="material-symbols-outlined">menu</span>
         </button>
+
+        {/* Mobile Logo */}
+        <Link href="/dashboard" className="md:hidden flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Kobara Logo"
+            className="w-32 h-auto object-contain"
+          />
+        </Link>
+
         <div className="hidden md:flex flex-col">
           <h2 className="font-headline-lg text-headline-lg text-text-primary tracking-tight">
-            Bonsoir, {merchant ? merchant.business_name : 'Nouveau Marchand'} 👋
+            Bonsoir, {user?.first_name || merchant?.business_name || 'Nouveau Marchand'} 👋
           </h2>
           <span className="font-body-sm text-body-sm text-text-secondary">
             {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -57,11 +67,7 @@ export default function TopNav({ onToggleSidebar, merchant }: { onToggleSidebar:
       
       {/* Right: Actions */}
       <div className="flex items-center gap-4">
-        <Link href="/dashboard/payment-links" className="hidden lg:flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg font-semibold text-body-sm hover:opacity-90 transition-opacity">
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          Créer un lien de paiement
-        </Link>
-        <div className="flex items-center gap-2 border-l border-border-subtle pl-4 ml-2 relative">
+        <div className="flex items-center gap-2 relative">
           
           {/* Notifications */}
           <div ref={notifRef} className="relative">

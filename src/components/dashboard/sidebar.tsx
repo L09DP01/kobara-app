@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -12,7 +13,6 @@ interface SidebarProps {
 const SIDEBAR_LINKS = [
   { href: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true },
   { href: "/dashboard/payments", icon: "payments", label: "Paiements" },
-  { href: "/dashboard/payment-links", icon: "link", label: "Liens de paiement" },
   { href: "/dashboard/customers", icon: "group", label: "Clients" },
   { href: "/dashboard/withdrawals", icon: "account_balance_wallet", label: "Retraits" },
   { href: "/dashboard/api-keys", icon: "vpn_key", label: "Clés API" },
@@ -33,14 +33,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
     >
       {/* Header */}
-      <div className="px-6 py-8 flex justify-between items-start gap-1">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-headline-md font-display-xl font-extrabold text-primary dark:text-on-primary tracking-tight">Kobara.app</h1>
-          <span className="text-body-sm text-text-secondary"></span>
-        </div>
+      <div className="px-6 py-8 flex justify-between items-center gap-1">
+        <Link href="/dashboard" className="flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Kobara Logo"
+            className="w-44 h-auto object-contain -ml-3"
+          />
+        </Link>
         <button
           onClick={onClose}
-          className="md:hidden text-text-secondary hover:text-primary transition-colors mt-1"
+          className="md:hidden text-text-secondary hover:text-primary transition-colors"
         >
           <span className="material-symbols-outlined">close</span>
         </button>
@@ -76,17 +80,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer / Create Link Button */}
+      {/* Footer */}
       <div className="p-4 border-t border-border-subtle dark:border-outline-variant mt-auto flex-shrink-0">
-        <button className="w-full bg-primary hover:bg-inverse-surface text-on-primary font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
-          Créer un lien
-        </button>
-        <div className="mt-4 space-y-2">
-          <Link href="/help" onClick={onClose} className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary dark:text-on-primary-container dark:hover:text-primary-fixed-dim transition-colors text-body-sm">
+        <div className="space-y-2">
+          <Link href="/dashboard/settings" onClick={onClose} className="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary dark:text-on-primary-container dark:hover:text-primary-fixed-dim transition-colors text-body-sm">
             <span className="material-symbols-outlined text-[20px]">help</span>
             <span>Centre d'aide</span>
           </Link>
-          <button className="flex items-center w-full gap-3 px-4 py-2 text-on-surface-variant hover:text-primary dark:text-on-primary-container dark:hover:text-primary-fixed-dim transition-colors text-body-sm">
+          <button 
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex items-center w-full gap-3 px-4 py-2 text-on-surface-variant hover:text-primary dark:text-on-primary-container dark:hover:text-primary-fixed-dim transition-colors text-body-sm cursor-pointer"
+          >
             <span className="material-symbols-outlined text-[20px]">logout</span>
             <span>Déconnexion</span>
           </button>

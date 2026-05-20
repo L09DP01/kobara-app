@@ -1,29 +1,9 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import Link from "next/link";
 import LinkActions from "./LinkActions";
 
 export default async function PaymentLinksPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Fetch current merchant
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (!merchant) {
-    redirect('/login');
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   // Fetch payment links
   const { data: paymentLinks } = await supabase
@@ -75,7 +55,7 @@ export default async function PaymentLinksPage() {
 
       <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden ambient-shadow">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[800px]">
             <thead className="bg-surface-container-lowest border-b border-border-subtle">
               <tr>
                 <th className="py-4 px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Lien</th>

@@ -1,7 +1,9 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { ApiKeySecurity } from "@/lib/server/security/api-keys";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export async function completeOnboarding(formData: {
   first_name: string;
@@ -11,22 +13,29 @@ export async function completeOnboarding(formData: {
   phone: string;
   address?: string;
 }) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
 
   if (!user) {
     throw new Error("Vous devez être connecté pour finaliser votre inscription.");
   }
 
-  // 1. Update User metadata with first_name and last_name
-  await supabase.auth.updateUser({
-    data: { 
-      first_name: formData.first_name, 
-      last_name: formData.last_name 
-    }
-  });
+  const supabase = createAdminClient();
+
+  // 1. Update User names in public.users table
+  const { error: userUpdateError } = await supabase
+    .from('users')
+    .update({
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', user.id);
+
+  if (userUpdateError) {
+    console.error("Erreur mise à jour utilisateur:", userUpdateError);
+    throw new Error("Erreur lors de la mise à jour de vos informations personnelles.");
+  }
 
   // 2. Generate a unique business slug
   const baseSlug = formData.business_name
@@ -39,28 +48,52 @@ export async function completeOnboarding(formData: {
   const randomSuffix = Math.random().toString(36).substring(2, 6);
   const businessSlug = `${baseSlug}-${randomSuffix}`;
 
-  // 3. Create the merchant profile
-  const { error } = await supabase
+  // 3. Create or update the merchant profile
+  const { data: existingMerchant } = await supabase
     .from('merchants')
-    .insert({
-      user_id: user.id,
-      email: user.email,
-      business_name: formData.business_name,
-      business_slug: businessSlug,
-      category: formData.category,
-      phone: formData.phone,
-      address: formData.address || null,
-      status: 'active', // default status for MVP
-      available_balance: 0,
-      pending_balance: 0
-    });
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  let error;
+  if (existingMerchant) {
+    const { error: updateError } = await supabase
+      .from('merchants')
+      .update({
+        business_name: formData.business_name,
+        business_slug: businessSlug,
+        category: formData.category,
+        phone: formData.phone,
+        address: formData.address || null,
+        status: 'active',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingMerchant.id);
+    error = updateError;
+  } else {
+    const { error: insertError } = await supabase
+      .from('merchants')
+      .insert({
+        user_id: user.id,
+        email: user.email,
+        business_name: formData.business_name,
+        business_slug: businessSlug,
+        category: formData.category,
+        phone: formData.phone,
+        address: formData.address || null,
+        status: 'active',
+        available_balance: 0,
+        pending_balance: 0
+      });
+    error = insertError;
+  }
 
   if (error) {
     console.error("Erreur onboarding:", error);
-    throw new Error("Erreur lors de la création du profil marchand. " + error.message);
+    throw new Error("Erreur lors de la configuration du profil marchand. " + error.message);
   }
 
-  // 4. Generate default API keys for the new merchant
+  // 4. Generate default API keys for the merchant if they don't already exist
   const { data: merchant } = await supabase
     .from('merchants')
     .select('id')
@@ -68,30 +101,38 @@ export async function completeOnboarding(formData: {
     .single();
 
   if (merchant) {
-    const { ApiKeySecurity } = require("@/lib/server/security/api-keys");
-    // Generate Test Key
-    const { rawKey: testKeyRaw, keyHash: testKeyHash } = ApiKeySecurity.generateKey("kbr_sk_test_");
-    
-    // Generate Live Key
-    const { rawKey: liveKeyRaw, keyHash: liveKeyHash } = ApiKeySecurity.generateKey("kbr_sk_live_");
+    // Check if keys already exist
+    const { count: keysCount } = await supabase
+      .from('api_keys')
+      .select('id', { count: 'exact', head: true })
+      .eq('merchant_id', merchant.id);
 
-    await supabase.from('api_keys').insert([
-      { 
-        merchant_id: merchant.id, 
-        name: 'Clé Test par défaut', 
-        prefix: 'kbr_sk_test_', 
-        key_hash: testKeyHash, 
-        environment: 'test' 
-      },
-      { 
-        merchant_id: merchant.id, 
-        name: 'Clé Live par défaut', 
-        prefix: 'kbr_sk_live_', 
-        key_hash: liveKeyHash, 
-        environment: 'live' 
-      }
-    ]);
+    if (!keysCount || keysCount === 0) {
+      // Generate Test Key
+      const { rawKey: testKeyRaw, keyHash: testKeyHash } = ApiKeySecurity.generateKey("kbr_sk_test_");
+      
+      // Generate Live Key
+      const { rawKey: liveKeyRaw, keyHash: liveKeyHash } = ApiKeySecurity.generateKey("kbr_sk_live_");
+
+      await supabase.from('api_keys').insert([
+        { 
+          merchant_id: merchant.id, 
+          name: 'Clé Test par défaut', 
+          prefix: 'kbr_sk_test_', 
+          key_hash: testKeyHash, 
+          environment: 'test' 
+        },
+        { 
+          merchant_id: merchant.id, 
+          name: 'Clé Live par défaut', 
+          prefix: 'kbr_sk_live_', 
+          key_hash: liveKeyHash, 
+          environment: 'live' 
+        }
+      ]);
+    }
   }
 
   return { success: true };
 }
+

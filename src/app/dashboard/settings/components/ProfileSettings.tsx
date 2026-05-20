@@ -4,12 +4,15 @@ import { useState } from 'react';
 import { updateMerchantProfile } from '../actions';
 
 export function ProfileSettings({ user, merchant }: { user: any, merchant: any }) {
+  console.log("ProfileSettings client component received user:", user);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     business_name: merchant.business_name || '',
     category: merchant.category || '',
     email: merchant.email || '',
-    phone: merchant.phone || ''
+    phone: merchant.phone || '',
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -28,10 +31,6 @@ export function ProfileSettings({ user, merchant }: { user: any, merchant: any }
     }
   };
 
-  const firstName = user?.user_metadata?.first_name || '';
-  const lastName = user?.user_metadata?.last_name || '';
-  const fullName = `${firstName} ${lastName}`.trim() || 'Propriétaire du compte';
-
   return (
     <div className="space-y-6">
       {/* User Personal Info Card */}
@@ -39,21 +38,32 @@ export function ProfileSettings({ user, merchant }: { user: any, merchant: any }
         <h2 className="text-headline-md font-headline-md text-text-primary mb-6">Informations Personnelles</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-body-sm font-medium text-text-primary">Nom et Prénom</label>
+            <label className="text-body-sm font-medium text-text-primary">Prénom</label>
             <input 
-              disabled
-              value={fullName}
+              name="first_name"
+              value={formData.first_name}
+              onChange={handleChange}
               type="text" 
-              className="w-full bg-surface-container-low border border-border-subtle rounded-lg px-3 py-2 text-text-secondary cursor-not-allowed" 
+              className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
             />
           </div>
           <div className="space-y-1.5">
+            <label className="text-body-sm font-medium text-text-primary">Nom</label>
+            <input 
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              type="text" 
+              className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
+            />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
             <label className="text-body-sm font-medium text-text-primary">Email du compte</label>
             <input 
               disabled
               value={user?.email || ''}
               type="email" 
-              className="w-full bg-surface-container-low border border-border-subtle rounded-lg px-3 py-2 text-text-secondary cursor-not-allowed" 
+              className="w-full bg-surface-container-low border border-border-subtle rounded-lg px-3 py-2 text-text-secondary cursor-not-allowed opacity-70" 
             />
           </div>
         </div>

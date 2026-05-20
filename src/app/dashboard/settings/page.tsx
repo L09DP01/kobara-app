@@ -1,27 +1,61 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import { SettingsClient } from "./settings-client";
 
-export default async function SettingsPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+export const dynamic = 'force-dynamic';
 
-  const { data: { user } } = await supabase.auth.getUser();
+export default async function SettingsPage() {
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
 
   if (!user) {
     redirect('/login');
   }
 
-  // Get current merchant id (works for owners and active team members)
-  const { data: merchantId } = await supabase.rpc('get_current_merchant_id');
+  const supabase = createAdminClient();
 
-  if (!merchantId) {
-    // If no merchant profile at all, redirect or show error
-    redirect('/onboarding'); // or somewhere else
+  const { data: dbUser } = await supabase
+    .from('users')
+    .select('id, email, first_name, last_name')
+    .eq('id', user.id)
+    .single();
+
+  console.log("SettingsPage - dbUser fetched:", dbUser);
+
+  if (!dbUser) {
+    redirect('/login');
   }
 
+  // Get current merchant id (works for owners and active team members)
   const { data: merchant } = await supabase
+    .from('merchants')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  let merchantId = merchant?.id;
+
+  if (!merchantId) {
+    const { data: member } = await supabase
+      .from('merchant_members')
+      .select('merchant_id')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle();
+
+    if (member) {
+      merchantId = member.merchant_id;
+    }
+  }
+
+  if (!merchantId) {
+    redirect('/onboarding');
+  }
+
+  const { data: activeMerchant } = await supabase
     .from('merchants')
     .select('*')
     .eq('id', merchantId)
@@ -31,12 +65,19 @@ export default async function SettingsPage() {
     .from('settings')
     .select('*')
     .eq('merchant_id', merchantId)
-    .single();
+    .maybeSingle();
 
   const { data: members } = await supabase
     .from('merchant_members')
     .select('*')
     .eq('merchant_id', merchantId);
 
-  return <SettingsClient user={user} merchant={merchant} settings={settings} members={members || []} />;
+  return (
+    <SettingsClient 
+      user={dbUser} 
+      merchant={activeMerchant} 
+      settings={settings} 
+      members={members || []} 
+    />
+  );
 }

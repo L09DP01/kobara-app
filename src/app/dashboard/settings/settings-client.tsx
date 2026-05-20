@@ -48,7 +48,7 @@ export function SettingsClient({ user, merchant, settings, members }: { user: an
         {/* Settings Content Area */}
         <div className="md:col-span-3 space-y-6">
           {activeTab === 'profile' && <ProfileSettings user={user} merchant={merchant} />}
-          {activeTab === 'security' && <SecuritySettings />}
+          {activeTab === 'security' && <SecuritySettings user={user} settings={settings} />}
           {activeTab === 'notifications' && <NotificationSettings settings={settings} />}
           {activeTab === 'team' && <TeamSettings members={members} />}
         </div>

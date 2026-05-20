@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
+import { cookies } from "next/headers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,14 +29,25 @@ export const metadata: Metadata = {
   description: "Haiti Premium SaaS Fintech",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let lang = "fr";
+  try {
+    const cookieStore = await cookies();
+    const langCookie = cookieStore.get("kbr_lang")?.value;
+    if (langCookie === "fr" || langCookie === "en") {
+      lang = langCookie;
+    }
+  } catch (e) {
+    lang = "fr";
+  }
+
   return (
     <html
-      lang="fr"
+      lang={lang}
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jakarta.variable} h-full antialiased`}
     >
       <head>
@@ -46,8 +59,11 @@ export default function RootLayout({
         `}</style>
       </head>
       <body className="bg-background-main font-body-base text-body-base text-on-surface min-h-screen flex flex-col">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );
 }
+

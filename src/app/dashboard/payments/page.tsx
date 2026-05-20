@@ -1,27 +1,8 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
+import Link from "next/link";
 
 export default async function PaymentsPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Fetch current merchant
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (!merchant) {
-    redirect('/login');
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   // Fetch all payments
   const { data: payments } = await supabase
@@ -46,10 +27,10 @@ export default async function PaymentsPage() {
       const pDate = new Date(p.created_at);
       if (p.status === 'succeeded') {
         if (pDate >= today) {
-          totalToday += Number(p.amount);
+          totalToday += Number(p.net_amount || p.amount);
         }
         if (pDate >= oneWeekAgo) {
-          totalWeek += Number(p.amount);
+          totalWeek += Number(p.net_amount || p.amount);
         }
       }
       if (p.status === 'refunded') {
@@ -79,6 +60,10 @@ export default async function PaymentsPage() {
             <span className="material-symbols-outlined text-[18px]">download</span>
             Exporter
           </button>
+          <Link href="/dashboard/payment-links" className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm">
+            <span className="material-symbols-outlined text-[18px]">add_link</span>
+            Créer un lien de paiement
+          </Link>
         </div>
       </div>
 
@@ -156,12 +141,12 @@ export default async function PaymentsPage() {
                 payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-surface-container-low transition-colors group cursor-pointer">
                     <td className="py-4 px-6">
-                      <div className="font-medium">{Number(payment.amount).toLocaleString('fr-FR')} {payment.currency}</div>
-                      <div className="text-text-secondary text-xs">Net: {Number(payment.net_amount).toLocaleString('fr-FR')} {payment.currency}</div>
+                      <div className="font-medium text-status-success">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} {payment.currency}</div>
+                      <div className="text-text-secondary text-xs">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')} {payment.currency}</div>
                     </td>
                     <td className="py-4 px-6">
-                      <div className="font-medium">{payment.customers?.name || payment.kobara_reference}</div>
-                      <div className="text-text-secondary text-xs">{payment.customers?.email || "N/A"}</div>
+                      <div className="font-medium">{payment.customers?.name || 'Client Inconnu'}</div>
+                      <div className="text-text-secondary text-xs font-mono-code">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
                     </td>
                     <td className="py-4 px-6">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -188,9 +173,9 @@ export default async function PaymentsPage() {
                       <div className="text-xs">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <button className="text-text-secondary hover:text-primary transition-colors font-medium">
+                      <Link href={`/dashboard/payments/${payment.id}`} className="text-text-secondary hover:text-primary transition-colors font-medium">
                         Détails
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))

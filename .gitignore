@@ -46,3 +46,7 @@ skills-lock.json
 
 # separate sdk
 kobara-js/
+kobara-node/
+kobara-php-sdk/
+kobara-python/
+

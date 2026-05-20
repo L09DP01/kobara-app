@@ -8,12 +8,22 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { processSuccessfulPayment } from "./actions";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const reference = searchParams.get("reference");
   const amount = searchParams.get("amount");
+  const [processed, setProcessed] = useState(false);
+
+  useEffect(() => {
+    if (reference && !processed) {
+      processSuccessfulPayment(reference).then(() => {
+        setProcessed(true);
+      }).catch(console.error);
+    }
+  }, [reference, processed]);
   
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">

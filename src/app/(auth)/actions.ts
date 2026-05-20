@@ -1,77 +1,280 @@
 "use server"
 
-import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { createAdminClient } from '@/utils/supabase/admin'
+import { sendEmail } from '@/lib/server/mail'
+import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import dns from 'dns'
 
-export async function login(formData: FormData) {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
-  
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
+import { authLimiter } from '@/lib/server/security/rate-limit'
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    redirect('/login?error=' + error.message)
+// DNS MX records check to prevent fake emails
+async function checkMxRecords(domain: string): Promise<boolean> {
+  try {
+    const records = await dns.promises.resolveMx(domain);
+    return records && records.length > 0;
+  } catch (err) {
+    console.warn(`DNS resolveMx check failed for domain: ${domain}`, err);
+    return false;
   }
-
-  revalidatePath('/dashboard', 'layout')
-  redirect('/dashboard')
 }
 
 export async function signup(formData: FormData) {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
-
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const businessName = formData.get('business_name') as string
-
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        business_name: businessName,
-      }
-    }
-  })
-
-  if (signUpError) {
-    redirect('/register?error=' + signUpError.message)
+  // Rate limiting by IP (or a generic 'register' key if we can't get IP easily in Server Actions)
+  // Usually headers() is used in Server Actions
+  const ip = "register_ip"; // Since we can't easily get IP in server actions without headers()
+  const { success } = await authLimiter.limit(ip);
+  if (!success) {
+    redirect('/register?error=' + encodeURIComponent("Trop de tentatives. Veuillez réessayer plus tard."));
   }
 
-  if (authData.user) {
-    // Generate a unique slug
-    const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000)
-    
+  const emailInput = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const businessName = formData.get('business_name') as string;
+
+  if (!emailInput || !password || !businessName) {
+    redirect('/register?error=' + encodeURIComponent("Veuillez remplir tous les champs requis."));
+  }
+
+  const email = emailInput.toLowerCase().trim();
+  const domain = email.split('@')[1];
+
+  if (!domain) {
+    redirect('/register?error=' + encodeURIComponent("Format d'adresse e-mail invalide."));
+  }
+
+  // 1. Domain verification using DNS MX records to reject fake email domains
+  const isRealDomain = await checkMxRecords(domain);
+  if (!isRealDomain) {
+    redirect(
+      '/register?error=' +
+        encodeURIComponent(
+          "L'adresse e-mail saisie n'est pas valide ou provient d'un domaine inexistant sans serveur de messagerie actif."
+        )
+    );
+  }
+
+  const supabase = createAdminClient();
+
+  // 2. Check if user already exists
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existingUser) {
+    redirect('/register?error=' + encodeURIComponent("Un compte avec cet e-mail existe déjà."));
+  }
+
+  // 3. Hash password using bcryptjs
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // 4. Generate verification token and expiration date (24 hours)
+  const userId = crypto.randomUUID();
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+  // 5. Create user record
+  const { error: userError } = await supabase.from('users').insert({
+    id: userId,
+    email,
+    password_hash: hashedPassword,
+    email_verified: false,
+    verification_token: token,
+    verification_token_expires: tokenExpires
+  });
+
+  if (userError) {
+    console.error("Signup User Error:", userError);
+    redirect('/register?error=' + encodeURIComponent("Une erreur est survenue lors de la création de votre compte."));
+  }
+
+  // 6. Create or link merchant profile
+  const { data: existingMerchant } = await supabase
+    .from('merchants')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existingMerchant) {
+    // Re-link the existing merchant to the new public.users row
+    const { error: updateError } = await supabase
+      .from('merchants')
+      .update({ user_id: userId })
+      .eq('id', existingMerchant.id);
+
+    if (updateError) {
+      console.error("Re-linking Merchant Error:", updateError);
+      // Cleanup incomplete user record
+      await supabase.from('users').delete().eq('id', userId);
+      redirect('/register?error=' + encodeURIComponent("Une erreur est survenue lors de la mise à jour de votre profil marchand existant."));
+    }
+  } else {
+    // Create new merchant profile
+    const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000);
     const { error: merchantError } = await supabase.from('merchants').insert({
-      user_id: authData.user.id,
+      user_id: userId,
       business_name: businessName,
       business_slug: slug,
-      email: email,
-    })
+      email,
+    });
 
     if (merchantError) {
-      console.error("Merchant Creation Error:", merchantError)
-      redirect('/register?error=Account created but merchant profile failed')
+      console.error("Signup Merchant Error:", merchantError);
+      // Cleanup incomplete user record
+      await supabase.from('users').delete().eq('id', userId);
+      redirect('/register?error=' + encodeURIComponent("Une erreur est survenue lors de la création de votre profil marchand."));
     }
   }
 
-  revalidatePath('/dashboard', 'layout')
-  redirect('/dashboard')
+  // 7. Send activation e-mail via SMTP
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const verificationLink = `${appUrl}/api/auth/verify-email?token=${token}`;
+
+  await sendEmail({
+    to: email,
+    subject: "Activez votre compte Kobara",
+    text: `Bonjour,\n\nMerci de vous être inscrit sur Kobara. Pour activer votre compte marchand et commencer à accepter des paiements MonCash, veuillez cliquer sur le lien suivant :\n\n${verificationLink}\n\nCe lien est valide pendant 24 heures.\n\nSi vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.\n\nCordialement,\nL'équipe Kobara`
+  });
+
+  // 8. Redirect user to login with explicit verification prompt
+  redirect('/login?registered=true&email=' + encodeURIComponent(email));
 }
 
 export async function logout() {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore)
+  const cookieStore = await cookies();
   
-  await supabase.auth.signOut()
-  redirect('/login')
+  // Clear all NextAuth related cookies
+  cookieStore.delete('next-auth.session-token');
+  cookieStore.delete('next-auth.csrf-token');
+  cookieStore.delete('next-auth.callback-url');
+  cookieStore.delete('__Secure-next-auth.session-token');
+  cookieStore.delete('__Secure-next-auth.callback-url');
+  cookieStore.delete('__Secure-next-auth.csrf-token');
+  cookieStore.delete('kbr_2fa_email_ok');
+  
+  redirect('/login');
+}
+
+export async function requestPasswordReset(emailInput: string, lang: string = 'fr') {
+  if (!emailInput) {
+    return { error: lang === 'en' ? "Please enter your email address." : "Veuillez saisir votre adresse e-mail." };
+  }
+
+  const email = emailInput.toLowerCase().trim();
+  const supabase = createAdminClient();
+
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('id, email')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (error || !user) {
+    return { error: lang === 'en' ? "No account exists with this email address." : "Aucun compte n'existe avec cette adresse e-mail." };
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({
+      reset_token: token,
+      reset_token_expires: expires
+    })
+    .eq('id', user.id);
+
+  if (updateError) {
+    console.error("Error setting password reset token:", updateError);
+    return { error: lang === 'en' ? "An error occurred while initiating password reset." : "Une erreur est survenue lors de la réinitialisation de votre mot de passe." };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const resetLink = `${appUrl}/reset-password?token=${token}`;
+
+  await sendEmail({
+    to: email,
+    subject: lang === 'en' ? "Reset your Kobara password" : "Réinitialisation de votre mot de passe Kobara",
+    text: lang === 'en' 
+      ? `Hello,\n\nYou requested a password reset for your Kobara account. Please click the link below to set a new password:\n\n${resetLink}\n\nThis link is valid for 1 hour.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nThe Kobara Team`
+      : `Bonjour,\n\nVous avez demandé la réinitialisation de votre mot de passe Kobara. Veuillez cliquer sur le lien suivant pour définir un nouveau mot de passe :\n\n${resetLink}\n\nCe lien est valide pendant 1 heure.\n\nSi vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.\n\nCordialement,\nL'équipe Kobara`
+  });
+
+  return { success: true };
+}
+
+export async function resetPassword(token: string, passwordInput: string, lang: string = 'fr') {
+  if (!token || !passwordInput) {
+    return { error: lang === 'en' ? "Invalid request." : "Requête invalide." };
+  }
+
+  const supabase = createAdminClient();
+
+  const now = new Date().toISOString();
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('id, reset_token_expires')
+    .eq('reset_token', token)
+    .gt('reset_token_expires', now)
+    .maybeSingle();
+
+  if (error || !user) {
+    return { error: lang === 'en' ? "The reset link is invalid or has expired." : "Le lien de réinitialisation est invalide ou a expiré." };
+  }
+
+  const hashedPassword = await bcrypt.hash(passwordInput, 10);
+
+  const { error: updateError } = await supabase
+    .from('users')
+    .update({
+      password_hash: hashedPassword,
+      reset_token: null,
+      reset_token_expires: null
+    })
+    .eq('id', user.id);
+
+  if (updateError) {
+    console.error("Error resetting password:", updateError);
+    return { error: lang === 'en' ? "An error occurred while updating your password." : "Une erreur est survenue lors de la mise à jour de votre mot de passe." };
+  }
+
+  return { success: true };
+}
+
+export async function verifyCredentialsAction(emailInput: string, passwordInput: string, lang: string = 'fr') {
+  if (!emailInput || !passwordInput) {
+    return { error: lang === 'en' ? "Please enter your email and password." : "Veuillez saisir votre e-mail et votre mot de passe." };
+  }
+
+  const email = emailInput.toLowerCase().trim();
+  const supabase = createAdminClient();
+
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (error || !user) {
+    return { error: lang === 'en' ? "No account exists with this email." : "Aucun compte n'existe avec cet e-mail." };
+  }
+
+  const passwordMatches = await bcrypt.compare(passwordInput, user.password_hash);
+  if (!passwordMatches) {
+    return { error: lang === 'en' ? "Incorrect password." : "Mot de passe incorrect." };
+  }
+
+  if (!user.email_verified) {
+    return {
+      error: lang === 'en'
+        ? "Your account is not verified yet. Please check your inbox to validate your account."
+        : "Votre compte n'est pas encore vérifié. Veuillez consulter votre boîte de réception pour valider votre compte."
+    };
+  }
+
+  return { success: true };
 }

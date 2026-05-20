@@ -12,14 +12,13 @@ export async function POST(request: NextRequest) {
 
     const secret = process.env.BAZIK_WEBHOOK_SECRET;
     
-    if (secret && signature) {
-      const expectedSignature = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-      if (signature !== expectedSignature) {
-        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-      }
-    } else if (process.env.NODE_ENV === "production") {
-       // In production we absolutely require the signature and secret
-       return NextResponse.json({ error: "Missing signature or secret" }, { status: 401 });
+    if (!secret || !signature) {
+      return NextResponse.json({ error: "Missing signature or secret" }, { status: 401 });
+    }
+
+    const expectedSignature = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+    if (signature !== expectedSignature) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);

@@ -1,29 +1,31 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import { OnboardingClient } from "./onboarding-client";
 
 export default async function OnboardingPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
 
   if (!user) {
     redirect('/login');
   }
 
-  // Check if merchant already exists
+  const supabase = createAdminClient();
+
+  // Check if merchant already exists and has completed onboarding
   const { data: merchant } = await supabase
     .from('merchants')
-    .select('id')
+    .select('id, phone, category')
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (merchant) {
+  if (merchant && merchant.phone && merchant.category) {
     // Already onboarded
     redirect('/dashboard');
   }
 
   return <OnboardingClient defaultEmail={user.email || ''} />;
 }
+

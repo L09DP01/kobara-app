@@ -13,7 +13,7 @@ export default function LinkActions({ linkId, linkUrl }: { linkId: string, linkU
   };
 
   return (
-    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+    <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
       <button 
         onClick={handleCopy}
         className={`p-1.5 rounded transition-colors ${copied ? 'text-status-success bg-status-success/10' : 'text-text-secondary hover:text-text-primary hover:bg-surface-container-high'}`}

@@ -1,47 +1,12 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import crypto from "crypto";
 
 export async function createPaymentLink(formData: FormData) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  // Obtenir le merchant_id actuel
-  let merchantId = null;
-
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (merchant) {
-    merchantId = merchant.id;
-  } else {
-    const { data: member } = await supabase
-      .from('merchant_members')
-      .select('merchant_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
-    
-    if (member) {
-      merchantId = member.merchant_id;
-    }
-  }
-
-  if (!merchantId) {
-    throw new Error("Merchant non trouvé");
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   const title = formData.get('title') as string;
   const amountStr = formData.get('amount') as string;
@@ -56,7 +21,7 @@ export async function createPaymentLink(formData: FormData) {
   const { error } = await supabase
     .from('payment_links')
     .insert({
-      merchant_id: merchantId,
+      merchant_id: merchant.id,
       title,
       amount,
       description,
@@ -75,14 +40,7 @@ export async function createPaymentLink(formData: FormData) {
 }
 
 export async function updatePaymentLink(formData: FormData) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   const id = formData.get('id') as string;
   const title = formData.get('title') as string;
@@ -91,6 +49,18 @@ export async function updatePaymentLink(formData: FormData) {
 
   if (!id || !title) {
     throw new Error("ID et Titre sont requis");
+  }
+
+  // Find payment link to verify ownership (with RLS, the update will just fail if they don't own it)
+  // But doing a select first gives a better error message.
+  const { data: linkInfo } = await supabase
+    .from('payment_links')
+    .select('merchant_id')
+    .eq('id', id)
+    .single();
+
+  if (!linkInfo || linkInfo.merchant_id !== merchant.id) {
+    throw new Error("Lien de paiement non trouvé ou accès refusé");
   }
 
   const amount = amountStr ? parseFloat(amountStr) : null;

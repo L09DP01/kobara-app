@@ -1,26 +1,19 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { updatePaymentLink } from "../../actions";
 
 export default async function EditPaymentLinkPage({ params }: { params: Promise<{ id: string }> }) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
   
   const resolvedParams = await params;
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
 
   // Verify the link belongs to the merchant
   const { data: link } = await supabase
     .from('payment_links')
     .select('*')
     .eq('id', resolvedParams.id)
+    .eq('merchant_id', merchant.id)
     .single();
 
   if (!link) {

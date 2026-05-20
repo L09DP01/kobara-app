@@ -1,29 +1,11 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 
 export async function addWebhookEndpoint(url: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (!merchant) {
-    throw new Error("Merchant not found");
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   // Generate a webhook secret for HMAC signing
   const secret = `whsec_${crypto.randomBytes(24).toString('hex')}`;
@@ -45,8 +27,18 @@ export async function addWebhookEndpoint(url: string) {
 }
 
 export async function deleteWebhookEndpoint(id: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
+
+  // Find endpoint to verify ownership
+  const { data: endpoint } = await supabase
+    .from('webhook_endpoints')
+    .select('merchant_id')
+    .eq('id', id)
+    .single();
+
+  if (!endpoint || endpoint.merchant_id !== merchant.id) {
+    throw new Error("Webhook endpoint not found ou accès refusé");
+  }
 
   const { error } = await supabase
     .from('webhook_endpoints')
@@ -59,3 +51,4 @@ export async function deleteWebhookEndpoint(id: string) {
 
   revalidatePath('/dashboard/webhooks');
 }
+

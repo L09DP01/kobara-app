@@ -4,20 +4,223 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { kobaraSdks } from '@/config/sdks';
 
+const KOBARA_AI_PROMPT = `Tu es un architecte logiciel senior spécialisé dans les infrastructures fintech, les APIs de paiement et les intégrations SaaS sécurisées.
+
+Ta mission est d’intégrer Kobara Payments dans mon application existante de manière professionnelle, sécurisée et scalable.
+
+IMPORTANT :
+Avant de coder quoi que ce soit :
+1. Analyse entièrement mon projet.
+2. Détecte automatiquement ma stack technique.
+3. Comprends l’architecture frontend/backend.
+4. Analyse les routes existantes.
+5. Analyse la structure de la base de données.
+6. Analyse les systèmes d’authentification existants.
+7. Vérifie les variables d’environnement.
+8. Vérifie la gestion des paiements déjà existante.
+9. Vérifie les middlewares sécurité.
+10. Vérifie les endpoints API existants.
+
+OBJECTIF :
+Intégrer Kobara Payments correctement dans mon application sans casser l’architecture existante.
+
+RÈGLES CRITIQUES :
+
+1. Ne jamais exposer les clés secrètes Kobara côté client.
+2. Toutes les requêtes sensibles doivent passer par le backend.
+3. Toujours utiliser les variables .env.
+4. Toujours utiliser HTTPS.
+5. Vérifier les signatures webhook Kobara.
+6. Utiliser uniquement les clés Kobara :
+   - kbr_pk_* côté frontend
+   - kbr_sk_* côté backend
+7. Ne jamais communiquer directement avec MonCash ou MonCash.
+8. Toute communication paiement doit passer uniquement par l’API Kobara.
+9. Utiliser les bonnes pratiques OWASP.
+10. Ajouter validation et gestion erreurs.
+
+ARCHITECTURE RECOMMANDÉE :
+
+Frontend
+↓
+Backend sécurisé
+↓
+API Kobara
+↓
+Infrastructure MonCash
+↓
+MonCash
+
+TÂCHES À EFFECTUER :
+
+1. Installer le SDK Kobara adapté à ma stack.
+2. Configurer les variables d’environnement.
+3. Créer les services Kobara backend.
+4. Créer les endpoints API nécessaires.
+5. Créer la logique de paiement.
+6. Créer la logique des retraits.
+7. Créer la logique des webhooks.
+8. Créer la gestion des statuts paiement.
+9. Ajouter les logs sécurité.
+10. Ajouter la gestion erreurs.
+11. Ajouter les protections anti-abus.
+12. Ajouter la validation des données.
+13. Ajouter les notifications temps réel.
+14. Ajouter les analytics paiement.
+15. Ajouter le mode Test et Live.
+
+ANALYSE AUTOMATIQUE DEMANDÉE :
+
+Détecte automatiquement :
+- Next.js
+- React
+- Vue
+- Laravel
+- Express
+- NestJS
+- FastAPI
+- Django
+- Supabase
+- PostgreSQL
+- Prisma
+- Tailwind
+- TypeScript
+- Docker
+- Vercel
+
+Puis adapte l’intégration Kobara à cette stack.
+
+LOGIQUE DE PAIEMENT À IMPLÉMENTER :
+
+1. Créer paiement :
+POST /api/v1/payments
+
+2. Retourner :
+- checkout_url
+- payment_id
+- status
+
+3. Rediriger le client vers Kobara Checkout.
+
+4. Après paiement :
+- recevoir webhook
+- vérifier signature
+- mettre à jour DB
+- notifier frontend
+- créditer dashboard marchand
+
+STATUTS À GÉRER :
+
+- pending
+- succeeded
+- failed
+- expired
+- refunded
+
+WEBHOOKS :
+
+Créer un endpoint webhook sécurisé.
+
+Toujours :
+- vérifier Kobara-Signature
+- vérifier timestamp
+- logger les événements
+- éviter double traitement
+
+ENV VARIABLES :
+
+Frontend :
+NEXT_PUBLIC_KOBARA_PUBLIC_KEY=
+
+Backend :
+KOBARA_SECRET_KEY=
+KOBARA_WEBHOOK_SECRET=
+
+BASE DE DONNÉES :
+
+Créer ou adapter :
+- payments
+- customers
+- payment_links
+- withdrawals
+- webhook_events
+- audit_logs
+
+GESTION FRONTEND :
+
+Créer :
+- checkout buttons
+- payment success page
+- payment failed page
+- loading states
+- error handling
+- notifications
+
+GESTION BACKEND :
+
+Créer :
+- services Kobara
+- middleware auth
+- rate limiting
+- webhook verification
+- retry logic
+- logging
+
+SÉCURITÉ :
+
+Ajouter :
+- validation Zod/Yup
+- rate limiting
+- CSRF protection
+- secure headers
+- anti replay webhook protection
+
+QUALITÉ CODE :
+
+- code propre
+- TypeScript strict
+- architecture scalable
+- composants réutilisables
+- services séparés
+- aucune duplication
+
+IMPORTANT :
+
+Avant toute modification :
+1. explique ce que tu vas modifier ;
+2. explique pourquoi ;
+3. explique les impacts ;
+4. puis implémente proprement.
+
+Si une architecture existante est mauvaise :
+- explique pourquoi ;
+- propose une meilleure solution ;
+- puis migre proprement.
+
+Le résultat final doit être :
+- sécurisé ;
+- scalable ;
+- production-ready ;
+- fintech-grade ;
+- compatible Kobara ;
+- optimisé pour MonCash.`;
+
 export function DevelopersClient({ 
   merchant, 
   testPublicKey, 
   livePublicKey, 
   webhook, 
   usage, 
-  subscription 
+  subscription,
+  isGuest = false,
 }: { 
   merchant: any, 
   testPublicKey: string, 
   livePublicKey: string, 
   webhook: { configured: boolean, url: string | null }, 
   usage: any, 
-  subscription: any 
+  subscription: any,
+  isGuest?: boolean,
 }) {
   const [isTestMode, setIsTestMode] = useState(true);
   const [activeTab, setActiveTab] = useState<'curl' | 'javascript' | 'python' | 'php'>('curl');
@@ -26,6 +229,25 @@ export function DevelopersClient({
 
   return (
     <div className="max-w-[1440px] mx-auto w-full space-y-12 pb-12">
+      {/* Guest banner — shown when user is not logged in */}
+      {isGuest && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-xl px-6 py-4">
+          <div>
+            <p className="text-sm font-bold text-amber-800">Mode Sandbox — données génériques</p>
+            <p className="text-sm text-amber-700 mt-0.5">
+              Connectez-vous pour voir vos vraies clés API et accéder à votre tableau de bord.
+            </p>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <Link href="/login" className="px-5 py-2 rounded-lg bg-kobara-primary text-white text-sm font-bold hover:opacity-90 transition-opacity">
+              Se connecter
+            </Link>
+            <Link href="/register" className="px-5 py-2 rounded-lg border border-amber-300 bg-white text-amber-800 text-sm font-bold hover:bg-amber-50 transition-colors">
+              Créer un compte
+            </Link>
+          </div>
+        </div>
+      )}
       {/* 1. Header de page & Mode Switch */}
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
         <div>
@@ -214,13 +436,14 @@ export function DevelopersClient({
               </p>
               
               <div className="bg-code-bg border border-white/10 rounded-xl p-5 mb-6 relative group">
-                <p className="font-mono-code text-body-sm text-white/90 leading-relaxed">
-                  "Tu es un développeur full-stack senior. Intègre Kobara Payment dans mon application. Utilise l’API Kobara, pas Bazik directement. Installe le SDK adapté à mon stack, crée une page checkout, crée un paiement avec POST /api/v1/payments, gère les statuts pending, succeeded, failed et expired, configure un webhook sécurisé, vérifie la signature webhook, stocke les transactions dans ma base de données, utilise les variables d’environnement pour les clés Kobara, et n’expose jamais les clés secrètes côté client."
-                </p>
+                <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar font-mono-code text-body-sm text-white/90 leading-relaxed whitespace-pre-wrap">
+                  {KOBARA_AI_PROMPT}
+                </div>
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
-                    onClick={() => navigator.clipboard.writeText("Tu es un développeur full-stack senior. Intègre Kobara Payment dans mon application. Utilise l’API Kobara, pas Bazik directement. Installe le SDK adapté à mon stack, crée une page checkout, crée un paiement avec POST /api/v1/payments, gère les statuts pending, succeeded, failed et expired, configure un webhook sécurisé, vérifie la signature webhook, stocke les transactions dans ma base de données, utilise les variables d’environnement pour les clés Kobara, et n’expose jamais les clés secrètes côté client.")}
+                    onClick={() => navigator.clipboard.writeText(KOBARA_AI_PROMPT)}
                     className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm transition-colors border border-white/10"
+                    title="Copier"
                   >
                     <span className="material-symbols-outlined text-[18px]">content_copy</span>
                   </button>
@@ -229,7 +452,7 @@ export function DevelopersClient({
 
               <div className="flex flex-wrap gap-4">
                 <button 
-                  onClick={() => navigator.clipboard.writeText("Tu es un développeur full-stack senior. Intègre Kobara Payment dans mon application. Utilise l’API Kobara, pas Bazik directement. Installe le SDK adapté à mon stack, crée une page checkout, crée un paiement avec POST /api/v1/payments, gère les statuts pending, succeeded, failed et expired, configure un webhook sécurisé, vérifie la signature webhook, stocke les transactions dans ma base de données, utilise les variables d’environnement pour les clés Kobara, et n’expose jamais les clés secrètes côté client.")}
+                  onClick={() => navigator.clipboard.writeText(KOBARA_AI_PROMPT)}
                   className="bg-white text-primary px-6 py-2.5 rounded-lg font-body-base text-body-sm font-medium hover:bg-surface-container-lowest transition-colors shadow-sm flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-[18px]">content_copy</span>
@@ -279,7 +502,7 @@ export function DevelopersClient({
                     className="w-full bg-surface-container-low border border-border-subtle rounded-lg px-4 py-2.5 text-body-base font-mono-code focus:ring-primary focus:border-primary text-text-primary" 
                     readOnly 
                     type="text" 
-                    value="https://api.kobara.com/api/v1/payments"
+                    value={`${process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app'}/api/v1/payments`}
                   />
                 </div>
               </div>
@@ -343,7 +566,7 @@ export function DevelopersClient({
               <pre className="text-[13px] font-mono-code text-white/90 leading-relaxed overflow-x-auto pt-2">
                 {activeTab === 'curl' && (
                   <>
-                    <span className="text-[#56b6c2]">curl</span> -X POST https://api.kobara.com/api/v1/payments \{'\n'}
+                    <span className="text-[#56b6c2]">curl</span> -X POST {process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app'}/api/v1/payments \{'\n'}
                     {'  '}-H <span className="text-[#98c379]" >"Authorization: Bearer {isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}"</span> \{'\n'}
                     {'  '}-H <span className="text-[#98c379]" >"Content-Type: application/json"</span> \{'\n'}
                     {'  '}-d <span className="text-[#98c379]">'{'{'}

@@ -1,45 +1,9 @@
-﻿import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import RevenueChart from "./RevenueChart";
 
 export default async function AnalyticsPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Obtenir le merchant_id actuel
-  let merchantId = null;
-
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (merchant) {
-    merchantId = merchant.id;
-  } else {
-    const { data: member } = await supabase
-      .from('merchant_members')
-      .select('merchant_id')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
-    
-    if (member) {
-      merchantId = member.merchant_id;
-    }
-  }
-
-  if (!merchantId) {
-    redirect('/login');
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
+  const merchantId = merchant.id;
 
   // Get payments for the last 30 days
   const thirtyDaysAgo = new Date();

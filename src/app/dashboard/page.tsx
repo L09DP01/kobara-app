@@ -1,32 +1,8 @@
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
+import Link from "next/link";
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/login');
-  }
-
-  // Fetch current merchant
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
-
-  if (!merchant) {
-    // Should theoretically not happen if signup creates it, but as fallback
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-text-secondary">Profil marchand introuvable.</p>
-      </div>
-    );
-  }
+  const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   // Fetch recent payments
   const { data: recentPayments } = await supabase
@@ -37,15 +13,14 @@ export default async function DashboardPage() {
     .limit(5);
 
   // Aggregate stats (Total Encaissé)
-  // For MVP, we can aggregate here, or fetch a pre-calculated field.
   // We'll calculate it from all succeeded payments.
   const { data: succeededPayments } = await supabase
     .from('payments')
-    .select('amount')
+    .select('amount, net_amount')
     .eq('merchant_id', merchant.id)
     .eq('status', 'succeeded');
 
-  const totalEncaisse = succeededPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+  const totalEncaisse = succeededPayments?.reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
   const soldeDisponible = Number(merchant.available_balance || 0);
 
   // Calculate success rate
@@ -178,7 +153,7 @@ export default async function DashboardPage() {
           <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
             <div className="p-6 border-b border-border-subtle flex justify-between items-center">
               <h3 className="font-headline-md text-headline-md text-text-primary">Transactions Récentes</h3>
-              <button className="text-body-sm font-semibold text-primary hover:text-text-secondary transition-colors">Voir Tout</button>
+              <Link href="/dashboard/payments" className="text-body-sm font-semibold text-primary hover:text-text-secondary transition-colors">Voir Tout</Link>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -203,7 +178,10 @@ export default async function DashboardPage() {
                             {payment.customers?.name || payment.kobara_reference}
                           </span>
                         </td>
-                        <td className="py-4 px-6 font-mono-code text-mono-code text-text-primary">{Number(payment.amount).toLocaleString('fr-FR')} {payment.currency}</td>
+                        <td className="py-4 px-6">
+                          <div className="font-mono-code text-mono-code text-status-success font-medium">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} {payment.currency}</div>
+                          <div className="text-text-secondary text-xs mt-1">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')}</div>
+                        </td>
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 bg-secondary-container/20 rounded flex items-center justify-center text-secondary">
@@ -246,18 +224,18 @@ export default async function DashboardPage() {
           <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-headline-md text-headline-md text-text-primary">Statistiques de Retrait</h3>
-              <button className="p-1 hover:bg-surface-container rounded-lg text-text-secondary transition-colors">
+              <Link href="/dashboard/withdrawals" className="p-1 hover:bg-surface-container rounded-lg text-text-secondary transition-colors flex items-center justify-center">
                 <span className="material-symbols-outlined text-[20px]">more_vert</span>
-              </button>
+              </Link>
             </div>
             <div className="space-y-4">
               <div className="flex justify-center py-4">
                 <span className="text-body-sm text-text-secondary">Aucun retrait récent.</span>
               </div>
             </div>
-            <button className="w-full mt-6 py-2 border border-border-subtle rounded-lg text-body-sm font-medium hover:bg-surface-container transition-colors text-text-primary">
+            <Link href="/dashboard/withdrawals" className="block text-center w-full mt-6 py-2 border border-border-subtle rounded-lg text-body-sm font-medium hover:bg-surface-container transition-colors text-text-primary">
               Demander un retrait
-            </button>
+            </Link>
           </div>
 
           {/* Notifications Pane */}

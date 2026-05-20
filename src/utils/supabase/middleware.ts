@@ -1,45 +1,36 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+  // Forward the pathname so server layouts can detect the current route
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
+  const supabaseResponse = NextResponse.next({
     request: {
-      headers: request.headers,
+      headers: requestHeaders,
     },
   });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+  // Extract NextAuth session token from cookies (works in development & production)
+  const sessionToken = request.cookies.get("next-auth.session-token")?.value ||
+                       request.cookies.get("__Secure-next-auth.session-token")?.value;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userLoggedIn = !!sessionToken;
 
   const publicRoutes = [
     '/',
     '/login',
     '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/confirmed',
     '/api',
     '/pay',
     '/pricing',
+    '/developers',
+    '/docs',
+    '/dashboard/developers',
     '/contact',
     '/terms',
     '/privacy',
@@ -52,7 +43,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Default-deny: if not a public route and no user, redirect to login
-  if (!isPublicRoute && !user) {
+  if (!isPublicRoute && !userLoggedIn) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', pathname);
@@ -60,7 +51,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect logged in users away from auth pages
-  if ((pathname === '/login' || pathname === '/register') && user) {
+  const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
+  if (isAuthPage && userLoggedIn) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);

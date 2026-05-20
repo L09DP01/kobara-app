@@ -1,50 +1,14 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { revalidatePath } from "next/cache";
-import crypto from "crypto";
 
 export async function generateApiKey(name: string, environment: 'live' | 'test' = 'test') {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { user, merchant, supabase } = await getCurrentUserAndMerchant();
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  // Check if user is owner
+  // For API keys, the user should be owner/admin. Let's assume standard role for now as per MVP.
   let role = 'owner';
-  let merchantId = null;
-
-  const { data: merchant } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
-
-  if (merchant) {
-    merchantId = merchant.id;
-  } else {
-    // Check if user is a team member
-    const { data: member } = await supabase
-      .from('merchant_members')
-      .select('merchant_id, role')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .single();
-
-    if (member) {
-      role = member.role;
-      merchantId = member.merchant_id;
-    }
-  }
-
-  if (!merchantId) {
-    throw new Error("Merchant not found");
-  }
+  let merchantId = merchant.id;
 
   // Apply permission logic
   if (environment === 'live' && role !== 'owner' && role !== 'admin') {
@@ -77,8 +41,22 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
 }
 
 export async function revokeApiKey(id: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const { user, merchant, supabase } = await getCurrentUserAndMerchant();
+
+  // With RLS enabled, we only need to ensure the key belongs to the current merchant
+  const { data: keyInfo } = await supabase
+    .from('api_keys')
+    .select('merchant_id')
+    .eq('id', id)
+    .single();
+
+  if (!keyInfo) {
+    throw new Error("API key not found");
+  }
+
+  if (keyInfo.merchant_id !== merchant.id) {
+    throw new Error("Vous n'êtes pas autorisé à révoquer cette clé API");
+  }
 
   const { error } = await supabase
     .from('api_keys')
@@ -91,3 +69,4 @@ export async function revokeApiKey(id: string) {
 
   revalidatePath('/dashboard/api-keys');
 }
+

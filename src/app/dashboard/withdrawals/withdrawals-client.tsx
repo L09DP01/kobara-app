@@ -14,19 +14,34 @@ export function WithdrawalsClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [amount, setAmount] = useState<number | ''>('');
   const [method, setMethod] = useState('MonCash');
+  const [receiver, setReceiver] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleRequest = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
     if (!amount || Number(amount) < 100) return;
+    if (method === 'MonCash' && !receiver) {
+      setErrorMsg("Le numéro de réception est requis pour MonCash.");
+      return;
+    }
+    if (Number(amount) > Number(merchant.available_balance)) {
+      setErrorMsg("votre solde est insuffisant");
+      return;
+    }
     
     try {
       setLoading(true);
-      await requestWithdrawal(Number(amount), method);
+      await requestWithdrawal(Number(amount), method, receiver);
       setIsModalOpen(false);
       setAmount('');
-      alert("Demande de retrait initiée !");
+      setReceiver('');
+      setSuccessMsg("Demande de retrait initiée !");
+      setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err: any) {
-      alert(err.message || "Erreur lors de la demande");
+      setErrorMsg(err.message || "Erreur lors de la demande");
     } finally {
       setLoading(false);
     }
@@ -64,6 +79,14 @@ export function WithdrawalsClient({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-surface-card rounded-xl p-6 w-full max-w-md shadow-lg">
             <h2 className="text-headline-md font-headline-md text-text-primary mb-4">Initier un Retrait</h2>
+            
+            {errorMsg && (
+              <div className="mb-4 p-3 rounded-lg bg-status-error/10 border border-status-error/20 text-status-error text-body-sm flex items-start gap-2">
+                <span className="material-symbols-outlined text-[18px]">error</span>
+                <span>{errorMsg}</span>
+              </div>
+            )}
+            
             <form onSubmit={handleRequest} className="space-y-4">
               <div>
                 <label className="block text-body-sm text-text-secondary mb-1">Montant (HTG) - Max: {merchant.available_balance}</label>
@@ -72,12 +95,28 @@ export function WithdrawalsClient({
                   value={amount}
                   onChange={(e) => setAmount(Number(e.target.value))}
                   placeholder="1000.00"
-                  max={merchant.available_balance}
+                  max={Math.max(100, Number(merchant.available_balance || 0))}
                   min={100}
                   step="0.01"
                   className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   required
                 />
+                {amount && Number(amount) >= 100 && (
+                  <div className="mt-3 p-3 bg-surface-container rounded-lg border border-border-subtle">
+                    <div className="flex justify-between text-body-sm text-text-secondary mb-1">
+                      <span>Montant demandé</span>
+                      <span>{Number(amount).toLocaleString('fr-FR')} HTG</span>
+                    </div>
+                    <div className="flex justify-between text-body-sm text-status-warning mb-1">
+                      <span>Frais appliqués (5%)</span>
+                      <span>-{(Number(amount) * 0.05).toLocaleString('fr-FR')} HTG</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-text-primary mt-2 pt-2 border-t border-border-subtle">
+                      <span>Montant net à recevoir</span>
+                      <span className="text-status-success">{(Number(amount) * 0.95).toLocaleString('fr-FR')} HTG</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-body-sm text-text-secondary mb-1">Méthode de réception</label>
@@ -87,10 +126,25 @@ export function WithdrawalsClient({
                   className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="MonCash">MonCash</option>
-                  <option value="Sogebank">Sogebank (Bientôt)</option>
-                  <option value="Unibank">Unibank (Bientôt)</option>
+                  <option value="Sogebank" disabled>Sogebank (Bientôt)</option>
+                  <option value="Unibank" disabled>Unibank (Bientôt)</option>
                 </select>
               </div>
+              
+              {method === 'MonCash' && (
+                <div>
+                  <label className="block text-body-sm text-text-secondary mb-1">Numéro de téléphone (MonCash)</label>
+                  <input 
+                    type="tel" 
+                    value={receiver}
+                    onChange={(e) => setReceiver(e.target.value)}
+                    placeholder="3xxxxxxx"
+                    className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    required
+                  />
+                </div>
+              )}
+
               <div className="flex justify-end gap-2 pt-2">
                 <button 
                   type="button" 
@@ -116,6 +170,12 @@ export function WithdrawalsClient({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Balance Card */}
         <div className="lg:col-span-2 bg-surface-card rounded-xl border border-border-subtle p-8 ambient-shadow relative overflow-hidden">
+          {successMsg && (
+            <div className="absolute top-4 right-4 z-20 p-3 rounded-lg bg-status-success/10 border border-status-success/20 text-status-success text-body-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+              <span className="material-symbols-outlined text-[18px]">check_circle</span>
+              <span>{successMsg}</span>
+            </div>
+          )}
           <div className="relative z-10 flex flex-col justify-between h-full">
             <div>
               <p className="font-body-base text-body-sm text-text-secondary font-medium uppercase tracking-wider mb-2">Solde Disponible</p>
