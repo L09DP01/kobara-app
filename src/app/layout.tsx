@@ -25,7 +25,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Kobara.app - Dashboard",
+  title: "Kobara - Dashboard",
   description: "Haiti Premium SaaS Fintech",
 };
 

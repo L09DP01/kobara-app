@@ -133,7 +133,7 @@ export const translations = {
     },
     dashboard: {
       sidebar: {
-        title: "Kobara.app",
+        title: "Kobara",
         home: "Dashboard",
         payments: "Paiements",
         paymentLinks: "Liens de paiement",
@@ -454,7 +454,7 @@ export const translations = {
     },
     dashboard: {
       sidebar: {
-        title: "Kobara.app",
+        title: "Kobara",
         home: "Dashboard",
         payments: "Payments",
         paymentLinks: "Payment Links",
