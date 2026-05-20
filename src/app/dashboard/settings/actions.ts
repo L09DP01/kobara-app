@@ -150,9 +150,9 @@ async function getOrCreateSettings(supabase: any, merchantId: string) {
 }
 
 export async function sendEmailOtpAction() {
-  const { user, merchantId, supabase } = await getAuthUserAndMerchant();
+  const { user, merchant, supabase } = await getAuthUserAndMerchant();
 
-  const settings = await getOrCreateSettings(supabase, merchantId);
+  const settings = await getOrCreateSettings(supabase, merchant.id);
   const security = settings.security_json || {};
 
   // Rate limit check: wait 60s between sends
@@ -181,7 +181,7 @@ export async function sendEmailOtpAction() {
   const { error } = await supabase
     .from('settings')
     .update({ security_json: updatedSecurity })
-    .eq('merchant_id', merchantId);
+    .eq('merchant_id', merchant.id);
 
   if (error) {
     console.error("Failed to save OTP code:", error);
@@ -200,10 +200,10 @@ export async function sendEmailOtpAction() {
 }
 
 export async function verifyEmailOtpAction(code: string) {
-  const { merchantId, supabase } = await getAuthUserAndMerchant();
+  const { merchant, supabase } = await getAuthUserAndMerchant();
   const cookieStore = await cookies();
 
-  const settings = await getOrCreateSettings(supabase, merchantId);
+  const settings = await getOrCreateSettings(supabase, merchant.id);
   const security = settings.security_json || {};
   const emailOtp = security.email_otp || {};
 
@@ -226,7 +226,7 @@ export async function verifyEmailOtpAction(code: string) {
   const { error } = await supabase
     .from('settings')
     .update({ security_json: updatedSecurity })
-    .eq('merchant_id', merchantId);
+    .eq('merchant_id', merchant.id);
 
   if (error) {
     throw new Error("Erreur lors de l'activation de la double authentification");
@@ -248,7 +248,7 @@ export async function verifyEmailOtpAction(code: string) {
 }
 
 export async function activateTotp2faAction() {
-  const { merchantId, supabase } = await getAuthUserAndMerchant();
+  const { merchant, supabase } = await getAuthUserAndMerchant();
 
   const { data: mfaFactors } = await supabase.auth.mfa.listFactors();
   const hasVerifiedTotp = mfaFactors?.totp?.some((f: any) => f.status === 'verified');
@@ -258,7 +258,7 @@ export async function activateTotp2faAction() {
     // Let's assume we can save it directly as active if they completed the verification on client-side
   }
 
-  const settings = await getOrCreateSettings(supabase, merchantId);
+  const settings = await getOrCreateSettings(supabase, merchant.id);
   const security = settings.security_json || {};
 
   const updatedSecurity = {
@@ -270,7 +270,7 @@ export async function activateTotp2faAction() {
   const { error } = await supabase
     .from('settings')
     .update({ security_json: updatedSecurity })
-    .eq('merchant_id', merchantId);
+    .eq('merchant_id', merchant.id);
 
   if (error) throw new Error("Erreur de sauvegarde de la configuration");
 
@@ -279,10 +279,10 @@ export async function activateTotp2faAction() {
 }
 
 export async function disable2faAction() {
-  const { merchantId, supabase } = await getAuthUserAndMerchant();
+  const { merchant, supabase } = await getAuthUserAndMerchant();
   const cookieStore = await cookies();
 
-  const settings = await getOrCreateSettings(supabase, merchantId);
+  const settings = await getOrCreateSettings(supabase, merchant.id);
   const security = settings.security_json || {};
 
   const updatedSecurity = {
@@ -294,7 +294,7 @@ export async function disable2faAction() {
   const { error } = await supabase
     .from('settings')
     .update({ security_json: updatedSecurity })
-    .eq('merchant_id', merchantId);
+    .eq('merchant_id', merchant.id);
 
   if (error) throw new Error("Impossible de désactiver le 2FA");
 
