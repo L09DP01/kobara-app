@@ -148,10 +148,11 @@ export function OnboardingClient({ defaultEmail }: { defaultEmail: string }) {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="address" className="text-body-sm font-medium text-text-primary">Adresse (Optionnel)</label>
+              <label htmlFor="address" className="text-body-sm font-medium text-text-primary">Adresse</label>
               <input 
                 id="address"
                 name="address"
+                required
                 value={formData.address}
                 onChange={handleChange}
                 type="text" 

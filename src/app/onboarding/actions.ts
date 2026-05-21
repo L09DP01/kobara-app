@@ -11,7 +11,7 @@ export async function completeOnboarding(formData: {
   business_name: string;
   category: string;
   phone: string;
-  address?: string;
+  address: string;
 }) {
   const session = await getServerSession(authOptions);
   const user = session?.user as any;
