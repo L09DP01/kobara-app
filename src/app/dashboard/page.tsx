@@ -238,23 +238,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          {/* Notifications Pane */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-headline-md text-headline-md text-text-primary">Notifications</h3>
-              <button className="text-body-sm text-text-secondary hover:text-primary transition-colors">Marquer tout comme lu</button>
-            </div>
-            <div className="space-y-4">
-              <div className="flex gap-3 items-start">
-                <div className="w-2 h-2 rounded-full bg-status-success mt-2 flex-shrink-0"></div>
-                <div>
-                  <p className="font-body-base text-body-base text-text-primary">Bienvenue sur Kobara</p>
-                  <p className="text-body-sm text-text-secondary">Votre compte marchand est prêt.</p>
-                  <p className="text-label-caps text-text-secondary mt-1">À L'INSTANT</p>
-                </div>
-              </div>
-            </div>
-          </div>
+
           
         </div>
       </div>

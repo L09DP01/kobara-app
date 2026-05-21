@@ -76,8 +76,8 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
               className="p-2 text-text-secondary hover:bg-surface-container rounded-lg transition-colors hover:text-primary relative"
             >
               <span className="material-symbols-outlined">notifications</span>
-              {/* Optional: red dot for unread notifications */}
-              {/* <span className="absolute top-2 right-2 w-2 h-2 bg-status-error rounded-full border-2 border-surface"></span> */}
+              {/* Unread red dot */}
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-status-error rounded-full border-2 border-surface"></span>
             </button>
             
             {isNotifOpen && (
@@ -87,9 +87,33 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
                   <button className="text-body-sm text-primary hover:underline">Tout marquer comme lu</button>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
-                  <div className="p-8 text-center text-text-secondary flex flex-col items-center gap-2">
-                    <span className="material-symbols-outlined text-[32px] opacity-50">notifications_off</span>
-                    <p className="text-body-sm">Aucune nouvelle notification</p>
+                  {/* Welcome notification */}
+                  <div className="p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle cursor-pointer">
+                    <div className="flex gap-3 items-start">
+                      <div className="w-8 h-8 rounded-full bg-status-success/20 flex items-center justify-center text-status-success shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-[16px]">celebration</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-body-base text-body-base text-text-primary font-medium">Bienvenue sur Kobara 🎉</p>
+                        <p className="text-body-sm text-text-secondary mt-0.5">Votre compte marchand est prêt. Commencez à accepter des paiements dès maintenant.</p>
+                        <p className="text-[11px] text-text-secondary mt-1.5 uppercase tracking-wider font-semibold">À l&apos;instant</p>
+                      </div>
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                    </div>
+                  </div>
+                  {/* Secure account notification */}
+                  <div className="p-4 hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                    <div className="flex gap-3 items-start">
+                      <div className="w-8 h-8 rounded-full bg-primary-fixed/30 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-[16px]">shield</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-body-base text-body-base text-text-primary font-medium">Sécurisez votre compte</p>
+                        <p className="text-body-sm text-text-secondary mt-0.5">Activez l&apos;authentification à deux facteurs pour protéger votre compte.</p>
+                        <p className="text-[11px] text-text-secondary mt-1.5 uppercase tracking-wider font-semibold">Il y a 5 min</p>
+                      </div>
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                    </div>
                   </div>
                 </div>
               </div>
