@@ -10,39 +10,38 @@ export function Footer() {
   return (
     <footer className="py-16 sm:py-20 relative border-t border-slate-100 bg-white/50 backdrop-blur-sm">
       <div className="max-w-[1280px] mx-auto px-5 sm:px-10">
-        {/* Brand Column - Always full width on top */}
-        <div className="space-y-5">
-          <Link href="/" className="flex items-center group">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.png"
-              alt="Kobara"
-              className="w-36 h-auto object-contain"
-            />
-          </Link>
-          <p className="text-kobara-secondary font-medium max-w-xs leading-relaxed">
-            {t("home.heroDesc")}
-          </p>
-          <div className="flex flex-wrap items-center gap-4">
-            {[
-              { icon: MessageCircle, href: "#" },
-              { icon: Code2, href: "#" },
-              { icon: Share2, href: "#" },
-              { icon: Mail, href: "mailto:support@kobara.app" },
-            ].map((social, i) => (
-              <a
-                key={i}
-                href={social.href}
-                className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-kobara-primary hover:border-kobara-primary transition-all"
-              >
-                <social.icon className="w-5 h-5" />
-              </a>
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-8">
+          {/* Brand Column */}
+          <div className="lg:col-span-2 space-y-5">
+            <Link href="/" className="flex items-center group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="Kobara"
+                className="w-36 h-auto object-contain"
+              />
+            </Link>
+            <p className="text-kobara-secondary font-medium max-w-xs leading-relaxed">
+              {t("home.heroDesc")}
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              {[
+                { icon: MessageCircle, href: "#" },
+                { icon: Code2, href: "#" },
+                { icon: Share2, href: "#" },
+                { icon: Mail, href: "mailto:support@kobara.app" },
+              ].map((social, i) => (
+                <a
+                  key={i}
+                  href={social.href}
+                  className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-kobara-primary hover:border-kobara-primary transition-all"
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Link Columns - 2 columns on mobile, 3 on md+ */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 lg:gap-10">
           {/* Product Column */}
           <div className="space-y-5">
             <h4 className="text-sm font-black text-kobara-primary uppercase tracking-widest">
