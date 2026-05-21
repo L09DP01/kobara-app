@@ -41,14 +41,14 @@ export function DeveloperSection() {
 
   return (
     <section className="py-24 relative overflow-hidden">
-      <div className="max-w-[1280px] mx-auto px-10">
-        <div className="grid lg:grid-cols-2 gap-20 items-center">
+      <div className="max-w-[1280px] mx-auto px-5 md:px-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Text Content */}
           <div className="space-y-8">
             <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-orange-50 border border-orange-100 text-sm font-bold text-kobara-orange">
               {t("home.devBadge")}
             </div>
-            <h2 className="text-5xl font-black text-kobara-primary tracking-tighter leading-[1.1]">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-kobara-primary tracking-tighter leading-[1.1]">
               {language === "fr" ? "Une intégration en quelques minutes, pas en quelques semaines." : "Integration that takes minutes, not weeks."}
             </h2>
             <p className="text-lg text-kobara-secondary font-medium leading-relaxed max-w-xl">
@@ -97,12 +97,12 @@ export function DeveloperSection() {
               </div>
               
               {/* Body */}
-              <div className="bg-slate-950 p-8 font-mono text-[14px] leading-relaxed overflow-x-auto">
+              <div className="bg-slate-950 p-5 md:p-8 font-mono text-[12px] md:text-[14px] leading-relaxed overflow-x-auto">
                 <pre className="text-slate-300">
                   {CODE_SNIPPET.split('\n').map((line, i) => (
-                    <div key={i} className="flex gap-6">
-                      <span className="text-slate-700 select-none w-4 text-right">{i + 1}</span>
-                      <span>
+                    <div key={i} className="flex gap-4 md:gap-6">
+                      <span className="text-slate-700 select-none w-4 shrink-0 text-right">{i + 1}</span>
+                      <span className="whitespace-pre">
                         {line.includes('//') ? (
                           <span className="text-slate-500 italic">{line}</span>
                         ) : line.includes("'") || line.includes('"') ? (
