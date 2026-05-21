@@ -27,7 +27,7 @@ const features = [
 export function ApiFeatures() {
   return (
     <section className="py-32">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
+      <div className="max-w-[1440px] mx-auto px-5 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -35,7 +35,7 @@ export function ApiFeatures() {
           className="text-center mb-20"
         >
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Infrastructure</h2>
-          <h3 className="text-4xl lg:text-5xl font-extrabold text-kobara-primary">Built for scale and speed</h3>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-kobara-primary">Built for scale and speed</h3>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
@@ -47,7 +47,7 @@ export function ApiFeatures() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -10 }}
-              className="bg-white rounded-3xl p-10 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(11,19,36,0.08)] transition-all duration-300 group"
+              className="bg-white rounded-3xl p-6 md:p-10 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(11,19,36,0.08)] transition-all duration-300 group"
             >
               <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-kobara-orange/10 group-hover:scale-110 transition-all duration-300">
                 {feature.icon}

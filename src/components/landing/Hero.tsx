@@ -21,7 +21,7 @@ export function Hero() {
         <div className="flex-1 rounded-[24px] sm:rounded-[28px] overflow-hidden relative bg-white/65 backdrop-blur-md border border-white/90 shadow-[0_20px_60px_rgba(7,20,43,0.07)] flex flex-col lg:flex-row">
 
           {/* ── Left column: text content ── */}
-          <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left lg:w-[52%] px-6 sm:px-10 lg:pl-16 lg:pr-8 py-8 lg:py-12 z-10 relative">
+          <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left lg:w-[52%] px-4 sm:px-10 lg:pl-16 lg:pr-8 py-8 lg:py-12 z-10 relative">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -34,7 +34,7 @@ export function Hero() {
               </div>
 
               {/* Headline */}
-              <h1 className="text-5xl sm:text-6xl xl:text-[4.2rem] leading-[1.06] font-black text-kobara-primary tracking-tighter">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] leading-[1.06] font-black text-kobara-primary tracking-tighter">
                 {language === "fr" ? (
                   <>
                     Construisez, Lancez Et<br />

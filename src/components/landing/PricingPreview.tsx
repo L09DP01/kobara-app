@@ -36,7 +36,7 @@ const plans = [
 export function PricingPreview() {
   return (
     <section className="py-32 relative overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
+      <div className="max-w-[1440px] mx-auto px-5 lg:px-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -44,7 +44,7 @@ export function PricingPreview() {
           className="text-center mb-20"
         >
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Pricing</h2>
-          <h3 className="text-4xl lg:text-5xl font-extrabold text-kobara-primary mb-6">Simple pricing, no hidden fees</h3>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-kobara-primary mb-6">Simple pricing, no hidden fees</h3>
           <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
             Choose the plan that fits your growth. Every plan includes our 2.9% transaction fee.
           </p>
@@ -58,9 +58,9 @@ export function PricingPreview() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className={`relative flex flex-col p-10 rounded-[2.5rem] border transition-all duration-500 ${
+              className={`relative flex flex-col p-6 md:p-10 rounded-[2.5rem] border transition-all duration-500 ${
                 plan.highlight 
-                ? "bg-slate-900 text-white border-white/10 shadow-[0_32px_64px_rgba(11,19,36,0.15)] scale-105 z-10" 
+                ? "bg-slate-900 text-white border-white/10 shadow-[0_32px_64px_rgba(11,19,36,0.15)] md:scale-105 z-10" 
                 : "bg-white text-kobara-primary border-slate-100 shadow-sm hover:shadow-xl"
               }`}
             >

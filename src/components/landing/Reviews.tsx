@@ -79,7 +79,7 @@ export function Reviews() {
             <Star className="w-4 h-4 fill-kobara-red" />
             {language === "fr" ? "Retours d'expérience" : "Customer Success Stories"}
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black text-kobara-primary tracking-tighter leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-kobara-primary tracking-tighter leading-tight">
             {language === "fr" 
               ? "Recommandé par les leaders de l'économie digitale en Haïti" 
               : "Trusted by the leaders of Haiti's digital economy"}

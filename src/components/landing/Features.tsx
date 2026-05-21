@@ -62,12 +62,12 @@ export function Features() {
 
   return (
     <section className="py-24 relative">
-      <div className="max-w-[1280px] mx-auto px-10">
+      <div className="max-w-[1280px] mx-auto px-5 md:px-10">
         <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
           <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-sm font-bold text-blue-600">
             {language === "fr" ? "Fonctionnalités puissantes" : "Powerful Features"}
           </div>
-          <h2 className="text-5xl font-black text-kobara-primary tracking-tighter">
+          <h2 className="text-4xl md:text-5xl font-black text-kobara-primary tracking-tighter">
             {t("home.featuresTitle")}
           </h2>
           <p className="text-lg text-kobara-secondary font-medium leading-relaxed">

@@ -20,7 +20,7 @@ const steps = [
 export function HowItWorks() {
   return (
     <section className="py-32 relative">
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-12 text-center">
+      <div className="max-w-[1440px] mx-auto px-5 lg:px-12 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -28,7 +28,7 @@ export function HowItWorks() {
           className="mb-20"
         >
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Process</h2>
-          <h3 className="text-4xl lg:text-5xl font-extrabold text-kobara-primary">How it works</h3>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-kobara-primary">How it works</h3>
         </motion.div>
 
         <div className="flex flex-col lg:flex-row items-start justify-center gap-12 lg:gap-6 relative max-w-5xl mx-auto">
