@@ -87,34 +87,69 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
                   <button className="text-body-sm text-primary hover:underline">Tout marquer comme lu</button>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
-                  {/* Welcome notification */}
-                  <div className="p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle cursor-pointer">
+                  {/* Welcome notification → Create first payment link */}
+                  <Link
+                    href="/dashboard/payment-links"
+                    onClick={() => setIsNotifOpen(false)}
+                    className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle"
+                  >
                     <div className="flex gap-3 items-start">
                       <div className="w-8 h-8 rounded-full bg-status-success/20 flex items-center justify-center text-status-success shrink-0 mt-0.5">
                         <span className="material-symbols-outlined text-[16px]">celebration</span>
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-body-base text-body-base text-text-primary font-medium">Bienvenue sur Kobara 🎉</p>
-                        <p className="text-body-sm text-text-secondary mt-0.5">Votre compte marchand est prêt. Commencez à accepter des paiements dès maintenant.</p>
-                        <p className="text-[11px] text-text-secondary mt-1.5 uppercase tracking-wider font-semibold">À l&apos;instant</p>
+                        <p className="text-body-sm text-text-secondary mt-0.5">Votre compte marchand est prêt. Créez votre premier lien de paiement.</p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">À l&apos;instant</p>
+                          <span className="text-[11px] text-primary font-semibold flex items-center gap-1">Créer un lien <span className="material-symbols-outlined text-[12px]">arrow_forward</span></span>
+                        </div>
                       </div>
                       <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
                     </div>
-                  </div>
-                  {/* Secure account notification */}
-                  <div className="p-4 hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                  </Link>
+                  {/* Secure account → Settings security */}
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setIsNotifOpen(false)}
+                    className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle"
+                  >
                     <div className="flex gap-3 items-start">
                       <div className="w-8 h-8 rounded-full bg-primary-fixed/30 flex items-center justify-center text-primary shrink-0 mt-0.5">
                         <span className="material-symbols-outlined text-[16px]">shield</span>
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-body-base text-body-base text-text-primary font-medium">Sécurisez votre compte</p>
                         <p className="text-body-sm text-text-secondary mt-0.5">Activez l&apos;authentification à deux facteurs pour protéger votre compte.</p>
-                        <p className="text-[11px] text-text-secondary mt-1.5 uppercase tracking-wider font-semibold">Il y a 5 min</p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Il y a 5 min</p>
+                          <span className="text-[11px] text-primary font-semibold flex items-center gap-1">Paramètres <span className="material-symbols-outlined text-[12px]">arrow_forward</span></span>
+                        </div>
                       </div>
                       <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
                     </div>
-                  </div>
+                  </Link>
+                  {/* Generate API keys → API keys page */}
+                  <Link
+                    href="/dashboard/api-keys"
+                    onClick={() => setIsNotifOpen(false)}
+                    className="block p-4 hover:bg-surface-container-lowest transition-colors"
+                  >
+                    <div className="flex gap-3 items-start">
+                      <div className="w-8 h-8 rounded-full bg-secondary-fixed/30 flex items-center justify-center text-secondary shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-[16px]">key</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body-base text-body-base text-text-primary font-medium">Générez vos clés API</p>
+                        <p className="text-body-sm text-text-secondary mt-0.5">Connectez votre application avec nos APIs pour accepter les paiements MonCash.</p>
+                        <div className="flex items-center justify-between mt-1.5">
+                          <p className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Il y a 10 min</p>
+                          <span className="text-[11px] text-primary font-semibold flex items-center gap-1">Clés API <span className="material-symbols-outlined text-[12px]">arrow_forward</span></span>
+                        </div>
+                      </div>
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                    </div>
+                  </Link>
                 </div>
               </div>
             )}
