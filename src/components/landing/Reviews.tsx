@@ -73,18 +73,18 @@ export function Reviews() {
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-rose-100/30 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-orange-100/30 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-[1280px] mx-auto px-6 sm:px-10 relative z-10">
+      <div className="max-w-[1280px] mx-auto px-5 sm:px-10 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
           <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-sm font-bold text-kobara-red">
             <Star className="w-4 h-4 fill-kobara-red" />
             {language === "fr" ? "Retours d'expérience" : "Customer Success Stories"}
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-kobara-primary tracking-tighter leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-kobara-primary tracking-tighter leading-tight">
             {language === "fr" 
               ? "Recommandé par les leaders de l'économie digitale en Haïti" 
               : "Trusted by the leaders of Haiti's digital economy"}
           </h2>
-          <p className="text-lg text-kobara-secondary font-medium leading-relaxed">
+          <p className="text-base sm:text-lg text-kobara-secondary font-medium leading-relaxed">
             {language === "fr" 
               ? "Découvrez pourquoi les développeurs et entrepreneurs haïtiens choisissent l'infrastructure de Kobara pour propulser leur croissance." 
               : "Discover why Haitian developers and entrepreneurs choose Kobara's infrastructure to power their growth."}
@@ -96,14 +96,14 @@ export function Reviews() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid md:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
         >
           {REVIEWS_DATA.map((review, i) => (
             <motion.div
               key={i}
               variants={cardVariants}
               whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.04)" }}
-              className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col justify-between relative transition-all duration-350"
+              className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between relative transition-all duration-350"
             >
               {/* Quote icon overlay */}
               <div className="absolute top-6 right-8 text-slate-100 pointer-events-none">
@@ -119,19 +119,19 @@ export function Reviews() {
                 </div>
 
                 {/* Review Text */}
-                <p className="text-[16px] text-slate-700 leading-relaxed font-medium italic">
+                <p className="text-sm sm:text-[16px] text-slate-700 leading-relaxed font-medium italic">
                   "{language === "fr" ? review.content.fr : review.content.en}"
                 </p>
               </div>
 
               {/* User Bio */}
-              <div className="flex items-center gap-4 pt-8 border-t border-slate-100 mt-8 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-kobara-orange/20 to-kobara-red/20 text-kobara-primary flex items-center justify-center font-bold text-lg border border-white shrink-0 shadow-sm">
+              <div className="flex items-center gap-3 sm:gap-4 pt-6 sm:pt-8 border-t border-slate-100 mt-6 sm:mt-8 relative z-10">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-kobara-orange/20 to-kobara-red/20 text-kobara-primary flex items-center justify-center font-bold text-base sm:text-lg border border-white shrink-0 shadow-sm">
                   {review.avatarInitials}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="font-bold text-kobara-primary text-[15px] truncate">{review.name}</h4>
+                    <h4 className="font-bold text-kobara-primary text-[14px] sm:text-[15px] truncate">{review.name}</h4>
                     <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
                   </div>
                   <p className="text-xs text-kobara-secondary font-medium truncate mt-0.5">
