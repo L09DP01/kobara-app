@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { inviteTeamMember, removeTeamMember } from '../actions';
+import { toast } from "sonner";
 
 export function TeamSettings({ members }: { members: any[] }) {
   const [loading, setLoading] = useState(false);
@@ -15,9 +16,10 @@ export function TeamSettings({ members }: { members: any[] }) {
       setLoading(true);
       await inviteTeamMember(inviteEmail, inviteRole);
       setInviteEmail('');
-      alert("Invitation envoyée !");
+      toast.success("Invitation envoyée !");
+      setInviteEmail('');
     } catch (err: any) {
-      alert(err.message || "Erreur d'invitation");
+      toast.error(err.message || "Erreur d'invitation");
     } finally {
       setLoading(false);
     }
@@ -29,7 +31,7 @@ export function TeamSettings({ members }: { members: any[] }) {
       setLoading(true);
       await removeTeamMember(id);
     } catch (err: any) {
-      alert(err.message || "Erreur lors de la suppression");
+      toast.error(err.message || "Erreur lors de la suppression");
     } finally {
       setLoading(false);
     }

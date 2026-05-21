@@ -6,8 +6,10 @@ import {
   updatePassword, 
   sendEmailOtpAction, 
   verifyEmailOtpAction, 
-  activateTotp2faAction, 
-  disable2faAction 
+  generateTotpSecretAction, 
+  verifyAndActivateTotpAction, 
+  disable2faAction,
+  deletePasskeyAction
 } from '../actions';
 import { 
   Shield, 
@@ -185,17 +187,9 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
     setMfaSuccess('');
     setActionLoading(true);
     try {
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: 'totp',
-        issuer: 'Kobara',
-        friendlyName: user.email || 'Kobara User'
-      });
-
-      if (error) throw error;
-
-      setEnrollFactorId(data.id);
-      setQrCodeSvg(data.totp.qr_code);
-      setSecretKey(data.totp.secret);
+      const { secret, qrCodeDataUrl } = await generateTotpSecretAction();
+      setSecretKey(secret);
+      setQrCodeSvg(qrCodeDataUrl);
       setIsConfiguringTotp(true);
     } catch (err: any) {
       setMfaError(err.message || "Impossible d'initialiser l'application d'authentification.");
@@ -213,35 +207,13 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
     setMfaSuccess('');
     setActionLoading(true);
     try {
-      const challenge = await supabase.auth.mfa.challenge({ factorId: enrollFactorId });
-      if (challenge.error) throw challenge.error;
-
-      const challengeId = challenge.data.id;
-
-      const verify = await supabase.auth.mfa.verify({
-        factorId: enrollFactorId,
-        challengeId,
-        code: totpCode
-      });
-
-      if (verify.error) throw verify.error;
-
-      // Unenroll previous factors
-      for (const factor of factors) {
-        if (factor.id !== enrollFactorId && factor.status === 'verified') {
-          await supabase.auth.mfa.unenroll({ factorId: factor.id });
-        }
+      const res = await verifyAndActivateTotpAction(totpCode);
+      if (res.success) {
+        setMfaSuccess("Authentification par application activée avec succès !");
+        setIsConfiguringTotp(false);
+        setTotpCode('');
+        setDbMethod('totp');
       }
-
-      // Activate in Postgres DB settings
-      await activateTotp2faAction();
-
-      setMfaSuccess("Authentification par application activée avec succès !");
-      setIsConfiguringTotp(false);
-      setTotpCode('');
-      setDbMethod('totp');
-      await supabase.auth.refreshSession();
-      await fetchFactors();
     } catch (err: any) {
       setMfaError(err.message || 'Code de vérification invalide.');
     } finally {
@@ -595,7 +567,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                   
                   <div className="flex justify-center bg-white p-4 rounded-xl border border-border-subtle w-fit mx-auto shadow-sm">
                     <img 
-                      src={`data:image/svg+xml;utf-8,${encodeURIComponent(qrCodeSvg)}`} 
+                      src={qrCodeSvg} 
                       alt="QR Code MFA" 
                       className="w-44 h-44" 
                     />
@@ -663,6 +635,106 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
             )}
           </div>
         )}
+      </div>
+
+      {/* Passkeys Management Card */}
+      <div className="bg-surface-card rounded-xl border border-border-subtle p-6 ambient-shadow">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+            <span className="material-symbols-outlined">fingerprint</span>
+          </div>
+          <div>
+            <h2 className="text-headline-md font-headline-md text-text-primary">Connexion Biométrique (Passkey)</h2>
+            <p className="text-body-sm text-text-secondary mt-0.5">Utilisez Touch ID, Face ID ou Windows Hello pour vous connecter sans mot de passe.</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <button
+            type="button"
+            disabled={actionLoading}
+            onClick={async () => {
+              setActionLoading(true);
+              setMfaError('');
+              setMfaSuccess('');
+              try {
+                const { startRegistration } = await import('@simplewebauthn/browser');
+                const resp = await fetch('/api/auth/passkey/generate-registration-options');
+                if (!resp.ok) throw new Error("Erreur de génération des options");
+                const options = await resp.json();
+                
+                const attResp = await startRegistration(options);
+                
+                const verifyResp = await fetch('/api/auth/passkey/verify-registration', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(attResp),
+                });
+                
+                if (!verifyResp.ok) throw new Error("Échec de la validation de la clé");
+                setMfaSuccess("Clé biométrique ajoutée avec succès ! Rechargez la page pour la voir.");
+              } catch (e: any) {
+                console.error(e);
+                setMfaError(e.message || "Impossible d'ajouter le Passkey.");
+              } finally {
+                setActionLoading(false);
+              }
+            }}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-text-primary text-surface-container-lowest rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Ajouter un appareil biométrique
+          </button>
+
+          {(settings?.security_json?.passkeys?.length || 0) > 0 && (
+            <div className="mt-6 border border-border-subtle rounded-xl overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-surface-container-lowest border-b border-border-subtle text-text-secondary">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Appareil</th>
+                    <th className="py-3 px-4 font-semibold">Date d'ajout</th>
+                    <th className="py-3 px-4 text-right font-semibold">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-subtle bg-white">
+                  {settings.security_json.passkeys.map((pk: any) => (
+                    <tr key={pk.id}>
+                      <td className="py-3 px-4 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-gray-400">devices</span>
+                        <span className="font-medium text-text-primary capitalize">{pk.deviceType || 'Appareil inconnu'}</span>
+                      </td>
+                      <td className="py-3 px-4 text-text-secondary">
+                        {new Date(pk.created_at).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={async () => {
+                            if (!confirm("Voulez-vous vraiment supprimer cet appareil biométrique ?")) return;
+                            setActionLoading(true);
+                            try {
+                              await deletePasskeyAction(pk.id);
+                              setMfaSuccess("Clé biométrique supprimée.");
+                            } catch (e: any) {
+                              setMfaError("Erreur lors de la suppression.");
+                            } finally {
+                              setActionLoading(false);
+                            }
+                          }}
+                          className="text-rose-600 hover:text-rose-800 font-medium text-sm transition-colors disabled:opacity-50"
+                        >
+                          Supprimer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

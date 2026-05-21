@@ -15,12 +15,23 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
     throw new Error("Only owners and admins can generate live API keys");
   }
 
+  const { canCreateApiKey } = require("@/lib/server/access");
+  const accessCheck = await canCreateApiKey(merchantId, environment);
+  if (!accessCheck.allowed) {
+    if (accessCheck.reason === 'kyc_required') throw new Error("Vous devez vérifier votre compte (KYC) pour créer une clé Live.");
+    if (accessCheck.reason === 'api_key_limit_reached') throw new Error("Vous avez atteint la limite de clés API de votre plan.");
+    throw new Error("Access Denied");
+  }
+
   // Generate a random key
   const { ApiKeySecurity } = require("@/lib/server/security/api-keys");
   const prefix = environment === 'live' ? "kbr_sk_live_" : "kbr_sk_test_";
   const { rawKey, keyHash } = ApiKeySecurity.generateKey(prefix);
 
-  const { error } = await supabase
+  const { createAdminClient } = require("@/utils/supabase/admin");
+  const adminClient = createAdminClient();
+
+  const { error } = await adminClient
     .from('api_keys')
     .insert({
       merchant_id: merchantId,
@@ -43,7 +54,7 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
 export async function revokeApiKey(id: string) {
   const { user, merchant, supabase } = await getCurrentUserAndMerchant();
 
-  // With RLS enabled, we only need to ensure the key belongs to the current merchant
+  // Verify the key belongs to this merchant (via RLS-protected SELECT)
   const { data: keyInfo } = await supabase
     .from('api_keys')
     .select('merchant_id')
@@ -58,13 +69,19 @@ export async function revokeApiKey(id: string) {
     throw new Error("Vous n'êtes pas autorisé à révoquer cette clé API");
   }
 
-  const { error } = await supabase
+  // Use admin client to bypass RLS (no DELETE policy exists on api_keys)
+  const { createAdminClient } = require("@/utils/supabase/admin");
+  const adminClient = createAdminClient();
+
+  const { error } = await adminClient
     .from('api_keys')
-    .update({ revoked_at: new Date().toISOString() })
-    .eq('id', id);
+    .delete()
+    .eq('id', id)
+    .eq('merchant_id', merchant.id); // Double-check ownership
 
   if (error) {
-    throw new Error("Failed to revoke API key");
+    console.error("API Key Delete Error:", error);
+    throw new Error("Failed to delete API key");
   }
 
   revalidatePath('/dashboard/api-keys');

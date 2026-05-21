@@ -10,5 +10,26 @@ export default async function ApiKeysPage() {
     .eq('merchant_id', merchant.id)
     .order('created_at', { ascending: false });
 
-  return <ApiKeysClient initialKeys={apiKeys || []} />;
+  // Compute API calls metrics based on payments this week
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const { data: recentPayments } = await supabase
+    .from('payments')
+    .select('status')
+    .eq('merchant_id', merchant.id)
+    .gte('created_at', oneWeekAgo.toISOString());
+
+  const apiCallsThisWeek = recentPayments?.length || 0;
+  const successfulCalls = recentPayments?.filter(p => p.status === 'succeeded').length || 0;
+  
+  const successRate = apiCallsThisWeek > 0 
+    ? Math.round((successfulCalls / apiCallsThisWeek) * 100) 
+    : 100;
+
+  return <ApiKeysClient 
+    initialKeys={apiKeys || []} 
+    apiCallsThisWeek={apiCallsThisWeek}
+    successRate={successRate}
+  />;
 }

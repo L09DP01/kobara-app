@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { cookies } from "next/headers";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +62,7 @@ export default async function RootLayout({
       <body className="bg-background-main font-body-base text-body-base text-on-surface min-h-screen flex flex-col">
         <LanguageProvider>
           {children}
+          <Toaster position="top-right" richColors />
         </LanguageProvider>
       </body>
     </html>

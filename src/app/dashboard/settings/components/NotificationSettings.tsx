@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { updateNotificationSettings } from '../actions';
+import { toast } from "sonner";
 
 export function NotificationSettings({ settings }: { settings: any }) {
   const [loading, setLoading] = useState(false);
@@ -20,9 +21,9 @@ export function NotificationSettings({ settings }: { settings: any }) {
     try {
       setLoading(true);
       await updateNotificationSettings(notifications);
-      alert("Préférences de notifications sauvegardées !");
+      toast.success("Préférences de notifications sauvegardées !");
     } catch (err: any) {
-      alert(err.message || "Erreur");
+      toast.error(err.message || "Erreur");
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Sidebar from "@/components/dashboard/sidebar";
 import TopNav from "@/components/dashboard/top-nav";
+import { KycRequiredBanner } from "@/components/dashboard/kyc-banner";
 
 export default function DashboardLayoutClient({
   children,
@@ -65,8 +66,11 @@ export default function DashboardLayoutClient({
         />
       )}
 
-      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[260px] w-full md:w-[calc(100%-260px)]">
+      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[260px] w-full md:w-[calc(100%-260px)] transition-all duration-300">
         <TopNav onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} merchant={merchant} user={user} />
+        {merchant && merchant.kyc_status !== 'approved' && (
+          <KycRequiredBanner />
+        )}
         <main className="flex-1 p-container-padding flex flex-col gap-8">
           {children}
         </main>

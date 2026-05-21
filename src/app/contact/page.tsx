@@ -35,7 +35,7 @@ export default function ContactPage() {
             <div className="space-y-6">
               {[
                 { icon: Mail, label: "Email", value: "support@kobara.app", href: "mailto:support@kobara.app" },
-                { icon: MessageCircle, label: "WhatsApp", value: "+509 ×××× ××××", href: "#" },
+                { icon: MessageCircle, label: "WhatsApp", value: "+509 4003 5664", href: "tel:+50940035664" },
                 { icon: MapPin, label: "Location", value: "Port-au-Prince, Haïti", href: "#" },
               ].map((item, i) => (
                 <a

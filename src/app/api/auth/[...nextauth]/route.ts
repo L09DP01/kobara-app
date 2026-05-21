@@ -11,17 +11,14 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        language: { label: "Language", type: "text" }
+        language: { label: "Language", type: "text" },
+        passkey_response: { label: "Passkey Response", type: "text" }
       },
       async authorize(credentials) {
         const lang = credentials?.language || "fr";
 
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error(
-            lang === "en"
-              ? "Please enter your email and password."
-              : "Veuillez saisir votre e-mail et votre mot de passe."
-          );
+        if (!credentials?.email) {
+          throw new Error(lang === "en" ? "Please enter your email." : "Veuillez saisir votre e-mail.");
         }
 
         const supabase = createAdminClient();
@@ -34,30 +31,70 @@ export const authOptions: AuthOptions = {
           .maybeSingle();
 
         if (error || !user) {
-          throw new Error(
-            lang === "en"
-              ? "No account exists with this email."
-              : "Aucun compte n'existe avec cet e-mail."
-          );
-        }
-
-        // Verify if password is correct
-        const passwordMatches = await bcrypt.compare(credentials.password, user.password_hash);
-        if (!passwordMatches) {
-          throw new Error(
-            lang === "en"
-              ? "Incorrect password."
-              : "Mot de passe incorrect."
-          );
+          throw new Error(lang === "en" ? "No account exists with this email." : "Aucun compte n'existe avec cet e-mail.");
         }
 
         // Check if account is verified
         if (!user.email_verified) {
-          throw new Error(
-            lang === "en"
-              ? "Your account is not verified yet. Please check your inbox to validate your account."
-              : "Votre compte n'est pas encore vérifié. Veuillez consulter votre boîte de réception pour valider votre compte."
-          );
+          throw new Error(lang === "en" ? "Your account is not verified yet." : "Votre compte n'est pas encore vérifié.");
+        }
+
+        // PASSKEY AUTHENTICATION
+        if (credentials.passkey_response) {
+          const { verifyAuthenticationResponse } = require('@simplewebauthn/server');
+          
+          const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', user.id).maybeSingle();
+          if (!merchant) throw new Error("Marchand introuvable.");
+
+          const { data: settings } = await supabase.from('settings').select('security_json').eq('merchant_id', merchant.id).maybeSingle();
+          const security = settings?.security_json || {};
+          const expectedChallenge = security.auth_challenge;
+
+          if (!expectedChallenge) throw new Error("Challenge invalide ou expiré.");
+
+          const passkeys = security.passkeys || [];
+          const responseBody = JSON.parse(credentials.passkey_response);
+          
+          const passkey = passkeys.find((pk: any) => pk.id === responseBody.id);
+          if (!passkey) throw new Error("Clé biométrique introuvable.");
+
+          const rpID = process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : 'localhost';
+          const origin = process.env.NEXT_PUBLIC_APP_URL || `http://${rpID}:3000`;
+
+          const verification = await verifyAuthenticationResponse({
+            response: responseBody,
+            expectedChallenge,
+            expectedOrigin: origin,
+            expectedRPID: rpID,
+            credential: {
+              id: passkey.id,
+              publicKey: Buffer.from(passkey.publicKey, 'base64url'),
+              counter: passkey.counter,
+              transports: passkey.transports,
+            },
+          });
+
+          if (!verification.verified) {
+            throw new Error("Authentification biométrique échouée.");
+          }
+
+          // Update counter and clear challenge
+          passkey.counter = verification.authenticationInfo.newCounter;
+          await supabase.from('settings').update({ 
+            security_json: { ...security, passkeys, auth_challenge: null }
+          }).eq('merchant_id', merchant.id);
+
+          return { id: user.id, email: user.email, email_verified: user.email_verified };
+        }
+
+        // PASSWORD AUTHENTICATION
+        if (!credentials.password) {
+          throw new Error(lang === "en" ? "Password required." : "Mot de passe requis.");
+        }
+
+        const passwordMatches = await bcrypt.compare(credentials.password, user.password_hash);
+        if (!passwordMatches) {
+          throw new Error(lang === "en" ? "Incorrect password." : "Mot de passe incorrect.");
         }
 
         return {

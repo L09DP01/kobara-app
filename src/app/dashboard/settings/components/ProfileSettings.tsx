@@ -2,18 +2,67 @@
 
 import { useState } from 'react';
 import { updateMerchantProfile } from '../actions';
+import { toast } from "sonner";
 
 export function ProfileSettings({ user, merchant }: { user: any, merchant: any }) {
   console.log("ProfileSettings client component received user:", user);
+  let parsedAddress = { address: '', city: '', state: '', country: '', zipcode: '' };
+  try {
+    if (merchant?.address && merchant.address.startsWith('{')) {
+      parsedAddress = { ...parsedAddress, ...JSON.parse(merchant.address) };
+    } else if (merchant?.address) {
+      parsedAddress.address = merchant.address;
+    }
+  } catch(e) {}
+
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    business_name: string;
+    category: string;
+    email: string;
+    phone: string;
+    first_name: string;
+    last_name: string;
+    logo_preview: string;
+    logo_url?: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    zipcode: string;
+  }>({
     business_name: merchant.business_name || '',
     category: merchant.category || '',
     email: merchant.email || '',
     phone: merchant.phone || '',
     first_name: user?.first_name || '',
-    last_name: user?.last_name || ''
+    last_name: user?.last_name || '',
+    logo_preview: merchant?.logo_url || '',
+    logo_url: merchant?.logo_url || undefined,
+    address: parsedAddress.address,
+    city: parsedAddress.city,
+    state: parsedAddress.state,
+    country: parsedAddress.country,
+    zipcode: parsedAddress.zipcode
   });
+
+  const autoDetectLocation = async () => {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      if (data && data.country_name) {
+        setFormData(prev => ({
+          ...prev,
+          city: data.city || prev.city,
+          state: data.region || prev.state,
+          country: data.country_name || prev.country,
+          zipcode: data.postal || prev.zipcode
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to auto-detect location", e);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,9 +72,9 @@ export function ProfileSettings({ user, merchant }: { user: any, merchant: any }
     try {
       setLoading(true);
       await updateMerchantProfile(formData);
-      alert("Paramètres du profil sauvegardés avec succès !");
+      toast.success("Paramètres du profil sauvegardés avec succès !");
     } catch (err: any) {
-      alert(err.message || "Erreur de sauvegarde");
+      toast.error(err.message || "Erreur de sauvegarde");
     } finally {
       setLoading(false);
     }
@@ -84,13 +133,50 @@ export function ProfileSettings({ user, merchant }: { user: any, merchant: any }
         
         <div className="space-y-4">
           <div className="flex items-center gap-6 mb-6">
-            <div className="h-20 w-20 rounded-full bg-surface-container border-2 border-border-subtle flex items-center justify-center overflow-hidden">
-              <span className="text-2xl font-bold text-text-secondary">{formData.business_name.charAt(0) || 'K'}</span>
+            <div className="h-20 w-20 rounded-full bg-surface-container border-2 border-border-subtle flex items-center justify-center overflow-hidden relative group">
+              {formData.logo_preview ? (
+                <img src={formData.logo_preview} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-bold text-text-secondary">{formData.business_name.charAt(0) || 'K'}</span>
+              )}
             </div>
             <div>
-              <button className="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm font-medium text-text-primary hover:bg-surface-container transition-colors mb-2">
+              <input 
+                type="file" 
+                id="logo_upload" 
+                className="hidden" 
+                accept="image/jpeg, image/png, image/gif"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 1024 * 1024) {
+                      toast.error("Le fichier est trop volumineux (max 1MB).");
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onloadend = async () => {
+                      const base64Img = reader.result as string;
+                      setFormData(prev => ({ ...prev, logo_preview: base64Img, logo_url: base64Img }));
+                      try {
+                        setLoading(true);
+                        await updateMerchantProfile({ ...formData, logo_url: base64Img });
+                        toast.success("Logo mis à jour avec succès !");
+                      } catch (err: any) {
+                        toast.error(err.message || "Erreur lors de la sauvegarde du logo");
+                      } finally {
+                        setLoading(false);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              <label 
+                htmlFor="logo_upload"
+                className="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm font-medium text-text-primary hover:bg-surface-container transition-colors mb-2 cursor-pointer inline-block"
+              >
                 Changer le logo
-              </button>
+              </label>
               <p className="text-[12px] text-text-secondary">JPG, GIF ou PNG. Max 1MB.</p>
             </div>
           </div>
@@ -142,6 +228,74 @@ export function ProfileSettings({ user, merchant }: { user: any, merchant: any }
             type="tel" 
             className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
           />
+        </div>
+        
+        <div className="pt-4 mt-6 border-t border-border-subtle">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-body-lg font-semibold text-text-primary">Adresse complète</h3>
+            <button
+              type="button"
+              onClick={autoDetectLocation}
+              className="text-primary text-sm font-medium hover:underline flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[16px]">my_location</span>
+              Autodétecter ma position
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-body-sm font-medium text-text-primary">Adresse / Rue</label>
+              <input 
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                type="text" 
+                placeholder="Ex: 123 Rue Principale"
+                className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-body-sm font-medium text-text-primary">Ville</label>
+              <input 
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                type="text" 
+                className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-body-sm font-medium text-text-primary">Département / Région</label>
+              <input 
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                type="text" 
+                className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-body-sm font-medium text-text-primary">Code Postal</label>
+              <input 
+                name="zipcode"
+                value={formData.zipcode}
+                onChange={handleChange}
+                type="text" 
+                className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-body-sm font-medium text-text-primary">Pays</label>
+              <input 
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                type="text" 
+                className="w-full bg-surface-container-lowest border border-border-subtle rounded-lg px-3 py-2 focus:ring-1 focus:ring-primary focus:border-primary text-text-primary" 
+              />
+            </div>
+          </div>
         </div>
         </div>
       </div>

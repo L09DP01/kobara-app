@@ -7,6 +7,11 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { getCurrentUserAndMerchant as getAuthUserAndMerchant } from "@/utils/supabase/auth-helper";
+import { 
+  notifyPasswordChange, 
+  notify2faActivation, 
+  notifyPlanActivation 
+} from "@/lib/server/notifications";
 
 export async function updateMerchantProfile(formData: {
   business_name: string;
@@ -15,6 +20,12 @@ export async function updateMerchantProfile(formData: {
   phone: string;
   first_name?: string;
   last_name?: string;
+  logo_url?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipcode?: string;
 }) {
   const { user, merchant, supabase } = await getAuthUserAndMerchant();
 
@@ -25,7 +36,15 @@ export async function updateMerchantProfile(formData: {
       business_name: formData.business_name,
       category: formData.category,
       email: formData.email,
-      phone: formData.phone
+      phone: formData.phone,
+      logo_url: formData.logo_url !== undefined ? formData.logo_url : merchant.logo_url,
+      address: JSON.stringify({
+        address: formData.address || '',
+        city: formData.city || '',
+        state: formData.state || '',
+        country: formData.country || '',
+        zipcode: formData.zipcode || ''
+      })
     })
     .eq('id', merchant.id);
 
@@ -112,6 +131,13 @@ export async function updatePassword(password: string) {
   if (error) {
     throw new Error("Erreur lors de la mise à jour du mot de passe: " + error.message);
   }
+
+  try {
+    const { data: mData } = await supabase.from('merchants').select('id').eq('user_id', user.id).single();
+    if (mData) {
+      await notifyPasswordChange(mData.id, user.email);
+    }
+  } catch (e) { console.error("Notification failed", e); }
 
   return { success: true };
 }
@@ -232,6 +258,11 @@ export async function verifyEmailOtpAction(code: string) {
     throw new Error("Erreur lors de l'activation de la double authentification");
   }
 
+  try {
+    const { user } = await getAuthUserAndMerchant();
+    await notify2faActivation(merchant.id, user.email, 'Email');
+  } catch (e) { console.error("Notification failed", e); }
+
   // Set secure, HTTP-only cookie indicating verification passed
   cookieStore.set({
     name: 'kbr_2fa_email_ok',
@@ -247,24 +278,63 @@ export async function verifyEmailOtpAction(code: string) {
   return { success: true };
 }
 
-export async function activateTotp2faAction() {
-  const { merchant, supabase } = await getAuthUserAndMerchant();
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
 
-  const { data: mfaFactors } = await supabase.auth.mfa.listFactors();
-  const hasVerifiedTotp = mfaFactors?.totp?.some((f: any) => f.status === 'verified');
+export async function generateTotpSecretAction() {
+  const { user, merchant, supabase } = await getAuthUserAndMerchant();
+  
+  const secret = speakeasy.generateSecret({
+    name: `Kobara (${user.email})`
+  });
 
-  if (!hasVerifiedTotp) {
-    // If not using Supabase auth directly, or if verified differently, fallback to DB verification or allow it directly
-    // Let's assume we can save it directly as active if they completed the verification on client-side
-  }
+  const qrCodeDataUrl = await QRCode.toDataURL(secret.otpauth_url!);
 
   const settings = await getOrCreateSettings(supabase, merchant.id);
   const security = settings.security_json || {};
 
   const updatedSecurity = {
     ...security,
+    pending_totp_secret: secret.base32
+  };
+
+  const { error } = await supabase
+    .from('settings')
+    .update({ security_json: updatedSecurity })
+    .eq('merchant_id', merchant.id);
+
+  if (error) throw new Error("Erreur lors de la génération du secret TOTP");
+
+  return { secret: secret.base32, qrCodeDataUrl };
+}
+
+export async function verifyAndActivateTotpAction(token: string) {
+  const { merchant, supabase } = await getAuthUserAndMerchant();
+  const settings = await getOrCreateSettings(supabase, merchant.id);
+  const security = settings.security_json || {};
+
+  const pendingSecret = security.pending_totp_secret;
+  if (!pendingSecret) {
+    throw new Error("Aucune configuration TOTP en attente.");
+  }
+
+  const verified = speakeasy.totp.verify({
+    secret: pendingSecret,
+    encoding: 'base32',
+    token: token,
+    window: 1
+  });
+
+  if (!verified) {
+    throw new Error("Le code de vérification est invalide ou expiré.");
+  }
+
+  const updatedSecurity = {
+    ...security,
     two_factor_method: 'totp',
-    email_otp: null
+    totp_secret: pendingSecret,
+    email_otp: null,
+    pending_totp_secret: null
   };
 
   const { error } = await supabase
@@ -274,10 +344,38 @@ export async function activateTotp2faAction() {
 
   if (error) throw new Error("Erreur de sauvegarde de la configuration");
 
+  try {
+    const { user } = await getAuthUserAndMerchant();
+    await notify2faActivation(merchant.id, user.email, 'Application Authenticator');
+  } catch (e) { console.error("Notification failed", e); }
+
   revalidatePath('/dashboard/settings');
   return { success: true };
 }
+export async function deletePasskeyAction(passkeyId: string) {
+  const { merchant, supabase } = await getAuthUserAndMerchant();
 
+  const { data: settings } = await supabase
+    .from('settings')
+    .select('security_json')
+    .eq('merchant_id', merchant.id)
+    .single();
+
+  const security = settings?.security_json || {};
+  const passkeys = security.passkeys || [];
+
+  const updatedPasskeys = passkeys.filter((pk: any) => pk.id !== passkeyId);
+
+  const { error } = await supabase
+    .from('settings')
+    .update({ security_json: { ...security, passkeys: updatedPasskeys } })
+    .eq('merchant_id', merchant.id);
+
+  if (error) throw new Error("Erreur lors de la suppression de la clé biométrique");
+
+  revalidatePath('/dashboard/settings');
+  return { success: true };
+}
 export async function disable2faAction() {
   const { merchant, supabase } = await getAuthUserAndMerchant();
   const cookieStore = await cookies();

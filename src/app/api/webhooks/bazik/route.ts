@@ -42,6 +42,27 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Intercepter les paiements pour mise à niveau d'abonnement
+    if (reference.startsWith('UPGRADE::')) {
+      const parts = reference.split('::');
+      if (parts.length >= 3) {
+        const merchantId = parts[1];
+        const planSlug = parts[2];
+        const bazikStatus = String(status).toUpperCase();
+        
+        if (bazikStatus === "SUCCESS" || bazikStatus === "COMPLETED" || bazikStatus === "SUCCESSFUL" || status === true) {
+          const { upgradeMerchantPlan } = await import("@/lib/server/plans");
+          try {
+            await upgradeMerchantPlan(merchantId, planSlug);
+            console.log(`Plan upgraded successfully via Bazik Webhook: Merchant ${merchantId} to ${planSlug}`);
+          } catch (err) {
+            console.error(`Erreur lors de l'upgrade de plan via Webhook:`, err);
+          }
+        }
+      }
+      return NextResponse.json({ received: true });
+    }
+
     // Find the payment
     const { data: payment, error: fetchError } = await supabaseAdmin
       .from('payments')

@@ -16,12 +16,19 @@ const PaymentSchema = z.object({
   metadata: z.record(z.string(), z.any()).optional(),
 });
 
+import { canCreatePayment } from "@/lib/server/access";
+
 export async function POST(request: NextRequest) {
   try {
-    const { merchantId, error: authError } = await authenticateApiRequest(request);
+    const { merchantId, environment, error: authError } = await authenticateApiRequest(request);
 
     if (authError || !merchantId) {
       return NextResponse.json({ error: authError || "Unauthorized" }, { status: 401 });
+    }
+
+    const accessCheck = await canCreatePayment(merchantId, environment as 'test' | 'live');
+    if (!accessCheck.allowed) {
+      return NextResponse.json({ error: "Access Denied", reason: accessCheck.reason }, { status: 403 });
     }
 
     const { success } = await apiLimiter.limit(`api_payments_${merchantId}`);

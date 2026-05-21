@@ -1,0 +1,185 @@
+import { getKycStatus } from "./actions";
+import Link from "next/link";
+import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
+import { redirect } from "next/navigation";
+
+export default async function KycPage() {
+  const { merchant } = await getCurrentUserAndMerchant();
+  if (!merchant) redirect('/login');
+
+  const profile = await getKycStatus();
+  const status = profile?.status || 'not_started';
+
+  const steps = [
+    { label: 'Informations', icon: 'person' },
+    { label: 'Documents', icon: 'description' },
+    { label: 'Vérification', icon: 'search' },
+    { label: 'Approuvé', icon: 'verified' },
+  ];
+
+  const getStepState = (index: number) => {
+    if (status === 'approved') return 'completed';
+    if (status === 'in_review' && index <= 1) return 'completed';
+    if (status === 'in_review' && index === 2) return 'active';
+    if (status === 'not_started' && index === 0) return 'active';
+    if (status === 'rejected' && index <= 1) return 'completed';
+    if (status === 'rejected' && index === 2) return 'error';
+    return 'upcoming';
+  };
+
+  return (
+    <div className="max-w-[800px] w-full mx-auto pb-12 space-y-8">
+      {/* Progress Stepper */}
+      <div className="bg-surface-card border border-border-subtle rounded-xl shadow-sm p-6">
+        <div className="flex items-center justify-between relative">
+          <div className="absolute top-5 left-[10%] right-[10%] h-0.5 bg-border-subtle"></div>
+          <div className="absolute top-5 left-[10%] h-0.5 bg-status-success transition-all duration-500" style={{ 
+            width: status === 'approved' ? '80%' : status === 'in_review' ? '53%' : status === 'rejected' ? '53%' : '0%' 
+          }}></div>
+          {steps.map((step, i) => {
+            const state = getStepState(i);
+            return (
+              <div key={i} className="flex flex-col items-center relative z-10 flex-1">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
+                  state === 'completed' ? 'bg-status-success border-status-success text-white' :
+                  state === 'active' ? 'bg-primary border-primary text-on-primary animate-pulse' :
+                  state === 'error' ? 'bg-status-error border-status-error text-white' :
+                  'bg-surface-container border-border-subtle text-text-secondary'
+                }`}>
+                  {state === 'completed' ? (
+                    <span className="material-symbols-outlined text-[20px]">check</span>
+                  ) : state === 'error' ? (
+                    <span className="material-symbols-outlined text-[20px]">close</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px]">{step.icon}</span>
+                  )}
+                </div>
+                <span className={`text-[11px] font-semibold mt-2 ${
+                  state === 'completed' ? 'text-status-success' :
+                  state === 'active' ? 'text-primary' :
+                  state === 'error' ? 'text-status-error' :
+                  'text-text-secondary'
+                }`}>{step.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="bg-surface-card border border-border-subtle rounded-xl shadow-sm p-8">
+        <h1 className="text-2xl font-bold text-text-primary mb-2">Vérification d'Identité (KYC)</h1>
+        <p className="text-sm text-text-secondary mb-8">
+          Pour accepter des paiements réels et retirer vos fonds, vous devez vérifier votre identité. Ce processus prend moins de 5 minutes.
+        </p>
+
+        {status === 'not_started' && (
+          <div className="bg-surface-container-lowest border border-border-subtle p-6 rounded-xl">
+            <h3 className="text-lg font-bold text-text-primary mb-5">Ce dont vous aurez besoin :</h3>
+            <div className="space-y-4 mb-8">
+              {[
+                { icon: 'badge', text: "Une pièce d'identité valide (CIN, Passeport, ou Permis de conduire)", num: '1' },
+                { icon: 'photo_camera', text: "Un appareil avec une caméra pour un court selfie vidéo (Liveness)", num: '2' },
+                { icon: 'lightbulb', text: "Un environnement bien éclairé", num: '3' },
+              ].map(item => (
+                <div key={item.num} className="flex items-start gap-4 p-3 rounded-xl hover:bg-surface-container transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[18px] text-primary">{item.icon}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-primary font-bold">Étape {item.num}</span>
+                    <p className="text-sm text-text-secondary mt-0.5">{item.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Link 
+              href="/dashboard/kyc/start"
+              className="inline-flex items-center justify-center gap-2 bg-primary text-on-primary px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-sm hover:shadow-md"
+            >
+              Commencer la vérification
+              <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </Link>
+          </div>
+        )}
+
+        {status === 'in_review' && (
+          <div className="bg-amber-50 border border-amber-100 p-8 rounded-xl text-center">
+            <div className="w-16 h-16 rounded-2xl bg-amber-100 mx-auto flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-4xl text-status-warning animate-pulse">hourglass_empty</span>
+            </div>
+            <h3 className="text-lg font-bold text-amber-900 mb-2">En cours de vérification</h3>
+            <p className="text-sm text-amber-700 max-w-md mx-auto mb-6">
+              Vos documents ont bien été reçus. Notre équipe les analyse actuellement.
+            </p>
+            {/* Timeline */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-status-success"></span>
+                <span className="text-xs text-amber-800 font-medium">Documents reçus</span>
+              </div>
+              <div className="w-8 h-0.5 bg-amber-200"></div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-status-warning animate-pulse"></span>
+                <span className="text-xs text-amber-800 font-medium">En analyse</span>
+              </div>
+              <div className="w-8 h-0.5 bg-amber-200"></div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-surface-container"></span>
+                <span className="text-xs text-amber-600">Décision</span>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full">
+              <span className="material-symbols-outlined text-[16px] text-amber-700">schedule</span>
+              <span className="text-xs font-semibold text-amber-800">Délai estimé : 24-48h</span>
+            </div>
+          </div>
+        )}
+
+        {status === 'approved' && (
+          <div className="bg-green-50 border border-green-100 p-8 rounded-xl text-center relative overflow-hidden">
+            <div className="absolute top-2 left-4 text-4xl opacity-20">🎉</div>
+            <div className="absolute top-6 right-8 text-3xl opacity-20">✨</div>
+            <div className="absolute bottom-4 left-12 text-2xl opacity-20">🎊</div>
+            <div className="w-16 h-16 rounded-2xl bg-green-100 mx-auto flex items-center justify-center mb-4 relative z-10">
+              <span className="material-symbols-outlined text-4xl text-status-success">verified</span>
+            </div>
+            <h3 className="text-lg font-bold text-green-900 mb-2">Compte Vérifié !</h3>
+            <p className="text-sm text-green-700 max-w-md mx-auto mb-4">
+              Félicitations, votre identité a été confirmée. Vous pouvez désormais accepter des paiements en mode Live et effectuer des retraits.
+            </p>
+            <span className="inline-flex items-center gap-1.5 bg-status-success text-white px-4 py-1.5 rounded-full text-xs font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+              Mode Live Activé
+            </span>
+          </div>
+        )}
+
+        {status === 'rejected' && (
+          <div className="bg-red-50 border border-red-100 p-8 rounded-xl text-center">
+            <div className="w-16 h-16 rounded-2xl bg-red-100 mx-auto flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-4xl text-status-error">cancel</span>
+            </div>
+            <h3 className="text-lg font-bold text-red-900 mb-2">Vérification Échouée</h3>
+            <p className="text-sm text-red-700 max-w-md mx-auto mb-4">
+              {profile.rejection_reason || "Vos documents n'ont pas pu être vérifiés."}
+            </p>
+            <div className="bg-white/60 rounded-xl p-4 max-w-sm mx-auto mb-6 text-left space-y-2">
+              <p className="text-xs font-semibold text-red-800">Pour réessayer :</p>
+              <div className="flex items-start gap-2 text-xs text-red-700"><span className="font-bold">1.</span> Vérifiez que le document est lisible</div>
+              <div className="flex items-start gap-2 text-xs text-red-700"><span className="font-bold">2.</span> Assurez-vous que tous les coins sont visibles</div>
+              <div className="flex items-start gap-2 text-xs text-red-700"><span className="font-bold">3.</span> Utilisez un éclairage suffisant</div>
+            </div>
+            <Link 
+              href="/dashboard/kyc/start"
+              className="inline-flex items-center justify-center gap-2 bg-status-error text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-status-error/90 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">refresh</span>
+              Recommencer la vérification
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

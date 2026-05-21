@@ -12,41 +12,53 @@ export function SettingsClient({ user, merchant, settings, members }: { user: an
   const [activeTab, setActiveTab] = useState<Tab>('profile');
 
   const tabs = [
-    { id: 'profile', label: 'Profil Entreprise' },
-    { id: 'security', label: 'Sécurité' },
-    { id: 'notifications', label: 'Notifications' },
-    { id: 'team', label: "Membres d'équipe" },
+    { id: 'profile', label: 'Profil Entreprise', icon: 'store', desc: 'Logo, nom, adresse' },
+    { id: 'security', label: 'Sécurité', icon: 'shield', desc: 'Mot de passe, 2FA' },
+    { id: 'notifications', label: 'Notifications', icon: 'notifications', desc: 'Email, push, alertes' },
+    { id: 'team', label: "Membres d'équipe", icon: 'group', desc: 'Rôles et accès' },
   ] as const;
 
   return (
-    <div className="max-w-[1080px] mx-auto w-full space-y-8 pb-12">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-[1080px] mx-auto w-full space-y-6 pb-12">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-2">
+        <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center">
+          <span className="material-symbols-outlined text-2xl text-text-secondary">settings</span>
+        </div>
         <div>
-          <h1 className="text-headline-lg font-headline-lg text-text-primary tracking-tight">Paramètres</h1>
-          <p className="text-text-secondary text-body-sm mt-1">Gérez les préférences de votre compte et de votre entreprise.</p>
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Paramètres</h1>
+          <p className="text-text-secondary text-sm mt-0.5">Gérez les préférences de votre compte et de votre entreprise.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Settings Navigation Sidebar */}
-        <div className="md:col-span-1 space-y-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as Tab)}
-              className={`w-full text-left px-4 py-2.5 rounded-lg font-medium text-body-sm transition-colors ${
-                activeTab === tab.id 
-                  ? 'bg-surface-container-high text-text-primary' 
-                  : 'text-text-secondary hover:bg-surface-container hover:text-text-primary'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="md:col-span-1">
+          <nav className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as Tab)}
+                className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition-all duration-200 border-l-2 ${
+                  activeTab === tab.id 
+                    ? 'bg-primary/5 border-l-primary text-text-primary' 
+                    : 'border-l-transparent text-text-secondary hover:bg-surface-container-lowest hover:text-text-primary'
+                }`}
+              >
+                <span className={`material-symbols-outlined text-[20px] ${activeTab === tab.id ? 'text-primary' : 'text-text-secondary'}`}>
+                  {tab.icon}
+                </span>
+                <div>
+                  <span className="text-sm font-semibold block">{tab.label}</span>
+                  <span className="text-[11px] text-text-secondary/60">{tab.desc}</span>
+                </div>
+              </button>
+            ))}
+          </nav>
         </div>
 
         {/* Settings Content Area */}
-        <div className="md:col-span-3 space-y-6">
+        <div className="md:col-span-3">
           {activeTab === 'profile' && <ProfileSettings user={user} merchant={merchant} />}
           {activeTab === 'security' && <SecuritySettings user={user} settings={settings} />}
           {activeTab === 'notifications' && <NotificationSettings settings={settings} />}

@@ -27,7 +27,7 @@ export default async function DevelopersPage() {
 
   const { data: merchant } = await supabase
     .from('merchants')
-    .select('id, business_name, status')
+    .select('id, business_name, status, plan_slug')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -40,7 +40,7 @@ export default async function DevelopersPage() {
         livePublicKey="kobara_pk_live_xxxxxxxxxxxxxxxxxxxxxxxx"
         webhook={{ configured: false, url: null }}
         usage={{ apiCallsToday: 0, paymentsThisMonth: 0, planLimit: 10 }}
-        subscription={{ plan: "Free", status: "active" }}
+        subscription={{ plan: "Sandbox (Gratuit)", status: "active" }}
         isGuest={true}
       />
     );
@@ -77,15 +77,39 @@ export default async function DevelopersPage() {
     ? { configured: true, url: webhooks[0].url }
     : { configured: false, url: null };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const startOfDay = today.toISOString();
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
+
+  // Get API calls today (using audit_logs as proxy)
+  const { count: apiCallsToday } = await supabase
+    .from('audit_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('merchant_id', merchantId)
+    .gte('created_at', startOfDay);
+
+  // Get payments this month
+  const { count: paymentsThisMonth } = await supabase
+    .from('payments')
+    .select('*', { count: 'exact', head: true })
+    .eq('merchant_id', merchantId)
+    .gte('created_at', startOfMonth);
+
   const usage = {
-    apiCallsToday: 124,
-    paymentsThisMonth: 8,
-    planLimit: 10
+    apiCallsToday: apiCallsToday || 0,
+    paymentsThisMonth: paymentsThisMonth || 0,
+    planLimit: merchant.plan_slug === 'test_only' ? 10 : 1000
   };
 
+  let planName = "Sandbox (Gratuit)";
+  if (merchant.plan_slug === 'starter') planName = "Starter";
+  if (merchant.plan_slug === 'pro') planName = "Pro";
+  if (merchant.plan_slug === 'business') planName = "Business";
+
   const subscription = {
-    plan: "Free",
-    status: merchant.status || "active"
+    plan: planName,
+    status: merchant.status === 'active' ? 'Actif' : 'En attente'
   };
 
   return (

@@ -217,6 +217,62 @@ function LoginContent() {
 
         <button 
           type="button"
+          onClick={async () => {
+            if (!email) {
+              setError(language === "fr" ? "Veuillez entrer votre e-mail pour utiliser Passkey." : "Please enter your email to use Passkey.");
+              return;
+            }
+            try {
+              setLoading(true);
+              setError('');
+              const { startAuthentication } = await import('@simplewebauthn/browser');
+              
+              // 1. Get options
+              const resp = await fetch('/api/auth/passkey/generate-authentication-options', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+              });
+              
+              if (!resp.ok) {
+                const data = await resp.json();
+                throw new Error(data.error || "Failed to get passkey options");
+              }
+              const options = await resp.json();
+              
+              // 2. Authenticate with browser
+              const assertion = await startAuthentication(options);
+              
+              // 3. Login via NextAuth
+              const res = await signIn('credentials', {
+                email: email.toLowerCase().trim(),
+                passkey_response: JSON.stringify(assertion),
+                language,
+                redirect: false
+              });
+
+              if (res?.error) {
+                setError(res.error);
+                setLoading(false);
+              } else {
+                router.push('/dashboard');
+                router.refresh();
+              }
+            } catch (err: any) {
+              console.error(err);
+              setError(err.message || (language === "fr" ? "Erreur biométrique" : "Biometric error"));
+              setLoading(false);
+            }
+          }}
+          disabled={loading}
+          className="w-full bg-white border border-gray-200 text-gray-700 rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center gap-3 mb-4"
+        >
+          <span className="material-symbols-outlined text-[20px] text-kobara-red">fingerprint</span>
+          {language === "fr" ? "Se connecter avec Passkey" : "Sign in with Passkey"}
+        </button>
+
+        <button 
+          type="button"
           className="w-full bg-white border border-gray-200 text-gray-700 rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center gap-3"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">

@@ -11,6 +11,7 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
   const supabase = createClient();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -31,6 +32,54 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/login' });
+  };
+
+  useEffect(() => {
+    if (merchant?.id) {
+      const fetchNotifs = async () => {
+        const { data } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('merchant_id', merchant.id)
+          .eq('read', false)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (data) setNotifications(data);
+      };
+      fetchNotifs();
+    }
+  }, [merchant?.id, supabase]);
+
+  const markAsRead = async (id: string) => {
+    await supabase.from('notifications').update({ read: true }).eq('id', id);
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const markAllAsRead = async () => {
+    if (merchant?.id) {
+      await supabase.from('notifications').update({ read: true }).eq('merchant_id', merchant.id).eq('read', false);
+      setNotifications([]);
+    }
+  };
+
+  const getNotifStyle = (type: string) => {
+    switch (type) {
+      case 'payment_received': return { icon: 'payments', bg: 'bg-status-success/20 text-status-success', dot: 'bg-status-success' };
+      case 'security_alert': return { icon: 'shield', bg: 'bg-status-error/20 text-status-error', dot: 'bg-status-error' };
+      case 'kyc_reminder':
+      case 'kyc_success': return { icon: 'how_to_reg', bg: 'bg-primary-fixed/30 text-primary', dot: 'bg-primary' };
+      case 'plan_activated': return { icon: 'workspace_premium', bg: 'bg-secondary-fixed/30 text-secondary', dot: 'bg-secondary' };
+      default: return { icon: 'notifications', bg: 'bg-surface-container text-text-secondary', dot: 'bg-text-secondary' };
+    }
+  };
+
+  const formatTimeAgo = (dateStr: string) => {
+    const diffInMinutes = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 60000);
+    if (diffInMinutes < 1) return "À l'instant";
+    if (diffInMinutes < 60) return `Il y a ${diffInMinutes} min`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `Il y a ${diffInHours} h`;
+    return `Il y a ${Math.floor(diffInHours / 24)} j`;
   };
 
   return (
@@ -55,14 +104,7 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
           />
         </Link>
 
-        <div className="hidden md:flex flex-col">
-          <h2 className="font-headline-lg text-headline-lg text-text-primary tracking-tight">
-            Bonsoir, {user?.first_name || merchant?.business_name || 'Nouveau Marchand'} 👋
-          </h2>
-          <span className="font-body-sm text-body-sm text-text-secondary">
-            {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </span>
-        </div>
+
       </div>
       
       {/* Right: Actions */}
@@ -76,80 +118,60 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
               className="p-2 text-text-secondary hover:bg-surface-container rounded-lg transition-colors hover:text-primary relative"
             >
               <span className="material-symbols-outlined">notifications</span>
-              {/* Unread red dot */}
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-status-error rounded-full border-2 border-surface"></span>
+              {notifications.length > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-status-error rounded-full border-2 border-surface animate-pulse"></span>
+              )}
             </button>
             
             {isNotifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-surface-card border border-border-subtle rounded-xl shadow-lg overflow-hidden z-50">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-card border border-border-subtle rounded-xl shadow-lg overflow-hidden z-50">
                 <div className="p-4 border-b border-border-subtle flex justify-between items-center">
                   <h3 className="font-headline-sm text-text-primary">Notifications</h3>
-                  <button className="text-body-sm text-primary hover:underline">Tout marquer comme lu</button>
+                  {notifications.length > 0 && (
+                    <button onClick={markAllAsRead} className="text-[12px] font-medium text-primary hover:underline transition-all">
+                      Tout effacer
+                    </button>
+                  )}
                 </div>
-                <div className="max-h-[300px] overflow-y-auto">
-                  {/* Welcome notification → Create first payment link */}
-                  <Link
-                    href="/dashboard/payment-links"
-                    onClick={() => setIsNotifOpen(false)}
-                    className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle"
-                  >
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-full bg-status-success/20 flex items-center justify-center text-status-success shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-[16px]">celebration</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-body-base text-body-base text-text-primary font-medium">Bienvenue sur Kobara 🎉</p>
-                        <p className="text-body-sm text-text-secondary mt-0.5">Votre compte marchand est prêt. Créez votre premier lien de paiement.</p>
-                        <div className="flex items-center justify-between mt-1.5">
-                          <p className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">À l&apos;instant</p>
-                          <span className="text-[11px] text-primary font-semibold flex items-center gap-1">Créer un lien <span className="material-symbols-outlined text-[12px]">arrow_forward</span></span>
-                        </div>
-                      </div>
-                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
+                <div className="max-h-[350px] overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-8 text-center text-text-secondary">
+                      <span className="material-symbols-outlined text-4xl mb-2 opacity-30">notifications_off</span>
+                      <p className="text-sm font-medium">Aucune notification</p>
+                      <p className="text-xs opacity-70 mt-1">Vous n'avez aucune notification non lue.</p>
                     </div>
-                  </Link>
-                  {/* Secure account → Settings security */}
-                  <Link
-                    href="/dashboard/settings"
-                    onClick={() => setIsNotifOpen(false)}
-                    className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle"
-                  >
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-full bg-primary-fixed/30 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-[16px]">shield</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-body-base text-body-base text-text-primary font-medium">Sécurisez votre compte</p>
-                        <p className="text-body-sm text-text-secondary mt-0.5">Activez l&apos;authentification à deux facteurs pour protéger votre compte.</p>
-                        <div className="flex items-center justify-between mt-1.5">
-                          <p className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Il y a 5 min</p>
-                          <span className="text-[11px] text-primary font-semibold flex items-center gap-1">Paramètres <span className="material-symbols-outlined text-[12px]">arrow_forward</span></span>
+                  ) : (
+                    notifications.map(notif => {
+                      const style = getNotifStyle(notif.type);
+                      return (
+                        <div key={notif.id} className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle last:border-0 relative group">
+                          <div className="flex gap-3 items-start">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${style.bg}`}>
+                              <span className="material-symbols-outlined text-[20px]">{style.icon}</span>
+                            </div>
+                            <div className="min-w-0 flex-1 pr-6">
+                              <p className="font-body-base text-body-base text-text-primary font-bold">{notif.title}</p>
+                              <p className="text-body-sm text-text-secondary mt-0.5 line-clamp-2 leading-snug">{notif.message}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <p className="text-[10px] text-text-secondary uppercase tracking-wider font-bold">{formatTimeAgo(notif.created_at)}</p>
+                              </div>
+                            </div>
+                            {/* Unread indicator */}
+                            <div className={`w-2.5 h-2.5 rounded-full shrink-0 mt-2 ${style.dot}`}></div>
+                            
+                            {/* Hover action to dismiss */}
+                            <button 
+                              onClick={() => markAsRead(notif.id)}
+                              className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 p-1.5 bg-surface-container hover:bg-border-subtle rounded-md transition-all text-text-secondary hover:text-text-primary"
+                              title="Marquer comme lu et effacer"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">check</span>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
-                    </div>
-                  </Link>
-                  {/* Generate API keys → API keys page */}
-                  <Link
-                    href="/dashboard/api-keys"
-                    onClick={() => setIsNotifOpen(false)}
-                    className="block p-4 hover:bg-surface-container-lowest transition-colors"
-                  >
-                    <div className="flex gap-3 items-start">
-                      <div className="w-8 h-8 rounded-full bg-secondary-fixed/30 flex items-center justify-center text-secondary shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-[16px]">key</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-body-base text-body-base text-text-primary font-medium">Générez vos clés API</p>
-                        <p className="text-body-sm text-text-secondary mt-0.5">Connectez votre application avec nos APIs pour accepter les paiements MonCash.</p>
-                        <div className="flex items-center justify-between mt-1.5">
-                          <p className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Il y a 10 min</p>
-                          <span className="text-[11px] text-primary font-semibold flex items-center gap-1">Clés API <span className="material-symbols-outlined text-[12px]">arrow_forward</span></span>
-                        </div>
-                      </div>
-                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2"></div>
-                    </div>
-                  </Link>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}
@@ -186,9 +208,18 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
                     <span className="material-symbols-outlined text-[18px]">account_circle</span>
                     Mon profil
                   </Link>
-                  <Link href="/dashboard/settings" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px]">credit_card</span>
-                    Plan Actuel
+                  <Link href="/dashboard/billing" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px]">credit_card</span>
+                      Plan Actuel
+                    </div>
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase">
+                      {merchant?.plan_slug === 'test_only' ? 'TEST' : (merchant?.plan_slug || 'TEST')}
+                    </span>
+                  </Link>
+                  <Link href="/dashboard/billing" className="px-3 py-2 text-xs text-primary hover:bg-primary/5 rounded-lg transition-colors flex items-center gap-2 font-medium">
+                    <span className="material-symbols-outlined text-[16px]">upgrade</span>
+                    Upgrade / Voir les plans
                   </Link>
                   <div className="h-px bg-border-subtle my-2 mx-1"></div>
                   <button 
