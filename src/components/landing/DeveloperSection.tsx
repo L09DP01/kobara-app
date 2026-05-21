@@ -57,8 +57,8 @@ export function DeveloperSection() {
             
             <ul className="space-y-4 pt-4">
               {listItems.map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-kobara-primary font-bold">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                <li key={i} className="flex items-start sm:items-center gap-3 text-kobara-primary font-bold">
+                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
                     <Check className="w-4 h-4" />
                   </div>
                   {item}
@@ -72,11 +72,11 @@ export function DeveloperSection() {
             initial={{ x: 30, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
-            className="relative"
+            className="relative w-full min-w-0"
           >
             <div className="absolute -inset-4 bg-gradient-to-tr from-kobara-orange/20 to-kobara-red/20 blur-3xl opacity-30 -z-10 rounded-[40px]" />
             
-            <div className="glass rounded-[32px] border-white overflow-hidden shadow-2xl">
+            <div className="glass rounded-[32px] border-white overflow-hidden shadow-2xl w-full">
               {/* Header */}
               <div className="bg-slate-900/80 px-6 py-4 flex items-center justify-between border-b border-white/10">
                 <div className="flex gap-2">
