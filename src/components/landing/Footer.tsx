@@ -10,9 +10,9 @@ export function Footer() {
   return (
     <footer className="py-16 sm:py-20 relative border-t border-slate-100 bg-white/50 backdrop-blur-sm">
       <div className="max-w-[1280px] mx-auto px-5 sm:px-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand Column */}
-          <div className="col-span-2 lg:col-span-2 space-y-5">
+          <div className="col-span-1 sm:col-span-2 lg:col-span-2 space-y-5">
             <Link href="/" className="flex items-center group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -24,7 +24,7 @@ export function Footer() {
             <p className="text-kobara-secondary font-medium max-w-xs leading-relaxed">
               {t("home.heroDesc")}
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               {[
                 { icon: MessageCircle, href: "#" },
                 { icon: Code2, href: "#" },
@@ -77,7 +77,7 @@ export function Footer() {
         </div>
 
         <div className="mt-16 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-slate-400 text-sm font-medium">
+          <p className="text-slate-400 text-sm font-medium text-center md:text-left">
             © {new Date().getFullYear()} Kobara. {language === "fr" ? "Tous droits réservés." : "All rights reserved."}
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-400 font-medium">
