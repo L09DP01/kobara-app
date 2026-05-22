@@ -147,64 +147,64 @@ export function DocsClient({
 
       {/* Sidebar */}
       <aside className={clsx(
-        "fixed flex flex-col z-40 bg-surface-container-lowest dark:bg-primary-container text-primary dark:text-on-primary font-body-base text-body-base docked w-[260px] left-0 top-0 bottom-0 border-r border-border-subtle dark:border-outline-variant flat transition-transform duration-300 ease-in-out md:translate-x-0 md:flex",
+        "fixed flex flex-col z-40 bg-surface-container-lowest dark:bg-primary-container text-primary dark:text-on-primary font-body-base text-body-base docked w-[280px] left-0 top-0 bottom-0 border-r border-border-subtle dark:border-outline-variant flat transition-transform duration-300 ease-in-out md:translate-x-0 md:flex shadow-2xl md:shadow-none",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Header inside Sidebar */}
-        <div className="px-6 py-8 flex justify-between items-start gap-1">
-          <div className="flex flex-col gap-1">
-            <Link href="/" className="font-bold text-xl flex items-center gap-2 text-primary dark:text-on-primary">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-sm">
-                <span className="material-symbols-outlined text-[18px]">payments</span>
-              </div>
-              Kobara <span className="text-text-secondary font-normal">Docs</span>
-            </Link>
-          </div>
+        <div className="px-6 py-6 border-b border-border-subtle/50 flex justify-between items-center">
+          <Link href="/" className="font-bold text-xl flex items-center gap-3 text-primary dark:text-on-primary">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-md shadow-primary/20">
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+            </div>
+            Kobara <span className="text-text-secondary font-normal">Docs</span>
+          </Link>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="md:hidden text-text-secondary hover:text-primary transition-colors mt-1"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-text-secondary hover:text-primary transition-colors"
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 overflow-y-auto px-2 space-y-4 mt-4">
+        <nav className="flex-1 overflow-y-auto px-2 space-y-4 py-4">
           <SidebarContent />
         </nav>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[260px] w-full md:w-[calc(100%-260px)]">
+      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px] w-full md:w-[calc(100%-280px)]">
         
         {/* Top Nav */}
-        <header className="bg-surface/80 backdrop-blur-md dark:bg-primary/80 text-primary dark:text-on-primary font-headline-md text-headline-md docked full-width top-0 sticky border-b border-border-subtle dark:border-outline-variant flat flex justify-between items-center h-20 px-container-padding z-30 transition-all duration-200 ease-in-out">
-          <div className="flex items-center gap-6">
+        <header className="bg-surface/80 backdrop-blur-xl dark:bg-primary/80 text-primary dark:text-on-primary font-headline-md text-headline-md docked full-width top-0 sticky border-b border-border-subtle dark:border-outline-variant flat flex justify-between items-center h-16 sm:h-20 px-4 sm:px-8 z-30 transition-all duration-200 ease-in-out shadow-sm md:shadow-none">
+          <div className="flex items-center gap-3 sm:gap-6">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-text-secondary hover:text-primary transition-colors"
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-surface-container hover:bg-surface-container-high text-text-primary transition-colors shadow-sm border border-border-subtle"
             >
-              <span className="material-symbols-outlined">menu</span>
+              <span className="material-symbols-outlined text-[20px]">{isMobileMenuOpen ? 'close' : 'menu_open'}</span>
             </button>
-            <div className="hidden md:flex flex-col">
-              <h2 className="font-headline-lg text-headline-lg text-text-primary tracking-tight">
-                Documentation API
+            <div className="flex flex-col">
+              <h2 className="font-headline-sm sm:font-headline-lg text-text-primary tracking-tight font-bold">
+                <span className="md:hidden">Docs API</span>
+                <span className="hidden md:inline">Documentation API</span>
               </h2>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <a href={process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app'} target="_blank" rel="noreferrer" className="hidden sm:flex text-sm text-text-secondary hover:text-text-primary items-center gap-1 transition-colors">
-              API Status <span className="w-2 h-2 rounded-full bg-status-success"></span>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <a href={process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app'} target="_blank" rel="noreferrer" className="hidden sm:flex text-sm text-text-secondary hover:text-text-primary items-center gap-1.5 transition-colors bg-surface-container px-3 py-1.5 rounded-full border border-border-subtle">
+              <span className="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+              API Status
             </a>
-            <div className="w-px h-4 bg-border-subtle hidden sm:block mx-2"></div>
+            <div className="w-px h-4 bg-border-subtle hidden sm:block mx-1"></div>
             {isAuthenticated ? (
-              <Link href="/dashboard" className="bg-surface-container hover:bg-surface-container-high text-text-primary px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 border border-border-subtle shadow-sm">
+              <Link href="/dashboard" className="bg-primary hover:bg-primary/90 text-on-primary px-3 sm:px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2 shadow-md shadow-primary/20">
                 <span className="material-symbols-outlined text-[18px]">dashboard</span>
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
             ) : (
-              <Link href="/" className="bg-surface-container hover:bg-surface-container-high text-text-primary px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 border border-border-subtle shadow-sm">
+              <Link href="/" className="bg-surface-container hover:bg-surface-container-high text-text-primary px-3 sm:px-4 py-2 rounded-xl font-semibold text-sm transition-colors flex items-center gap-2 border border-border-subtle shadow-sm">
                 <span className="material-symbols-outlined text-[18px]">home</span>
                 <span className="hidden sm:inline">Accueil</span>
               </Link>

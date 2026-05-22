@@ -27,9 +27,13 @@ export function OnboardingClient({ defaultEmail }: { defaultEmail: string }) {
     setLoading(true);
 
     try {
-      await completeOnboarding(formData);
-      router.push('/dashboard');
-      router.refresh();
+      const res = await completeOnboarding(formData);
+      if (res && res.error) {
+        setError(res.error);
+        setLoading(false);
+        return;
+      }
+      window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
       setLoading(false);

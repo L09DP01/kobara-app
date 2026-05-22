@@ -76,7 +76,12 @@ export function KycStepperClient() {
     formData.append('selfie', selfieImage);
 
     try {
-      await uploadKycDocument(formData, documentType, documentCountry, fullName);
+      const res = await uploadKycDocument(formData, documentType, documentCountry, fullName);
+      if (res && res.error) {
+        setError(res.error);
+        setLoading(false);
+        return;
+      }
       router.push('/dashboard/kyc'); // Will show pending or approved status
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue.");

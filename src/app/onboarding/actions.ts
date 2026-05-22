@@ -17,7 +17,7 @@ export async function completeOnboarding(formData: {
   const user = session?.user as any;
 
   if (!user) {
-    throw new Error("Vous devez être connecté pour finaliser votre inscription.");
+    return { error: "Vous devez être connecté pour finaliser votre inscription." };
   }
 
   const supabase = createAdminClient();
@@ -34,7 +34,7 @@ export async function completeOnboarding(formData: {
 
   if (userUpdateError) {
     console.error("Erreur mise à jour utilisateur:", userUpdateError);
-    throw new Error("Erreur lors de la mise à jour de vos informations personnelles.");
+    return { error: "Erreur lors de la mise à jour de vos informations personnelles." };
   }
 
   // 2. Generate a unique business slug
@@ -90,7 +90,7 @@ export async function completeOnboarding(formData: {
 
   if (error) {
     console.error("Erreur onboarding:", error);
-    throw new Error("Erreur lors de la configuration du profil marchand. " + error.message);
+    return { error: "Erreur lors de la configuration du profil marchand. " + error.message };
   }
 
   // 4. Generate default API keys for the merchant if they don't already exist
