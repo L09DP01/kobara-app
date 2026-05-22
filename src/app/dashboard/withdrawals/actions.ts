@@ -122,6 +122,9 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     };
   }
 
+  const fees = amount * 0.05; // 5% Kobara fee
+  const netAmount = amount - fees;
+
   const reference = `WTH-${Date.now()}`;
   let bazikResponse: any = null;
   
@@ -129,7 +132,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   if (method === 'MonCash') {
     try {
       bazikResponse = await BazikService.createWithdrawal({
-        amount: amount,
+        amount: netAmount,
         receiver: receiver!,
         reference: reference,
         description: "Retrait Kobara",
@@ -140,22 +143,27 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     }
   }
 
-  // 3. Déduction du solde de l'utilisateur
+  // 3. Déduction du solde de l'utilisateur (le total demandé)
   const newBalance = Number(merchant.available_balance) - amount;
 
-  const { error: updateError } = await supabase
+  if (newBalance < 0) {
+    // Should never happen due to the check at the top, but just in case
+    return { error: "Fonds insuffisants." };
+  }
+
+  const adminClient = createAdminClient();
+
+  const { error: updateError } = await adminClient
     .from('merchants')
     .update({ available_balance: newBalance })
     .eq('id', merchant.id);
 
   if (updateError) {
-    return { error: "Erreur critique: le transfert est passé mais le solde n'a pu être mis à jour. Veuillez contacter le support." };
+    console.error("Failed to update merchant balance:", updateError);
+    return { error: "Erreur lors de la mise à jour du solde." };
   }
 
-  const adminClient = createAdminClient();
-
   // 4. Enregistrement en base de données
-  const fees = 0; // Calculer si nécessaire
   const total = amount;
   const { error: insertError } = await adminClient
     .from('withdrawals')
@@ -163,7 +171,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       merchant_id: merchant.id,
       kobara_reference: reference,
       bazik_transaction_id: bazikResponse?.transaction_id || bazikResponse?.id || null, // from bazik
-      amount: amount,
+      amount: netAmount,
       fees: fees,
       total: total,
       wallet: receiver || merchant.phone, // fallback to merchant phone
