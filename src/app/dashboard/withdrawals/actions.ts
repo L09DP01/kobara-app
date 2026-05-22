@@ -4,6 +4,7 @@ import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
+import { canCreateWithdrawal } from "@/lib/server/access";
 
 export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, passkeyResponse?: string) {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
@@ -12,7 +13,6 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     throw new Error("Merchant not found");
   }
 
-  const { canCreateWithdrawal } = require("@/lib/server/access");
   const accessCheck = await canCreateWithdrawal(merchant.id, amount);
   if (!accessCheck.allowed) {
     if (accessCheck.reason === 'kyc_required') throw new Error("Vous devez vérifier votre compte (KYC) pour effectuer des retraits réels.");

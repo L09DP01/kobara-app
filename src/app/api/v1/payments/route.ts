@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateApiRequest } from "@/lib/server/auth/api-auth";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { apiLimiter } from "@/lib/server/security/rate-limit";
@@ -51,7 +52,6 @@ export async function POST(request: NextRequest) {
     const { amount, currency, description, successUrl, errorUrl, metadata } = validationResult.data;
 
     // Connect to Supabase
-    const { createAdminClient } = require("@/utils/supabase/admin");
     const supabase = createAdminClient();
 
     // 1. Generate a unique Kobara Reference
