@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
 
@@ -140,7 +141,6 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     throw new Error("Erreur critique: le transfert est passé mais le solde n'a pu être mis à jour. Veuillez contacter le support.");
   }
 
-  const { createAdminClient } = require("@/utils/supabase/admin");
   const adminClient = createAdminClient();
 
   // 4. Enregistrement en base de données

@@ -2,6 +2,10 @@
 
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { revalidatePath } from "next/cache";
+import { canCreateApiKey } from "@/lib/server/access";
+import { ApiKeySecurity } from "@/lib/server/security/api-keys";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { notifyApiKeyRevoked } from "@/lib/server/notifications";
 
 export async function generateApiKey(name: string, environment: 'live' | 'test' = 'test') {
   const { user, merchant, supabase } = await getCurrentUserAndMerchant();
@@ -15,7 +19,6 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
     throw new Error("Only owners and admins can generate live API keys");
   }
 
-  const { canCreateApiKey } = require("@/lib/server/access");
   const accessCheck = await canCreateApiKey(merchantId, environment);
   if (!accessCheck.allowed) {
     if (accessCheck.reason === 'kyc_required') throw new Error("Vous devez vérifier votre compte (KYC) pour créer une clé Live.");
@@ -24,11 +27,9 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
   }
 
   // Generate a random key
-  const { ApiKeySecurity } = require("@/lib/server/security/api-keys");
   const prefix = environment === 'live' ? "kbr_sk_live_" : "kbr_sk_test_";
   const { rawKey, keyHash } = ApiKeySecurity.generateKey(prefix);
 
-  const { createAdminClient } = require("@/utils/supabase/admin");
   const adminClient = createAdminClient();
 
   const { error } = await adminClient
@@ -70,7 +71,6 @@ export async function revokeApiKey(id: string) {
   }
 
   // Use admin client to bypass RLS (no DELETE policy exists on api_keys)
-  const { createAdminClient } = require("@/utils/supabase/admin");
   const adminClient = createAdminClient();
 
   const { error } = await adminClient
@@ -85,7 +85,6 @@ export async function revokeApiKey(id: string) {
   }
 
   // Send notification to merchant
-  const { notifyApiKeyRevoked } = require("@/lib/server/notifications");
   await notifyApiKeyRevoked(merchant.id, merchant.email || user.email, keyInfo.name || "Inconnue");
 
   revalidatePath('/dashboard/api-keys');

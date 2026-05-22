@@ -118,7 +118,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
     }
 
-    const { createAdminClient } = require("@/utils/supabase/admin");
     const supabase = createAdminClient();
 
     // Get search params

@@ -1,6 +1,7 @@
 'use server'
 
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
@@ -18,7 +19,6 @@ export async function createPaymentLink(formData: FormData) {
 
   const amount = amountStr ? parseFloat(amountStr) : null;
 
-  const { createAdminClient } = require("@/utils/supabase/admin");
   const adminClient = createAdminClient();
 
   const { error } = await adminClient
