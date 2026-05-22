@@ -1,3 +1,5 @@
+import nodemailer from 'nodemailer';
+
 // Module d'envoi d'e-mails pour Kobara
 // Supporte SMTP réel si configuré, avec un simulateur pro en console en développement
 
@@ -103,7 +105,6 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
 
   if (smtpHost && smtpUser && smtpPass) {
     try {
-      const nodemailer = require('nodemailer');
       const transporter = nodemailer.createTransport({
         host: smtpHost,
         port: parseInt(smtpPort || '587'),

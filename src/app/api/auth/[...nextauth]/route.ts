@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { createAdminClient } from "@/utils/supabase/admin";
 import bcrypt from "bcryptjs";
 import { signSupabaseToken } from "@/lib/server/auth/supabase-jwt";
+import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -41,8 +42,6 @@ export const authOptions: AuthOptions = {
 
         // PASSKEY AUTHENTICATION
         if (credentials.passkey_response) {
-          const { verifyAuthenticationResponse } = require('@simplewebauthn/server');
-          
           const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', user.id).maybeSingle();
           if (!merchant) throw new Error("Marchand introuvable.");
 

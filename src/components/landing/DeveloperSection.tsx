@@ -5,7 +5,8 @@ import { Terminal, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "@/context/LanguageContext";
 
-const CODE_SNIPPET = `const kobara = require('kobara-sdk')('sk_test_...');
+const CODE_SNIPPET = `import kobara from 'kobara-sdk';
+const client = kobara('sk_test_...');
 
 // Create a payment charge
 const charge = await kobara.charges.create({

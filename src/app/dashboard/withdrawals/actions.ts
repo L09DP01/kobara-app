@@ -5,6 +5,8 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
 import { canCreateWithdrawal } from "@/lib/server/access";
+import { verifyAuthenticationResponse } from '@simplewebauthn/server';
+import speakeasy from 'speakeasy';
 
 export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, passkeyResponse?: string) {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
@@ -44,7 +46,6 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   const twoFactorMethod = security.two_factor_method || 'none';
 
   if (passkeyResponse) {
-    const { verifyAuthenticationResponse } = require('@simplewebauthn/server');
     const responseBody = JSON.parse(passkeyResponse);
     const passkeys = security.passkeys || [];
     const expectedChallenge = security.auth_challenge;
@@ -82,7 +83,6 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   } else if (code2fa) {
     // If they provided a code, verify it (either TOTP, or Email OTP as fallback/primary)
     if (twoFactorMethod === 'totp') {
-      const speakeasy = require('speakeasy');
       const verified = speakeasy.totp.verify({
         secret: security.totp_secret,
         encoding: 'base32',
