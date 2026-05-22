@@ -63,6 +63,80 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
+    // Intercepter les retraits (Withdrawals)
+    if (reference.startsWith('WTH-')) {
+      const { data: withdrawal, error: fetchError } = await supabaseAdmin
+        .from('withdrawals')
+        .select('*')
+        .eq('kobara_reference', reference)
+        .single();
+
+      if (fetchError || !withdrawal) {
+        console.error(`Webhook error: Withdrawal not found for reference ${reference}`);
+        return NextResponse.json({ error: "Withdrawal not found" }, { status: 404 });
+      }
+
+      let newStatus = withdrawal.status;
+      const bazikStatus = String(status).toUpperCase();
+
+      if (bazikStatus === "SUCCESS" || bazikStatus === "COMPLETED" || bazikStatus === "SUCCESSFUL" || status === true) {
+        newStatus = "completed";
+      } else if (bazikStatus === "FAILED" || bazikStatus === "CANCELLED" || status === false) {
+        newStatus = "failed";
+      }
+
+      if (newStatus !== withdrawal.status) {
+        // Update withdrawal status
+        const { error: updateError } = await supabaseAdmin
+          .from('withdrawals')
+          .update({
+            status: newStatus,
+            bazik_transaction_id: transaction_id || withdrawal.bazik_transaction_id,
+            processed_at: newStatus === "completed" ? new Date().toISOString() : withdrawal.processed_at
+          })
+          .eq('id', withdrawal.id);
+
+        if (updateError) throw updateError;
+
+        // If withdrawal failed, refund the total amount to the merchant's balance
+        if (newStatus === "failed") {
+          const { data: merchant } = await supabaseAdmin
+            .from('merchants')
+            .select('available_balance')
+            .eq('id', withdrawal.merchant_id)
+            .single();
+
+          if (merchant) {
+            const currentBalance = Number(merchant.available_balance || 0);
+            const totalRefund = Number(withdrawal.total || 0); // They paid the total amount
+
+            await supabaseAdmin
+              .from('merchants')
+              .update({ available_balance: currentBalance + totalRefund })
+              .eq('id', withdrawal.merchant_id);
+              
+            // Create notification for failed withdrawal refund
+            await supabaseAdmin.from('notifications').insert({
+              merchant_id: withdrawal.merchant_id,
+              type: 'payment_failed',
+              title: '⚠️ Retrait échoué',
+              message: `Votre retrait de ${withdrawal.amount} HTG a échoué. Le montant a été recrédité sur votre solde.`
+            });
+          }
+        } else if (newStatus === "completed") {
+          // Create notification for successful withdrawal
+          await supabaseAdmin.from('notifications').insert({
+            merchant_id: withdrawal.merchant_id,
+            type: 'withdrawal_paid',
+            title: '💸 Retrait envoyé',
+            message: `Votre retrait de ${withdrawal.amount} HTG a été envoyé avec succès à votre compte MonCash.`
+          });
+        }
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     // Find the payment
     const { data: payment, error: fetchError } = await supabaseAdmin
       .from('payments')
