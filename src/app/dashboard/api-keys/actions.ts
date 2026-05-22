@@ -57,7 +57,7 @@ export async function revokeApiKey(id: string) {
   // Verify the key belongs to this merchant (via RLS-protected SELECT)
   const { data: keyInfo } = await supabase
     .from('api_keys')
-    .select('merchant_id')
+    .select('merchant_id, name')
     .eq('id', id)
     .single();
 
@@ -83,6 +83,10 @@ export async function revokeApiKey(id: string) {
     console.error("API Key Delete Error:", error);
     throw new Error("Failed to delete API key");
   }
+
+  // Send notification to merchant
+  const { notifyApiKeyRevoked } = require("@/lib/server/notifications");
+  await notifyApiKeyRevoked(merchant.id, merchant.email || user.email, keyInfo.name || "Inconnue");
 
   revalidatePath('/dashboard/api-keys');
 }

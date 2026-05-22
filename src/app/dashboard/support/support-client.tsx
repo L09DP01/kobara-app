@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { submitSupportTicket } from './actions';
 
 export function SupportClient({ merchant, user }: { merchant: any, user: any }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     subject: '',
-    category: '',
+    category: 'Paiements',
     message: ''
   });
 
@@ -15,16 +17,21 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
     e.preventDefault();
     setLoading(true);
     
-    // Simuler l'envoi au support
-    await new Promise(r => setTimeout(r, 1500));
+    const res = await submitSupportTicket(formData);
     
     setLoading(false);
-    setSuccess(true);
-    setFormData({ subject: '', category: '', message: '' });
     
-    setTimeout(() => {
-      setSuccess(false);
-    }, 5000);
+    if (res && res.error) {
+      toast.error(res.error);
+    } else {
+      setSuccess(true);
+      toast.success("Votre demande a bien été envoyée. Notre équipe vous répondra sous 24h.");
+      setFormData({ subject: '', category: 'Paiements', message: '' });
+      
+      setTimeout(() => {
+        setSuccess(false);
+      }, 5000);
+    }
   };
 
   return (

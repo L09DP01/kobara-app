@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { 
   updatePassword, 
@@ -11,6 +12,7 @@ import {
   disable2faAction,
   deletePasskeyAction
 } from '../actions';
+import { getActiveSessions, revokeSession } from '../sessions-actions';
 import { 
   Shield, 
   KeyRound, 
@@ -88,12 +90,20 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
     }
   };
 
-  useEffect(() => {
-    fetchFactors();
-  }, []);
+  // Sessions management state
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
 
   // Sync state if settings prop changes
   useEffect(() => {
+    fetchFactors();
+    
+    // Fetch active sessions
+    getActiveSessions().then(res => {
+      setSessions(res);
+      setSessionsLoading(false);
+    });
+
     if (settings?.security_json?.two_factor_method) {
       setDbMethod(settings.security_json.two_factor_method);
       setSelectedMethod(settings.security_json.two_factor_method);
@@ -735,6 +745,105 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
             </div>
           )}
         </div>
+      </div>
+
+      {/* Sessions Management Card */}
+      <div className="bg-surface-card rounded-xl border border-border-subtle p-6 ambient-shadow">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+              <span className="material-symbols-outlined">devices</span>
+            </div>
+            <div>
+              <h2 className="text-headline-md font-headline-md text-text-primary">Sessions Actives</h2>
+              <p className="text-body-sm text-text-secondary mt-0.5">Appareils et navigateurs actuellement connectés à votre compte.</p>
+            </div>
+          </div>
+          <button 
+            type="button"
+            onClick={() => {
+              setSessionsLoading(true);
+              getActiveSessions().then(res => {
+                setSessions(res);
+                setSessionsLoading(false);
+              });
+            }}
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-text-secondary transition-colors"
+          >
+            <span className="material-symbols-outlined text-[18px]">refresh</span>
+          </button>
+        </div>
+
+        {sessionsLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="text-center py-8 bg-surface-container-lowest rounded-xl border border-border-subtle border-dashed">
+            <p className="text-text-secondary text-sm">Aucune session active trouvée.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session: any) => {
+              // Extract device/os from user agent
+              const ua = session.user_agent || '';
+              const isMobile = ua.toLowerCase().includes('mobile');
+              let browser = "Navigateur Inconnu";
+              if (ua.includes('Chrome')) browser = "Google Chrome";
+              else if (ua.includes('Firefox')) browser = "Mozilla Firefox";
+              else if (ua.includes('Safari')) browser = "Apple Safari";
+              else if (ua.includes('Edge')) browser = "Microsoft Edge";
+              
+              let os = "OS Inconnu";
+              if (ua.includes('Windows')) os = "Windows";
+              else if (ua.includes('Mac OS')) os = "macOS";
+              else if (ua.includes('Linux')) os = "Linux";
+              else if (ua.includes('Android')) os = "Android";
+              else if (ua.includes('iOS') || ua.includes('iPhone')) os = "iOS";
+
+              // Check if it's the current session (we don't have perfect session ID matching without exposing it, so we'll just check if it's recent + same IP for a guess, or just allow revoking all)
+              // Since Next.js has its own session, we'll let them revoke any of them. If they revoke their own, they will be logged out eventually.
+
+              return (
+                <div key={session.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-surface-container-lowest border border-border-subtle rounded-xl gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-text-secondary">
+                      <span className="material-symbols-outlined text-[20px]">{isMobile ? 'smartphone' : 'computer'}</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-text-primary">{os} • {browser}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-text-secondary font-mono bg-surface-container px-1.5 py-0.5 rounded">{session.ip_address}</span>
+                        <span className="text-xs text-text-secondary">Dernière activité: {new Date(session.last_active_at).toLocaleString('fr-FR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={actionLoading}
+                    onClick={async () => {
+                      if (!confirm("Voulez-vous vraiment déconnecter cet appareil ?")) return;
+                      setActionLoading(true);
+                      try {
+                        const res = await revokeSession(session.id);
+                        if (res.error) throw new Error(res.error);
+                        setSessions(sessions.filter(s => s.id !== session.id));
+                        toast.success("Appareil déconnecté.");
+                      } catch (e: any) {
+                        toast.error(e.message || "Erreur lors de la déconnexion.");
+                      } finally {
+                        setActionLoading(false);
+                      }
+                    }}
+                    className="px-3 py-1.5 border border-border-subtle text-text-secondary hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 text-xs font-medium rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                  >
+                    Déconnecter
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

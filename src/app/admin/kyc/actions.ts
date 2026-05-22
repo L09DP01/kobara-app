@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import { approveMerchantKyc } from "@/lib/server/kyc";
+import { notifyKycSuccess } from "@/lib/server/notifications";
 
 export async function getPendingKycProfiles() {
   const supabase = createAdminClient();
@@ -30,6 +31,12 @@ export async function adminApproveKyc(profileId: string, merchantId: string) {
   }).eq('id', profileId);
 
   await approveMerchantKyc(merchantId);
+
+  // Send notification to merchant
+  const { data: merchant } = await supabase.from('merchants').select('email').eq('id', merchantId).single();
+  if (merchant?.email) {
+    await notifyKycSuccess(merchantId, merchant.email);
+  }
 }
 
 export async function adminRejectKyc(profileId: string, merchantId: string, reason: string) {

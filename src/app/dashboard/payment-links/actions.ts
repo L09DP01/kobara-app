@@ -13,7 +13,7 @@ export async function createPaymentLink(formData: FormData) {
   const description = formData.get('description') as string;
 
   if (!title) {
-    throw new Error("Le titre est requis");
+    return { error: "Le titre est requis" };
   }
 
   const amount = amountStr ? parseFloat(amountStr) : null;
@@ -32,11 +32,11 @@ export async function createPaymentLink(formData: FormData) {
 
   if (error) {
     console.error("Erreur lors de la création du lien de paiement:", error);
-    throw new Error("Erreur lors de la création du lien de paiement");
+    return { error: "Erreur lors de la création du lien de paiement: " + error.message };
   }
 
   revalidatePath('/dashboard/payment-links');
-  redirect('/dashboard/payment-links');
+  return { success: true };
 }
 
 export async function updatePaymentLink(formData: FormData) {
