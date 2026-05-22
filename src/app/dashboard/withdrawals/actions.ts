@@ -63,9 +63,9 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       expectedChallenge,
       expectedOrigin: origin,
       expectedRPID: rpID,
-      authenticator: {
-        credentialID: Buffer.from(passkey.id, 'base64url'),
-        credentialPublicKey: Buffer.from(passkey.publicKey, 'base64url'),
+      credential: {
+        id: passkey.id,
+        publicKey: Buffer.from(passkey.publicKey, 'base64url'),
         counter: passkey.counter,
         transports: passkey.transports,
       },
