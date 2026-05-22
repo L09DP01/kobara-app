@@ -345,8 +345,8 @@ export function WithdrawalsClient({
                   return (
                     <tr key={w.id} className={`hover:bg-surface-container-lowest transition-colors group border-l-4 ${cfg.border}`}>
                       <td className="py-4 px-5">
-                        <div className="text-xs text-text-secondary">{new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
-                        <div className="font-mono text-xs text-text-primary mt-0.5 truncate max-w-[160px]">{w.reference}</div>
+                        <div className="font-mono text-xs text-text-primary truncate max-w-[160px]">{w.kobara_reference}</div>
+                        <div className="text-xs text-text-secondary mt-0.5">{new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
                       </td>
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-2">
