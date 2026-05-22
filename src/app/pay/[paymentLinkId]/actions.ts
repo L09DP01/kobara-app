@@ -4,6 +4,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
+import { getMerchantCurrentPlan } from "@/lib/server/plans";
 
 export async function processPayment(formData: FormData) {
   // Use admin client to bypass RLS for public operations
@@ -20,7 +21,11 @@ export async function processPayment(formData: FormData) {
   }
 
   const amount = parseFloat(amountStr);
-  const feeAmount = parseFloat((amount * 0.029).toFixed(2));
+  
+  const { plan } = await getMerchantCurrentPlan(merchantId);
+  const feePercent = plan ? (plan.transaction_fee_percent / 100) : 0.04; // Default to 4% if no plan
+  
+  const feeAmount = parseFloat((amount * feePercent).toFixed(2));
   const netAmount = parseFloat((amount - feeAmount).toFixed(2));
 
   // 1. Find or Create Customer

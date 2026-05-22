@@ -68,8 +68,12 @@ export async function POST(request: NextRequest) {
     const bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
 
     // 3. Save pending payment to DB
-    const feeAmount = amount * 0.029; // 2.9% fee
-    const netAmount = amount - feeAmount;
+    const { getMerchantCurrentPlan } = await import('@/lib/server/plans');
+    const { plan } = await getMerchantCurrentPlan(merchantId);
+    const feePercent = plan ? (plan.transaction_fee_percent / 100) : 0.04;
+    
+    const feeAmount = parseFloat((amount * feePercent).toFixed(2));
+    const netAmount = parseFloat((amount - feeAmount).toFixed(2));
 
     const { data: payment, error: dbError } = await supabase.from('payments').insert({
       merchant_id: merchantId,
