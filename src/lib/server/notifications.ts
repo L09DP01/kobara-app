@@ -121,3 +121,25 @@ export async function notifyPasskeyAdded(merchantId: string, email: string) {
     email
   );
 }
+
+// 9. Retrait effectué avec succès
+export async function notifyWithdrawalSuccess(merchantId: string, email: string, amount: number) {
+  await createNotification(
+    merchantId,
+    'withdrawal_paid',
+    '💸 Retrait envoyé avec succès',
+    `Votre retrait de ${amount} HTG a été envoyé avec succès à votre compte MonCash.`,
+    email
+  );
+}
+
+// 10. Retrait échoué
+export async function notifyWithdrawalFailed(merchantId: string, email: string, amount: number) {
+  await createNotification(
+    merchantId,
+    'payment_failed',
+    '⚠️ Retrait échoué',
+    `Votre retrait de ${amount} HTG a échoué. Le montant a été recrédité sur votre solde disponible.`,
+    email
+  );
+}

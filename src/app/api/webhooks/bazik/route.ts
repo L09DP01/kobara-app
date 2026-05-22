@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         if (newStatus === "failed") {
           const { data: merchant } = await supabaseAdmin
             .from('merchants')
-            .select('available_balance')
+            .select('available_balance, email')
             .eq('id', withdrawal.merchant_id)
             .single();
 
@@ -115,22 +115,18 @@ export async function POST(request: NextRequest) {
               .update({ available_balance: currentBalance + totalRefund })
               .eq('id', withdrawal.merchant_id);
               
-            // Create notification for failed withdrawal refund
-            await supabaseAdmin.from('notifications').insert({
-              merchant_id: withdrawal.merchant_id,
-              type: 'payment_failed',
-              title: '⚠️ Retrait échoué',
-              message: `Votre retrait de ${withdrawal.amount} HTG a échoué. Le montant a été recrédité sur votre solde.`
-            });
+            // Create notification and email for failed withdrawal refund
+            if (merchant.email) {
+              const { notifyWithdrawalFailed } = await import("@/lib/server/notifications");
+              await notifyWithdrawalFailed(withdrawal.merchant_id, merchant.email, Number(withdrawal.amount));
+            }
           }
         } else if (newStatus === "completed") {
-          // Create notification for successful withdrawal
-          await supabaseAdmin.from('notifications').insert({
-            merchant_id: withdrawal.merchant_id,
-            type: 'withdrawal_paid',
-            title: '💸 Retrait envoyé',
-            message: `Votre retrait de ${withdrawal.amount} HTG a été envoyé avec succès à votre compte MonCash.`
-          });
+          const { data: merchantData } = await supabaseAdmin.from('merchants').select('email').eq('id', withdrawal.merchant_id).single();
+          if (merchantData?.email) {
+            const { notifyWithdrawalSuccess } = await import("@/lib/server/notifications");
+            await notifyWithdrawalSuccess(withdrawal.merchant_id, merchantData.email, Number(withdrawal.amount));
+          }
         }
       }
 
