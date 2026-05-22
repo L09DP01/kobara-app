@@ -8,158 +8,72 @@ export function WithdrawalsClient({
   withdrawals, 
   merchant,
   twoFactorMethod = 'none',
-  hasPasskey = false,
   userEmail = '',
   savedMoncashNumber = ''
 }: { 
   withdrawals: any[], 
   merchant: any,
   twoFactorMethod?: 'none' | 'email' | 'totp',
-  hasPasskey?: boolean,
   userEmail?: string,
   savedMoncashNumber?: string
 }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [step, setStep] = useState<'details' | 'otp'>('details');
   const [amount, setAmount] = useState<number | ''>('');
   const [method, setMethod] = useState('MonCash');
   const [receiver, setReceiver] = useState(savedMoncashNumber);
   const [saveNumber, setSaveNumber] = useState(false);
   const [code2fa, setCode2fa] = useState('');
-  const [isWaitingForCode, setIsWaitingForCode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [localTwoFactorMethod, setLocalTwoFactorMethod] = useState<'none' | 'email' | 'totp'>(twoFactorMethod);
-  const [localHasPasskey, setLocalHasPasskey] = useState(hasPasskey);
 
-  const handleRequest = async (e: React.FormEvent) => {
+  const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    setSuccessMsg('');
     if (!amount || Number(amount) < 100) return;
     if (method === 'MonCash' && !receiver) {
       setErrorMsg("Le numéro de réception est requis pour MonCash.");
       return;
     }
     if (Number(amount) > Number(merchant.available_balance)) {
-      setErrorMsg("votre solde est insuffisant");
+      setErrorMsg("Votre solde est insuffisant.");
       return;
     }
-    
+
     try {
       setLoading(true);
-      let passkeyResponseStr = undefined;
-
-      if (localHasPasskey && !code2fa && !isWaitingForCode) {
-        try {
-          // Trigger passkey authentication
-          const { startAuthentication } = await import('@simplewebauthn/browser');
-          const resp = await fetch('/api/auth/passkey/generate-authentication-options', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: userEmail })
-          });
-          
-          if (!resp.ok) {
-            throw new Error("Impossible d'initialiser la biométrie.");
-          }
-          
-          const options = await resp.json();
-          const assertion = await startAuthentication(options);
-          passkeyResponseStr = JSON.stringify(assertion);
-        } catch (err) {
-          console.warn("Passkey échoué ou annulé, fallback vers email:", err);
-          await sendEmailOtpAction();
-          setErrorMsg("Biométrie annulée ou indisponible. Un code a été envoyé à votre adresse email. Veuillez le saisir ci-dessous pour valider.");
-          setIsWaitingForCode(true);
-          return;
-        }
-      } else if ((localTwoFactorMethod !== 'none' || localHasPasskey) && !code2fa) {
-        if (localTwoFactorMethod === 'totp') {
-          setErrorMsg("Veuillez saisir votre code d'application (TOTP).");
-          setIsWaitingForCode(true);
-          return;
-        } else {
-          // Send email OTP
-          await sendEmailOtpAction();
-          setErrorMsg("Un code a été envoyé à votre email. Veuillez le saisir.");
-          setIsWaitingForCode(true);
-          return;
-        }
+      // For email OTP, trigger the email
+      if (twoFactorMethod === 'email' || twoFactorMethod === 'none') {
+        await sendEmailOtpAction();
       }
-      
-      const res = await requestWithdrawal(Number(amount), method, receiver, code2fa, passkeyResponseStr, saveNumber);
+      setStep('otp');
+    } catch (err: any) {
+      setErrorMsg("Impossible d'envoyer le code de vérification.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFinalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    
+    if (!code2fa) {
+      setErrorMsg("Veuillez saisir le code de sécurité.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await requestWithdrawal(Number(amount), method, receiver, code2fa, undefined, saveNumber);
       
       if (res?.error) {
-        if (res.code === "validation_required" || res.error === "validation_required" || res.error === "Une validation de sécurité (Biométrie ou Code) est requise.") {
-          const actualTwoFactorMethod = res.twoFactorMethod || localTwoFactorMethod;
-          const actualHasPasskey = res.hasPasskey !== undefined ? res.hasPasskey : localHasPasskey;
-          
-          // Update local state so UI updates
-          setLocalTwoFactorMethod(actualTwoFactorMethod);
-          setLocalHasPasskey(actualHasPasskey);
-
-          // If passkeys are available and we haven't prompted yet
-          if (actualHasPasskey && !isWaitingForCode && !code2fa) {
-            try {
-              const { startAuthentication } = await import('@simplewebauthn/browser');
-              const resp = await fetch('/api/auth/passkey/generate-authentication-options', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: userEmail })
-              });
-              
-              if (!resp.ok) {
-                throw new Error("Impossible d'initialiser la biométrie.");
-              }
-              
-              const options = await resp.json();
-              const assertion = await startAuthentication(options);
-              const passkeyResponseStr2 = JSON.stringify(assertion);
-              
-              // Retry with passkey response
-              const retryRes = await requestWithdrawal(Number(amount), method, receiver, code2fa, passkeyResponseStr2, saveNumber);
-              if (retryRes?.error) {
-                throw new Error(retryRes.error);
-              }
-              
-              // Success!
-              setIsModalOpen(false);
-              setIsWaitingForCode(false);
-              setAmount('');
-              setReceiver('');
-              setCode2fa('');
-              setSuccessMsg("Demande de retrait initiée !");
-              setTimeout(() => setSuccessMsg(''), 5000);
-              return;
-            } catch (err) {
-              console.warn("Passkey failed during retry fallback:", err);
-              // Fallback to email OTP
-              await sendEmailOtpAction();
-              setErrorMsg("Biométrie annulée ou indisponible. Un code a été envoyé à votre adresse email. Veuillez le saisir ci-dessous pour valider.");
-              setIsWaitingForCode(true);
-              return;
-            }
-          }
-
-          // Show security input field
-          if (actualTwoFactorMethod === 'totp') {
-            setErrorMsg("Veuillez saisir votre code d'application (TOTP).");
-            setIsWaitingForCode(true);
-            return;
-          } else {
-            // Send email OTP
-            await sendEmailOtpAction();
-            setErrorMsg("Un code a été envoyé à votre email. Veuillez le saisir.");
-            setIsWaitingForCode(true);
-            return;
-          }
-        }
         throw new Error(res.error);
       }
 
       setIsModalOpen(false);
-      setIsWaitingForCode(false);
+      setStep('details');
       setAmount('');
       setReceiver('');
       setCode2fa('');
@@ -171,6 +85,13 @@ export function WithdrawalsClient({
     } finally {
       setLoading(false);
     }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setStep('details');
+    setCode2fa('');
+    setErrorMsg('');
   };
 
   const totalWithdrawn = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0);
@@ -258,8 +179,14 @@ export function WithdrawalsClient({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-surface-card rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] p-5">
-              <h2 className="text-lg font-bold text-white">Initier un Retrait</h2>
-              <p className="text-white/50 text-xs mt-1">Les fonds seront envoyés sur votre compte MonCash</p>
+              <h2 className="text-lg font-bold text-white">
+                {step === 'details' ? 'Initier un Retrait' : 'Vérification de sécurité'}
+              </h2>
+              <p className="text-white/50 text-xs mt-1">
+                {step === 'details' 
+                  ? 'Les fonds seront envoyés sur votre compte MonCash' 
+                  : 'Veuillez confirmer votre identité pour valider ce retrait'}
+              </p>
             </div>
             
             <div className="p-6">
@@ -270,77 +197,95 @@ export function WithdrawalsClient({
                 </div>
               )}
               
-              <form onSubmit={handleRequest} className="space-y-4">
-                <div>
-                  <label className="block text-xs text-text-secondary font-medium mb-1.5">Montant (HTG) - Max: {merchant.available_balance}</label>
-                  <input 
-                    type="number" 
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
-                    placeholder="1000.00"
-                    max={Math.max(100, Number(merchant.available_balance || 0))}
-                    min={100}
-                    step="0.01"
-                    className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                    required
-                  />
-                  {amount && Number(amount) >= 100 && (
-                    <div className="mt-3 p-4 bg-surface-container rounded-xl border border-border-subtle space-y-2">
-                      <div className="flex justify-between text-sm text-text-secondary">
-                        <span>Montant demandé</span>
-                        <span>{Number(amount).toLocaleString('fr-FR')} HTG</span>
-                      </div>
-                      <div className="flex justify-between text-sm text-status-warning">
-                        <span>Frais appliqués (5%)</span>
-                        <span>-{(Number(amount) * 0.05).toLocaleString('fr-FR')} HTG</span>
-                      </div>
-                      <div className="flex justify-between font-semibold text-text-primary mt-2 pt-2 border-t border-border-subtle">
-                        <span>Montant net à recevoir</span>
-                        <span className="text-status-success">{(Number(amount) * 0.95).toLocaleString('fr-FR')} HTG</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-xs text-text-secondary font-medium mb-1.5">Méthode de réception</label>
-                  <select 
-                    value={method}
-                    onChange={(e) => setMethod(e.target.value)}
-                    className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                  >
-                    <option value="MonCash">MonCash</option>
-                    <option value="Sogebank" disabled>Sogebank (Bientôt)</option>
-                    <option value="Unibank" disabled>Unibank (Bientôt)</option>
-                  </select>
-                </div>
-                
-                {method === 'MonCash' && (
+              {step === 'details' ? (
+                <form onSubmit={handleInitialSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs text-text-secondary font-medium mb-1.5">Numéro de téléphone (MonCash)</label>
+                    <label className="block text-xs text-text-secondary font-medium mb-1.5">Montant (HTG) - Max: {merchant.available_balance}</label>
                     <input 
-                      type="tel" 
-                      value={receiver}
-                      onChange={(e) => setReceiver(e.target.value)}
-                      placeholder="3xxxxxxx"
-                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all mb-3"
+                      type="number" 
+                      value={amount}
+                      onChange={(e) => setAmount(Number(e.target.value))}
+                      placeholder="1000.00"
+                      max={Math.max(100, Number(merchant.available_balance || 0))}
+                      min={100}
+                      step="0.01"
+                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
                       required
                     />
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={saveNumber}
-                        onChange={(e) => setSaveNumber(e.target.checked)}
-                        className="rounded border-border-subtle text-primary focus:ring-primary/30 bg-surface-container-low w-4 h-4"
-                      />
-                      <span className="text-sm text-text-secondary">Enregistrer ce numéro pour les prochains retraits</span>
-                    </label>
+                    {amount && Number(amount) >= 100 && (
+                      <div className="mt-3 p-4 bg-surface-container rounded-xl border border-border-subtle space-y-2">
+                        <div className="flex justify-between text-sm text-text-secondary">
+                          <span>Montant demandé</span>
+                          <span>{Number(amount).toLocaleString('fr-FR')} HTG</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-status-warning">
+                          <span>Frais appliqués (5%)</span>
+                          <span>-{(Number(amount) * 0.05).toLocaleString('fr-FR')} HTG</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-text-primary mt-2 pt-2 border-t border-border-subtle">
+                          <span>Montant net à recevoir</span>
+                          <span className="text-status-success">{(Number(amount) * 0.95).toLocaleString('fr-FR')} HTG</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-
-                {(localTwoFactorMethod !== 'none' || isWaitingForCode) && (
-                  <div className="pt-2 border-t border-border-subtle">
+                  <div>
+                    <label className="block text-xs text-text-secondary font-medium mb-1.5">Méthode de réception</label>
+                    <select 
+                      value={method}
+                      onChange={(e) => setMethod(e.target.value)}
+                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    >
+                      <option value="MonCash">MonCash</option>
+                      <option value="Sogebank" disabled>Sogebank (Bientôt)</option>
+                      <option value="Unibank" disabled>Unibank (Bientôt)</option>
+                    </select>
+                  </div>
+                  
+                  {method === 'MonCash' && (
+                    <div>
+                      <label className="block text-xs text-text-secondary font-medium mb-1.5">Numéro de téléphone (MonCash)</label>
+                      <input 
+                        type="tel" 
+                        value={receiver}
+                        onChange={(e) => setReceiver(e.target.value)}
+                        placeholder="3xxxxxxx"
+                        className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all mb-3"
+                        required
+                      />
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={saveNumber}
+                          onChange={(e) => setSaveNumber(e.target.checked)}
+                          className="rounded border-border-subtle text-primary focus:ring-primary/30 bg-surface-container-low w-4 h-4"
+                        />
+                        <span className="text-sm text-text-secondary">Enregistrer ce numéro pour les prochains retraits</span>
+                      </label>
+                    </div>
+                  )}
+                  <div className="flex justify-end gap-3 pt-3">
+                    <button 
+                      type="button" 
+                      onClick={closeModal}
+                      className="px-5 py-2.5 text-text-secondary hover:bg-surface-container rounded-xl transition-colors text-sm font-medium"
+                    >
+                      Annuler
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={loading}
+                      className="px-6 py-2.5 bg-primary text-on-primary rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-sm font-semibold shadow-sm"
+                    >
+                      {loading ? 'Traitement...' : 'Continuer'}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleFinalSubmit} className="space-y-4">
+                  <div className="pt-2">
                     <label className="block text-xs text-text-secondary font-medium mb-1.5">
-                      Code de sécurité ({(localTwoFactorMethod === 'totp') ? 'App Authenticator' : 'E-mail'})
+                      Code de sécurité ({(twoFactorMethod === 'totp') ? 'App Authenticator' : 'E-mail'})
                     </label>
                     <input 
                       type="text" 
@@ -348,35 +293,33 @@ export function WithdrawalsClient({
                       onChange={(e) => setCode2fa(e.target.value.replace(/[^0-9]/g, ''))}
                       placeholder="000000"
                       maxLength={6}
-                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-center tracking-widest font-mono font-bold"
+                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-center tracking-widest font-mono font-bold text-2xl"
                       required
                     />
-                    { localTwoFactorMethod === 'email' && !code2fa && (
-                       <p className="text-[10px] text-text-secondary mt-1">Le code vous a été envoyé par email. Veuillez le saisir ci-dessus.</p>
-                    )}
-                    { localTwoFactorMethod === 'none' && isWaitingForCode && !code2fa && (
-                       <p className="text-[10px] text-text-secondary mt-1">Le code vous a été envoyé par email comme méthode de secours. Veuillez le saisir ci-dessus.</p>
+                    { (twoFactorMethod === 'email' || twoFactorMethod === 'none') && (
+                       <p className="text-xs text-text-secondary mt-3 text-center">
+                          Un code à 6 chiffres a été envoyé à <strong>{userEmail}</strong>.<br/>Veuillez le saisir ci-dessus pour valider la transaction.
+                       </p>
                     )}
                   </div>
-                )}
-
-                <div className="flex justify-end gap-3 pt-3">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-5 py-2.5 text-text-secondary hover:bg-surface-container rounded-xl transition-colors text-sm font-medium"
-                  >
-                    Annuler
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="px-6 py-2.5 bg-primary text-on-primary rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-sm font-semibold shadow-sm"
-                  >
-                    {loading ? 'Traitement...' : 'Confirmer le retrait'}
-                  </button>
-                </div>
-              </form>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <button 
+                      type="button" 
+                      onClick={() => setStep('details')}
+                      className="px-5 py-2.5 text-text-secondary hover:bg-surface-container rounded-xl transition-colors text-sm font-medium"
+                    >
+                      Retour
+                    </button>
+                    <button 
+                      type="submit" 
+                      disabled={loading}
+                      className="px-6 py-2.5 bg-primary text-on-primary rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-sm font-semibold shadow-sm"
+                    >
+                      {loading ? 'Validation...' : 'Valider le retrait'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

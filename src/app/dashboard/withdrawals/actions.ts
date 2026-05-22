@@ -5,10 +5,9 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
 import { canCreateWithdrawal } from "@/lib/server/access";
-import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import speakeasy from 'speakeasy';
 
-export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, passkeyResponse?: string, saveNumber?: boolean) {
+export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, _unused?: any, saveNumber?: boolean) {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   if (!merchant) {
@@ -45,49 +44,8 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   const security = settings?.security_json || {};
   const twoFactorMethod = security.two_factor_method || 'none';
 
-  if (passkeyResponse) {
-    const responseBody = JSON.parse(passkeyResponse);
-    const passkeys = security.passkeys || [];
-    const expectedChallenge = security.auth_challenge;
-
-    if (!expectedChallenge) return { error: "Challenge invalide ou expiré." };
-
-    const passkey = passkeys.find((pk: any) => pk.id === responseBody.id);
-    if (!passkey) return { error: "Clé biométrique introuvable." };
-
-    const { headers } = await import('next/headers');
-    const headersList = await headers();
-    const requestOrigin = headersList.get('origin');
-    const host = headersList.get('host');
-    
-    // Dynamically calculate origin and rpID based on the request to support local network testing
-    const origin = requestOrigin || (host ? `http://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
-    const rpID = host ? host.split(':')[0] : (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : 'localhost');
-
-    const verification = await verifyAuthenticationResponse({
-      response: responseBody,
-      expectedChallenge,
-      expectedOrigin: origin,
-      expectedRPID: rpID,
-      credential: {
-        id: passkey.id,
-        publicKey: Buffer.from(passkey.publicKey, 'base64url'),
-        counter: passkey.counter,
-        transports: passkey.transports,
-      },
-    });
-
-    if (!verification.verified) {
-      return { error: "Authentification biométrique échouée." };
-    }
-
-    // Update counter and clear challenge
-    passkey.counter = verification.authenticationInfo.newCounter;
-    await supabase.from('settings').update({ 
-      security_json: { ...security, passkeys, auth_challenge: null }
-    }).eq('merchant_id', merchant.id);
-  } else if (code2fa) {
-    // If they provided a code, verify it (either TOTP, or Email OTP as fallback/primary)
+  if (code2fa) {
+    // If they provided a code, verify it (either TOTP, or Email OTP)
     if (twoFactorMethod === 'totp') {
       const verified = speakeasy.totp.verify({
         secret: security.totp_secret,
@@ -99,7 +57,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
         return { error: "Le code de l'application (TOTP) est invalide." };
       }
     } else {
-      // Standard Email or Fallback Email (if Passkey failed)
+      // Standard Email
       const emailOtp = security.email_otp || {};
       if (!emailOtp.code || emailOtp.code !== code2fa) {
         return { error: "Le code de vérification email est incorrect." };
@@ -113,12 +71,11 @@ export async function requestWithdrawal(amount: number, method: string, receiver
         security_json: { ...security, email_otp: null }
       }).eq('merchant_id', merchant.id);
     }
-  } else if ((security.passkeys && security.passkeys.length > 0) || twoFactorMethod !== 'none') {
+  } else if (twoFactorMethod !== 'none') {
     return { 
-      error: "Une validation de sécurité (Biométrie ou Code) est requise.",
+      error: "Une validation de sécurité (Code) est requise.",
       code: "validation_required",
-      twoFactorMethod,
-      hasPasskey: !!(security.passkeys && security.passkeys.length > 0)
+      twoFactorMethod
     };
   }
 

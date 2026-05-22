@@ -3,15 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import { signOut } from 'next-auth/react';
+import { markNotificationAsReadAction, markAllNotificationsAsReadAction } from './actions';
 
-export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSidebar: () => void, merchant?: any, user?: any }) {
+export default function TopNav({ onToggleSidebar, merchant, user, initialNotifications = [] }: { onToggleSidebar: () => void, merchant?: any, user?: any, initialNotifications?: any[] }) {
   const router = useRouter();
-  const supabase = createClient();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>(initialNotifications);
   
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -34,31 +33,15 @@ export default function TopNav({ onToggleSidebar, merchant, user }: { onToggleSi
     await signOut({ callbackUrl: '/login' });
   };
 
-  useEffect(() => {
-    if (merchant?.id) {
-      const fetchNotifs = async () => {
-        const { data } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('merchant_id', merchant.id)
-          .eq('read', false)
-          .order('created_at', { ascending: false })
-          .limit(10);
-        if (data) setNotifications(data);
-      };
-      fetchNotifs();
-    }
-  }, [merchant?.id, supabase]);
-
   const markAsRead = async (id: string) => {
-    await supabase.from('notifications').update({ read: true }).eq('id', id);
     setNotifications(prev => prev.filter(n => n.id !== id));
+    await markNotificationAsReadAction(id);
   };
 
   const markAllAsRead = async () => {
     if (merchant?.id) {
-      await supabase.from('notifications').update({ read: true }).eq('merchant_id', merchant.id).eq('read', false);
       setNotifications([]);
+      await markAllNotificationsAsReadAction(merchant.id);
     }
   };
 

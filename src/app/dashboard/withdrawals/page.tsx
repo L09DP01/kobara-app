@@ -21,14 +21,12 @@ export default async function WithdrawalsPage() {
   const security = settings?.security_json || {};
   const generalSettings = settings?.settings_json || {};
   const twoFactorMethod = security.two_factor_method || 'none';
-  const hasPasskey = security.passkeys && security.passkeys.length > 0;
   const savedMoncashNumber = generalSettings.saved_moncash_number || '';
 
   return <WithdrawalsClient 
     withdrawals={withdrawals || []} 
     merchant={merchant} 
     twoFactorMethod={twoFactorMethod} 
-    hasPasskey={hasPasskey}
     userEmail={user.email!}
     savedMoncashNumber={savedMoncashNumber}
   />;

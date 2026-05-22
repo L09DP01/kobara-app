@@ -26,6 +26,7 @@ export default async function DashboardLayout({
 
   let merchant = null;
   let dbUser = null;
+  let notifications = [];
   const user = session?.user as any;
 
   if (user) {
@@ -38,6 +39,15 @@ export default async function DashboardLayout({
 
     if (merchantData) {
       merchant = merchantData;
+      
+      const { data: notifs } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('merchant_id', merchant.id)
+        .eq('read', false)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      notifications = notifs || [];
     }
 
     const { data: userData } = await supabase
@@ -88,7 +98,7 @@ export default async function DashboardLayout({
 
   // For public dashboard pages: render without sidebar if no merchant
   return (
-    <DashboardLayoutClient merchant={merchant ?? undefined} user={dbUser} isGuest={!merchant}>
+    <DashboardLayoutClient merchant={merchant ?? undefined} user={dbUser} isGuest={!merchant} initialNotifications={notifications}>
       {children}
     </DashboardLayoutClient>
   );

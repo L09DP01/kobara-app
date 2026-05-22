@@ -10,11 +10,13 @@ export default function DashboardLayoutClient({
   merchant,
   user,
   isGuest = false,
+  initialNotifications = [],
 }: {
   children: React.ReactNode;
   merchant?: any;
   user?: any;
   isGuest?: boolean;
+  initialNotifications?: any[];
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -67,7 +69,7 @@ export default function DashboardLayoutClient({
       )}
 
       <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[260px] w-full md:w-[calc(100%-260px)] transition-all duration-300">
-        <TopNav onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} merchant={merchant} user={user} />
+        <TopNav onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} merchant={merchant} user={user} initialNotifications={initialNotifications} />
         {merchant && merchant.kyc_status !== 'approved' && (
           <KycRequiredBanner />
         )}
