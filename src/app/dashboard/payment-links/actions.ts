@@ -18,7 +18,10 @@ export async function createPaymentLink(formData: FormData) {
 
   const amount = amountStr ? parseFloat(amountStr) : null;
 
-  const { error } = await supabase
+  const { createAdminClient } = require("@/utils/supabase/admin");
+  const adminClient = createAdminClient();
+
+  const { error } = await adminClient
     .from('payment_links')
     .insert({
       merchant_id: merchant.id,
