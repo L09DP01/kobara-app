@@ -78,12 +78,21 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     await supabase.from('settings').update({ 
       security_json: { ...security, passkeys, auth_challenge: null }
     }).eq('merchant_id', merchant.id);
-  } else if (twoFactorMethod !== 'none') {
-    if (!code2fa) {
-      throw new Error("Un code 2FA est requis pour cette opération.");
-    }
-    
-    if (twoFactorMethod === 'email') {
+  } else if (code2fa) {
+    // If they provided a code, verify it (either TOTP, or Email OTP as fallback/primary)
+    if (twoFactorMethod === 'totp') {
+      const speakeasy = require('speakeasy');
+      const verified = speakeasy.totp.verify({
+        secret: security.totp_secret,
+        encoding: 'base32',
+        token: code2fa,
+        window: 1
+      });
+      if (!verified) {
+        throw new Error("Le code de l'application (TOTP) est invalide.");
+      }
+    } else {
+      // Standard Email or Fallback Email (if Passkey failed)
       const emailOtp = security.email_otp || {};
       if (!emailOtp.code || emailOtp.code !== code2fa) {
         throw new Error("Le code de vérification email est incorrect.");
@@ -96,19 +105,9 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       await supabase.from('settings').update({
         security_json: { ...security, email_otp: null }
       }).eq('merchant_id', merchant.id);
-    } 
-    else if (twoFactorMethod === 'totp') {
-      const speakeasy = require('speakeasy');
-      const verified = speakeasy.totp.verify({
-        secret: security.totp_secret,
-        encoding: 'base32',
-        token: code2fa,
-        window: 1
-      });
-      if (!verified) {
-        throw new Error("Le code de l'application (TOTP) est invalide.");
-      }
     }
+  } else if ((security.passkeys && security.passkeys.length > 0) || twoFactorMethod !== 'none') {
+    throw new Error("Une validation de sécurité (Biométrie ou Code) est requise.");
   }
 
   const reference = `WTH-${Date.now()}`;

@@ -43,23 +43,31 @@ export function WithdrawalsClient({
       setLoading(true);
       let passkeyResponseStr = undefined;
 
-      if (hasPasskey) {
-        // Trigger passkey authentication
-        const { startAuthentication } = await import('@simplewebauthn/browser');
-        const resp = await fetch('/api/auth/passkey/generate-authentication-options', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: userEmail })
-        });
-        
-        if (!resp.ok) {
-          throw new Error("Impossible d'initialiser la biométrie.");
+      if (hasPasskey && !code2fa) {
+        try {
+          // Trigger passkey authentication
+          const { startAuthentication } = await import('@simplewebauthn/browser');
+          const resp = await fetch('/api/auth/passkey/generate-authentication-options', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: userEmail })
+          });
+          
+          if (!resp.ok) {
+            throw new Error("Impossible d'initialiser la biométrie.");
+          }
+          
+          const options = await resp.json();
+          const assertion = await startAuthentication(options);
+          passkeyResponseStr = JSON.stringify(assertion);
+        } catch (err) {
+          console.warn("Passkey échoué ou annulé, fallback vers email:", err);
+          const { sendEmailOtpAction } = await import('../settings/actions');
+          await sendEmailOtpAction();
+          setErrorMsg("Biométrie annulée ou indisponible. Un code a été envoyé à votre adresse email. Veuillez le saisir ci-dessous pour valider.");
+          return;
         }
-        
-        const options = await resp.json();
-        const assertion = await startAuthentication(options);
-        passkeyResponseStr = JSON.stringify(assertion);
-      } else if (twoFactorMethod === 'email' && !code2fa) {
+      } else if ((twoFactorMethod === 'email' || hasPasskey) && !code2fa) {
         const { sendEmailOtpAction } = await import('../settings/actions');
         await sendEmailOtpAction();
         setErrorMsg("Un code a été envoyé à votre email. Veuillez le saisir.");
