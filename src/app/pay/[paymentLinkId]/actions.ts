@@ -23,19 +23,31 @@ export async function processPayment(formData: FormData) {
   const feeAmount = parseFloat((amount * 0.029).toFixed(2));
   const netAmount = parseFloat((amount - feeAmount).toFixed(2));
 
-  // 1. Create Customer
-  const { data: customer, error: customerError } = await supabaseAdmin
+  // 1. Find or Create Customer
+  let customerId = null;
+  const { data: existingCustomer } = await supabaseAdmin
     .from('customers')
-    .insert({
-      merchant_id: merchantId,
-      name: customerName,
-      phone: customerPhone
-    })
     .select('id')
+    .eq('merchant_id', merchantId)
+    .eq('phone', customerPhone)
     .single();
 
-  // Si on n'arrive pas à insérer (à cause de RLS), on continue sans l'ID client pour l'instant
-  const customerId = customer ? customer.id : null;
+  if (existingCustomer) {
+    customerId = existingCustomer.id;
+  } else {
+    const { data: newCustomer } = await supabaseAdmin
+      .from('customers')
+      .insert({
+        merchant_id: merchantId,
+        name: customerName,
+        phone: customerPhone
+      })
+      .select('id')
+      .single();
+    if (newCustomer) {
+      customerId = newCustomer.id;
+    }
+  }
 
   // 2. Create Payment Record (Pending)
   const externalRef = crypto.randomUUID();

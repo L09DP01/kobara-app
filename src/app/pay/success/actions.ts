@@ -82,6 +82,13 @@ export async function processSuccessfulPayment(reference: string) {
     message: `Vous avez reçu un paiement de ${payment.amount} HTG de la part de ${customerName}. Référence: ${payment.kobara_reference}`
   });
 
+  // Send email notification
+  const { data: merchantData } = await supabase.from('merchants').select('email').eq('id', payment.merchant_id).single();
+  if (merchantData?.email) {
+    const { notifyNewPayment } = await import("@/lib/server/notifications");
+    await notifyNewPayment(payment.merchant_id, merchantData.email, Number(payment.amount), payment.currency || 'HTG');
+  }
+
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/payments');
 
