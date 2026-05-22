@@ -2,28 +2,35 @@
 
 import { useState } from 'react';
 import { requestWithdrawal } from './actions';
+import { sendEmailOtpAction } from '../settings/actions';
 
 export function WithdrawalsClient({ 
   withdrawals, 
   merchant,
   twoFactorMethod = 'none',
   hasPasskey = false,
-  userEmail = ''
+  userEmail = '',
+  savedMoncashNumber = ''
 }: { 
   withdrawals: any[], 
   merchant: any,
   twoFactorMethod?: 'none' | 'email' | 'totp',
   hasPasskey?: boolean,
-  userEmail?: string
+  userEmail?: string,
+  savedMoncashNumber?: string
 }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [amount, setAmount] = useState<number | ''>('');
   const [method, setMethod] = useState('MonCash');
-  const [receiver, setReceiver] = useState('');
+  const [receiver, setReceiver] = useState(savedMoncashNumber);
+  const [saveNumber, setSaveNumber] = useState(false);
   const [code2fa, setCode2fa] = useState('');
+  const [isWaitingForCode, setIsWaitingForCode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [localTwoFactorMethod, setLocalTwoFactorMethod] = useState<'none' | 'email' | 'totp'>(twoFactorMethod);
+  const [localHasPasskey, setLocalHasPasskey] = useState(hasPasskey);
 
   const handleRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +50,7 @@ export function WithdrawalsClient({
       setLoading(true);
       let passkeyResponseStr = undefined;
 
-      if (hasPasskey && !code2fa) {
+      if (localHasPasskey && !code2fa && !isWaitingForCode) {
         try {
           // Trigger passkey authentication
           const { startAuthentication } = await import('@simplewebauthn/browser');
@@ -62,20 +69,97 @@ export function WithdrawalsClient({
           passkeyResponseStr = JSON.stringify(assertion);
         } catch (err) {
           console.warn("Passkey échoué ou annulé, fallback vers email:", err);
-          const { sendEmailOtpAction } = await import('../settings/actions');
           await sendEmailOtpAction();
           setErrorMsg("Biométrie annulée ou indisponible. Un code a été envoyé à votre adresse email. Veuillez le saisir ci-dessous pour valider.");
+          setIsWaitingForCode(true);
           return;
         }
-      } else if ((twoFactorMethod === 'email' || hasPasskey) && !code2fa) {
-        const { sendEmailOtpAction } = await import('../settings/actions');
-        await sendEmailOtpAction();
-        setErrorMsg("Un code a été envoyé à votre email. Veuillez le saisir.");
-        return;
+      } else if ((localTwoFactorMethod !== 'none' || localHasPasskey) && !code2fa) {
+        if (localTwoFactorMethod === 'totp') {
+          setErrorMsg("Veuillez saisir votre code d'application (TOTP).");
+          setIsWaitingForCode(true);
+          return;
+        } else {
+          // Send email OTP
+          await sendEmailOtpAction();
+          setErrorMsg("Un code a été envoyé à votre email. Veuillez le saisir.");
+          setIsWaitingForCode(true);
+          return;
+        }
       }
       
-      await requestWithdrawal(Number(amount), method, receiver, code2fa, passkeyResponseStr);
+      const res = await requestWithdrawal(Number(amount), method, receiver, code2fa, passkeyResponseStr, saveNumber);
+      
+      if (res?.error) {
+        if (res.code === "validation_required" || res.error === "validation_required" || res.error === "Une validation de sécurité (Biométrie ou Code) est requise.") {
+          const actualTwoFactorMethod = res.twoFactorMethod || localTwoFactorMethod;
+          const actualHasPasskey = res.hasPasskey !== undefined ? res.hasPasskey : localHasPasskey;
+          
+          // Update local state so UI updates
+          setLocalTwoFactorMethod(actualTwoFactorMethod);
+          setLocalHasPasskey(actualHasPasskey);
+
+          // If passkeys are available and we haven't prompted yet
+          if (actualHasPasskey && !isWaitingForCode && !code2fa) {
+            try {
+              const { startAuthentication } = await import('@simplewebauthn/browser');
+              const resp = await fetch('/api/auth/passkey/generate-authentication-options', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: userEmail })
+              });
+              
+              if (!resp.ok) {
+                throw new Error("Impossible d'initialiser la biométrie.");
+              }
+              
+              const options = await resp.json();
+              const assertion = await startAuthentication(options);
+              const passkeyResponseStr2 = JSON.stringify(assertion);
+              
+              // Retry with passkey response
+              const retryRes = await requestWithdrawal(Number(amount), method, receiver, code2fa, passkeyResponseStr2, saveNumber);
+              if (retryRes?.error) {
+                throw new Error(retryRes.error);
+              }
+              
+              // Success!
+              setIsModalOpen(false);
+              setIsWaitingForCode(false);
+              setAmount('');
+              setReceiver('');
+              setCode2fa('');
+              setSuccessMsg("Demande de retrait initiée !");
+              setTimeout(() => setSuccessMsg(''), 5000);
+              return;
+            } catch (err) {
+              console.warn("Passkey failed during retry fallback:", err);
+              // Fallback to email OTP
+              await sendEmailOtpAction();
+              setErrorMsg("Biométrie annulée ou indisponible. Un code a été envoyé à votre adresse email. Veuillez le saisir ci-dessous pour valider.");
+              setIsWaitingForCode(true);
+              return;
+            }
+          }
+
+          // Show security input field
+          if (actualTwoFactorMethod === 'totp') {
+            setErrorMsg("Veuillez saisir votre code d'application (TOTP).");
+            setIsWaitingForCode(true);
+            return;
+          } else {
+            // Send email OTP
+            await sendEmailOtpAction();
+            setErrorMsg("Un code a été envoyé à votre email. Veuillez le saisir.");
+            setIsWaitingForCode(true);
+            return;
+          }
+        }
+        throw new Error(res.error);
+      }
+
       setIsModalOpen(false);
+      setIsWaitingForCode(false);
       setAmount('');
       setReceiver('');
       setCode2fa('');
@@ -238,16 +322,25 @@ export function WithdrawalsClient({
                       value={receiver}
                       onChange={(e) => setReceiver(e.target.value)}
                       placeholder="3xxxxxxx"
-                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all mb-3"
                       required
                     />
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={saveNumber}
+                        onChange={(e) => setSaveNumber(e.target.checked)}
+                        className="rounded border-border-subtle text-primary focus:ring-primary/30 bg-surface-container-low w-4 h-4"
+                      />
+                      <span className="text-sm text-text-secondary">Enregistrer ce numéro pour les prochains retraits</span>
+                    </label>
                   </div>
                 )}
 
-                {twoFactorMethod !== 'none' && (
+                {(localTwoFactorMethod !== 'none' || isWaitingForCode) && (
                   <div className="pt-2 border-t border-border-subtle">
                     <label className="block text-xs text-text-secondary font-medium mb-1.5">
-                      Code de sécurité ({twoFactorMethod === 'email' ? 'E-mail' : 'App Authenticator'})
+                      Code de sécurité ({(localTwoFactorMethod === 'totp') ? 'App Authenticator' : 'E-mail'})
                     </label>
                     <input 
                       type="text" 
@@ -258,8 +351,11 @@ export function WithdrawalsClient({
                       className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-center tracking-widest font-mono font-bold"
                       required
                     />
-                    {twoFactorMethod === 'email' && !code2fa && (
-                       <p className="text-[10px] text-text-secondary mt-1">Le code vous sera envoyé lors du clic sur le bouton ci-dessous.</p>
+                    { localTwoFactorMethod === 'email' && !code2fa && (
+                       <p className="text-[10px] text-text-secondary mt-1">Le code vous a été envoyé par email. Veuillez le saisir ci-dessus.</p>
+                    )}
+                    { localTwoFactorMethod === 'none' && isWaitingForCode && !code2fa && (
+                       <p className="text-[10px] text-text-secondary mt-1">Le code vous a été envoyé par email comme méthode de secours. Veuillez le saisir ci-dessus.</p>
                     )}
                   </div>
                 )}

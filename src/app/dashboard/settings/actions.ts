@@ -13,6 +13,32 @@ import {
   notifyPlanActivation 
 } from "@/lib/server/notifications";
 
+export async function updatePayoutSettings(savedMoncashNumber: string) {
+  const { merchant, supabase } = await getAuthUserAndMerchant();
+
+  const { data: currentSettings } = await supabase
+    .from('settings')
+    .select('settings_json')
+    .eq('merchant_id', merchant.id)
+    .maybeSingle();
+
+  const generalSettings = currentSettings?.settings_json || {};
+  generalSettings.saved_moncash_number = savedMoncashNumber;
+
+  const adminClient = createAdminClient();
+  const { error } = await adminClient
+    .from('settings')
+    .update({ settings_json: generalSettings })
+    .eq('merchant_id', merchant.id);
+
+  if (error) {
+    throw new Error("Erreur lors de la mise à jour des paramètres de retrait");
+  }
+
+  revalidatePath('/dashboard/settings');
+  revalidatePath('/dashboard/withdrawals');
+}
+
 export async function updateMerchantProfile(formData: {
   business_name: string;
   category: string;

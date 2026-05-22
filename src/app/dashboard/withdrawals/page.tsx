@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { WithdrawalsClient } from "./withdrawals-client";
 
@@ -12,13 +14,15 @@ export default async function WithdrawalsPage() {
 
   const { data: settings } = await supabase
     .from('settings')
-    .select('security_json')
+    .select('security_json, settings_json')
     .eq('merchant_id', merchant.id)
     .maybeSingle();
 
   const security = settings?.security_json || {};
+  const generalSettings = settings?.settings_json || {};
   const twoFactorMethod = security.two_factor_method || 'none';
   const hasPasskey = security.passkeys && security.passkeys.length > 0;
+  const savedMoncashNumber = generalSettings.saved_moncash_number || '';
 
   return <WithdrawalsClient 
     withdrawals={withdrawals || []} 
@@ -26,5 +30,6 @@ export default async function WithdrawalsPage() {
     twoFactorMethod={twoFactorMethod} 
     hasPasskey={hasPasskey}
     userEmail={user.email!}
+    savedMoncashNumber={savedMoncashNumber}
   />;
 }

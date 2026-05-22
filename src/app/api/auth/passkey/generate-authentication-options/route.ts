@@ -33,14 +33,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No passkeys registered for this user' }, { status: 400 });
     }
 
-    const rpID = process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : 'localhost';
+    const host = req.headers.get('host');
+    const rpID = host ? host.split(':')[0] : (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : 'localhost');
 
     const options = await generateAuthenticationOptions({
       rpID,
       allowCredentials: passkeys.map((pk: any) => ({
         id: pk.id,
         type: 'public-key',
-        transports: pk.transports,
+        // Omit transports to force the browser to show QR code / cross-platform options
+        // transports: pk.transports,
       })),
       userVerification: 'preferred',
     });

@@ -5,14 +5,16 @@ import { ProfileSettings } from './components/ProfileSettings';
 import { SecuritySettings } from './components/SecuritySettings';
 import { NotificationSettings } from './components/NotificationSettings';
 import { TeamSettings } from './components/TeamSettings';
+import { PayoutSettings } from './components/PayoutSettings';
 
-type Tab = 'profile' | 'security' | 'notifications' | 'team';
+type Tab = 'profile' | 'payouts' | 'security' | 'notifications' | 'team';
 
 export function SettingsClient({ user, merchant, settings, members }: { user: any, merchant: any, settings: any, members: any[] }) {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
 
   const tabs = [
     { id: 'profile', label: 'Profil Entreprise', icon: 'store', desc: 'Logo, nom, adresse' },
+    { id: 'payouts', label: 'Comptes de Retrait', icon: 'account_balance', desc: 'MonCash, banques' },
     { id: 'security', label: 'Sécurité', icon: 'shield', desc: 'Mot de passe, 2FA' },
     { id: 'notifications', label: 'Notifications', icon: 'notifications', desc: 'Email, push, alertes' },
     { id: 'team', label: "Membres d'équipe", icon: 'group', desc: 'Rôles et accès' },
@@ -60,6 +62,7 @@ export function SettingsClient({ user, merchant, settings, members }: { user: an
         {/* Settings Content Area */}
         <div className="md:col-span-3">
           {activeTab === 'profile' && <ProfileSettings user={user} merchant={merchant} />}
+          {activeTab === 'payouts' && <PayoutSettings settings={settings} />}
           {activeTab === 'security' && <SecuritySettings user={user} settings={settings} />}
           {activeTab === 'notifications' && <NotificationSettings settings={settings} />}
           {activeTab === 'team' && <TeamSettings members={members} />}

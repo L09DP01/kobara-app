@@ -8,31 +8,31 @@ import { canCreateWithdrawal } from "@/lib/server/access";
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import speakeasy from 'speakeasy';
 
-export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, passkeyResponse?: string) {
+export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, passkeyResponse?: string, saveNumber?: boolean) {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
 
   if (!merchant) {
-    throw new Error("Merchant not found");
+    return { error: "Merchant not found" };
   }
 
   const accessCheck = await canCreateWithdrawal(merchant.id, amount);
   if (!accessCheck.allowed) {
-    if (accessCheck.reason === 'kyc_required') throw new Error("Vous devez vérifier votre compte (KYC) pour effectuer des retraits réels.");
-    if (accessCheck.reason === 'plan_required') throw new Error("Vous devez avoir un plan actif pour retirer des fonds.");
-    if (accessCheck.reason === 'withdrawal_limit_reached') throw new Error("Votre limite de retrait journalière est atteinte.");
-    throw new Error("Access Denied");
+    if (accessCheck.reason === 'kyc_required') return { error: "Vous devez vérifier votre compte (KYC) pour effectuer des retraits réels." };
+    if (accessCheck.reason === 'plan_required') return { error: "Vous devez avoir un plan actif pour retirer des fonds." };
+    if (accessCheck.reason === 'withdrawal_limit_reached') return { error: "Votre limite de retrait journalière est atteinte." };
+    return { error: "Access Denied" };
   }
 
   if (amount > Number(merchant.available_balance)) {
-    throw new Error("Solde insuffisant pour ce retrait.");
+    return { error: "Solde insuffisant pour ce retrait." };
   }
 
   if (amount < 100) {
-    throw new Error("Le montant minimum est de 100 HTG.");
+    return { error: "Le montant minimum est de 100 HTG." };
   }
 
   if (method === 'MonCash' && !receiver) {
-    throw new Error("Numéro de réception requis pour MonCash.");
+    return { error: "Numéro de réception requis pour MonCash." };
   }
 
   // 2FA Verification
@@ -50,13 +50,19 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     const passkeys = security.passkeys || [];
     const expectedChallenge = security.auth_challenge;
 
-    if (!expectedChallenge) throw new Error("Challenge invalide ou expiré.");
+    if (!expectedChallenge) return { error: "Challenge invalide ou expiré." };
 
     const passkey = passkeys.find((pk: any) => pk.id === responseBody.id);
-    if (!passkey) throw new Error("Clé biométrique introuvable.");
+    if (!passkey) return { error: "Clé biométrique introuvable." };
 
-    const rpID = process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : 'localhost';
-    const origin = process.env.NEXT_PUBLIC_APP_URL || `http://${rpID}:3000`;
+    const { headers } = await import('next/headers');
+    const headersList = await headers();
+    const requestOrigin = headersList.get('origin');
+    const host = headersList.get('host');
+    
+    // Dynamically calculate origin and rpID based on the request to support local network testing
+    const origin = requestOrigin || (host ? `http://${host}` : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
+    const rpID = host ? host.split(':')[0] : (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname : 'localhost');
 
     const verification = await verifyAuthenticationResponse({
       response: responseBody,
@@ -72,7 +78,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     });
 
     if (!verification.verified) {
-      throw new Error("Authentification biométrique échouée.");
+      return { error: "Authentification biométrique échouée." };
     }
 
     // Update counter and clear challenge
@@ -90,17 +96,17 @@ export async function requestWithdrawal(amount: number, method: string, receiver
         window: 1
       });
       if (!verified) {
-        throw new Error("Le code de l'application (TOTP) est invalide.");
+        return { error: "Le code de l'application (TOTP) est invalide." };
       }
     } else {
       // Standard Email or Fallback Email (if Passkey failed)
       const emailOtp = security.email_otp || {};
       if (!emailOtp.code || emailOtp.code !== code2fa) {
-        throw new Error("Le code de vérification email est incorrect.");
+        return { error: "Le code de vérification email est incorrect." };
       }
       const expiresAt = new Date(emailOtp.expires_at).getTime();
       if (Date.now() > expiresAt) {
-        throw new Error("Le code de vérification email a expiré.");
+        return { error: "Le code de vérification email a expiré." };
       }
       // Consume the code
       await supabase.from('settings').update({
@@ -108,7 +114,12 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       }).eq('merchant_id', merchant.id);
     }
   } else if ((security.passkeys && security.passkeys.length > 0) || twoFactorMethod !== 'none') {
-    throw new Error("Une validation de sécurité (Biométrie ou Code) est requise.");
+    return { 
+      error: "Une validation de sécurité (Biométrie ou Code) est requise.",
+      code: "validation_required",
+      twoFactorMethod,
+      hasPasskey: !!(security.passkeys && security.passkeys.length > 0)
+    };
   }
 
   const reference = `WTH-${Date.now()}`;
@@ -125,7 +136,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       });
     } catch (error: any) {
       console.error("Bazik withdrawal error:", error);
-      throw new Error(`Échec du transfert MonCash: ${error.message || "Erreur interne"}`);
+      return { error: `Échec du transfert MonCash: ${error.message || "Erreur interne"}` };
     }
   }
 
@@ -138,7 +149,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     .eq('id', merchant.id);
 
   if (updateError) {
-    throw new Error("Erreur critique: le transfert est passé mais le solde n'a pu être mis à jour. Veuillez contacter le support.");
+    return { error: "Erreur critique: le transfert est passé mais le solde n'a pu être mis à jour. Veuillez contacter le support." };
   }
 
   const adminClient = createAdminClient();
@@ -151,7 +162,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     .insert({
       merchant_id: merchant.id,
       kobara_reference: reference,
-      bazik_transaction_id: bazikResponse?.id || null, // from bazik
+      bazik_transaction_id: bazikResponse?.transaction_id || bazikResponse?.id || null, // from bazik
       amount: amount,
       fees: fees,
       total: total,
@@ -162,8 +173,26 @@ export async function requestWithdrawal(amount: number, method: string, receiver
 
   if (insertError) {
     console.error("Failed to record withdrawal in DB", insertError);
-    throw new Error("Erreur lors de l'enregistrement du retrait");
+    return { error: "Erreur lors de l'enregistrement du retrait" };
+  }
+
+  if (saveNumber && method === 'MonCash' && receiver) {
+    // Fetch current settings to avoid overriding other settings
+    const { data: currentSettings } = await supabase
+      .from('settings')
+      .select('settings_json')
+      .eq('merchant_id', merchant.id)
+      .maybeSingle();
+      
+    const generalSettings = currentSettings?.settings_json || {};
+    generalSettings.saved_moncash_number = receiver;
+
+    await adminClient
+      .from('settings')
+      .update({ settings_json: generalSettings })
+      .eq('merchant_id', merchant.id);
   }
 
   revalidatePath('/dashboard/withdrawals');
+  return { success: true };
 }

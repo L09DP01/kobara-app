@@ -1,7 +1,10 @@
 const BAZIK_USER_ID = (process.env.BAZIK_USER_ID || '').trim();
 const BAZIK_SECRET_KEY = (process.env.BAZIK_SECRET_KEY || '').trim();
-const BAZIK_API_URL = (process.env.BAZIK_API_URL || 'https://api.bazik.io/v1').trim();
+const BAZIK_API_URL = (process.env.BAZIK_API_URL || '').trim();
 
+if (!BAZIK_API_URL) {
+  console.warn("WARNING: BAZIK_API_URL is not defined in environment variables!");
+}
 let cachedToken: string | null = null;
 let tokenExpiresAt: number = 0;
 
@@ -15,8 +18,8 @@ export const BazikService = {
       return cachedToken;
     }
 
-    if (!BAZIK_USER_ID || !BAZIK_SECRET_KEY) {
-      throw new Error("Missing Bazik credentials in environment variables.");
+    if (!BAZIK_USER_ID || !BAZIK_SECRET_KEY || !BAZIK_API_URL) {
+      throw new Error("Missing Bazik credentials or API URL in environment variables.");
     }
 
     // Adapté aux standards oauth2/token, typiquement POST /token
@@ -111,7 +114,7 @@ export const BazikService = {
   }) {
     const token = await this.getAccessToken();
 
-    const response = await fetch(`${BAZIK_API_URL}/transfers`, {
+    const response = await fetch(`${BAZIK_API_URL}/moncash/withdraw`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -119,10 +122,9 @@ export const BazikService = {
       },
       body: JSON.stringify({
         amount: params.amount,
-        receiver: params.receiver,
-        reference: params.reference,
+        wallet: params.receiver,
+        referenceId: params.reference,
         description: params.description || "Retrait Kobara",
-        provider: "moncash",
       }),
     });
 
