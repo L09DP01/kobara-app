@@ -1,107 +1,150 @@
 'use client'
 
-import { useState, useRef } from "react";
-import { uploadKycDocument } from "../actions";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { DocumentCapture } from "@/components/kyc/DocumentCapture";
+import { SelfieCapture } from "@/components/kyc/SelfieCapture";
+import { LivenessCheck } from "@/components/kyc/LivenessCheck";
+import { Loader2 } from "lucide-react";
+
+// For Desktop Handoff we could use a real QR code library (like qrcode.react)
+// For MVP, we'll just show a message. Ideally we'd use a package.
+import { QRCodeSVG } from 'qrcode.react';
 
 export function KycStepperClient() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const [documentType, setDocumentType] = useState('national_id');
-  const [documentCountry, setDocumentCountry] = useState('HT');
-  const [fullName, setFullName] = useState('');
-  
-  const [frontImage, setFrontImage] = useState<File | null>(null);
-  const [backImage, setBackImage] = useState<File | null>(null);
-  const [selfieImage, setSelfieImage] = useState<File | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [handoffUrl, setHandoffUrl] = useState('');
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [livenessInstruction, setLivenessInstruction] = useState("Veuillez regarder la caméra et sourire");
+  // Liveness State
+  const [livenessChallengeId, setLivenessChallengeId] = useState('');
+  const [livenessInstruction, setLivenessInstruction] = useState('');
 
-  const startCamera = async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err) {
-      setError("Impossible d'accéder à la caméra. Veuillez autoriser l'accès.");
+  useEffect(() => {
+    // Basic detection for Desktop
+    if (window.innerWidth > 1024 || !(/Mobi|Android/i.test(navigator.userAgent))) {
+      setIsDesktop(true);
+      const url = new URL(window.location.href);
+      // We pass a handoff flag if we want
+      url.searchParams.set('handoff', '1');
+      setHandoffUrl(url.toString());
+    } else {
+      setStep(1); // Start flow directly on mobile
     }
-  };
+  }, []);
 
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-  };
-
-  const captureSelfie = () => {
-    if (videoRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d')?.drawImage(video, 0, 0);
-      
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
-          setSelfieImage(file);
-          stopCamera();
-          setStep(4); // Move to review
-        }
-      }, 'image/jpeg');
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!frontImage || !selfieImage || !fullName) {
-      setError("Informations incomplètes.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
+  const uploadDocument = async (blob: Blob, side: string) => {
     const formData = new FormData();
-    formData.append('front', frontImage);
-    if (backImage) formData.append('back', backImage);
-    formData.append('selfie', selfieImage);
+    formData.append('file', blob);
+    formData.append('documentType', documentType);
+    formData.append('side', side);
 
+    const res = await fetch('/api/kyc/capture-document', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Erreur lors de l'enregistrement du document");
+    }
+  };
+
+  const uploadSelfie = async (blob: Blob) => {
+    const formData = new FormData();
+    formData.append('file', blob);
+
+    const res = await fetch('/api/kyc/capture-selfie', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Erreur lors de l'enregistrement du selfie");
+    }
+  };
+
+  const startLiveness = async () => {
+    const res = await fetch('/api/kyc/liveness/start', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erreur liveness");
+    setLivenessChallengeId(data.id);
+    setLivenessInstruction(data.instruction);
+  };
+
+  const verifyLiveness = async (frames: Blob[]) => {
+    const formData = new FormData();
+    formData.append('challengeId', livenessChallengeId);
+    frames.forEach((f, i) => formData.append(`frame_${i}`, f));
+
+    const res = await fetch('/api/kyc/liveness/verify', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Échec vérification liveness");
+  };
+
+  const submitKyc = async () => {
+    setLoading(true);
     try {
-      const res = await uploadKycDocument(formData, documentType, documentCountry, fullName);
-      if (res && res.error) {
-        setError(res.error);
-        setLoading(false);
-        return;
-      }
-      router.push('/dashboard/kyc'); // Will show pending or approved status
+      const res = await fetch('/api/kyc/submit', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur de soumission");
+      
+      router.push('/dashboard/kyc'); // Will show pending, approved or rejected status
     } catch (err: any) {
-      setError(err.message || "Une erreur est survenue.");
+      setError(err.message);
       setLoading(false);
     }
   };
 
+  const nextStep = (next: number) => {
+    setError(null);
+    setStep(next);
+  };
+
+  if (isDesktop && step === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 bg-surface-container-lowest h-full border-b border-border-subtle">
+        <span className="material-symbols-outlined text-6xl text-primary mb-6">smartphone</span>
+        <h2 className="font-headline-md text-text-primary mb-4 text-center">Continuez sur votre téléphone</h2>
+        <p className="text-body-base text-text-secondary max-w-md text-center mb-8">
+          Pour des raisons de sécurité, la vérification d'identité doit être effectuée depuis un smartphone pour utiliser la caméra arrière. 
+          Veuillez scanner ce QR code avec votre téléphone en étant connecté au même réseau WiFi.
+        </p>
+        
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-border-subtle mb-6">
+          <QRCodeSVG value={handoffUrl} size={200} />
+        </div>
+
+        <button onClick={() => { setIsDesktop(false); setStep(1); }} className="text-sm text-text-secondary underline hover:text-text-primary">
+          J'ai un ordinateur avec une bonne webcam (non recommandé)
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-surface-container-lowest max-w-2xl mx-auto w-full">
       {/* Header */}
-      <div className="bg-surface-container-lowest p-6 border-b border-border-subtle">
-        <h2 className="font-headline-md text-text-primary">Vérification d'identité - Étape {step} sur 4</h2>
-        <div className="flex gap-2 mt-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className={`h-2 flex-1 rounded-full ${step >= i ? 'bg-primary' : 'bg-surface-container-high'}`} />
+      <div className="p-6 border-b border-border-subtle">
+        <h2 className="font-headline-md text-text-primary text-center">Vérification d'identité</h2>
+        <div className="flex gap-2 mt-6">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className={`h-1.5 flex-1 rounded-full ${step >= i ? 'bg-primary' : 'bg-surface-container-high'}`} />
           ))}
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-4 sm:p-8 flex-1">
         {error && (
           <div className="mb-6 bg-error-container/20 border border-status-error/30 text-status-error p-4 rounded-xl flex items-start gap-3">
             <span className="material-symbols-outlined text-[20px] shrink-0 mt-0.5">error</span>
@@ -111,173 +154,122 @@ export function KycStepperClient() {
 
         {/* Step 1: Info */}
         {step === 1 && (
-          <div className="space-y-6">
-            <h3 className="font-headline-sm text-text-primary">Informations du document</h3>
-            <div>
-              <label className="block text-body-sm text-text-secondary mb-2">Nom complet (exactement comme sur le document)</label>
-              <input 
-                type="text" 
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder="Jean Dupont"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-body-sm text-text-secondary mb-2">Type de document</label>
-                <select 
-                  value={documentType}
-                  onChange={(e) => setDocumentType(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          <div className="space-y-6 max-w-md mx-auto">
+            <h3 className="font-headline-sm text-text-primary text-center">Type de document</h3>
+            <p className="text-body-sm text-text-secondary text-center mb-6">Préparez votre pièce d'identité officielle.</p>
+            
+            <div className="space-y-3">
+              {[
+                { id: 'national_id', label: 'Carte d\'Identité Nationale (CIN)' },
+                { id: 'passport', label: 'Passeport' },
+                { id: 'driver_license', label: 'Permis de conduire' }
+              ].map(doc => (
+                <button 
+                  key={doc.id}
+                  onClick={() => setDocumentType(doc.id)}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-colors flex items-center gap-3 ${documentType === doc.id ? 'border-primary bg-primary/5 text-primary' : 'border-border-subtle bg-surface-container-low text-text-primary hover:border-primary/50'}`}
                 >
-                  <option value="national_id">Carte d'Identité Nationale (CIN)</option>
-                  <option value="passport">Passeport</option>
-                  <option value="driver_license">Permis de conduire</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-body-sm text-text-secondary mb-2">Pays d'émission</label>
-                <select 
-                  value={documentCountry}
-                  onChange={(e) => setDocumentCountry(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="HT">Haïti</option>
-                  <option value="US">États-Unis</option>
-                  <option value="CA">Canada</option>
-                  <option value="FR">France</option>
-                  <option value="DO">Rép. Dominicaine</option>
-                </select>
-              </div>
+                  <span className="material-symbols-outlined">{doc.id === 'passport' ? 'import_contacts' : 'id_card'}</span>
+                  <span className="font-medium">{doc.label}</span>
+                </button>
+              ))}
             </div>
+
             <button 
-              onClick={() => { if(fullName) setStep(2); else setError("Veuillez entrer votre nom complet"); }}
-              className="mt-4 px-6 py-2 bg-primary text-on-primary rounded-lg font-medium hover:opacity-90 transition-opacity"
+              onClick={() => nextStep(2)}
+              className="w-full mt-6 px-6 py-3 bg-primary text-on-primary rounded-full font-medium shadow-sm hover:opacity-90 transition-opacity"
             >
-              Suivant
+              Commencer la capture
             </button>
           </div>
         )}
 
-        {/* Step 2: Documents */}
+        {/* Step 2: Document Front / Passport */}
         {step === 2 && (
           <div className="space-y-6">
-            <h3 className="font-headline-sm text-text-primary">Photos du document</h3>
-            <p className="text-body-sm text-text-secondary">Veuillez télécharger des photos claires et lisibles (Formats: JPG, PNG, WEBP, PDF - Max 5Mo).</p>
-            
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-border-subtle p-6 rounded-xl text-center bg-surface-container-lowest">
-                <span className="material-symbols-outlined text-4xl text-primary mb-2">id_card</span>
-                <p className="font-medium text-text-primary mb-2">Recto du document (Obligatoire)</p>
-                <input 
-                  type="file" 
-                  accept=".jpg,.jpeg,.png,.webp,.pdf"
-                  onChange={(e) => setFrontImage(e.target.files?.[0] || null)}
-                  className="w-full max-w-xs mx-auto block text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
-                />
-                {frontImage && <p className="text-status-success text-sm mt-2 font-medium">✓ Fichier sélectionné : {frontImage.name}</p>}
-              </div>
-
-              <div className="border-2 border-dashed border-border-subtle p-6 rounded-xl text-center bg-surface-container-lowest">
-                <span className="material-symbols-outlined text-4xl text-text-secondary mb-2">credit_card</span>
-                <p className="font-medium text-text-primary mb-2">Verso du document (Optionnel)</p>
-                <input 
-                  type="file" 
-                  accept=".jpg,.jpeg,.png,.webp,.pdf"
-                  onChange={(e) => setBackImage(e.target.files?.[0] || null)}
-                  className="w-full max-w-xs mx-auto block text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-surface-container-high file:text-text-primary hover:file:bg-surface-container-highest cursor-pointer"
-                />
-                {backImage && <p className="text-status-success text-sm mt-2 font-medium">✓ Fichier sélectionné : {backImage.name}</p>}
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <button onClick={() => setStep(1)} className="px-6 py-2 bg-surface-container-high text-text-primary rounded-lg font-medium hover:bg-surface-container-highest">Retour</button>
-              <button 
-                onClick={() => {
-                  if(!frontImage) setError("Le recto du document est obligatoire");
-                  else {
-                    setError(null);
-                    setStep(3);
-                    startCamera();
+            <DocumentCapture 
+              documentType={documentType}
+              side={documentType === 'passport' ? 'passport_page' : 'front'}
+              onCaptureComplete={async (blob) => {
+                try {
+                  await uploadDocument(blob, documentType === 'passport' ? 'passport_page' : 'front');
+                  if (documentType === 'passport') {
+                    nextStep(4); // Skip back for passport
+                  } else {
+                    nextStep(3); // Go to back capture
                   }
-                }} 
-                className="px-6 py-2 bg-primary text-on-primary rounded-lg font-medium hover:opacity-90"
-              >
-                Suivant
-              </button>
-            </div>
+                } catch (e: any) {
+                  setError(e.message);
+                }
+              }}
+            />
           </div>
         )}
 
-        {/* Step 3: Selfie & Liveness */}
-        {step === 3 && (
+        {/* Step 3: Document Back */}
+        {step === 3 && documentType !== 'passport' && (
           <div className="space-y-6">
-            <h3 className="font-headline-sm text-text-primary">Test de vivacité (Liveness) & Selfie</h3>
-            <p className="text-body-sm text-text-secondary">Assurez-vous que votre visage est bien éclairé et au centre du cadre.</p>
-            
-            <div className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 overflow-hidden relative">
-              <div className="bg-primary text-on-primary font-medium text-center py-2 px-4 rounded-lg mb-4 shadow-sm z-10 relative">
-                {livenessInstruction}
-              </div>
-              
-              <div className="relative w-full max-w-sm mx-auto aspect-[3/4] bg-black rounded-full overflow-hidden border-4 border-primary/20">
-                <video 
-                  ref={videoRef} 
-                  autoPlay 
-                  playsInline 
-                  muted 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <canvas ref={canvasRef} className="hidden" />
-            </div>
-
-            <div className="flex gap-4 justify-center">
-              <button onClick={() => { stopCamera(); setStep(2); }} className="px-6 py-2 bg-surface-container-high text-text-primary rounded-lg font-medium">Retour</button>
-              <button 
-                onClick={captureSelfie} 
-                className="px-8 py-3 bg-primary text-on-primary rounded-full font-medium shadow-md flex items-center gap-2 hover:opacity-90"
-              >
-                <span className="material-symbols-outlined">photo_camera</span>
-                Capturer
-              </button>
-            </div>
+            <DocumentCapture 
+              documentType={documentType}
+              side="back"
+              onCaptureComplete={async (blob) => {
+                try {
+                  await uploadDocument(blob, 'back');
+                  nextStep(4);
+                } catch (e: any) {
+                  setError(e.message);
+                }
+              }}
+            />
           </div>
         )}
 
-        {/* Step 4: Review */}
+        {/* Step 4: Selfie */}
         {step === 4 && (
-          <div className="space-y-6 text-center">
-            <div className="w-20 h-20 bg-status-success/10 text-status-success rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-4xl">check_circle</span>
+          <div className="space-y-6">
+            <SelfieCapture 
+              onCaptureComplete={async (blob) => {
+                try {
+                  await uploadSelfie(blob);
+                  await startLiveness();
+                  nextStep(5);
+                } catch (e: any) {
+                  setError(e.message);
+                }
+              }}
+            />
+          </div>
+        )}
+
+        {/* Step 5: Liveness */}
+        {step === 5 && (
+          <div className="space-y-6">
+            <LivenessCheck 
+              challengeId={livenessChallengeId}
+              instruction={livenessInstruction}
+              onVerifyComplete={async (frames) => {
+                try {
+                  await verifyLiveness(frames);
+                  nextStep(6);
+                  submitKyc(); // Auto submit when done
+                } catch (e: any) {
+                  setError(e.message);
+                }
+              }}
+            />
+          </div>
+        )}
+
+        {/* Step 6: Review / Submitting */}
+        {step === 6 && (
+          <div className="space-y-6 text-center py-12">
+            <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
+              <Loader2 className="w-10 h-10 animate-spin" />
             </div>
-            <h3 className="font-headline-md text-text-primary">Prêt à soumettre</h3>
-            <p className="text-body-base text-text-secondary max-w-md mx-auto">
-              Vos documents et votre selfie ont été capturés avec succès. Cliquez sur "Soumettre" pour lancer la vérification.
+            <h3 className="font-headline-md text-text-primary">Analyse en cours</h3>
+            <p className="text-body-base text-text-secondary max-w-sm mx-auto">
+              Notre système sécurisé analyse vos documents. Veuillez patienter quelques instants...
             </p>
-            
-            <div className="flex justify-center gap-4 mt-8">
-              <button onClick={() => { setSelfieImage(null); setStep(3); startCamera(); }} className="px-6 py-2 text-text-secondary underline font-medium">Refaire le selfie</button>
-              <button 
-                onClick={handleSubmit}
-                disabled={loading}
-                className="px-8 py-3 bg-primary text-on-primary rounded-lg font-medium shadow-sm hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <span className="material-symbols-outlined animate-spin">refresh</span>
-                    Analyse en cours...
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined">send</span>
-                    Soumettre la vérification
-                  </>
-                )}
-              </button>
-            </div>
           </div>
         )}
 

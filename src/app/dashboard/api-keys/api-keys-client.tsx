@@ -31,7 +31,15 @@ export function ApiKeysClient({
       setSuccess(null);
       const name = "Clé générée le " + new Date().toLocaleDateString('fr-FR');
       const result = await generateApiKey(name, environment);
-      setNewKey(result);
+      
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      
+      if (result.rawKey) {
+        setNewKey(result as { rawKey: string, name: string, environment: string });
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Erreur lors de la génération de la clé");
@@ -44,7 +52,13 @@ export function ApiKeysClient({
     if (!confirmRevokeId) return;
     try {
       setError(null);
-      await revokeApiKey(confirmRevokeId);
+      const result = await revokeApiKey(confirmRevokeId);
+      
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      
       setSuccess("La clé a été supprimée avec succès.");
       setTimeout(() => {
         setSuccess(null);

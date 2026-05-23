@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth/auth-options";
+
+const CHALLENGES = [
+  'blink_twice',
+  'turn_head_left',
+  'turn_head_right',
+  'smile'
+];
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const supabase = createAdminClient();
+    const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', session.user.id).single();
+    if (!merchant) return NextResponse.json({ error: "Marchand introuvable" }, { status: 404 });
+    const merchantId = merchant.id;
+
+    // Pick a random challenge
+    const challenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
+    
+    // Expires in 3 minutes
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 3);
+
+    // Save challenge
+    const { data: record, error } = await supabase.from('kyc_liveness_challenges').insert({
+      merchant_id: merchantId,
+      challenge_type: challenge,
+      expires_at: expiresAt.toISOString()
+    }).select('id, challenge_type').single();
+
+    if (error || !record) {
+      console.error("Liveness start error:", error);
+      return NextResponse.json({ error: "Impossible d'initialiser le défi Liveness" }, { status: 500 });
+    }
+
+    // Update kyc_profiles with this challenge ID
+    await supabase.from('kyc_profiles').update({ liveness_challenge_id: record.id }).eq('merchant_id', merchantId);
+
+    // Provide friendly instruction based on challenge
+    let instruction = '';
+    switch(challenge) {
+      case 'blink_twice': instruction = "Clignez des yeux deux fois"; break;
+      case 'turn_head_left': instruction = "Tournez la tête vers la gauche"; break;
+      case 'turn_head_right': instruction = "Tournez la tête vers la droite"; break;
+      case 'smile': instruction = "Faites un grand sourire"; break;
+    }
+
+    return NextResponse.json({ 
+      id: record.id,
+      challenge_type: record.challenge_type,
+      instruction 
+    });
+
+  } catch (error) {
+    console.error("Liveness start error:", error);
+    return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
+  }
+}
