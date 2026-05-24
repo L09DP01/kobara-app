@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Kobara",
-  description: "Integrate MonCash Payments Into Your Website, App Or Business in Haiti. Create payment links, use APIs, and manage transactions with our Fintech SaaS.",
+  description: "Integrate a modern Payment Gateway into your Website, App or Business in Haiti. Accept MonCash, create payment links, and use our developer-friendly APIs.",
   url: process.env.NEXT_PUBLIC_APP_URL || "https://kobara.app",
   ogImage: "/og.jpg",
   links: {
@@ -8,14 +8,14 @@ export const siteConfig = {
     github: "https://github.com/L09DP01/kobara-app",
   },
   keywords: [
-    "MonCash API",
-    "MonCash integration",
-    "Paiement MonCash site web",
-    "MonCash WordPress",
-    "MonCash checkout",
-    "Payment gateway Haiti",
+    "Payment Gateway Haiti",
+    "Passerelle de paiement Haïti",
+    "MonCash integration gateway",
+    "Paiement en ligne Haïti",
+    "MonCash WooCommerce gateway",
+    "API de paiement Haïti",
     "Fintech Haiti",
-    "MonCash Payment API"
+    "Kobara Payment Gateway"
   ]
 };
 

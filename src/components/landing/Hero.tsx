@@ -37,13 +37,13 @@ export function Hero() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] leading-[1.06] font-black text-kobara-primary tracking-tighter">
                 {language === "fr" ? (
                   <>
-                    L'API de Paiement MonCash<br />
-                    pour les Entreprises et<br />
+                    La Passerelle de Paiement<br />
+                    Pour Entreprises et<br />
                     Développeurs<span className="text-kobara-red">.</span>
                   </>
                 ) : (
                   <>
-                    MonCash Payment API<br />
+                    The Payment Gateway API<br />
                     For Businesses And<br />
                     Developers<span className="text-kobara-red">.</span>
                   </>
@@ -53,8 +53,8 @@ export function Hero() {
               {/* Subtext */}
               <h2 className="text-sm sm:text-base xl:text-lg text-kobara-secondary max-w-[460px] leading-relaxed font-medium mx-auto lg:mx-0">
                 {language === "fr"
-                  ? "Intégrez les paiements MonCash sur votre site web, application ou business. Acceptez des paiements en ligne, créez des liens de paiement en quelques secondes et automatisez vos encaissements en Haïti."
-                  : "Integrate MonCash payments into your website, app or business. Accept MonCash payments online, create payment links in seconds and automate your payouts in Haiti."}
+                  ? "La meilleure API de paiement en Haïti. Intégrez facilement notre passerelle sur votre site web pour accepter MonCash. Créez des liens de paiement et automatisez vos encaissements."
+                  : "The best payment gateway API in Haiti. Easily integrate our gateway into your website to accept MonCash. Create payment links in seconds and automate your payouts."}
               </h2>
 
               {/* CTA Buttons */}
