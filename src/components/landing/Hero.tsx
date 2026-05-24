@@ -37,25 +37,25 @@ export function Hero() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] leading-[1.06] font-black text-kobara-primary tracking-tighter">
                 {language === "fr" ? (
                   <>
-                    Construisez, Lancez Et<br />
-                    Gérez Les Paiements<br />
-                    MonCash À Grande Échelle<span className="text-kobara-red">.</span>
+                    L'API de Paiement MonCash<br />
+                    pour les Entreprises et<br />
+                    Développeurs<span className="text-kobara-red">.</span>
                   </>
                 ) : (
                   <>
-                    Build, Launch And<br />
-                    Manage MonCash<br />
-                    Payments At Scale<span className="text-kobara-red">.</span>
+                    MonCash Payment API<br />
+                    For Businesses And<br />
+                    Developers<span className="text-kobara-red">.</span>
                   </>
                 )}
               </h1>
 
               {/* Subtext */}
-              <p className="text-sm sm:text-base xl:text-lg text-kobara-secondary max-w-[460px] leading-relaxed font-medium mx-auto lg:mx-0">
+              <h2 className="text-sm sm:text-base xl:text-lg text-kobara-secondary max-w-[460px] leading-relaxed font-medium mx-auto lg:mx-0">
                 {language === "fr"
-                  ? "Tout ce dont vous avez besoin pour accepter des paiements, automatiser les retraits et développer votre business avec Kobara. APIs pensées pour les développeurs, checkout hébergé, liens de paiement et webhooks en temps réel pour le commerce haïtien moderne."
-                  : "Everything you need to accept payments, automate payouts and grow your business with Kobara. Developer-first APIs, hosted checkout, payment links and real-time webhooks for modern Haitian commerce."}
-              </p>
+                  ? "Intégrez les paiements MonCash sur votre site web, application ou business. Acceptez des paiements en ligne, créez des liens de paiement en quelques secondes et automatisez vos encaissements en Haïti."
+                  : "Integrate MonCash payments into your website, app or business. Accept MonCash payments online, create payment links in seconds and automate your payouts in Haiti."}
+              </h2>
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 w-full">
