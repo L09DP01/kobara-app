@@ -10,9 +10,9 @@ export default async function AdminKYCPage() {
     .from('kyc_profiles')
     .select(`
       *,
-      merchants ( id, business_name, email )
+      merchants!inner ( id, business_name, email, kyc_status )
     `)
-    .eq('status', 'in_review')
+    .eq('merchants.kyc_status', 'in_review')
     .order('created_at', { ascending: false });
 
   async function approveKYC(formData: FormData) {
