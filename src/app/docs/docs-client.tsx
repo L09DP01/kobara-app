@@ -148,10 +148,10 @@ export function DocsClient({
       </aside>
 
       {/* Main Content Area (adjusted for left sidebar AND right AI sidebar) */}
-      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px] lg:mr-[340px] w-full md:w-[calc(100%-280px)] lg:w-[calc(100%-280px-340px)] relative">
+      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px] lg:mr-[450px] w-full md:w-[calc(100%-280px)] lg:w-[calc(100%-280px-450px)] relative">
         
-        {/* Top Nav */}
-        <header className="bg-surface/80 backdrop-blur-xl border-b border-border-subtle sticky top-0 flex justify-between items-center h-16 sm:h-20 px-4 sm:px-8 z-20 transition-all duration-200">
+        {/* Top Nav (now spans full remaining width, above AI Assistant) */}
+        <header className="bg-surface/80 backdrop-blur-xl border-b border-border-subtle fixed top-0 right-0 w-full md:w-[calc(100%-280px)] flex justify-between items-center h-16 sm:h-20 px-4 sm:px-8 z-40 transition-all duration-200">
           <div className="flex items-center gap-3 sm:gap-6">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -188,7 +188,7 @@ export function DocsClient({
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-container-padding flex flex-col gap-6 max-w-[840px] mx-auto w-full py-8 min-w-0">
+        <main className="flex-1 p-container-padding flex flex-col gap-6 max-w-[840px] mx-auto w-full pt-24 sm:pt-28 pb-8 min-w-0">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]} 
             rehypePlugins={[rehypeSlug]}

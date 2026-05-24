@@ -112,8 +112,8 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
     return <code className="bg-surface-container px-1.5 py-0.5 rounded text-[13px] text-primary font-mono" {...props}>{children}</code>;
   };
 
-  // UI du Chat (Réutilisable Desktop/Mobile)
-  const ChatInterface = () => (
+  // UI du Chat (Réutilisable Desktop/Mobile) - Défini comme JSX, pas comme un composant pour éviter la perte de focus
+  const chatInterfaceNode = (
     <div className="flex flex-col h-full bg-surface-container-lowest dark:bg-surface-container-lowest border-l border-border-subtle dark:border-outline-variant shadow-2xl">
       {/* Header */}
       <div className="px-4 py-3 flex items-center justify-between border-b border-border-subtle bg-surface-container/50">
@@ -136,7 +136,7 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
-        {messages.map(m => (
+        {messages.map((m: any) => (
           <div key={m.id} className={clsx("flex gap-3", m.role === 'user' ? "flex-row-reverse" : "")}>
             <div className={clsx(
               "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
@@ -219,9 +219,9 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
 
   return (
     <>
-      {/* --- DESKTOP (Fixe à droite) --- */}
-      <aside className="hidden lg:block fixed right-0 top-0 bottom-0 w-[340px] z-30 transform transition-transform">
-        <ChatInterface />
+      {/* --- DESKTOP (Fixe à droite sous le header) --- */}
+      <aside className="hidden lg:block fixed right-0 top-16 sm:top-20 bottom-0 w-[450px] z-30 transform transition-transform">
+        {chatInterfaceNode}
       </aside>
 
       {/* --- MOBILE (Bouton flottant + Drawer) --- */}
@@ -264,7 +264,7 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
                   <div className="w-12 h-1.5 bg-border-subtle rounded-full" />
                 </div>
                 <div className="flex-1 mt-3">
-                  <ChatInterface />
+                  {chatInterfaceNode}
                 </div>
               </motion.div>
             </>
