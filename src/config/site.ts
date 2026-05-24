@@ -10,9 +10,13 @@ export const siteConfig = {
   keywords: [
     "Payment Gateway Haiti",
     "Passerelle de paiement Haïti",
-    "MonCash integration gateway",
+    "MonCash API",
+    "MonCash integration",
+    "Paiement MonCash site web",
+    "MonCash WordPress",
+    "MonCash checkout",
+    "MonCash Payment API",
     "Paiement en ligne Haïti",
-    "MonCash WooCommerce gateway",
     "API de paiement Haïti",
     "Fintech Haiti",
     "Kobara Payment Gateway"
