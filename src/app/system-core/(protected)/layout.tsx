@@ -29,7 +29,7 @@ export default function SystemCoreLayout({ children }: { children: React.ReactNo
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-mono selection:bg-red-500/30">
+    <div className="fixed inset-0 bg-slate-950 text-slate-100 flex font-mono selection:bg-red-500/30">
       <AdminSessionManager>
         {/* Sidebar */}
         <aside className="w-64 border-r border-slate-800 bg-slate-900/50 backdrop-blur-xl flex flex-col hidden md:flex">
