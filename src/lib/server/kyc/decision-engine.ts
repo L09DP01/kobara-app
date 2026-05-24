@@ -68,13 +68,17 @@ export function decideKycStatus(signals: KycSignals): KycDecision {
   if (signals.risk_score >= 60) { needsReview = true; reasons.push("Score de risque élevé"); }
   
   if (signals.gemini_review) {
+    if (signals.gemini_review.recommended_status === 'rejected') {
+      reasons.push(`Rejet recommandé par l'assistant IA: document invalide ou fraude détectée`);
+      return { status: 'rejected', score: 0, reasons };
+    }
     if (signals.gemini_review.risk_level === 'high' || signals.gemini_review.risk_level === 'critical') {
       needsReview = true; 
       reasons.push(`Risque ${signals.gemini_review.risk_level} signalé par l'assistant IA`);
     }
-    if (signals.gemini_review.recommended_status === 'in_review' || signals.gemini_review.recommended_status === 'rejected') {
+    if (signals.gemini_review.recommended_status === 'in_review') {
       needsReview = true;
-      reasons.push(`Statut ${signals.gemini_review.recommended_status} recommandé par l'assistant IA`);
+      reasons.push(`Examen manuel recommandé par l'assistant IA`);
     }
   }
 
