@@ -7,6 +7,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
 
+import { DocsAIAssistant } from '@/components/docs/DocsAIAssistant';
+
 export function DocsClient({ 
   testPublicKey, 
   testSecretKey,
@@ -47,6 +49,7 @@ export function DocsClient({
     <div className="py-6 space-y-8">
       <div className="flex flex-col gap-1">
         <h3 className="text-[11px] font-bold uppercase tracking-wider text-text-secondary px-4 mb-2">Getting Started</h3>
+        <NavItem id="quickstart" label="Quickstart" />
         <NavItem id="api-keys" label="API Keys" />
         <NavItem id="authentication" label="Authentication" />
       </div>
@@ -67,12 +70,12 @@ export function DocsClient({
 
       <div className="flex flex-col gap-1">
         <h3 className="text-[11px] font-bold uppercase tracking-wider text-text-secondary px-4 mb-2">Core API</h3>
-        <NavItem id="payments-api" label="Payments" />
-        <NavItem id="payment-links-api" label="Payment Links" />
+        <NavItem id="payments" label="Payments" />
+        <NavItem id="payment-links" label="Payment Links" />
         <NavItem id="webhooks" label="Webhooks" />
-        <NavItem id="withdrawals-api" label="Withdrawals" />
-        <NavItem id="metadata-expansion" label="Metadata & Expansion" />
-        <NavItem id="errors-api" label="Errors" />
+        <NavItem id="withdrawals" label="Withdrawals" />
+        <NavItem id="metadata" label="Metadata & Expansion" />
+        <NavItem id="errors" label="Errors" />
       </div>
     </div>
   );
@@ -89,7 +92,7 @@ export function DocsClient({
               <div className="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
               <div className="w-3 h-3 rounded-full bg-[#27C93F]"></div>
             </div>
-            <span className="text-white/40 text-[11px] font-mono-code ml-1 font-medium tracking-wider uppercase">{displayTitle}</span>
+            <span className="text-white/40 text-[11px] font-mono ml-1 font-medium tracking-wider uppercase">{displayTitle}</span>
           </div>
           <button 
             onClick={() => navigator.clipboard.writeText(code)}
@@ -99,7 +102,7 @@ export function DocsClient({
             <span className="material-symbols-outlined text-[16px]">content_copy</span>
           </button>
         </div>
-        <pre className="p-5 text-[13px] font-mono-code text-white/90 overflow-x-auto leading-relaxed">
+        <pre className="p-5 text-[13px] font-mono text-white/90 overflow-x-auto leading-relaxed">
           <code>{code}</code>
         </pre>
       </div>
@@ -107,24 +110,24 @@ export function DocsClient({
   };
 
   return (
-    <div className="bg-background-main font-body-base text-body-base text-on-surface antialiased min-h-screen flex selection:bg-primary/20">
+    <div className="bg-background-main font-body text-text-primary antialiased min-h-screen flex selection:bg-primary/20">
       
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden" 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" 
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={clsx(
-        "fixed flex flex-col z-40 bg-surface-container-lowest dark:bg-primary-container text-primary dark:text-on-primary font-body-base text-body-base docked w-[280px] left-0 top-0 bottom-0 border-r border-border-subtle dark:border-outline-variant flat transition-transform duration-300 ease-in-out md:translate-x-0 md:flex shadow-2xl md:shadow-none",
+        "fixed flex flex-col z-40 bg-surface-container-lowest dark:bg-surface-container-lowest text-text-primary font-body w-[280px] left-0 top-0 bottom-0 border-r border-border-subtle transition-transform duration-300 ease-in-out md:translate-x-0 md:flex shadow-2xl md:shadow-none",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Header inside Sidebar */}
-        <div className="px-6 py-6 border-b border-border-subtle/50 flex justify-between items-center">
-          <Link href="/" className="font-bold text-xl flex items-center gap-3 text-primary dark:text-on-primary">
+        <div className="px-6 py-6 border-b border-border-subtle flex justify-between items-center bg-surface-container-lowest">
+          <Link href="/" className="font-bold text-xl flex items-center gap-3 text-text-primary">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white shadow-md shadow-primary/20">
               <span className="material-symbols-outlined text-[18px]">payments</span>
             </div>
@@ -132,23 +135,23 @@ export function DocsClient({
           </Link>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-text-secondary hover:text-primary transition-colors"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-full bg-surface-container-high text-text-secondary hover:text-text-primary transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 overflow-y-auto px-2 space-y-4 py-4">
+        <nav className="flex-1 overflow-y-auto px-2 space-y-4 py-4 scrollbar-thin">
           <SidebarContent />
         </nav>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px] w-full md:w-[calc(100%-280px)]">
+      {/* Main Content Area (adjusted for left sidebar AND right AI sidebar) */}
+      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px] lg:mr-[340px] w-full md:w-[calc(100%-280px)] lg:w-[calc(100%-280px-340px)] relative">
         
         {/* Top Nav */}
-        <header className="bg-surface/80 backdrop-blur-xl dark:bg-primary/80 text-primary dark:text-on-primary font-headline-md text-headline-md docked full-width top-0 sticky border-b border-border-subtle dark:border-outline-variant flat flex justify-between items-center h-16 sm:h-20 px-4 sm:px-8 z-30 transition-all duration-200 ease-in-out shadow-sm md:shadow-none">
+        <header className="bg-surface/80 backdrop-blur-xl border-b border-border-subtle sticky top-0 flex justify-between items-center h-16 sm:h-20 px-4 sm:px-8 z-20 transition-all duration-200">
           <div className="flex items-center gap-3 sm:gap-6">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -224,6 +227,9 @@ export function DocsClient({
           </ReactMarkdown>
         </main>
       </div>
+
+      {/* Docs AI Assistant Panel */}
+      <DocsAIAssistant currentSlug={currentSlug} />
     </div>
   );
 }

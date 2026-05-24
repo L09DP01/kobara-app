@@ -11,6 +11,8 @@
     "verify-api-contracts": "node scripts/verify-api-contracts.js"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.79",
+    "@ai-sdk/react": "^3.0.193",
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@base-ui/react": "^1.4.1",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -24,11 +26,12 @@
     "@tailwindcss/forms": "^0.5.11",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
+    "ai": "^6.0.191",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.2.1",
-    "framer-motion": "^12.38.0",
+    "framer-motion": "^12.40.0",
     "jose": "^6.2.3",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.16.0",
