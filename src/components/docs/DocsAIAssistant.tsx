@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Bot, User, Send, Copy, Check, X, TerminalSquare, Loader2, Sparkles } from 'lucide-react';
+import { Bot, User, Send, Copy, Check, X, TerminalSquare, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -15,13 +15,23 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<any[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: 'Bonjour ! Je suis l\'assistant IA de Kobara. Comment puis-je vous aider avec votre intégration aujourd\'hui ? (ex: "Comment créer un paiement", "Valider mon code", etc.)'
+  const [messages, setMessages] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('kobara_docs_chat_history');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
     }
-  ]);
+    return [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: 'Bonjour ! Je suis l\'assistant IA de Kobara. Comment puis-je vous aider avec votre intégration aujourd\'hui ? (ex: "Comment créer un paiement", "Valider mon code", etc.)'
+      }
+    ];
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value);
 
@@ -78,7 +88,24 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
 
   useEffect(() => {
     scrollToBottom();
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('kobara_docs_chat_history', JSON.stringify(messages));
+    }
   }, [messages]);
+
+  const clearChat = () => {
+    const init = [
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: 'Bonjour ! Je suis l\'assistant IA de Kobara. Comment puis-je vous aider avec votre intégration aujourd\'hui ? (ex: "Comment créer un paiement", "Valider mon code", etc.)'
+      }
+    ];
+    setMessages(init);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('kobara_docs_chat_history');
+    }
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -126,12 +153,23 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
             <p className="text-[11px] text-text-secondary leading-none">Assistant Intégration</p>
           </div>
         </div>
-        <button 
-          onClick={() => setIsOpenMobile(false)}
-          className="md:hidden p-2 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-container"
-        >
-          <X size={18} />
-        </button>
+        <div className="flex items-center gap-1">
+          {messages.length > 1 && (
+            <button 
+              onClick={clearChat}
+              title="Effacer la conversation"
+              className="p-2 text-text-secondary hover:text-status-error rounded-full hover:bg-status-error/10 transition-colors"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+          <button 
+            onClick={() => setIsOpenMobile(false)}
+            className="md:hidden p-2 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-container transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
