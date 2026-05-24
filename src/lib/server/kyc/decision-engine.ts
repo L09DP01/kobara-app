@@ -69,16 +69,16 @@ export function decideKycStatus(signals: KycSignals): KycDecision {
   
   if (signals.gemini_review) {
     if (signals.gemini_review.recommended_status === 'rejected') {
-      reasons.push(`Rejet recommandé par l'assistant IA: document invalide ou fraude détectée`);
+      reasons.push(`Les documents fournis sont invalides, illisibles ou ne correspondent pas à une pièce d'identité officielle.`);
       return { status: 'rejected', score: 0, reasons };
     }
     if (signals.gemini_review.risk_level === 'high' || signals.gemini_review.risk_level === 'critical') {
       needsReview = true; 
-      reasons.push(`Risque ${signals.gemini_review.risk_level} signalé par l'assistant IA`);
+      reasons.push(`Risque ${signals.gemini_review.risk_level} signalé lors de l'analyse automatique`);
     }
     if (signals.gemini_review.recommended_status === 'in_review') {
       needsReview = true;
-      reasons.push(`Examen manuel recommandé par l'assistant IA`);
+      reasons.push(`Vérification manuelle requise suite à l'analyse automatique`);
     }
   }
 
