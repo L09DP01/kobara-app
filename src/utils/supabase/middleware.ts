@@ -35,7 +35,8 @@ export async function updateSession(request: NextRequest) {
     '/terms',
     '/privacy',
     '/onboarding',
-    '/kyc/mobile'
+    '/kyc/mobile',
+    '/system-core'
   ];
 
   const pathname = request.nextUrl.pathname;
@@ -51,12 +52,57 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect logged in users away from auth pages
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
   if (isAuthPage && userLoggedIn) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);
+  }
+
+  // -------------------------------------------------------------
+  // SUPER ADMIN SECURITY
+  // -------------------------------------------------------------
+  if (pathname.startsWith('/system-core') && !pathname.startsWith('/system-core/login')) {
+    const adminToken = request.cookies.get('kbr_admin_token')?.value;
+    
+    if (!adminToken) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/system-core/login';
+      return NextResponse.redirect(url);
+    }
+
+    try {
+      // Decode JWT without library inside Edge if necessary, but we have jose.
+      // We will do a simple expiration check here or rely on jose if imported.
+      // Since jose is imported at the top? We need to import jwtVerify. Let's do it dynamically or import it at top.
+      const { jwtVerify } = await import('jose');
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'fallback_secret_kobara_admin_2026');
+      const { payload } = await jwtVerify(adminToken, secret);
+      
+      if (payload.role !== 'superadmin') throw new Error('Invalid role');
+    } catch (e) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/system-core/login';
+      const response = NextResponse.redirect(url);
+      response.cookies.delete('kbr_admin_token');
+      return response;
+    }
+  }
+
+  if (pathname === '/system-core/login') {
+    const adminToken = request.cookies.get('kbr_admin_token')?.value;
+    if (adminToken) {
+      try {
+        const { jwtVerify } = await import('jose');
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'fallback_secret_kobara_admin_2026');
+        await jwtVerify(adminToken, secret);
+        const url = request.nextUrl.clone();
+        url.pathname = '/system-core/dashboard';
+        return NextResponse.redirect(url);
+      } catch (e) {
+        // invalid token, just let them see login page
+      }
+    }
   }
 
   return supabaseResponse;
