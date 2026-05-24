@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth-options";
+import { getKycMerchantId } from "@/lib/server/auth/handoff-auth";
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions) as any;
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { merchantId, error: authError } = await getKycMerchantId(request);
+    if (authError || !merchantId) {
+      return NextResponse.json({ error: authError || "Unauthorized" }, { status: 401 });
     }
 
     const formData = await request.formData();

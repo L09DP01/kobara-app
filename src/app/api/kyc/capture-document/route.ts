@@ -3,14 +3,14 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import crypto from 'crypto';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
+import { getKycMerchantId } from "@/lib/server/auth/handoff-auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions) as any;
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { merchantId, error: authError } = await getKycMerchantId(request);
+    if (authError || !merchantId) {
+      return NextResponse.json({ error: authError || "Unauthorized" }, { status: 401 });
     }
-    const userId = session.user.id;
 
     const formData = await request.formData();
     const file = formData.get("file") as Blob;
@@ -32,10 +32,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // Get merchant ID
-    const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', userId).single();
-    if (!merchant) return NextResponse.json({ error: "Marchand introuvable" }, { status: 404 });
-    const merchantId = merchant.id;
+    // Merchant ID is already provided by getKycMerchantId
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const hash = crypto.createHash('sha256').update(buffer).digest('hex');

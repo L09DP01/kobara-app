@@ -1,73 +1,23 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { DocumentCapture } from "@/components/kyc/DocumentCapture";
 import { SelfieCapture } from "@/components/kyc/SelfieCapture";
 import { LivenessCheck } from "@/components/kyc/LivenessCheck";
 import { Loader2 } from "lucide-react";
 
-// For Desktop Handoff we could use a real QR code library (like qrcode.react)
-// For MVP, we'll just show a message. Ideally we'd use a package.
-import { QRCodeSVG } from 'qrcode.react';
-
-import { generateHandoffToken, checkHandoffStatus } from "./actions";
-
-export function KycStepperClient() {
-  const [step, setStep] = useState(0);
+export function MobileStepperClient({ token }: { token: string }) {
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const [documentType, setDocumentType] = useState('national_id');
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [handoffUrl, setHandoffUrl] = useState('');
 
   // Liveness State
   const [livenessChallengeId, setLivenessChallengeId] = useState('');
   const [livenessInstruction, setLivenessInstruction] = useState('');
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    const setupHandoff = async () => {
-      // Basic detection for Desktop
-      if (window.innerWidth > 1024 || !(/Mobi|Android/i.test(navigator.userAgent))) {
-        setIsDesktop(true);
-        const { token, error } = await generateHandoffToken();
-        if (error || !token) {
-          setError(error || "Erreur de génération du lien");
-          return;
-        }
-
-        const url = new URL(window.location.origin + `/kyc/mobile/${token}`);
-        setHandoffUrl(url.toString());
-
-        // Polling
-        intervalId = setInterval(async () => {
-          const status = await checkHandoffStatus();
-          if (status.expired) {
-            setError("Le code QR a expiré. Veuillez recharger la page.");
-            clearInterval(intervalId);
-          } else if (status.completed) {
-            clearInterval(intervalId);
-            setIsDesktop(false);
-            setStep(6);
-            submitKyc();
-          }
-        }, 3000);
-
-      } else {
-        setStep(1); // Start flow directly on mobile
-      }
-    };
-
-    setupHandoff();
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, []);
+  const headers = { 'Authorization': `Bearer ${token}` };
 
   const uploadDocument = async (blob: Blob, side: string) => {
     const formData = new FormData();
@@ -77,6 +27,7 @@ export function KycStepperClient() {
 
     const res = await fetch('/api/kyc/capture-document', {
       method: 'POST',
+      headers,
       body: formData
     });
 
@@ -92,6 +43,7 @@ export function KycStepperClient() {
 
     const res = await fetch('/api/kyc/capture-selfie', {
       method: 'POST',
+      headers,
       body: formData
     });
 
@@ -102,7 +54,7 @@ export function KycStepperClient() {
   };
 
   const startLiveness = async () => {
-    const res = await fetch('/api/kyc/liveness/start', { method: 'POST' });
+    const res = await fetch('/api/kyc/liveness/start', { method: 'POST', headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erreur liveness");
     setLivenessChallengeId(data.id);
@@ -116,6 +68,7 @@ export function KycStepperClient() {
 
     const res = await fetch('/api/kyc/liveness/verify', {
       method: 'POST',
+      headers,
       body: formData
     });
 
@@ -123,14 +76,14 @@ export function KycStepperClient() {
     if (!res.ok) throw new Error(data.error || "Échec vérification liveness");
   };
 
-  const submitKyc = async () => {
+  const completeHandoff = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/kyc/submit', { method: 'POST' });
+      const res = await fetch('/api/kyc/handoff/complete', { method: 'POST', headers });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur de soumission");
       
-      router.push('/dashboard/kyc'); // Will show pending, approved or rejected status
+      setStep(6);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -142,40 +95,21 @@ export function KycStepperClient() {
     setStep(next);
   };
 
-  if (isDesktop && step === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 bg-surface-container-lowest h-full border-b border-border-subtle">
-        <span className="material-symbols-outlined text-6xl text-primary mb-6">smartphone</span>
-        <h2 className="font-headline-md text-text-primary mb-4 text-center">Continuez sur votre téléphone</h2>
-        <p className="text-body-base text-text-secondary max-w-md text-center mb-8">
-          Pour des raisons de sécurité, la vérification d'identité doit être effectuée depuis un smartphone pour utiliser la caméra arrière. 
-          Veuillez scanner ce QR code avec votre téléphone en étant connecté au même réseau WiFi.
-        </p>
-        
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-border-subtle mb-6">
-          <QRCodeSVG value={handoffUrl} size={200} />
-        </div>
-
-        <button onClick={() => { setIsDesktop(false); setStep(1); }} className="text-sm text-text-secondary underline hover:text-text-primary">
-          J'ai un ordinateur avec une bonne webcam (non recommandé)
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col h-full bg-surface-container-lowest max-w-2xl mx-auto w-full">
+    <div className="flex flex-col h-[100dvh] bg-surface-container-lowest max-w-2xl mx-auto w-full">
       {/* Header */}
-      <div className="p-6 border-b border-border-subtle">
-        <h2 className="font-headline-md text-text-primary text-center">Vérification d'identité</h2>
-        <div className="flex gap-2 mt-6">
-          {[1, 2, 3, 4, 5].map(i => (
-            <div key={i} className={`h-1.5 flex-1 rounded-full ${step >= i ? 'bg-primary' : 'bg-surface-container-high'}`} />
-          ))}
-        </div>
+      <div className="p-4 border-b border-border-subtle bg-white sticky top-0 z-10">
+        <h2 className="font-headline-sm text-text-primary text-center">Vérification Mobile</h2>
+        {step < 6 && (
+          <div className="flex gap-2 mt-4">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className={`h-1.5 flex-1 rounded-full ${step >= i ? 'bg-primary' : 'bg-surface-container-high'}`} />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="p-4 sm:p-8 flex-1">
+      <div className="p-4 sm:p-8 flex-1 overflow-y-auto">
         {error && (
           <div className="mb-6 bg-error-container/20 border border-status-error/30 text-status-error p-4 rounded-xl flex items-start gap-3">
             <span className="material-symbols-outlined text-[20px] shrink-0 mt-0.5">error</span>
@@ -281,8 +215,8 @@ export function KycStepperClient() {
               onVerifyComplete={async (frames) => {
                 try {
                   await verifyLiveness(frames);
-                  nextStep(6);
-                  submitKyc(); // Auto submit when done
+                  // Call handoff complete
+                  await completeHandoff();
                 } catch (e: any) {
                   setError(e.message);
                 }
@@ -294,12 +228,16 @@ export function KycStepperClient() {
         {/* Step 6: Review / Submitting */}
         {step === 6 && (
           <div className="space-y-6 text-center py-12">
-            <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
-              <Loader2 className="w-10 h-10 animate-spin" />
+            <div className="w-24 h-24 bg-status-success/10 text-status-success rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-[48px]">check_circle</span>
             </div>
-            <h3 className="font-headline-md text-text-primary">Analyse en cours</h3>
-            <p className="text-body-base text-text-secondary max-w-sm mx-auto">
-              Notre système sécurisé analyse vos documents. Veuillez patienter quelques instants...
+            <h3 className="font-headline-md text-text-primary">Documents soumis !</h3>
+            <p className="text-body-base text-text-secondary max-w-sm mx-auto mt-4">
+              La vérification sur mobile est terminée. <br/><br/>
+              <strong className="text-text-primary">Regardez votre ordinateur, l'écran s'est mis à jour automatiquement.</strong>
+            </p>
+            <p className="text-sm text-text-tertiary mt-8">
+              Vous pouvez fermer cette page en toute sécurité.
             </p>
           </div>
         )}

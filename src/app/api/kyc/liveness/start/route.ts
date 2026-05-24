@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/auth-options";
+import { getKycMerchantId } from "@/lib/server/auth/handoff-auth";
 
 const CHALLENGES = [
   'blink_twice',
@@ -12,15 +13,12 @@ const CHALLENGES = [
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions) as any;
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { merchantId, error: authError } = await getKycMerchantId(request);
+    if (authError || !merchantId) {
+      return NextResponse.json({ error: authError || "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createAdminClient();
-    const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', session.user.id).single();
-    if (!merchant) return NextResponse.json({ error: "Marchand introuvable" }, { status: 404 });
-    const merchantId = merchant.id;
 
     // Pick a random challenge
     const challenge = CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)];
