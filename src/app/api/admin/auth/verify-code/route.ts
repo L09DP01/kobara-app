@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminOtp } from "@/lib/server/admin/auth";
 import { cookies } from "next/headers";
+import { logAdminAudit } from "@/lib/server/admin/audit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +14,7 @@ export async function POST(request: NextRequest) {
     const result = await verifyAdminOtp(email, code);
 
     if (!result.success || !result.token) {
+      await logAdminAudit('admin_login_failed', { email, reason: result.error || "Code invalide" });
       return NextResponse.json({ error: result.error || "Code invalide" }, { status: 401 });
     }
 
@@ -24,6 +26,8 @@ export async function POST(request: NextRequest) {
       sameSite: 'strict',
       path: '/'
     });
+
+    await logAdminAudit('admin_login_success', { email });
 
     return NextResponse.json({ success: true });
   } catch (error) {

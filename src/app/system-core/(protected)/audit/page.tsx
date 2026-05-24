@@ -23,15 +23,17 @@ export default async function AdminAuditPage() {
             <tr>
               <th className="px-6 py-4 font-semibold tracking-wider text-xs">TIMESTAMP</th>
               <th className="px-6 py-4 font-semibold tracking-wider text-xs">ACTION</th>
-              <th className="px-6 py-4 font-semibold tracking-wider text-xs">MERCHANT</th>
-              <th className="px-6 py-4 font-semibold tracking-wider text-xs">IP ADDRESS</th>
+              <th className="px-6 py-4 font-semibold tracking-wider text-xs">MERCHANT / USER</th>
+              <th className="px-6 py-4 font-semibold tracking-wider text-xs">IP & CLIENT</th>
+              <th className="px-6 py-4 font-semibold tracking-wider text-xs">METADATA</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800 font-mono text-xs">
             {logs?.map((l: any) => (
               <tr key={l.id} className="hover:bg-slate-800/30 transition-colors group">
                 <td className="px-6 py-4 text-slate-400">
-                  {new Date(l.created_at).toLocaleString()}
+                  <div className="text-slate-300">{new Date(l.created_at).toLocaleDateString()}</div>
+                  <div className="text-[10px] text-slate-500">{new Date(l.created_at).toLocaleTimeString()}</div>
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded font-bold tracking-wider ${
@@ -43,16 +45,32 @@ export default async function AdminAuditPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-slate-300">
-                  {l.merchants?.business_name || 'System / Unknown'}
+                  {l.merchants?.business_name ? (
+                    <div>
+                      <div className="font-semibold text-slate-200">{l.merchants.business_name}</div>
+                      <div className="text-[10px] text-slate-500 uppercase">Merchant</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="font-semibold text-amber-500">{l.metadata?.email || 'Super Admin'}</div>
+                      <div className="text-[10px] text-amber-500/50 uppercase">System Level</div>
+                    </div>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-slate-300 font-bold">{l.ip_address || '0.0.0.0'}</div>
+                  <div className="text-[10px] text-slate-500 max-w-[150px] truncate" title={l.user_agent}>{l.user_agent || 'Unknown Client'}</div>
                 </td>
                 <td className="px-6 py-4 text-slate-500">
-                  {l.ip_address || '0.0.0.0'}
+                  <pre className="text-[9px] bg-slate-950 p-2 rounded border border-slate-800 max-w-[300px] overflow-x-auto">
+                    {JSON.stringify(l.metadata, null, 2)}
+                  </pre>
                 </td>
               </tr>
             ))}
             {(!logs || logs.length === 0) && (
               <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
                   <div className="flex flex-col items-center gap-2">
                     <SearchCode className="w-6 h-6 opacity-20" />
                     <p>No audit logs found.</p>

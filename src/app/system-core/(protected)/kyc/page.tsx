@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 export default async function AdminKYCPage() {
   const supabase = createAdminClient();
 
-  const { data: profiles } = await supabase
+  const { data: rawProfiles } = await supabase
     .from('kyc_profiles')
     .select(`
       *,
@@ -14,6 +14,28 @@ export default async function AdminKYCPage() {
     `)
     .eq('merchants.kyc_status', 'in_review')
     .order('created_at', { ascending: false });
+
+  // Generate signed URLs for the images
+  const profiles = await Promise.all((rawProfiles || []).map(async (p: any) => {
+    let signed_front_url = null;
+    let signed_selfie_url = null;
+    
+    if (p.document_front_url && !p.document_front_url.startsWith('http')) {
+      const { data } = await supabase.storage.from('kyc_documents').createSignedUrl(p.document_front_url, 3600);
+      signed_front_url = data?.signedUrl || null;
+    } else {
+      signed_front_url = p.document_front_url; // It might be a mock https:// url
+    }
+
+    if (p.selfie_url && !p.selfie_url.startsWith('http')) {
+      const { data } = await supabase.storage.from('kyc_documents').createSignedUrl(p.selfie_url, 3600);
+      signed_selfie_url = data?.signedUrl || null;
+    } else {
+      signed_selfie_url = p.selfie_url;
+    }
+
+    return { ...p, signed_front_url, signed_selfie_url };
+  }));
 
   async function approveKYC(formData: FormData) {
     'use server';
@@ -99,11 +121,11 @@ export default async function AdminKYCPage() {
                   <div className="bg-slate-950 p-4 rounded border border-slate-800 font-mono text-sm space-y-2">
                     <div className="grid grid-cols-3">
                       <span className="text-slate-500">FIRST NAME:</span>
-                      <span className="col-span-2 text-slate-300">{p.first_name || 'N/A'}</span>
+                      <span className="col-span-2 text-slate-300">{p.full_name?.split(' ')[0] || 'N/A'}</span>
                     </div>
                     <div className="grid grid-cols-3">
                       <span className="text-slate-500">LAST NAME:</span>
-                      <span className="col-span-2 text-slate-300">{p.last_name || 'N/A'}</span>
+                      <span className="col-span-2 text-slate-300">{p.full_name?.split(' ').slice(1).join(' ') || 'N/A'}</span>
                     </div>
                     <div className="grid grid-cols-3">
                       <span className="text-slate-500">DOC TYPE:</span>
@@ -111,7 +133,7 @@ export default async function AdminKYCPage() {
                     </div>
                     <div className="grid grid-cols-3">
                       <span className="text-slate-500">DOC NUMBER:</span>
-                      <span className="col-span-2 text-slate-300">{p.document_number || 'N/A'}</span>
+                      <span className="col-span-2 text-slate-300">{p.document_number_hash ? '***' + p.document_number_hash.slice(-4) : 'N/A'}</span>
                     </div>
                   </div>
 
@@ -128,24 +150,28 @@ export default async function AdminKYCPage() {
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="aspect-[4/3] bg-slate-950 border border-slate-800 rounded flex items-center justify-center relative overflow-hidden group">
-                      {p.document_url ? (
-                        <img src={p.document_url} alt="ID Document" className="w-full h-full object-cover" />
+                      {p.signed_front_url ? (
+                        <img src={p.signed_front_url} alt="ID Document" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-slate-600 text-xs">NO DOC</span>
                       )}
-                      <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link href={p.document_url || '#'} target="_blank" className="text-xs font-bold text-white border border-slate-600 px-3 py-1 rounded hover:bg-slate-800">VIEW FULL</Link>
-                      </div>
+                      {p.signed_front_url && (
+                        <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link href={p.signed_front_url} target="_blank" className="text-xs font-bold text-white border border-slate-600 px-3 py-1 rounded hover:bg-slate-800">VIEW FULL</Link>
+                        </div>
+                      )}
                     </div>
                     <div className="aspect-[4/3] bg-slate-950 border border-slate-800 rounded flex items-center justify-center relative overflow-hidden group">
-                      {p.selfie_url ? (
-                        <img src={p.selfie_url} alt="Selfie" className="w-full h-full object-cover" />
+                      {p.signed_selfie_url ? (
+                        <img src={p.signed_selfie_url} alt="Selfie" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-slate-600 text-xs">NO SELFIE</span>
                       )}
-                      <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link href={p.selfie_url || '#'} target="_blank" className="text-xs font-bold text-white border border-slate-600 px-3 py-1 rounded hover:bg-slate-800">VIEW FULL</Link>
-                      </div>
+                      {p.signed_selfie_url && (
+                        <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link href={p.signed_selfie_url} target="_blank" className="text-xs font-bold text-white border border-slate-600 px-3 py-1 rounded hover:bg-slate-800">VIEW FULL</Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
