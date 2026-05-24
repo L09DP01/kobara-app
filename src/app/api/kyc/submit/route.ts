@@ -125,7 +125,12 @@ Retourne uniquement :
     else if (decision.status === 'rejected') updatePayload.rejected_at = new Date().toISOString();
 
     // 1. Update KYC Profile
-    await supabase.from('kyc_profiles').update(updatePayload).eq('id', profile.id);
+    const { error: profileUpdateError } = await supabase.from('kyc_profiles').update(updatePayload).eq('id', profile.id);
+    
+    if (profileUpdateError) {
+      console.error("KYC Profile Update Error:", profileUpdateError);
+      throw new Error("Failed to update KYC profile: " + profileUpdateError.message);
+    }
 
     // 2. Update Merchant Status
     await supabase.from('merchants').update({
