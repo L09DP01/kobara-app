@@ -16,8 +16,7 @@ import {
 export async function updatePayoutSettings(savedMoncashNumber: string) {
   const { merchant, supabase } = await getAuthUserAndMerchant();
 
-  const { data: currentSettings } = await supabase
-    .from('settings')
+  const { data: currentSettings } = await createAdminClient().from('settings')
     .select('settings_json')
     .eq('merchant_id', merchant.id)
     .maybeSingle();
@@ -56,8 +55,7 @@ export async function updateMerchantProfile(formData: {
   const { user, merchant, supabase } = await getAuthUserAndMerchant();
 
   // 1. Update merchants table
-  const { error: merchantError } = await supabase
-    .from('merchants')
+  const { error: merchantError } = await createAdminClient().from('merchants')
     .update({
       business_name: formData.business_name,
       category: formData.category,
@@ -78,8 +76,7 @@ export async function updateMerchantProfile(formData: {
 
   // 2. Update users table if names are provided
   if (formData.first_name !== undefined || formData.last_name !== undefined) {
-    const { error: userError } = await supabase
-      .from('users')
+    const { error: userError } = await createAdminClient().from('users')
       .update({
         first_name: formData.first_name || '',
         last_name: formData.last_name || '',
@@ -96,8 +93,7 @@ export async function updateMerchantProfile(formData: {
 export async function updateNotificationSettings(notificationsJson: any) {
   const { merchant, supabase } = await getAuthUserAndMerchant();
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ notifications_json: notificationsJson })
     .eq('merchant_id', merchant.id);
 
@@ -109,8 +105,7 @@ export async function inviteTeamMember(email: string, role: string) {
   const { merchant, supabase } = await getAuthUserAndMerchant();
 
   // Only owners and admins can invite
-  const { error } = await supabase
-    .from('merchant_members')
+  const { error } = await createAdminClient().from('merchant_members')
     .insert({
       merchant_id: merchant.id,
       email: email,
@@ -125,8 +120,7 @@ export async function inviteTeamMember(email: string, role: string) {
 export async function removeTeamMember(memberId: string) {
   const { merchant, supabase } = await getAuthUserAndMerchant();
 
-  const { error } = await supabase
-    .from('merchant_members')
+  const { error } = await createAdminClient().from('merchant_members')
     .delete()
     .eq('id', memberId)
     .eq('merchant_id', merchant.id);
@@ -149,8 +143,7 @@ export async function updatePassword(password: string) {
   const supabase = createAdminClient();
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const { error } = await supabase
-    .from('users')
+  const { error } = await createAdminClient().from('users')
     .update({ password_hash: passwordHash })
     .eq('id', user.id);
 
@@ -159,7 +152,7 @@ export async function updatePassword(password: string) {
   }
 
   try {
-    const { data: mData } = await supabase.from('merchants').select('id').eq('user_id', user.id).single();
+    const { data: mData } = await createAdminClient().from('merchants').select('id').eq('user_id', user.id).single();
     if (mData) {
       await notifyPasswordChange(mData.id, user.email);
     }
@@ -173,8 +166,7 @@ export async function updatePassword(password: string) {
 // -------------------------------------------------------------
 
 async function getOrCreateSettings(supabase: any, merchantId: string) {
-  const { data, error } = await supabase
-    .from('settings')
+  const { data, error } = await createAdminClient().from('settings')
     .select('*')
     .eq('merchant_id', merchantId)
     .maybeSingle();
@@ -182,8 +174,7 @@ async function getOrCreateSettings(supabase: any, merchantId: string) {
   if (data) return data;
 
   // Insert default row
-  const { data: inserted, error: insertError } = await supabase
-    .from('settings')
+  const { data: inserted, error: insertError } = await createAdminClient().from('settings')
     .insert({
       merchant_id: merchantId,
       transaction_fee_percent: 2.9,
@@ -230,8 +221,7 @@ export async function sendEmailOtpAction() {
     }
   };
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ security_json: updatedSecurity })
     .eq('merchant_id', merchant.id);
 
@@ -275,8 +265,7 @@ export async function verifyEmailOtpAction(code: string) {
     email_otp: null
   };
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ security_json: updatedSecurity })
     .eq('merchant_id', merchant.id);
 
@@ -324,8 +313,7 @@ export async function generateTotpSecretAction() {
     pending_totp_secret: secret.base32
   };
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ security_json: updatedSecurity })
     .eq('merchant_id', merchant.id);
 
@@ -363,8 +351,7 @@ export async function verifyAndActivateTotpAction(token: string) {
     pending_totp_secret: null
   };
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ security_json: updatedSecurity })
     .eq('merchant_id', merchant.id);
 
@@ -381,8 +368,7 @@ export async function verifyAndActivateTotpAction(token: string) {
 export async function deletePasskeyAction(passkeyId: string) {
   const { merchant, supabase } = await getAuthUserAndMerchant();
 
-  const { data: settings } = await supabase
-    .from('settings')
+  const { data: settings } = await createAdminClient().from('settings')
     .select('security_json')
     .eq('merchant_id', merchant.id)
     .single();
@@ -392,8 +378,7 @@ export async function deletePasskeyAction(passkeyId: string) {
 
   const updatedPasskeys = passkeys.filter((pk: any) => pk.id !== passkeyId);
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ security_json: { ...security, passkeys: updatedPasskeys } })
     .eq('merchant_id', merchant.id);
 
@@ -415,8 +400,7 @@ export async function disable2faAction() {
     email_otp: null
   };
 
-  const { error } = await supabase
-    .from('settings')
+  const { error } = await createAdminClient().from('settings')
     .update({ security_json: updatedSecurity })
     .eq('merchant_id', merchant.id);
 

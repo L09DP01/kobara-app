@@ -19,6 +19,16 @@ export async function createPaymentLink(formData: FormData) {
 
   const amount = amountStr ? parseFloat(amountStr) : null;
 
+  const collectPhone = formData.get('collect_phone') === 'true';
+  const collectAddress = formData.get('collect_address') === 'true';
+  const passFeesToCustomer = formData.get('pass_fees_to_customer') === 'true';
+
+  const metadata = {
+    collect_phone: collectPhone,
+    collect_address: collectAddress,
+    pass_fees_to_customer: passFeesToCustomer
+  };
+
   const adminClient = createAdminClient();
 
   const { error } = await adminClient
@@ -30,7 +40,8 @@ export async function createPaymentLink(formData: FormData) {
       description,
       status: 'active',
       slug: crypto.randomUUID().replace(/-/g, '').substring(0, 10),
-      currency: 'HTG'
+      currency: 'HTG',
+      metadata
     });
 
   if (error) {
@@ -44,6 +55,7 @@ export async function createPaymentLink(formData: FormData) {
 
 export async function updatePaymentLink(formData: FormData) {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
+  const adminClient = createAdminClient();
 
   const id = formData.get('id') as string;
   const title = formData.get('title') as string;
@@ -68,7 +80,7 @@ export async function updatePaymentLink(formData: FormData) {
 
   const amount = amountStr ? parseFloat(amountStr) : null;
 
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('payment_links')
     .update({
       title,

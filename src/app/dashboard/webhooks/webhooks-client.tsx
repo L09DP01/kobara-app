@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react';
-import { addWebhookEndpoint, deleteWebhookEndpoint } from './actions';
+import { addWebhookEndpoint, deleteWebhookEndpoint, resendWebhookEvent } from './actions';
 import { toast } from "sonner";
 
-export function WebhooksClient({ endpoints }: { endpoints: any[] }) {
+export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], events?: any[] }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [url, setUrl] = useState('');
@@ -34,6 +34,16 @@ export function WebhooksClient({ endpoints }: { endpoints: any[] }) {
       toast.success("Webhook supprimé avec succès !");
     } catch (err) {
       toast.error("Erreur lors de la suppression");
+    }
+  };
+
+  const handleResend = async (eventId: string) => {
+    try {
+      toast.loading("Renvoi en cours...", { id: eventId });
+      await resendWebhookEvent(eventId);
+      toast.success("Webhook renvoyé avec succès !", { id: eventId });
+    } catch (err) {
+      toast.error("Erreur lors du renvoi", { id: eventId });
     }
   };
 
@@ -148,6 +158,63 @@ export function WebhooksClient({ endpoints }: { endpoints: any[] }) {
             <span className="material-symbols-outlined text-[18px]">add</span>
             Ajouter un endpoint
           </button>
+        </div>
+      )}
+
+      {/* Delivery Logs */}
+      {events.length > 0 && (
+        <div className="mt-12 space-y-4">
+          <h2 className="text-xl font-bold text-text-primary tracking-tight mb-6">Logs de livraison</h2>
+          <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-surface-container-lowest border-b border-border-subtle text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                    <th className="px-5 py-4">Événement</th>
+                    <th className="px-5 py-4">Statut HTTP</th>
+                    <th className="px-5 py-4">Date</th>
+                    <th className="px-5 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-subtle text-sm">
+                  {events.map((event) => (
+                    <tr key={event.id} className="hover:bg-surface-container-lowest/50 transition-colors group">
+                      <td className="px-5 py-4 font-mono text-xs text-text-primary">
+                        <span className="bg-surface-container px-2 py-1 rounded-md">{event.event_type}</span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {event.delivery_status === 'pending' ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700">
+                            En attente
+                          </span>
+                        ) : event.response_status && event.response_status >= 200 && event.response_status < 300 ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-status-success/10 text-status-success">
+                            {event.response_status} OK
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-status-error/10 text-status-error" title={event.response_body}>
+                            {event.response_status || 'Erreur'} Échoué
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4 text-text-secondary text-xs">
+                        {new Date(event.created_at).toLocaleString('fr-FR')}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <button 
+                          onClick={() => handleResend(event.id)}
+                          className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 flex items-center gap-1 justify-end w-full"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">refresh</span>
+                          Renvoyer
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 

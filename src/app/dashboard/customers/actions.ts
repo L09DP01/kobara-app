@@ -1,12 +1,14 @@
 'use server'
 
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export async function createCustomer(formData: { name: string, email: string, phone: string }) {
-  const { merchant, supabase } = await getCurrentUserAndMerchant();
+  const { merchant } = await getCurrentUserAndMerchant();
+  const supabaseAdmin = createAdminClient();
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('customers')
     .insert({
       merchant_id: merchant.id,

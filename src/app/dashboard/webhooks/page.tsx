@@ -10,5 +10,12 @@ export default async function WebhooksPage() {
     .eq('merchant_id', merchant.id)
     .order('created_at', { ascending: false });
 
-  return <WebhooksClient endpoints={endpoints || []} />;
+  const { data: events } = await supabase
+    .from('webhook_events')
+    .select('*')
+    .eq('merchant_id', merchant.id)
+    .order('created_at', { ascending: false })
+    .limit(50); // Fetch latest 50 logs for performance
+
+  return <WebhooksClient endpoints={endpoints || []} events={events || []} />;
 }

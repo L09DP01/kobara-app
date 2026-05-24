@@ -67,7 +67,8 @@ export async function requestWithdrawal(amount: number, method: string, receiver
         return { error: "Le code de vérification email a expiré." };
       }
       // Consume the code
-      await supabase.from('settings').update({
+      const adminClientForOTP = createAdminClient();
+      await adminClientForOTP.from('settings').update({
         security_json: { ...security, email_otp: null }
       }).eq('merchant_id', merchant.id);
     }
@@ -140,6 +141,15 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     console.error("Failed to record withdrawal in DB", insertError);
     return { error: "Erreur lors de l'enregistrement du retrait" };
   }
+
+  // Create notification
+  const { notifyWithdrawalCreated } = await import('@/lib/server/notifications');
+  try {
+    const { data: mData } = await supabase.from('merchants').select('email').eq('id', merchant.id).single();
+    if (mData) {
+      await notifyWithdrawalCreated(merchant.id, mData.email, amount);
+    }
+  } catch(e) { console.error("Notification failed", e); }
 
   if (saveNumber && method === 'MonCash' && receiver) {
     // Fetch current settings to avoid overriding other settings

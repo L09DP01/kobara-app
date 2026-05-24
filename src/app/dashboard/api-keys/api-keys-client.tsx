@@ -18,19 +18,27 @@ export function ApiKeysClient({
   const [showKey, setShowKey] = useState(false);
   const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [keyName, setKeyName] = useState('');
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const filteredKeys = initialKeys.filter(k => k.environment === environment);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!keyName.trim()) {
+      setError("Veuillez entrer un nom pour la clé API.");
+      return;
+    }
+    
     try {
       setLoading(true);
       setShowKey(false);
       setError(null);
       setSuccess(null);
-      const name = "Clé générée le " + new Date().toLocaleDateString('fr-FR');
-      const result = await generateApiKey(name, environment);
+      const result = await generateApiKey(keyName, environment);
       
       if (result.error) {
         setError(result.error);
@@ -39,6 +47,8 @@ export function ApiKeysClient({
       
       if (result.rawKey) {
         setNewKey(result as { rawKey: string, name: string, environment: string });
+        setShowCreateModal(false);
+        setKeyName('');
       }
     } catch (err: any) {
       console.error(err);
@@ -183,12 +193,12 @@ export function ApiKeysClient({
             </p>
           </div>
           <button 
-            onClick={handleGenerate}
+            onClick={() => setShowCreateModal(true)}
             disabled={loading}
             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl font-semibold text-sm hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
           >
             <span className="material-symbols-outlined text-[18px]">vpn_key</span>
-            {loading ? "Génération..." : "Nouvelle clé secrète"}
+            Nouvelle clé secrète
           </button>
         </div>
         
@@ -309,6 +319,58 @@ export function ApiKeysClient({
                 Oui, révoquer la clé
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Key Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-surface-card w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-subtle animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-text-primary">Nouvelle clé {environment === 'live' ? 'Live' : 'Test'}</h3>
+              <button onClick={() => { setShowCreateModal(false); setKeyName(''); setError(null); }} className="text-text-secondary hover:text-text-primary p-1 rounded-full hover:bg-surface-container transition-colors">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <form onSubmit={handleGenerate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-text-primary mb-1">Nom de la clé</label>
+                <input 
+                  type="text" 
+                  required
+                  autoFocus
+                  value={keyName}
+                  onChange={(e) => setKeyName(e.target.value)}
+                  className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary"
+                  placeholder="Ex: Backend Prod, Serveur de Test..."
+                />
+                <p className="text-xs text-text-secondary mt-2">Ce nom vous aidera à identifier l'utilisation de cette clé plus tard.</p>
+              </div>
+              
+              <div className="flex gap-3 mt-6">
+                <button 
+                  type="button"
+                  onClick={() => { setShowCreateModal(false); setKeyName(''); setError(null); }}
+                  className="flex-1 px-4 py-2.5 border border-border-subtle rounded-xl font-semibold text-sm text-text-secondary hover:bg-surface-container transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  type="submit"
+                  disabled={loading || !keyName.trim()}
+                  className="flex-1 px-4 py-2.5 bg-primary text-on-primary rounded-xl font-semibold text-sm hover:opacity-90 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>
+                      Génération...
+                    </>
+                  ) : "Générer la clé"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

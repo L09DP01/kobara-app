@@ -82,6 +82,37 @@ export function CreatePaymentLinkForm() {
         ></textarea>
       </div>
 
+      <div className="p-4 bg-surface-container-lowest border border-border-subtle rounded-xl space-y-4">
+        <h3 className="text-body-md font-semibold text-text-primary">Options supplémentaires</h3>
+        <p className="text-xs text-text-secondary">Informations à collecter auprès du client lors du paiement.</p>
+        
+        <div className="space-y-3 pt-2">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="collect_phone" value="true" className="w-4 h-4 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
+            <span className="text-sm font-medium text-text-primary">Demander le numéro de téléphone</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="collect_address" value="true" className="w-4 h-4 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
+            <span className="text-sm font-medium text-text-primary">Demander l'adresse de livraison</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="p-4 bg-surface-container-lowest border border-border-subtle rounded-xl space-y-4">
+        <h3 className="text-body-md font-semibold text-text-primary">Frais de transaction</h3>
+        <p className="text-xs text-text-secondary">Choisissez qui prend en charge les frais de paiement.</p>
+        
+        <div className="space-y-3 pt-2">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" name="pass_fees_to_customer" value="true" className="w-4 h-4 mt-0.5 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
+            <div>
+              <span className="text-sm font-medium text-text-primary">Faire payer les frais par le client</span>
+              <p className="text-xs text-text-secondary mt-1">Si activé, le client paiera le montant du lien + les frais Kobara. Vous recevrez le montant exact du lien.</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <div className="pt-4 border-t border-border-subtle flex justify-end gap-3">
         <Link 
           href="/dashboard/payment-links"

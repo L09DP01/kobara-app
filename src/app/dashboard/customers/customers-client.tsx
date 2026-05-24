@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { createCustomer } from './actions';
 
-export function CustomersClient({ customers }: { customers: any[] }) {
+export function CustomersClient({ customers, stats }: { customers: any[], stats?: any }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,6 +13,12 @@ export function CustomersClient({ customers }: { customers: any[] }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+
+  const displayStats = stats || {
+    totalClients: customers.length,
+    activeClients: customers.filter(c => (c.payments?.length || 0) > 0).length,
+    volumeMoyen: 0
+  };
 
   const avatarColors = [
     'from-red-400 to-pink-500', 'from-blue-400 to-indigo-500', 'from-green-400 to-emerald-500',
@@ -25,7 +32,11 @@ export function CustomersClient({ customers }: { customers: any[] }) {
 
   const getCustomerStats = (customer: any) => {
     const payments = customer.payments || [];
-    const totalVolume = payments.reduce((acc: number, p: any) => acc + Number(p.gross_amount || 0), 0);
+    
+    // Only count succeeded/completed payments towards the volume
+    const successfulPayments = payments.filter((p: any) => p.status === 'succeeded' || p.status === 'completed');
+    
+    const totalVolume = successfulPayments.reduce((acc: number, p: any) => acc + Number(p.net_amount || p.amount || 0), 0);
     
     let lastPaymentDate = null;
     let paymentMode = 'N/A';
@@ -85,7 +96,7 @@ export function CustomersClient({ customers }: { customers: any[] }) {
           </div>
           <div>
             <p className="text-xs text-text-secondary font-medium">Total Clients</p>
-            <p className="text-lg font-bold text-text-primary">{customers.length}</p>
+            <p className="text-lg font-bold text-text-primary">{displayStats.totalClients}</p>
           </div>
         </div>
         <div className="bg-surface-card rounded-xl border border-border-subtle p-4 shadow-sm flex items-center gap-3">
@@ -94,7 +105,7 @@ export function CustomersClient({ customers }: { customers: any[] }) {
           </div>
           <div>
             <p className="text-xs text-text-secondary font-medium">Clients Actifs</p>
-            <p className="text-lg font-bold text-text-primary">{customers.filter(c => (c.payments?.length || 0) > 0).length}</p>
+            <p className="text-lg font-bold text-text-primary">{displayStats.activeClients}</p>
           </div>
         </div>
         <div className="bg-surface-card rounded-xl border border-border-subtle p-4 shadow-sm flex items-center gap-3">
@@ -104,9 +115,7 @@ export function CustomersClient({ customers }: { customers: any[] }) {
           <div>
             <p className="text-xs text-text-secondary font-medium">Volume Moyen</p>
             <p className="text-lg font-bold text-text-primary">
-              {customers.length > 0 
-                ? Math.round(customers.reduce((sum, c) => sum + (c.payments || []).reduce((a: number, p: any) => a + Number(p.gross_amount || 0), 0), 0) / customers.length).toLocaleString('fr-FR')
-                : 0} HTG
+              {Math.round(displayStats.volumeMoyen).toLocaleString('fr-FR')} HTG
             </p>
           </div>
         </div>
@@ -174,10 +183,13 @@ export function CustomersClient({ customers }: { customers: any[] }) {
                       {stats.lastPaymentDate ? stats.lastPaymentDate.toLocaleDateString('fr-FR') : 'Aucun'}
                     </td>
                     <td className="py-3.5 px-5 text-right">
-                      <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors">
+                      <Link 
+                        href={`/dashboard/customers/${customer.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors"
+                      >
                         Détails
                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 );

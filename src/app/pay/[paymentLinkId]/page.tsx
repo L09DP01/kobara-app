@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 import { notFound, redirect } from "next/navigation";
 import { processPayment } from "./actions";
+import { getMerchantCurrentPlan } from "@/lib/server/plans";
 
 export default async function PublicPaymentPage({ params, searchParams }: { params: Promise<{ paymentLinkId: string }>, searchParams: Promise<{ status?: string }> }) {
   const supabaseAdmin = createAdminClient();
@@ -88,6 +89,15 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
         </div>
         
         <div className="p-6">
+          {link.metadata?.pass_fees_to_customer && (
+            <div className="mb-6 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-2">
+              <span className="material-symbols-outlined text-blue-600 text-[18px] mt-0.5">info</span>
+              <div>
+                <p className="text-xs text-blue-900 font-medium">Frais de transaction applicables</p>
+                <p className="text-xs text-blue-800/80 mt-0.5">Les frais de traitement réseau seront ajoutés au montant de base lors du paiement.</p>
+              </div>
+            </div>
+          )}
           <form action={processPayment} className="space-y-5">
             <input type="hidden" name="paymentLinkId" value={link.id} />
             <input type="hidden" name="merchantId" value={link.merchant_id} />
@@ -135,6 +145,20 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
                 className="w-full px-4 py-2.5 bg-surface-container-lowest border border-border-subtle rounded-lg text-body-base text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
+
+            {link.metadata?.collect_address && (
+              <div className="space-y-1.5">
+                <label htmlFor="customerAddress" className="block text-body-sm font-medium text-text-primary">Adresse de livraison *</label>
+                <textarea 
+                  id="customerAddress" 
+                  name="customerAddress" 
+                  required
+                  rows={2}
+                  placeholder="Votre adresse complète"
+                  className="w-full px-4 py-2.5 bg-surface-container-lowest border border-border-subtle rounded-lg text-body-base text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                ></textarea>
+              </div>
+            )}
 
             <button 
               type="submit"

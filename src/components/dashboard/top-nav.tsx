@@ -127,7 +127,18 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                     notifications.map(notif => {
                       const style = getNotifStyle(notif.type);
                       return (
-                        <div key={notif.id} className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle last:border-0 relative group">
+                        <div 
+                          key={notif.id} 
+                          onClick={() => {
+                            markAsRead(notif.id);
+                            setIsNotifOpen(false);
+                            if (notif.type.includes('payment')) router.push('/dashboard/payments');
+                            else if (notif.type.includes('withdrawal')) router.push('/dashboard/withdrawals');
+                            else if (notif.type.includes('kyc') || notif.type.includes('security')) router.push('/dashboard/settings');
+                            else router.push('/dashboard');
+                          }}
+                          className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle last:border-0 relative group cursor-pointer"
+                        >
                           <div className="flex gap-3 items-start">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${style.bg}`}>
                               <span className="material-symbols-outlined text-[20px]">{style.icon}</span>
@@ -144,7 +155,10 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                             
                             {/* Hover action to dismiss */}
                             <button 
-                              onClick={() => markAsRead(notif.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(notif.id);
+                              }}
                               className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 p-1.5 bg-surface-container hover:bg-border-subtle rounded-md transition-all text-text-secondary hover:text-text-primary"
                               title="Marquer comme lu et effacer"
                             >

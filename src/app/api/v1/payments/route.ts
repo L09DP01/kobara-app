@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation Error", details: validationResult.error.issues }, { status: 400 });
     }
 
-    const { amount, currency, description, success_url, cancel_url, metadata } = validationResult.data;
+    const { amount, currency, description, success_url, cancel_url, metadata, customer } = validationResult.data;
 
     // Connect to Supabase
     const supabase = createAdminClient();
@@ -59,6 +59,64 @@ export async function POST(request: NextRequest) {
     // Bazik response typically gives a payment URL or an order ID.
     const bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
 
+    // 2.5 Resolve Customer
+    let customerId = null;
+    if (customer) {
+      const { name, email, phone } = customer;
+      
+      let existingCustomer = null;
+      if (email) {
+        const { data } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('merchant_id', merchantId)
+          .eq('email', email)
+          .maybeSingle();
+        if (data) existingCustomer = data;
+      }
+      
+      if (!existingCustomer && phone) {
+        const { data } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('merchant_id', merchantId)
+          .eq('phone', phone)
+          .maybeSingle();
+        if (data) existingCustomer = data;
+      }
+
+      if (existingCustomer) {
+        customerId = existingCustomer.id;
+        // Mettre à jour si de nouvelles infos sont fournies
+        const updates: any = {};
+        if (name) updates.name = name;
+        if (email) updates.email = email;
+        if (phone) updates.phone = phone;
+        
+        if (Object.keys(updates).length > 0) {
+          await supabase.from('customers').update(updates).eq('id', customerId);
+        }
+      } else {
+        const { data: newCustomer, error: createError } = await supabase
+          .from('customers')
+          .insert({
+            merchant_id: merchantId,
+            name: name || 'Client inconnu',
+            email: email || null,
+            phone: phone || null,
+            wallet: phone || null
+          })
+          .select('id')
+          .single();
+          
+        if (newCustomer) {
+          customerId = newCustomer.id;
+        } else {
+          console.error("Erreur création client API", createError);
+        }
+      }
+    }
+
     // 3. Save pending payment to DB
     const { getMerchantCurrentPlan } = await import('@/lib/server/plans');
     const { plan } = await getMerchantCurrentPlan(merchantId);
@@ -69,6 +127,7 @@ export async function POST(request: NextRequest) {
 
     const { data: payment, error: dbError } = await supabase.from('payments').insert({
       merchant_id: merchantId,
+      customer_id: customerId,
       kobara_reference: kobaraReference,
       bazik_order_id: bazikOrderId,
       amount: amount,
@@ -85,6 +144,15 @@ export async function POST(request: NextRequest) {
       console.error("Payment insertion error:", dbError);
       return NextResponse.json({ error: "Internal Database Error" }, { status: 500 });
     }
+
+    // Call notification service
+    const { notifyPaymentCreated } = await import('@/lib/server/notifications');
+    try {
+      const { data: mData } = await supabase.from('merchants').select('email').eq('id', merchantId).single();
+      if (mData) {
+        await notifyPaymentCreated(merchantId, mData.email, amount, currency);
+      }
+    } catch(e) { console.error("Notification failed", e); }
 
     // 4. Return response to merchant
     return NextResponse.json({

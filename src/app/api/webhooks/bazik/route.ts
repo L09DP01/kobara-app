@@ -210,19 +210,11 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // 2. Create Notification for Merchant
-      await supabaseAdmin.from('notifications').insert({
-        merchant_id: payment.merchant_id,
-        type: 'payment_received',
-        title: '💰 Nouveau paiement reçu',
-        message: `Vous avez reçu un paiement de ${payment.amount} HTG de la part de ${customerName}. Référence: ${payment.kobara_reference}`
-      });
-
-      // Send email notification
+      // 2. Create Notification for Merchant via service
       const { data: merchantData } = await supabaseAdmin.from('merchants').select('email').eq('id', payment.merchant_id).single();
       if (merchantData?.email) {
-        const { notifyNewPayment } = await import("@/lib/server/notifications");
-        await notifyNewPayment(payment.merchant_id, merchantData.email, Number(payment.amount), payment.currency || 'HTG');
+        const { notifyPaymentSucceeded } = await import("@/lib/server/notifications");
+        await notifyPaymentSucceeded(payment.merchant_id, merchantData.email, Number(payment.amount), payment.currency || 'HTG');
       }
 
       // 3. Send outbound webhooks to merchant endpoints
@@ -266,6 +258,12 @@ export async function POST(request: NextRequest) {
             console.error(`Failed to send webhook to ${endpoint.url}:`, err);
           }
         }
+      }
+    } else if (newStatus === "failed" && payment.status !== "failed") {
+      const { data: merchantData } = await supabaseAdmin.from('merchants').select('email').eq('id', payment.merchant_id).single();
+      if (merchantData?.email) {
+        const { notifyPaymentFailed } = await import("@/lib/server/notifications");
+        await notifyPaymentFailed(payment.merchant_id, merchantData.email, Number(payment.amount), payment.currency || 'HTG');
       }
     }
 

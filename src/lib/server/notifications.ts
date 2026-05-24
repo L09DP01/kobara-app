@@ -34,13 +34,33 @@ export async function createNotification(
   }
 }
 
-// 1. Nouvelle Paiement
-export async function notifyNewPayment(merchantId: string, email: string, amount: number, currency: string) {
+// 1. Nouvelle Paiement (succeeded)
+export async function notifyPaymentSucceeded(merchantId: string, email: string, amount: number, currency: string) {
   await createNotification(
     merchantId,
-    'payment_received',
-    'Nouveau paiement reçu',
-    `Vous avez reçu un nouveau paiement de ${amount} ${currency}. Le montant a été ajouté à votre solde en attente.`,
+    'payment_succeeded',
+    'Paiement reçu',
+    `Vous avez reçu un paiement de ${amount} ${currency}.`,
+    email
+  );
+}
+
+export async function notifyPaymentCreated(merchantId: string, email: string, amount: number, currency: string) {
+  await createNotification(
+    merchantId,
+    'payment_created',
+    'Nouveau paiement créé',
+    `Un paiement de ${amount} ${currency} est en attente.`,
+    email
+  );
+}
+
+export async function notifyPaymentFailed(merchantId: string, email: string, amount: number, currency: string) {
+  await createNotification(
+    merchantId,
+    'payment_failed',
+    'Paiement échoué',
+    `Un paiement de ${amount} ${currency} a échoué.`,
     email
   );
 }
@@ -126,8 +146,8 @@ export async function notifyPasskeyAdded(merchantId: string, email: string) {
 export async function notifyWithdrawalSuccess(merchantId: string, email: string, amount: number) {
   await createNotification(
     merchantId,
-    'withdrawal_paid',
-    '💸 Retrait envoyé avec succès',
+    'withdrawal_completed',
+    '💸 Retrait complété',
     `Votre retrait de ${amount} HTG a été envoyé avec succès à votre compte MonCash.`,
     email
   );
@@ -137,9 +157,20 @@ export async function notifyWithdrawalSuccess(merchantId: string, email: string,
 export async function notifyWithdrawalFailed(merchantId: string, email: string, amount: number) {
   await createNotification(
     merchantId,
-    'payment_failed',
+    'withdrawal_failed',
     '⚠️ Retrait échoué',
     `Votre retrait de ${amount} HTG a échoué. Le montant a été recrédité sur votre solde disponible.`,
+    email
+  );
+}
+
+// 11. Retrait créé
+export async function notifyWithdrawalCreated(merchantId: string, email: string, amount: number) {
+  await createNotification(
+    merchantId,
+    'withdrawal_created',
+    'Demande de retrait',
+    `Votre demande de retrait de ${amount} HTG a été reçue et est en cours de traitement.`,
     email
   );
 }

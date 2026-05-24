@@ -44,7 +44,7 @@ export default async function DashboardLayout({
         .from('notifications')
         .select('*')
         .eq('merchant_id', merchant.id)
-        .eq('read', false)
+        .is('read_at', null)
         .order('created_at', { ascending: false })
         .limit(10);
       notifications = notifs || [];

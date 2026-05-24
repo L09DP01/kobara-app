@@ -27,6 +27,7 @@ export function WithdrawalsClient({
   const [code2fa, setCode2fa] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +96,9 @@ export function WithdrawalsClient({
   };
 
   const totalWithdrawn = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0);
-  const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + Number(w.amount), 0);
+  const filteredWithdrawals = filterStatus === 'all' 
+    ? withdrawals 
+    : withdrawals.filter(w => w.status === filterStatus);
 
   const getStatusConfig = (status: string) => {
     switch(status) {
@@ -159,8 +162,8 @@ export function WithdrawalsClient({
             <span className="material-symbols-outlined text-[22px] text-status-warning">hourglass_empty</span>
           </div>
           <div>
-            <p className="text-xs text-text-secondary font-medium">Solde en attente</p>
-            <h3 className="text-xl font-bold text-text-primary">{pendingWithdrawals.toLocaleString('fr-FR')} <span className="text-sm font-normal text-text-secondary">HTG</span></h3>
+            <p className="text-xs text-text-secondary font-medium">Solde en attente (Paiements)</p>
+            <h3 className="text-xl font-bold text-text-primary">{Number(merchant.pending_balance || 0).toLocaleString('fr-FR')} <span className="text-sm font-normal text-text-secondary">HTG</span></h3>
           </div>
         </div>
         <div className="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
@@ -327,7 +330,20 @@ export function WithdrawalsClient({
 
       {/* Withdrawal History */}
       <div>
-        <h3 className="text-lg font-bold text-text-primary mb-4">Historique des Retraits</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-text-primary">Historique des Retraits</h3>
+          <select 
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-3 py-1.5 bg-surface-container border border-border-subtle rounded-lg text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="completed">Complétés</option>
+            <option value="pending">En attente</option>
+            <option value="processing">En traitement</option>
+            <option value="failed">Échoués</option>
+          </select>
+        </div>
         <div className="bg-surface-card rounded-xl border border-border-subtle overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[600px]">
@@ -340,7 +356,7 @@ export function WithdrawalsClient({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle">
-                {withdrawals.length > 0 ? withdrawals.map(w => {
+                {filteredWithdrawals.length > 0 ? filteredWithdrawals.map(w => {
                   const cfg = getStatusConfig(w.status);
                   return (
                     <tr key={w.id} className={`hover:bg-surface-container-lowest transition-colors group border-l-4 ${cfg.border}`}>

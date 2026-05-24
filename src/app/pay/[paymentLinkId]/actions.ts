@@ -15,18 +15,48 @@ export async function processPayment(formData: FormData) {
   const amountStr = formData.get('amount') as string;
   const customerName = formData.get('customerName') as string;
   const customerPhone = formData.get('customerPhone') as string;
+  const customerAddress = formData.get('customerAddress') as string;
 
   if (!paymentLinkId || !merchantId || !amountStr || !customerName || !customerPhone) {
     throw new Error("Informations manquantes");
   }
 
-  const amount = parseFloat(amountStr);
+  // 1. Fetch Payment Link to check settings
+  const { data: linkInfo } = await supabaseAdmin
+    .from('payment_links')
+    .select('amount, metadata')
+    .eq('id', paymentLinkId)
+    .single();
+
+  if (!linkInfo) {
+    throw new Error("Lien de paiement invalide");
+  }
+
+  // Determine base amount (if link has a fixed amount, use it to avoid tampering)
+  const baseAmount = linkInfo.amount ? Number(linkInfo.amount) : parseFloat(amountStr);
   
   const { plan } = await getMerchantCurrentPlan(merchantId);
   const feePercent = plan ? (plan.transaction_fee_percent / 100) : 0.04; // Default to 4% if no plan
   
-  const feeAmount = parseFloat((amount * feePercent).toFixed(2));
-  const netAmount = parseFloat((amount - feeAmount).toFixed(2));
+  const passFeesToCustomer = linkInfo.metadata?.pass_fees_to_customer === true;
+
+  let grossAmount = baseAmount;
+  let feeAmount = 0;
+  let netAmount = 0;
+
+  if (passFeesToCustomer) {
+    // Customer pays the fee.
+    // If base is 100, and fee is 4%, to get 100 net, gross must be 100 / 0.96 = 104.17
+    // Alternatively: gross = 100 + (100 * 0.04) = 104. Let's use standard Stripe calculation:
+    grossAmount = parseFloat((baseAmount / (1 - feePercent)).toFixed(2));
+    feeAmount = parseFloat((grossAmount - baseAmount).toFixed(2));
+    netAmount = baseAmount;
+  } else {
+    // Merchant pays the fee
+    feeAmount = parseFloat((baseAmount * feePercent).toFixed(2));
+    netAmount = parseFloat((baseAmount - feeAmount).toFixed(2));
+    grossAmount = baseAmount;
+  }
 
   // 1. Find or Create Customer
   let customerId = null;
@@ -35,22 +65,28 @@ export async function processPayment(formData: FormData) {
     .select('id')
     .eq('merchant_id', merchantId)
     .eq('phone', customerPhone)
-    .single();
+    .maybeSingle();
 
   if (existingCustomer) {
     customerId = existingCustomer.id;
+    // Update name if different
+    await supabaseAdmin.from('customers').update({ name: customerName }).eq('id', customerId);
   } else {
-    const { data: newCustomer } = await supabaseAdmin
+    const { data: newCustomer, error: createError } = await supabaseAdmin
       .from('customers')
       .insert({
         merchant_id: merchantId,
         name: customerName,
-        phone: customerPhone
+        phone: customerPhone,
+        wallet: customerPhone
       })
       .select('id')
       .single();
+      
     if (newCustomer) {
       customerId = newCustomer.id;
+    } else {
+      console.error("Erreur création client public", createError);
     }
   }
 
@@ -66,13 +102,14 @@ export async function processPayment(formData: FormData) {
       payment_link_id: paymentLinkId,
       kobara_reference: txRef,
       bazik_transaction_id: externalRef,
-      amount: amount,
+      amount: grossAmount,
       fee_amount: feeAmount,
       net_amount: netAmount,
       currency: 'HTG',
       status: 'pending',
       provider: 'moncash',
-      payment_method: 'moncash'
+      payment_method: 'moncash',
+      metadata: customerAddress ? { address: customerAddress } : {}
     })
     .select('id')
     .single();
@@ -83,12 +120,20 @@ export async function processPayment(formData: FormData) {
     throw new Error("Erreur lors de l'initialisation du paiement");
   }
 
+  const { notifyPaymentCreated } = await import('@/lib/server/notifications');
+  try {
+    const { data: mData } = await supabaseAdmin.from('merchants').select('email').eq('id', merchantId).single();
+    if (mData) {
+      await notifyPaymentCreated(merchantId, mData.email, grossAmount, 'HTG');
+    }
+  } catch(e) { console.error("Notification failed", e); }
+
   // 3. Appel à Bazik pour initialiser le paiement MonCash
   let paymentUrl = '';
   
   try {
     const bazikResponse = await BazikService.createMoncashPayment({
-      amount: amount,
+      amount: grossAmount,
       reference: txRef,
       description: `Paiement pour ${customerName}`
     });

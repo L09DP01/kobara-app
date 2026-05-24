@@ -1,6 +1,7 @@
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import Link from "next/link";
 import { PaymentsFilter } from "./payments-filter";
+import ExportCsvButton from "./ExportCsvButton";
 
 export default async function PaymentsPage({
   searchParams
@@ -73,9 +74,12 @@ export default async function PaymentsPage({
     <div className="max-w-[1440px] mx-auto w-full space-y-8 pb-16">
 
       {/* ── Page Header ── */}
-      <div className="flex flex-col gap-1">
-        <h1 className="font-headline-lg text-text-primary text-2xl tracking-tight">Paiements</h1>
-        <p className="font-body-sm text-text-secondary">Suivez, filtrez et gérez toutes vos transactions en un seul endroit.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-headline-lg text-text-primary text-2xl tracking-tight">Paiements</h1>
+          <p className="font-body-sm text-text-secondary">Suivez, filtrez et gérez toutes vos transactions en un seul endroit.</p>
+        </div>
+        <ExportCsvButton payments={filteredPayments} />
       </div>
 
       <PaymentsFilter />
