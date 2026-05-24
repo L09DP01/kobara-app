@@ -16,17 +16,34 @@ export async function generateHandoffToken() {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 15);
 
-    const { error } = await supabase
-      .from('kyc_profiles')
-      .update({
-        mobile_handoff_token: token,
-        mobile_handoff_expires_at: expiresAt.toISOString(),
-        mobile_handoff_completed: false
-      })
-      .eq('merchant_id', merchant.id);
+    // Check if profile exists
+    const { data: profile } = await supabase.from('kyc_profiles').select('id').eq('merchant_id', merchant.id).single();
 
-    if (error) {
-      console.error("Failed to update kyc_profiles with handoff token:", error);
+    let dbError;
+    if (profile) {
+      const { error } = await supabase
+        .from('kyc_profiles')
+        .update({
+          mobile_handoff_token: token,
+          mobile_handoff_expires_at: expiresAt.toISOString(),
+          mobile_handoff_completed: false
+        })
+        .eq('id', profile.id);
+      dbError = error;
+    } else {
+      const { error } = await supabase
+        .from('kyc_profiles')
+        .insert({
+          merchant_id: merchant.id,
+          mobile_handoff_token: token,
+          mobile_handoff_expires_at: expiresAt.toISOString(),
+          mobile_handoff_completed: false
+        });
+      dbError = error;
+    }
+
+    if (dbError) {
+      console.error("Failed to update kyc_profiles with handoff token:", dbError);
       return { error: "Erreur lors de la génération du lien." };
     }
 
