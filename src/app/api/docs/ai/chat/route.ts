@@ -57,7 +57,7 @@ ${DOCS_CONTEXT}
 `;
 
     const result = await streamText({
-      model: google('gemini-1.5-flash'),
+      model: google('gemini-flash-latest'),
       messages,
       system: systemPrompt,
     });
