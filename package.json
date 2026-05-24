@@ -11,7 +11,7 @@
     "verify-api-contracts": "node scripts/verify-api-contracts.js"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.79",
+    "@ai-sdk/google": "^0.0.52",
     "@ai-sdk/react": "^3.0.193",
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@base-ui/react": "^1.4.1",
@@ -26,7 +26,7 @@
     "@tailwindcss/forms": "^0.5.11",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
-    "ai": "^6.0.191",
+    "ai": "^3.4.15",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
