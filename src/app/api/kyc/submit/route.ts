@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/auth-options";
 import { decideKycStatus, KycSignals } from "@/lib/server/kyc/decision-engine";
 import { activateFreePlanAfterKyc } from "@/lib/server/plans";
 import { createNotification } from "@/lib/server/notifications";

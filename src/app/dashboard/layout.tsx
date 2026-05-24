@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/auth-options";
 
 // Pages inside /dashboard that are publicly accessible (no login required)
 const PUBLIC_DASHBOARD_PATHS = ["/dashboard/developers"];

@@ -3,7 +3,7 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 import { ApiKeySecurity } from "@/lib/server/security/api-keys";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth/auth-options";
 
 export async function completeOnboarding(formData: {
   first_name: string;
