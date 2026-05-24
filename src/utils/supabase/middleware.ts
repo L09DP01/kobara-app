@@ -34,7 +34,8 @@ export async function updateSession(request: NextRequest) {
     '/contact',
     '/terms',
     '/privacy',
-    '/onboarding'
+    '/onboarding',
+    '/kyc/mobile'
   ];
 
   const pathname = request.nextUrl.pathname;
