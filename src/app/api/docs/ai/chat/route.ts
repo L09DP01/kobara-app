@@ -52,13 +52,13 @@ VOICI LE CONTEXTE COMPLET DE KOBARA (Docs + OpenAPI) :
 ${DOCS_CONTEXT}
 `;
 
-    const result = streamText({
+    const result = await streamText({
       model: google('gemini-1.5-flash'),
       messages,
       system: systemPrompt,
     });
 
-    return result.toTextStreamResponse();
+    return result.toDataStreamResponse();
   } catch (error: any) {
     console.error('Chat API Error:', error);
     return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), { status: 500 });
