@@ -16,7 +16,7 @@ export async function generateAdminOtp(email: string) {
   const { data: admin } = await supabase
     .from('super_admins')
     .select('id')
-    .eq('email', email)
+    .ilike('email', email)
     .single();
 
   if (!admin) {
@@ -69,7 +69,7 @@ export async function verifyAdminOtp(email: string, code: string) {
   const { data: otp } = await supabase
     .from('admin_otps')
     .select('*')
-    .eq('email', email)
+    .ilike('email', email)
     .eq('code', code)
     .eq('used', false)
     .gte('expires_at', new Date().toISOString())
@@ -91,7 +91,7 @@ export async function verifyAdminOtp(email: string, code: string) {
   const { data: admin } = await supabase
     .from('super_admins')
     .select('id')
-    .eq('email', email)
+    .ilike('email', email)
     .single();
 
   if (!admin) {
