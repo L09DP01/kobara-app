@@ -12,52 +12,24 @@ export function DocsClient({
   testSecretKey,
   livePublicKey,
   isAuthenticated,
-  markdownContent
+  markdownContent,
+  currentSlug = 'quickstart'
 }: { 
   testPublicKey: string, 
   testSecretKey: string,
   livePublicKey: string,
   isAuthenticated: boolean,
-  markdownContent: string
+  markdownContent: string,
+  currentSlug?: string
 }) {
-  const [activeSection, setActiveSection] = useState('quickstart');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Intersection Observer for highlighting the active section
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-20% 0px -80% 0px' }
-    );
-
-    const sections = document.querySelectorAll('h1[id], h2[id], h3[id]');
-    sections.forEach((section) => observer.observe(section));
-
-    return () => {
-      sections.forEach((section) => observer.unobserve(section));
-    };
-  }, [markdownContent]);
-
-  const scrollToSection = (id: string) => {
-    setIsMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      const y = element.getBoundingClientRect().top + window.scrollY - 100;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-  };
-
   const NavItem = ({ id, label, isSubItem = false }: { id: string, label: string, isSubItem?: boolean }) => {
-    const isActive = activeSection === id;
+    const isActive = currentSlug === id;
     return (
-      <button 
-        onClick={() => scrollToSection(id)}
+      <Link 
+        href={`/docs/${id}`}
+        onClick={() => setIsMobileMenuOpen(false)}
         className={clsx(
           "w-full text-left py-2 px-4 transition-colors text-sm rounded-lg flex items-center gap-3",
           isActive
@@ -67,7 +39,7 @@ export function DocsClient({
         )}
       >
         <span>{label}</span>
-      </button>
+      </Link>
     );
   };
 

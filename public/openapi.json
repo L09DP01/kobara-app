@@ -1,0 +1,183 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Kobara API",
+    "description": "The API for integrating MonCash payments via Kobara."
+  },
+  "servers": [
+    {
+      "url": "https://api.kobara.app"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "PaymentResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "success"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "pay_123456"
+              },
+              "reference": {
+                "type": "string",
+                "example": "KOB-123456"
+              },
+              "amount": {
+                "type": "number",
+                "example": 2500
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "succeeded",
+                  "failed",
+                  "expired",
+                  "refunded"
+                ],
+                "example": "pending"
+              },
+              "checkout_url": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://kobara.app/pay/pay_123456"
+              }
+            },
+            "required": [
+              "id",
+              "reference",
+              "amount",
+              "status",
+              "checkout_url"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "data"
+        ]
+      },
+      "PaymentCreatePayload": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "description": "Amount to charge",
+            "example": 2500
+          },
+          "currency": {
+            "type": "string",
+            "default": "HTG",
+            "description": "Currency of the payment",
+            "example": "HTG"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the payment",
+            "example": "Order #12345"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/Customer"
+          },
+          "success_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to redirect after successful payment",
+            "example": "https://your-site.com/success"
+          },
+          "cancel_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to redirect after cancelled/failed payment",
+            "example": "https://your-site.com/cancel"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            },
+            "description": "Key-value object for custom data",
+            "example": {
+              "order_id": "ORD-12345"
+            }
+          }
+        },
+        "required": [
+          "amount"
+        ]
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Full name of the customer",
+            "example": "Jean Dupont"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address of the customer",
+            "example": "jean@example.com"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number",
+            "example": "37000000"
+          }
+        }
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/payments": {
+      "post": {
+        "summary": "Create a new payment",
+        "description": "Initialize a MonCash payment transaction",
+        "tags": [
+          "Payments"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentCreatePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment successfully initialized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (Validation error)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  }
+}

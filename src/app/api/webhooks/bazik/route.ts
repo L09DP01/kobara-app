@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
 
       if (endpoints && endpoints.length > 0) {
         const eventPayload = {
-          event: `payment.${newStatus}`,
+          event_type: `payment.${newStatus}`,
           data: {
             id: payment.id,
             reference: payment.kobara_reference,
@@ -242,7 +242,8 @@ export async function POST(request: NextRequest) {
             net_amount: payment.net_amount,
             currency: payment.currency,
             status: newStatus,
-            paid_at: paidAt
+            paid_at: paidAt,
+            metadata: payment.metadata
           }
         };
 
@@ -257,7 +258,7 @@ export async function POST(request: NextRequest) {
               headers: {
                 'Content-Type': 'application/json',
                 'Kobara-Signature': signature,
-                'Kobara-Event': eventPayload.event
+                'Kobara-Event': eventPayload.event_type
               },
               body: JSON.stringify(eventPayload)
             });

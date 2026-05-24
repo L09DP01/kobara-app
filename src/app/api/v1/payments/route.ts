@@ -7,15 +7,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { apiLimiter } from "@/lib/server/security/rate-limit";
 
-const PaymentSchema = z.object({
-  amount: z.number().positive(),
-  currency: z.string().default("HTG"),
-  description: z.string().optional(),
-  customer: z.any().optional(), // Could be more strictly typed
-  successUrl: z.string().url().optional(),
-  errorUrl: z.string().url().optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
-});
+import { PaymentCreatePayloadSchema } from "@/lib/server/validators";
 
 import { canCreatePayment } from "@/lib/server/access";
 
@@ -44,12 +36,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const validationResult = PaymentSchema.safeParse(body);
+    const validationResult = PaymentCreatePayloadSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json({ error: "Validation Error", details: validationResult.error.issues }, { status: 400 });
     }
 
-    const { amount, currency, description, successUrl, errorUrl, metadata } = validationResult.data;
+    const { amount, currency, description, success_url, cancel_url, metadata } = validationResult.data;
 
     // Connect to Supabase
     const supabase = createAdminClient();
@@ -84,8 +76,8 @@ export async function POST(request: NextRequest) {
       net_amount: netAmount,
       currency: currency,
       status: 'pending',
-      success_url: successUrl,
-      error_url: errorUrl,
+      success_url: success_url,
+      error_url: cancel_url,
       metadata: metadata,
     }).select().single();
 
@@ -96,11 +88,14 @@ export async function POST(request: NextRequest) {
 
     // 4. Return response to merchant
     return NextResponse.json({
-      id: payment.id,
-      reference: payment.kobara_reference,
-      amount: payment.amount,
-      status: payment.status,
-      payment_url: bazikResponse.payment_url || bazikResponse.url || null, // URL for customer to pay
+      status: "success",
+      data: {
+        id: payment.id,
+        reference: payment.kobara_reference,
+        amount: payment.amount,
+        status: payment.status,
+        checkout_url: bazikResponse.payment_url || bazikResponse.url || null, // URL for customer to pay
+      }
     });
 
   } catch (error: any) {
