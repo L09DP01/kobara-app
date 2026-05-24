@@ -1,6 +1,6 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
+
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -13,19 +13,64 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: '/api/docs/ai/chat',
-    body: {
-      page: currentSlug
-    },
-    initialMessages: [
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: 'Bonjour ! Je suis l\'assistant IA de Kobara. Comment puis-je vous aider avec votre intégration aujourd\'hui ? (ex: "Comment créer un paiement", "Valider mon code", etc.)'
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<any[]>([
+    {
+      id: 'welcome',
+      role: 'assistant',
+      content: 'Bonjour ! Je suis l\'assistant IA de Kobara. Comment puis-je vous aider avec votre intégration aujourd\'hui ? (ex: "Comment créer un paiement", "Valider mon code", etc.)'
+    }
+  ]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = { id: Date.now().toString(), role: 'user', content: input };
+    const newMessages = [...messages, userMessage];
+    
+    setMessages(newMessages);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/docs/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: newMessages, page: currentSlug })
+      });
+
+      if (!response.ok) throw new Error('API Error');
+      
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let assistantMessage = '';
+
+      if (reader) {
+        setMessages([...newMessages, { id: (Date.now() + 1).toString(), role: 'assistant', content: '' }]);
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          assistantMessage += decoder.decode(value, { stream: true });
+          
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            return [...prev.slice(0, -1), { ...last, content: assistantMessage }];
+          });
+        }
       }
-    ]
-  });
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: 'Une erreur est survenue lors de la communication avec le serveur.' }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
