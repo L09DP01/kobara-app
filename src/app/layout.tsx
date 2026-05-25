@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import { cookies } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
 import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
+import { NotificationPrompt } from "@/components/notification-prompt";
 import type { Viewport } from 'next';
 
 const geistSans = Geist({
@@ -113,6 +114,7 @@ export default async function RootLayout({
           </div>
           <Toaster position="top-right" richColors />
           <PwaInstallPrompt />
+          <NotificationPrompt />
         </LanguageProvider>
       </body>
     </html>

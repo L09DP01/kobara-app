@@ -14,6 +14,19 @@ export function PwaInstallPrompt() {
       return; // Hide for 7 days if dismissed
     }
 
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in window.navigator && (window.navigator as any).standalone);
+
+    if (isStandalone) return;
+
+    if (isIos) {
+      // For iOS, beforeinstallprompt is not supported. Show our own manual instruction banner.
+      const timer = setTimeout(() => {
+        setShowPrompt(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+
     const handler = (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
@@ -31,6 +44,14 @@ export function PwaInstallPrompt() {
   }, []);
 
   const handleInstallClick = async () => {
+    // If it's iOS, they need to do it manually from the Share menu.
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    if (isIos) {
+      alert("Sur iPhone/iPad : Appuyez sur le bouton 'Partager' en bas (le carré avec une flèche vers le haut), puis sélectionnez 'Sur l'écran d'accueil'.");
+      handleDismiss();
+      return;
+    }
+
     if (!deferredPrompt) return;
     
     // Show the install prompt
