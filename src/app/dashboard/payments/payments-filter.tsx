@@ -44,10 +44,7 @@ export function PaymentsFilter() {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-surface-card border border-border-subtle rounded-xl text-body-sm font-medium text-text-primary hover:bg-surface-container-low hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
-            <span className="material-symbols-outlined text-[18px]">download</span>
-            Exporter
-          </button>
+
           <Link href="/dashboard/payment-links" className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl text-body-sm font-semibold hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
             <span className="material-symbols-outlined text-[18px]">add_link</span>
             Créer un lien de paiement
