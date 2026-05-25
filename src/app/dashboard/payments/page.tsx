@@ -85,9 +85,9 @@ export default async function PaymentsPage({
       <PaymentsFilter />
 
       {/* ── Stats Cards ── */}
-      <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 md:gap-6 pb-2 snap-x hide-scrollbar">
-        {/* Card: Total Encaissé */}
-        <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 w-[85vw] md:w-auto snap-center shrink-0 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+      <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+        {/* Card: Total Encaissé — full width on mobile */}
+        <div className="md:col-span-1 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-success rounded-l-2xl"></div>
           <div className="p-6 pl-5">
             <div className="flex justify-between items-start mb-4">
@@ -109,46 +109,48 @@ export default async function PaymentsPage({
           </div>
         </div>
 
-        {/* Card: Volume Hebdo */}
-        <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 w-[85vw] md:w-auto snap-center shrink-0 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-2xl"></div>
-          <div className="p-6 pl-5">
-            <div className="flex justify-between items-start mb-4">
-              <p className="font-body-sm text-text-secondary">Volume Hebdomadaire</p>
-              <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                <span className="material-symbols-outlined text-[22px]">bar_chart</span>
+        {/* Volume Hebdo + Remboursements — side by side on mobile */}
+        <div className="grid grid-cols-2 gap-4 md:contents">
+          {/* Card: Volume Hebdo */}
+          <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-2xl"></div>
+            <div className="p-4 pl-3 md:p-6 md:pl-5">
+              <div className="flex justify-between items-start mb-3 md:mb-4">
+                <p className="font-body-sm text-text-secondary text-xs md:text-sm">Volume Hebdo</p>
+                <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                  <span className="material-symbols-outlined text-[18px] md:text-[22px]">bar_chart</span>
+                </div>
+              </div>
+              <h3 className="font-headline-lg text-lg md:text-headline-lg text-text-primary tracking-tight">{totalWeek.toLocaleString('fr-FR')} <span className="text-sm md:text-base">HTG</span></h3>
+              <div className="mt-2 md:mt-3 flex items-center gap-1 text-text-secondary font-body-sm text-xs md:text-sm">
+                <span className="material-symbols-outlined text-[14px] md:text-[16px]">trending_flat</span>
+                <span>Stable</span>
               </div>
             </div>
-            <h3 className="font-headline-lg text-headline-lg text-text-primary tracking-tight">{totalWeek.toLocaleString('fr-FR')} HTG</h3>
-            <div className="mt-3 flex items-center gap-1 text-text-secondary font-body-sm">
-              <span className="material-symbols-outlined text-[16px]">trending_flat</span>
-              <span>Stable</span>
-              <span className="ml-1">vs sem. passée</span>
+            <div className="absolute -right-4 -bottom-4 opacity-[0.04] text-blue-500">
+              <span className="material-symbols-outlined text-[72px] md:text-[96px]">bar_chart</span>
             </div>
           </div>
-          <div className="absolute -right-4 -bottom-4 opacity-[0.04] text-blue-500">
-            <span className="material-symbols-outlined text-[96px]">bar_chart</span>
-          </div>
-        </div>
 
-        {/* Card: Remboursements */}
-        <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 w-[85vw] md:w-auto snap-center shrink-0 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-error rounded-l-2xl"></div>
-          <div className="p-6 pl-5">
-            <div className="flex justify-between items-start mb-4">
-              <p className="font-body-sm text-text-secondary">Remboursements</p>
-              <div className="h-10 w-10 rounded-xl bg-status-error/10 flex items-center justify-center text-status-error">
-                <span className="material-symbols-outlined text-[22px]">currency_exchange</span>
+          {/* Card: Remboursements */}
+          <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-error rounded-l-2xl"></div>
+            <div className="p-4 pl-3 md:p-6 md:pl-5">
+              <div className="flex justify-between items-start mb-3 md:mb-4">
+                <p className="font-body-sm text-text-secondary text-xs md:text-sm">Remboursements</p>
+                <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-status-error/10 flex items-center justify-center text-status-error">
+                  <span className="material-symbols-outlined text-[18px] md:text-[22px]">currency_exchange</span>
+                </div>
+              </div>
+              <h3 className="font-headline-lg text-lg md:text-headline-lg text-text-primary tracking-tight">0 <span className="text-sm md:text-base">HTG</span></h3>
+              <div className="mt-2 md:mt-3 flex items-center gap-1 text-text-secondary font-body-sm text-xs md:text-sm">
+                <span className="material-symbols-outlined text-[14px] md:text-[16px]">receipt_long</span>
+                <span>{refundCount} transaction(s)</span>
               </div>
             </div>
-            <h3 className="font-headline-lg text-headline-lg text-text-primary tracking-tight">0 HTG</h3>
-            <div className="mt-3 flex items-center gap-1 text-text-secondary font-body-sm">
-              <span className="material-symbols-outlined text-[16px]">receipt_long</span>
-              <span>{refundCount} transaction(s)</span>
+            <div className="absolute -right-4 -bottom-4 opacity-[0.04] text-status-error">
+              <span className="material-symbols-outlined text-[72px] md:text-[96px]">currency_exchange</span>
             </div>
-          </div>
-          <div className="absolute -right-4 -bottom-4 opacity-[0.04] text-status-error">
-            <span className="material-symbols-outlined text-[96px]">currency_exchange</span>
           </div>
         </div>
       </div>
