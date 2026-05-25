@@ -4,6 +4,8 @@ import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { cookies } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
+import type { Viewport } from 'next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +26,14 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  themeColor: '#0A0A0A',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+};
 
 import { siteConfig } from "@/config/site";
 
@@ -80,11 +90,29 @@ export default async function RootLayout({
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
           }
         `}</style>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('SW registered: ', registration.scope);
+                  }, function(err) {
+                    console.log('SW registration failed: ', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className="bg-background-main font-body-base text-body-base text-on-surface min-h-screen flex flex-col">
         <LanguageProvider>
-          {children}
+          <div style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }} className="flex-1 flex flex-col min-h-screen">
+            {children}
+          </div>
           <Toaster position="top-right" richColors />
+          <PwaInstallPrompt />
         </LanguageProvider>
       </body>
     </html>

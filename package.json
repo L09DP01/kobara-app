@@ -15,6 +15,11 @@
     "@ai-sdk/react": "^3.0.193",
     "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@base-ui/react": "^1.4.1",
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/camera": "^8.2.0",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/preferences": "^8.0.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -53,6 +58,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
