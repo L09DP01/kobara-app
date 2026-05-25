@@ -159,12 +159,12 @@ export default async function PaymentsPage({
           <table className="w-full text-left border-collapse md:min-w-[800px]">
             <thead>
               <tr className="border-b border-border-subtle bg-surface-container-lowest">
-                <th className="py-3 px-4 md:py-4 md:px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Client</th>
-                <th className="py-3 px-4 md:py-4 md:px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Montant</th>
-                <th className="py-3 px-4 md:py-4 md:px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Statut</th>
-                <th className="hidden md:table-cell py-3 px-4 md:py-4 md:px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Méthode</th>
-                <th className="hidden md:table-cell py-3 px-4 md:py-4 md:px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Date</th>
-                <th className="py-3 px-4 md:py-4 md:px-6 text-right font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Action</th>
+                <th className="py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Client</th>
+                <th className="py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Montant</th>
+                <th className="py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Statut</th>
+                <th className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Méthode</th>
+                <th className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Date</th>
+                <th className="py-2 px-3 md:py-4 md:px-6 text-right font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Action</th>
               </tr>
             </thead>
             <tbody className="font-body-sm text-text-primary">
@@ -176,29 +176,29 @@ export default async function PaymentsPage({
                     'border-l-status-warning'
                   }`}>
                     {/* Client with Avatar */}
-                    <td className="py-3 px-4 md:py-4 md:px-6">
+                    <td className="py-2 px-3 md:py-4 md:px-6">
                       <div className="flex items-center gap-2 md:gap-3">
-                        <div className={`h-8 w-8 md:h-9 md:w-9 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold text-white shrink-0 ${
+                        <div className={`h-6 w-6 md:h-9 md:w-9 rounded-full flex items-center justify-center text-[9px] md:text-xs font-bold text-white shrink-0 ${
                           payment.status === 'succeeded' ? 'bg-status-success' :
                           payment.status === 'failed' ? 'bg-status-error' :
                           'bg-status-warning'
                         }`}>
                           {(payment.customers?.name || 'CI').substring(0, 2).toUpperCase()}
                         </div>
-                        <div className="min-w-0 max-w-[120px] md:max-w-none">
-                          <div className="font-medium text-text-primary text-sm md:text-base truncate">{payment.customers?.name || 'Client Inconnu'}</div>
-                          <div className="text-text-secondary text-[10px] md:text-xs font-mono-code truncate">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
+                        <div className="min-w-0 max-w-[110px] md:max-w-none">
+                          <div className="font-medium text-text-primary text-xs md:text-sm truncate">{payment.customers?.name || 'Client Inconnu'}</div>
+                          <div className="text-text-secondary text-[9px] md:text-xs font-mono-code truncate">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
                         </div>
                       </div>
                     </td>
                     {/* Montant */}
-                    <td className="py-3 px-4 md:py-4 md:px-6">
-                      <div className="font-semibold text-text-primary text-sm md:text-base">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-xs">{payment.currency}</span></div>
-                      <div className="text-text-secondary text-[10px] md:text-xs mt-0.5">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px]">{payment.currency}</span></div>
+                    <td className="py-2 px-3 md:py-4 md:px-6">
+                      <div className="font-semibold text-text-primary text-xs md:text-sm">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px] md:text-xs">{payment.currency}</span></div>
+                      <div className="text-text-secondary text-[9px] md:text-xs mt-0.5">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[9px] md:text-[10px]">{payment.currency}</span></div>
                     </td>
                     {/* Statut */}
-                    <td className="py-3 px-4 md:py-4 md:px-6">
-                      <span className={`inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-semibold ${
+                    <td className="py-2 px-3 md:py-4 md:px-6">
+                      <span className={`inline-flex items-center gap-1 md:gap-1.5 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full text-[9px] md:text-xs font-semibold ${
                         payment.status === 'succeeded' ? 'bg-status-success/10 text-status-success' :
                         payment.status === 'failed' ? 'bg-status-error/10 text-status-error' :
                         'bg-status-warning/10 text-status-warning'
@@ -212,22 +212,22 @@ export default async function PaymentsPage({
                       </span>
                     </td>
                     {/* Méthode */}
-                    <td className="hidden md:table-cell py-3 px-4 md:py-4 md:px-6">
+                    <td className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6">
                       <div className="flex items-center gap-2 text-text-secondary">
                         <span className="material-symbols-outlined text-[18px]">smartphone</span>
                         <span className="capitalize text-text-primary font-medium">{payment.provider}</span>
                       </div>
                     </td>
                     {/* Date */}
-                    <td className="hidden md:table-cell py-3 px-4 md:py-4 md:px-6 text-text-secondary">
-                      <div className="font-medium text-text-primary">{new Date(payment.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    <td className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6 text-text-secondary">
+                      <div className="font-medium text-text-primary text-sm">{new Date(payment.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                       <div className="text-xs mt-0.5">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     {/* Action */}
-                    <td className="py-3 px-4 md:py-4 md:px-6 text-right">
+                    <td className="py-2 px-3 md:py-4 md:px-6 text-right">
                       <Link href={`/dashboard/payments/${payment.id}`} className="inline-flex items-center gap-1 text-text-secondary hover:text-primary font-medium transition-colors duration-150 group-hover:text-primary">
-                        <span className="text-sm hidden sm:inline-block">Détails</span>
-                        <span className="material-symbols-outlined text-[16px] opacity-100 sm:opacity-0 sm:-translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">arrow_forward</span>
+                        <span className="text-[11px] md:text-sm hidden sm:inline-block">Détails</span>
+                        <span className="material-symbols-outlined text-[14px] md:text-[16px] opacity-100 sm:opacity-0 sm:-translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">arrow_forward</span>
                       </Link>
                     </td>
                   </tr>
