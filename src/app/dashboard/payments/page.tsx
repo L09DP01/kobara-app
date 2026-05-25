@@ -74,10 +74,10 @@ export default async function PaymentsPage({
     <div className="max-w-[1440px] mx-auto w-full space-y-8 pb-16">
 
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-headline-lg text-text-primary text-2xl tracking-tight">Paiements</h1>
-          <p className="font-body-sm text-text-secondary">Suivez, filtrez et gérez toutes vos transactions en un seul endroit.</p>
+      <div className="flex flex-row justify-between items-center gap-4 w-full">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="font-headline-lg text-text-primary text-xl sm:text-2xl tracking-tight">Paiements</h1>
+          <p className="font-body-sm text-text-secondary hidden sm:block">Suivez, filtrez et gérez toutes vos transactions en un seul endroit.</p>
         </div>
         <ExportCsvButton payments={filteredPayments} />
       </div>
@@ -85,9 +85,9 @@ export default async function PaymentsPage({
       <PaymentsFilter />
 
       {/* ── Stats Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 md:gap-6 pb-2 snap-x hide-scrollbar">
         {/* Card: Total Encaissé */}
-        <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+        <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 w-[85vw] md:w-auto snap-center shrink-0 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-success rounded-l-2xl"></div>
           <div className="p-6 pl-5">
             <div className="flex justify-between items-start mb-4">
@@ -110,7 +110,7 @@ export default async function PaymentsPage({
         </div>
 
         {/* Card: Volume Hebdo */}
-        <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+        <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 w-[85vw] md:w-auto snap-center shrink-0 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-2xl"></div>
           <div className="p-6 pl-5">
             <div className="flex justify-between items-start mb-4">
@@ -132,7 +132,7 @@ export default async function PaymentsPage({
         </div>
 
         {/* Card: Remboursements */}
-        <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+        <div className="min-w-[260px] sm:min-w-[280px] md:min-w-0 w-[85vw] md:w-auto snap-center shrink-0 bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-error rounded-l-2xl"></div>
           <div className="p-6 pl-5">
             <div className="flex justify-between items-start mb-4">
@@ -159,12 +159,12 @@ export default async function PaymentsPage({
           <table className="w-full text-left border-collapse md:min-w-[800px]">
             <thead>
               <tr className="border-b border-border-subtle bg-surface-container-lowest">
-                <th className="py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Client</th>
-                <th className="py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Montant</th>
-                <th className="py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Statut</th>
-                <th className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Méthode</th>
-                <th className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6 font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Date</th>
-                <th className="py-2 px-3 md:py-4 md:px-6 text-right font-label-caps text-[10px] md:text-xs text-text-secondary uppercase tracking-wider font-semibold">Action</th>
+                <th className="py-2.5 sm:py-3 px-3 sm:px-5 font-label-caps text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Client</th>
+                <th className="py-2.5 sm:py-3 px-3 sm:px-5 font-label-caps text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Montant</th>
+                <th className="py-2.5 sm:py-3 px-3 sm:px-5 font-label-caps text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Statut</th>
+                <th className="hidden sm:table-cell py-3 px-5 font-label-caps text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Méthode</th>
+                <th className="hidden md:table-cell py-3 px-5 font-label-caps text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Date</th>
+                <th className="py-2.5 sm:py-3 px-3 sm:px-5 text-right font-label-caps text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Action</th>
               </tr>
             </thead>
             <tbody className="font-body-sm text-text-primary">
@@ -176,34 +176,34 @@ export default async function PaymentsPage({
                     'border-l-status-warning'
                   }`}>
                     {/* Client with Avatar */}
-                    <td className="py-2 px-3 md:py-4 md:px-6">
-                      <div className="flex items-center gap-2 md:gap-3">
-                        <div className={`h-6 w-6 md:h-9 md:w-9 rounded-full flex items-center justify-center text-[9px] md:text-xs font-bold text-white shrink-0 ${
+                    <td className="py-2.5 sm:py-3.5 px-3 sm:px-5">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className={`h-6 w-6 sm:h-8 sm:w-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white shrink-0 ${
                           payment.status === 'succeeded' ? 'bg-status-success' :
                           payment.status === 'failed' ? 'bg-status-error' :
                           'bg-status-warning'
                         }`}>
                           {(payment.customers?.name || 'CI').substring(0, 2).toUpperCase()}
                         </div>
-                        <div className="min-w-0 max-w-[110px] md:max-w-none">
-                          <div className="font-medium text-text-primary text-xs md:text-sm truncate">{payment.customers?.name || 'Client Inconnu'}</div>
-                          <div className="text-text-secondary text-[9px] md:text-xs font-mono-code truncate">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
+                        <div className="min-w-0 max-w-[120px] sm:max-w-[140px] md:max-w-none">
+                          <div className="font-medium text-text-primary text-xs sm:text-sm truncate">{payment.customers?.name || 'Client Inconnu'}</div>
+                          <div className="text-text-secondary text-[10px] sm:text-[11px] font-mono-code truncate">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
                         </div>
                       </div>
                     </td>
                     {/* Montant */}
-                    <td className="py-2 px-3 md:py-4 md:px-6">
-                      <div className="font-semibold text-text-primary text-xs md:text-sm">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px] md:text-xs">{payment.currency}</span></div>
-                      <div className="text-text-secondary text-[9px] md:text-xs mt-0.5">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[9px] md:text-[10px]">{payment.currency}</span></div>
+                    <td className="py-2.5 sm:py-3.5 px-3 sm:px-5">
+                      <div className="font-semibold text-text-primary text-xs sm:text-sm">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs">{payment.currency}</span></div>
+                      <div className="text-text-secondary text-[10px] sm:text-[11px] mt-0.5">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px]">{payment.currency}</span></div>
                     </td>
                     {/* Statut */}
-                    <td className="py-2 px-3 md:py-4 md:px-6">
-                      <span className={`inline-flex items-center gap-1 md:gap-1.5 px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full text-[9px] md:text-xs font-semibold ${
+                    <td className="py-2.5 sm:py-3.5 px-3 sm:px-5">
+                      <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-semibold ${
                         payment.status === 'succeeded' ? 'bg-status-success/10 text-status-success' :
                         payment.status === 'failed' ? 'bg-status-error/10 text-status-error' :
                         'bg-status-warning/10 text-status-warning'
                       }`}>
-                        <span className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${
+                        <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${
                           payment.status === 'succeeded' ? 'bg-status-success' :
                           payment.status === 'failed' ? 'bg-status-error' :
                           'bg-status-warning'
@@ -212,22 +212,22 @@ export default async function PaymentsPage({
                       </span>
                     </td>
                     {/* Méthode */}
-                    <td className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6">
+                    <td className="hidden sm:table-cell py-3.5 px-5">
                       <div className="flex items-center gap-2 text-text-secondary">
-                        <span className="material-symbols-outlined text-[18px]">smartphone</span>
-                        <span className="capitalize text-text-primary font-medium">{payment.provider}</span>
+                        <span className="material-symbols-outlined text-[14px] sm:text-[18px]">smartphone</span>
+                        <span className="capitalize text-xs sm:text-sm text-text-primary font-medium">{payment.provider}</span>
                       </div>
                     </td>
                     {/* Date */}
-                    <td className="hidden md:table-cell py-2 px-3 md:py-4 md:px-6 text-text-secondary">
-                      <div className="font-medium text-text-primary text-sm">{new Date(payment.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                      <div className="text-xs mt-0.5">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+                    <td className="hidden md:table-cell py-3.5 px-5 text-text-secondary">
+                      <div className="font-medium text-text-primary text-xs sm:text-sm">{new Date(payment.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                      <div className="text-[10px] sm:text-xs mt-0.5">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     {/* Action */}
-                    <td className="py-2 px-3 md:py-4 md:px-6 text-right">
+                    <td className="py-2.5 sm:py-3.5 px-3 sm:px-5 text-right">
                       <Link href={`/dashboard/payments/${payment.id}`} className="inline-flex items-center gap-1 text-text-secondary hover:text-primary font-medium transition-colors duration-150 group-hover:text-primary">
-                        <span className="text-[11px] md:text-sm hidden sm:inline-block">Détails</span>
-                        <span className="material-symbols-outlined text-[14px] md:text-[16px] opacity-100 sm:opacity-0 sm:-translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">arrow_forward</span>
+                        <span className="text-xs sm:text-sm hidden sm:inline-block">Détails</span>
+                        <span className="material-symbols-outlined text-[16px] opacity-100 sm:opacity-0 sm:-translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">arrow_forward</span>
                       </Link>
                     </td>
                   </tr>
