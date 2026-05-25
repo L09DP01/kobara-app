@@ -96,7 +96,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* Overview Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+      <section className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
         {/* Card 1 - Total Encaissé */}
         <div className="bg-surface-card rounded-xl border border-border-subtle p-5 flex flex-col gap-3 shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 border-l-4 border-l-status-success">
           <div className="flex justify-between items-start">
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Card 3 - Taux de Succès */}
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-5 flex flex-col gap-3 shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
+        <div className="hidden md:flex bg-surface-card rounded-xl border border-border-subtle p-5 flex-col gap-3 shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500">
           <div className="flex justify-between items-start">
             <span className="text-sm text-text-secondary font-medium">Taux de Succès</span>
             <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Card 4 - Revenu Mensuel */}
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-5 flex flex-col gap-3 shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 border-l-4 border-l-orange-500">
+        <div className="hidden md:flex bg-surface-card rounded-xl border border-border-subtle p-5 flex-col gap-3 shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 border-l-4 border-l-orange-500">
           <div className="flex justify-between items-start">
             <span className="text-sm text-text-secondary font-medium">Revenu Mensuel</span>
             <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
@@ -154,7 +154,7 @@ export default async function DashboardPage() {
         {/* Left Column */}
         <div className="xl:col-span-2 flex flex-col gap-6">
           {/* Chart Section */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm">
+          <div className="hidden md:block bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-text-primary">Flux Financier</h3>
               <div className="flex items-center bg-surface-container-lowest border border-border-subtle rounded-lg p-0.5">
