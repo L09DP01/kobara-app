@@ -51,7 +51,7 @@ export function CreatePaymentLinkForm() {
           name="title" 
           required
           placeholder="ex: Consultation vidéo 1h"
-          className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 sm:py-2 bg-surface-container-low border border-border-subtle rounded-lg text-base sm:text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
         <p className="text-text-secondary text-xs">Ce que vos clients verront lors du paiement.</p>
       </div>
@@ -66,7 +66,7 @@ export function CreatePaymentLinkForm() {
           step="0.01"
           min="10"
           placeholder="ex: 1500.00"
-          className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 sm:py-2 bg-surface-container-low border border-border-subtle rounded-lg text-base sm:text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         />
         <p className="text-text-secondary text-xs">Le montant fixe à payer en Gourdes Haïtiennes.</p>
       </div>
@@ -78,7 +78,7 @@ export function CreatePaymentLinkForm() {
           name="description" 
           rows={3}
           placeholder="Détails supplémentaires sur le paiement..."
-          className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+          className="w-full px-4 py-3 sm:py-2 bg-surface-container-low border border-border-subtle rounded-lg text-base sm:text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
         ></textarea>
       </div>
 
@@ -86,14 +86,14 @@ export function CreatePaymentLinkForm() {
         <h3 className="text-body-md font-semibold text-text-primary">Options supplémentaires</h3>
         <p className="text-xs text-text-secondary">Informations à collecter auprès du client lors du paiement.</p>
         
-        <div className="space-y-3 pt-2">
+        <div className="space-y-4 pt-2">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" name="collect_phone" value="true" className="w-4 h-4 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
-            <span className="text-sm font-medium text-text-primary">Demander le numéro de téléphone</span>
+            <input type="checkbox" name="collect_phone" value="true" className="w-5 h-5 sm:w-4 sm:h-4 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
+            <span className="text-base sm:text-sm font-medium text-text-primary">Demander le numéro de téléphone</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" name="collect_address" value="true" className="w-4 h-4 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
-            <span className="text-sm font-medium text-text-primary">Demander l'adresse de livraison</span>
+            <input type="checkbox" name="collect_address" value="true" className="w-5 h-5 sm:w-4 sm:h-4 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
+            <span className="text-base sm:text-sm font-medium text-text-primary">Demander l'adresse de livraison</span>
           </label>
         </div>
       </div>
@@ -102,28 +102,28 @@ export function CreatePaymentLinkForm() {
         <h3 className="text-body-md font-semibold text-text-primary">Frais de transaction</h3>
         <p className="text-xs text-text-secondary">Choisissez qui prend en charge les frais de paiement.</p>
         
-        <div className="space-y-3 pt-2">
+        <div className="space-y-4 pt-2">
           <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" name="pass_fees_to_customer" value="true" className="w-4 h-4 mt-0.5 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
+            <input type="checkbox" name="pass_fees_to_customer" value="true" className="w-5 h-5 sm:w-4 sm:h-4 mt-0.5 text-primary bg-surface-container border-border-subtle rounded focus:ring-primary focus:ring-2" />
             <div>
-              <span className="text-sm font-medium text-text-primary">Faire payer les frais par le client</span>
-              <p className="text-xs text-text-secondary mt-1">Si activé, le client paiera le montant du lien + les frais Kobara. Vous recevrez le montant exact du lien.</p>
+              <span className="text-base sm:text-sm font-medium text-text-primary">Faire payer les frais par le client</span>
+              <p className="text-sm sm:text-xs text-text-secondary mt-1">Si activé, le client paiera le montant du lien + les frais Kobara. Vous recevrez le montant exact du lien.</p>
             </div>
           </label>
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border-subtle flex justify-end gap-3">
+      <div className="pt-4 border-t border-border-subtle flex flex-col-reverse sm:flex-row justify-end gap-3">
         <Link 
           href="/dashboard/payment-links"
-          className="px-5 py-2.5 rounded-lg font-body-sm font-medium border border-border-subtle text-text-secondary hover:bg-surface-container-low hover:text-text-primary transition-colors"
+          className="w-full sm:w-auto text-center px-5 py-3 sm:py-2.5 rounded-lg font-body-sm font-medium border border-border-subtle text-text-secondary hover:bg-surface-container-low hover:text-text-primary transition-colors"
         >
           Annuler
         </Link>
         <button 
           type="submit"
           disabled={loading}
-          className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50"
+          className="w-full sm:w-auto bg-primary text-on-primary px-5 py-3 sm:py-2.5 rounded-lg font-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50"
         >
           {loading ? 'Création...' : 'Créer le lien'}
         </button>
