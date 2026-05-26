@@ -46,8 +46,8 @@ export async function updateSession(request: NextRequest) {
     pathname === route || pathname.startsWith(route + '/')
   );
 
-  // If the request is for the payment domain, it's public (handled by rewrites to /pay)
-  if (hostname === 'pay.kobara.app') {
+  // If the request is for a custom subdomain, it's public (handled by rewrites)
+  if (hostname === 'pay.kobara.app' || hostname === 'api.kobara.app') {
     isPublicRoute = true;
   }
 
