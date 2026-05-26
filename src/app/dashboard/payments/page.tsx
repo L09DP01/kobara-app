@@ -47,7 +47,6 @@ export default async function PaymentsPage({
   let totalToday = 0;
   let totalWeek = 0;
   let refundCount = 0;
-  let totalFees = 0;
 
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -56,7 +55,6 @@ export default async function PaymentsPage({
     allPaymentsForStats.forEach(p => {
       const pDate = new Date(p.created_at);
       if (p.status === 'succeeded') {
-        totalFees += Number(p.fee_amount || 0);
         if (pDate >= today) {
           totalToday += Number(p.net_amount || p.amount);
         }
@@ -70,32 +68,15 @@ export default async function PaymentsPage({
     });
   }
 
-  const totalPayments = allPaymentsForStats?.length || 0;
-  const succeededPayments = allPaymentsForStats?.filter(p => p.status === 'succeeded').length || 0;
-  const failedPayments = allPaymentsForStats?.filter(p => p.status === 'failed').length || 0;
+
 
   return (
     <div className="max-w-[1440px] mx-auto w-full space-y-6 md:space-y-8 pb-16">
 
       {/* ═══════════════════════════════════════════════════
-          HERO BANNER
+          TOP BAR: Search + Filters
       ═══════════════════════════════════════════════════ */}
-      <section className="relative rounded-2xl bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] p-5 sm:p-8 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-72 h-72 bg-primary/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
-          <div className="absolute bottom-0 left-0 w-56 h-56 bg-blue-500/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
-        </div>
-        <div className="relative z-10 flex flex-row items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="material-symbols-outlined text-primary text-[20px] sm:text-[24px]">payments</span>
-              <h1 className="text-white font-bold text-lg sm:text-2xl tracking-tight">Paiements</h1>
-            </div>
-            <p className="text-white/60 text-xs sm:text-sm hidden sm:block">Suivez, filtrez et gérez toutes vos transactions en un seul endroit.</p>
-          </div>
-          <ExportCsvButton payments={filteredPayments} />
-        </div>
-      </section>
+      <PaymentsFilter exportButton={<ExportCsvButton payments={filteredPayments} />} />
 
       {/* ═══════════════════════════════════════════════════
           STATS CARDS
@@ -168,37 +149,6 @@ export default async function PaymentsPage({
           </div>
         </div>
       </div>
-
-      {/* ═══════════════════════════════════════════════════
-          QUICK STATS BAR
-      ═══════════════════════════════════════════════════ */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-1 hide-scrollbar">
-        <div className="flex items-center gap-2 px-3 py-2 bg-surface-card border border-border-subtle rounded-xl shrink-0">
-          <div className="w-2 h-2 rounded-full bg-primary"></div>
-          <span className="text-text-secondary text-xs whitespace-nowrap">Total</span>
-          <span className="font-bold text-text-primary text-xs">{totalPayments}</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-surface-card border border-border-subtle rounded-xl shrink-0">
-          <div className="w-2 h-2 rounded-full bg-status-success"></div>
-          <span className="text-text-secondary text-xs whitespace-nowrap">Réussis</span>
-          <span className="font-bold text-status-success text-xs">{succeededPayments}</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-surface-card border border-border-subtle rounded-xl shrink-0">
-          <div className="w-2 h-2 rounded-full bg-status-error"></div>
-          <span className="text-text-secondary text-xs whitespace-nowrap">Échoués</span>
-          <span className="font-bold text-status-error text-xs">{failedPayments}</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-2 bg-surface-card border border-border-subtle rounded-xl shrink-0">
-          <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-          <span className="text-text-secondary text-xs whitespace-nowrap">Frais Kobara</span>
-          <span className="font-bold text-orange-400 text-xs">{totalFees.toLocaleString('fr-FR')} HTG</span>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════
-          FILTERS
-      ═══════════════════════════════════════════════════ */}
-      <PaymentsFilter />
 
       {/* ═══════════════════════════════════════════════════
           TRANSACTIONS TABLE

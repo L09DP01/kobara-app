@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export function PaymentsFilter() {
+export function PaymentsFilter({ exportButton }: { exportButton?: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [q, setQ] = useState(searchParams.get('q') || '');
@@ -27,29 +27,27 @@ export function PaymentsFilter() {
   }, [q, status]);
 
   return (
-    <div className="space-y-5">
-      {/* ── Search, Filters & Actions ── */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5">
+    <div className="space-y-4">
+      {/* ── Search + Actions (same row) ── */}
+      <div className="flex flex-row items-center gap-2 sm:gap-3 w-full">
         {/* Search */}
-        <div className="relative w-full lg:w-[480px]">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary text-[20px]">search</span>
+        <div className="relative flex-1 min-w-0">
+          <span className="material-symbols-outlined absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-text-secondary text-[18px] sm:text-[20px]">search</span>
           <input
-            className="w-full pl-11 pr-4 py-3 bg-surface-card border border-border-subtle rounded-xl text-body-sm font-body-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-sm transition-all duration-200"
-            placeholder="Rechercher par ID, client ou montant..."
+            className="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-surface-card border border-border-subtle rounded-xl text-xs sm:text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary shadow-sm transition-all duration-200"
+            placeholder="Rechercher..."
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
         </div>
-
-        {/* Actions */}
-        <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-
-          <Link href="/dashboard/payment-links" className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl text-body-sm font-semibold hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
-            <span className="material-symbols-outlined text-[18px]">add_link</span>
-            Créer un lien de paiement
-          </Link>
-        </div>
+        {/* Export Button (passed from parent) */}
+        {exportButton}
+        {/* Créer un lien */}
+        <Link href="/dashboard/payment-links" className="flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-primary text-on-primary rounded-xl text-xs sm:text-sm font-semibold hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-sm whitespace-nowrap shrink-0">
+          <span className="material-symbols-outlined text-[16px] sm:text-[18px]">add_link</span>
+          <span className="hidden sm:inline">Créer un lien</span>
+        </Link>
       </div>
 
       {/* ── Filter Pills ── */}
