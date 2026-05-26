@@ -40,9 +40,16 @@ export async function updateSession(request: NextRequest) {
   ];
 
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute = publicRoutes.some(route => 
+  const hostname = request.headers.get("host")?.split(":")[0] || request.nextUrl.hostname;
+  
+  let isPublicRoute = publicRoutes.some(route => 
     pathname === route || pathname.startsWith(route + '/')
   );
+
+  // If the request is for the payment domain, it's public (handled by rewrites to /pay)
+  if (hostname === 'pay.kobara.app') {
+    isPublicRoute = true;
+  }
 
   // Default-deny: if not a public route and no user, redirect to login
   if (!isPublicRoute && !userLoggedIn) {
