@@ -82,7 +82,7 @@ export default async function PaymentLinksPage() {
                         <div className="font-medium text-text-primary">{link.title}</div>
                         <div className="text-text-secondary text-xs flex items-center gap-1 mt-1 cursor-pointer hover:text-secondary transition-colors">
                           <span className="material-symbols-outlined text-[14px]">link</span>
-                          {`${process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, '') || 'localhost:3000'}/pay/${link.slug || link.id}`}
+                          {`pay.kobara.app/${link.slug || link.id}`}
                         </div>
                       </td>
                       <td className="py-4 px-6">
@@ -105,7 +105,7 @@ export default async function PaymentLinksPage() {
                       <td className="py-4 px-6 text-right">
                         <LinkActions 
                           linkId={link.id} 
-                          linkUrl={`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/pay/${link.slug || link.id}`} 
+                          linkUrl={`https://pay.kobara.app/${link.slug || link.id}`} 
                         />
                       </td>
                     </tr>
