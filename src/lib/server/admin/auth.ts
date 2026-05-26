@@ -2,9 +2,11 @@ import { SignJWT, jwtVerify } from 'jose';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { sendEmail } from '@/lib/server/mail';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'fallback_secret_kobara_admin_2026'
-);
+const _jwtSecretRaw = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
+if (!_jwtSecretRaw) {
+  throw new Error('CRITICAL: JWT_SECRET or NEXTAUTH_SECRET must be defined. Cannot start without a signing secret.');
+}
+const JWT_SECRET = new TextEncoder().encode(_jwtSecretRaw);
 
 // 5 minutes in milliseconds
 export const ADMIN_SESSION_TIMEOUT_MS = 5 * 60 * 1000;
@@ -68,7 +70,7 @@ export async function verifyAdminOtp(email: string, code: string) {
   
   const { data: otp } = await supabase
     .from('admin_otps')
-    .select('*')
+    .select('id')
     .ilike('email', email)
     .eq('code', code)
     .eq('used', false)

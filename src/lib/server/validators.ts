@@ -17,6 +17,7 @@ export const PaymentCreatePayloadSchema = z.object({
   success_url: z.string().url().optional().openapi({ description: "URL to redirect after successful payment", example: "https://your-site.com/success" }),
   cancel_url: z.string().url().optional().openapi({ description: "URL to redirect after cancelled/failed payment", example: "https://your-site.com/cancel" }),
   metadata: z.record(z.string(), z.any()).optional().openapi({ description: "Key-value object for custom data", example: { order_id: "ORD-12345" } }),
+  idempotency_key: z.string().optional().openapi({ description: "Idempotency key to prevent duplicate payments", example: "idem-key-12345" }),
 }).openapi("PaymentCreatePayload");
 
 export const PaymentResponseSchema = z.object({

@@ -59,7 +59,11 @@ if (hasRedis) {
     analytics: true,
   });
 } else {
-  // Fallback memory rate limiters
+  // LOW-03: Memory rate limiter is useless in serverless (Vercel) — warn in production
+  if (process.env.NODE_ENV === 'production') {
+    console.error('⚠️ CRITICAL: Upstash Redis is NOT configured. Rate limiting will NOT work in production serverless environment. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN immediately.');
+  }
+  // Fallback memory rate limiters (only useful in local dev)
   authLimiter = new MemoryRateLimiter(5, 5 * 60 * 1000);
   apiLimiter = new MemoryRateLimiter(100, 60 * 1000);
 }

@@ -3,6 +3,16 @@ import nodemailer from 'nodemailer';
 // Module d'envoi d'e-mails pour Kobara
 // Supporte SMTP réel si configuré, avec un simulateur pro en console en développement
 
+// MED-05: HTML escape function to prevent XSS via email content
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function generatePremiumEmailHtml(subject: string, text: string) {
   // Convert text into beautiful paragraphs and buttons/codes
   const contentHtml = text.split('\n\n').map(p => {
@@ -11,28 +21,28 @@ function generatePremiumEmailHtml(subject: string, text: string) {
     
     // Check if paragraph is just a URL (e.g. verificationLink, resetLink)
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      const safeUrl = escapeHtml(trimmed);
       return `
         <div style="text-align: center; margin: 32px 0;">
-          <a href="${trimmed}" style="background-color: #E53E3E; color: #ffffff; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 8px; display: inline-block; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.2);">Cliquez ici pour continuer</a>
+          <a href="${safeUrl}" style="background-color: #E53E3E; color: #ffffff; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 8px; display: inline-block; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.2);">Cliquez ici pour continuer</a>
         </div>
       `;
     }
     
     // Check if paragraph contains exactly a 6 digit code (like OTP)
-    // Wait, the OTP email is "Votre code de vérification temporaire à 6 chiffres pour votre compte Kobara est : 123456"
-    // It's all in one paragraph. Let's extract the code if the paragraph ends with it.
     const codeMatch = trimmed.match(/ :\s*(\d{6})$/);
     if (codeMatch) {
-      const textBefore = trimmed.replace(codeMatch[0], '');
+      const textBefore = escapeHtml(trimmed.replace(codeMatch[0], ''));
       return `
         <p style="color: #4B5563; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">${textBefore.replace(/\n/g, '<br>')}</p>
         <div style="text-align: center; margin: 32px 0;">
-          <span style="background-color: #F9FAFB; color: #111827; font-weight: 800; padding: 16px 32px; border-radius: 12px; display: inline-block; font-size: 28px; letter-spacing: 8px; border: 1px solid #E5E7EB;">${codeMatch[1]}</span>
+          <span style="background-color: #F9FAFB; color: #111827; font-weight: 800; padding: 16px 32px; border-radius: 12px; display: inline-block; font-size: 28px; letter-spacing: 8px; border: 1px solid #E5E7EB;">${escapeHtml(codeMatch[1])}</span>
         </div>
       `;
     }
     
-    return `<p style="color: #4B5563; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">${trimmed.replace(/\n/g, '<br>')}</p>`;
+    // MED-05: Escape all dynamic content before inserting into HTML
+    return `<p style="color: #4B5563; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">${escapeHtml(trimmed).replace(/\n/g, '<br>')}</p>`;
   }).join('');
 
   return `

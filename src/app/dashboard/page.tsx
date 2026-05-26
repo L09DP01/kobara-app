@@ -181,41 +181,41 @@ export default async function DashboardPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-border-subtle bg-surface-container-lowest/50">
-                    <th className="py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Client</th>
-                    <th className="py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Montant</th>
-                    <th className="py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Méthode</th>
-                    <th className="py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Statut</th>
-                    <th className="py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Date</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-5 text-[10px] sm:text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Client</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-5 text-[10px] sm:text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Montant</th>
+                    <th className="hidden sm:table-cell py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Méthode</th>
+                    <th className="py-2.5 sm:py-3 px-3 sm:px-5 text-[10px] sm:text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Statut</th>
+                    <th className="hidden md:table-cell py-3 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-subtle">
                   {recentPayments && recentPayments.length > 0 ? (
                     recentPayments.map((payment) => (
                       <tr key={payment.id} className="hover:bg-surface-container-lowest transition-colors group">
-                        <td className="py-3.5 px-5 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-semibold text-xs border border-primary/10">
+                        <td className="py-2.5 sm:py-3.5 px-3 sm:px-5 flex items-center gap-2 sm:gap-3">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-semibold text-[10px] sm:text-xs border border-primary/10">
                             {payment.customers?.name?.charAt(0)?.toUpperCase() || "?"}
                           </div>
-                          <span className="text-sm text-text-primary font-medium truncate max-w-[140px]">
+                          <span className="text-xs sm:text-sm text-text-primary font-medium truncate max-w-[100px] sm:max-w-[140px]">
                             {payment.customers?.name || payment.kobara_reference}
                           </span>
                         </td>
-                        <td className="py-3.5 px-5">
-                          <div className="text-sm font-semibold text-status-success">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} {payment.currency}</div>
+                        <td className="py-2.5 sm:py-3.5 px-3 sm:px-5">
+                          <div className="text-xs sm:text-sm font-semibold text-status-success">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs">{payment.currency}</span></div>
                         </td>
-                        <td className="py-3.5 px-5">
+                        <td className="hidden sm:table-cell py-3.5 px-5">
                           <div className="flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[14px] text-text-secondary">smartphone</span>
                             <span className="text-xs text-text-secondary capitalize">{payment.provider}</span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-5">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                        <td className="py-2.5 sm:py-3.5 px-3 sm:px-5">
+                          <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-semibold ${
                             payment.status === 'succeeded' ? 'bg-status-success/10 text-status-success' :
                             payment.status === 'failed' ? 'bg-status-error/10 text-status-error' :
                             'bg-status-warning/10 text-status-warning'
                           }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${
+                            <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${
                               payment.status === 'succeeded' ? 'bg-status-success' :
                               payment.status === 'failed' ? 'bg-status-error' :
                               'bg-status-warning'
@@ -223,7 +223,7 @@ export default async function DashboardPage() {
                             {payment.status === 'succeeded' ? 'Succès' : payment.status === 'failed' ? 'Échoué' : 'En attente'}
                           </span>
                         </td>
-                        <td className="py-3.5 px-5 text-xs text-text-secondary">
+                        <td className="hidden md:table-cell py-3.5 px-5 text-xs text-text-secondary">
                           {new Date(payment.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         </td>
                       </tr>

@@ -16,9 +16,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing signature or secret" }, { status: 401 });
     }
 
+    // HIGH-07: Use timing-safe comparison to prevent timing attacks
     const expectedSignature = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-    if (signature !== expectedSignature) {
+    const sigBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+    if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    // HIGH-07: Verify timestamp to prevent replay attacks
+    const timestamp = request.headers.get("x-bazik-timestamp");
+    if (!timestamp || Math.abs(Date.now() - Number(timestamp)) > 5 * 60 * 1000) {
+      return NextResponse.json({ error: "Stale or missing timestamp" }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);
@@ -67,7 +76,7 @@ export async function POST(request: NextRequest) {
     if (reference.startsWith('WTH-')) {
       const { data: withdrawal, error: fetchError } = await supabaseAdmin
         .from('withdrawals')
-        .select('*')
+        .select('id, status, bazik_transaction_id, processed_at, total, merchant_id, amount')
         .eq('kobara_reference', reference)
         .single();
 
@@ -107,13 +116,13 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (merchant) {
-            const currentBalance = Number(merchant.available_balance || 0);
-            const totalRefund = Number(withdrawal.total || 0); // They paid the total amount
-
-            await supabaseAdmin
-              .from('merchants')
-              .update({ available_balance: currentBalance + totalRefund })
-              .eq('id', withdrawal.merchant_id);
+            // CRIT-05: Atomic balance credit to prevent race conditions
+            const totalRefund = Number(withdrawal.total || 0);
+            const { error: rpcError } = await supabaseAdmin.rpc('credit_merchant_balance', {
+              p_merchant_id: withdrawal.merchant_id,
+              p_amount: totalRefund
+            });
+            if (rpcError) console.error("Atomic balance credit error:", rpcError);
               
             // Create notification and email for failed withdrawal refund
             if (merchant.email) {
@@ -136,7 +145,7 @@ export async function POST(request: NextRequest) {
     // Find the payment
     const { data: payment, error: fetchError } = await supabaseAdmin
       .from('payments')
-      .select('*')
+      .select('id, status, paid_at, bazik_transaction_id, merchant_id, customer_id, net_amount, amount, currency, kobara_reference, metadata')
       .eq('kobara_reference', reference)
       .single();
 
@@ -195,18 +204,14 @@ export async function POST(request: NextRequest) {
       }
       
       if (merchant) {
-        const currentBalance = Number(merchant.available_balance || 0);
+        // CRIT-05: Atomic balance credit to prevent race conditions
         const netAmount = Number(payment.net_amount || 0);
-        
-        const { error: balanceError } = await supabaseAdmin
-          .from('merchants')
-          .update({
-            available_balance: currentBalance + netAmount
-          })
-          .eq('id', payment.merchant_id);
-          
-        if (balanceError) {
-          console.error("Balance update error:", balanceError);
+        const { error: rpcError } = await supabaseAdmin.rpc('credit_merchant_balance', {
+          p_merchant_id: payment.merchant_id,
+          p_amount: netAmount
+        });
+        if (rpcError) {
+          console.error("Atomic balance credit error:", rpcError);
         }
       }
 
@@ -220,7 +225,7 @@ export async function POST(request: NextRequest) {
       // 3. Send outbound webhooks to merchant endpoints
       const { data: endpoints } = await supabaseAdmin
         .from('webhook_endpoints')
-        .select('*')
+        .select('secret, url')
         .eq('merchant_id', payment.merchant_id)
         .eq('status', 'active');
 

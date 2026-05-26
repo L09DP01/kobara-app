@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+// CRIT-02: No hardcoded fallback — fail explicitly if secret is missing
+const _jwtSecretRaw = process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET;
+
 export async function updateSession(request: NextRequest) {
   // Forward the pathname so server layouts can detect the current route
   const requestHeaders = new Headers(request.headers);
@@ -11,11 +14,25 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Extract NextAuth session token from cookies (works in development & production)
-  const sessionToken = request.cookies.get("next-auth.session-token")?.value ||
-                       request.cookies.get("__Secure-next-auth.session-token")?.value;
+  // HIGH-04: Validate JWT signature & expiration, not just cookie presence
+  // NextAuth tokens are encrypted (JWE). We must use `getToken` from `next-auth/jwt` to decrypt and verify them.
+  let userLoggedIn = false;
 
-  const userLoggedIn = !!sessionToken;
+  if (_jwtSecretRaw) {
+    try {
+      const { getToken } = await import('next-auth/jwt');
+      const token = await getToken({
+        req: request,
+        secret: _jwtSecretRaw,
+      });
+      if (token) {
+        userLoggedIn = true;
+      }
+    } catch (e) {
+      // Token is invalid, expired, or tampered — treat as not logged in
+      userLoggedIn = false;
+    }
+  }
 
   const publicRoutes = [
     '/',
@@ -67,23 +84,20 @@ export async function updateSession(request: NextRequest) {
   }
 
   // -------------------------------------------------------------
-  // SUPER ADMIN SECURITY
+  // SUPER ADMIN SECURITY — CRIT-02: no hardcoded fallback
   // -------------------------------------------------------------
   if (pathname.startsWith('/system-core') && !pathname.startsWith('/system-core/login')) {
     const adminToken = request.cookies.get('kbr_admin_token')?.value;
     
-    if (!adminToken) {
+    if (!adminToken || !_jwtSecretRaw) {
       const url = request.nextUrl.clone();
       url.pathname = '/system-core/login';
       return NextResponse.redirect(url);
     }
 
     try {
-      // Decode JWT without library inside Edge if necessary, but we have jose.
-      // We will do a simple expiration check here or rely on jose if imported.
-      // Since jose is imported at the top? We need to import jwtVerify. Let's do it dynamically or import it at top.
       const { jwtVerify } = await import('jose');
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'fallback_secret_kobara_admin_2026');
+      const secret = new TextEncoder().encode(_jwtSecretRaw);
       const { payload } = await jwtVerify(adminToken, secret);
       
       if (payload.role !== 'superadmin') throw new Error('Invalid role');
@@ -98,10 +112,10 @@ export async function updateSession(request: NextRequest) {
 
   if (pathname === '/system-core/login') {
     const adminToken = request.cookies.get('kbr_admin_token')?.value;
-    if (adminToken) {
+    if (adminToken && _jwtSecretRaw) {
       try {
         const { jwtVerify } = await import('jose');
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET || process.env.NEXTAUTH_SECRET || 'fallback_secret_kobara_admin_2026');
+        const secret = new TextEncoder().encode(_jwtSecretRaw);
         await jwtVerify(adminToken, secret);
         const url = request.nextUrl.clone();
         url.pathname = '/system-core/dashboard';

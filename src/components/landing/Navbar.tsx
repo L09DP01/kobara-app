@@ -1,16 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslation } from "@/context/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { getSession } from "next-auth/react";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getSession().then((sess) => {
+      setSession(sess);
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  const isLoggedIn = !!session;
 
   const navLinks = [
     { label: t("nav.developers"),    href: "/dashboard/developers" },
@@ -57,18 +71,31 @@ export function Navbar() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-5">
             <LanguageSwitcher />
-            <Link
-              href="/login"
-              className="text-[15px] font-semibold text-kobara-primary hover:opacity-70 transition-opacity"
-            >
-              {t("nav.login")}
-            </Link>
-            <Link
-              href="/register"
-              className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
-            >
-              {t("nav.signup")}
-            </Link>
+            {!loading && (
+              isLoggedIn ? (
+                <Link
+                  href="/dashboard"
+                  className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
+                >
+                  {language === "fr" ? "Mon compte" : "My Account"}
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-[15px] font-semibold text-kobara-primary hover:opacity-70 transition-opacity"
+                  >
+                    {t("nav.login")}
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
+                  >
+                    {t("nav.signup")}
+                  </Link>
+                </>
+              )
+            )}
           </div>
 
           {/* Mobile hamburger */}
@@ -106,20 +133,34 @@ export function Navbar() {
               </Link>
             ))}
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3 mt-1">
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="text-center h-11 flex items-center justify-center rounded-xl border border-slate-200 text-kobara-primary font-bold text-[15px] hover:bg-slate-50 transition-colors"
-              >
-                {t("nav.login")}
-              </Link>
-              <Link
-                href="/register"
-                onClick={() => setMobileOpen(false)}
-                className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
-              >
-                {t("nav.signup")}
-              </Link>
+              {!loading && (
+                isLoggedIn ? (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
+                  >
+                    {language === "fr" ? "Mon compte" : "My Account"}
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-center h-11 flex items-center justify-center rounded-xl border border-slate-200 text-kobara-primary font-bold text-[15px] hover:bg-slate-50 transition-colors"
+                    >
+                      {t("nav.login")}
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
+                    >
+                      {t("nav.signup")}
+                    </Link>
+                  </>
+                )
+              )}
             </div>
           </motion.div>
         )}

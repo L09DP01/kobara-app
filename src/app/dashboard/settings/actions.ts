@@ -136,8 +136,8 @@ export async function updatePassword(password: string) {
     throw new Error("Non autorisé");
   }
 
-  if (password.length < 6) {
-    throw new Error("Le mot de passe doit comporter au moins 6 caractères.");
+  if (password.length < 8 || password.length > 128) {
+    throw new Error("Le mot de passe doit contenir entre 8 et 128 caractères.");
   }
 
   const supabase = createAdminClient();
@@ -154,9 +154,11 @@ export async function updatePassword(password: string) {
   try {
     const { data: mData } = await createAdminClient().from('merchants').select('id').eq('user_id', user.id).single();
     if (mData) {
+      const { logMerchantAudit } = await import("@/lib/server/security/audit");
+      await logMerchantAudit(mData.id, 'auth.password_changed', { email: user.email });
       await notifyPasswordChange(mData.id, user.email);
     }
-  } catch (e) { console.error("Notification failed", e); }
+  } catch (e) { console.error("Notification/audit failed", e); }
 
   return { success: true };
 }
@@ -275,8 +277,10 @@ export async function verifyEmailOtpAction(code: string) {
 
   try {
     const { user } = await getAuthUserAndMerchant();
+    const { logMerchantAudit } = await import("@/lib/server/security/audit");
+    await logMerchantAudit(merchant.id, 'security.2fa_enabled', { method: 'email' });
     await notify2faActivation(merchant.id, user.email, 'Email');
-  } catch (e) { console.error("Notification failed", e); }
+  } catch (e) { console.error("Notification/audit failed", e); }
 
   // Set secure, HTTP-only cookie indicating verification passed
   cookieStore.set({
@@ -359,8 +363,10 @@ export async function verifyAndActivateTotpAction(token: string) {
 
   try {
     const { user } = await getAuthUserAndMerchant();
+    const { logMerchantAudit } = await import("@/lib/server/security/audit");
+    await logMerchantAudit(merchant.id, 'security.2fa_enabled', { method: 'totp' });
     await notify2faActivation(merchant.id, user.email, 'Application Authenticator');
-  } catch (e) { console.error("Notification failed", e); }
+  } catch (e) { console.error("Notification/audit failed", e); }
 
   revalidatePath('/dashboard/settings');
   return { success: true };
@@ -384,6 +390,11 @@ export async function deletePasskeyAction(passkeyId: string) {
 
   if (error) throw new Error("Erreur lors de la suppression de la clé biométrique");
 
+  try {
+    const { logMerchantAudit } = await import("@/lib/server/security/audit");
+    await logMerchantAudit(merchant.id, 'security.passkey_deleted', { passkeyId });
+  } catch (e) { console.error("Audit log failed", e); }
+
   revalidatePath('/dashboard/settings');
   return { success: true };
 }
@@ -405,6 +416,11 @@ export async function disable2faAction() {
     .eq('merchant_id', merchant.id);
 
   if (error) throw new Error("Impossible de désactiver le 2FA");
+
+  try {
+    const { logMerchantAudit } = await import("@/lib/server/security/audit");
+    await logMerchantAudit(merchant.id, 'security.2fa_disabled', {});
+  } catch (e) { console.error("Audit log failed", e); }
 
   // Delete email verified cookie
   cookieStore.delete('kbr_2fa_email_ok');

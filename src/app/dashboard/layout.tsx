@@ -71,26 +71,18 @@ export default async function DashboardLayout({
   }
 
   // -------------------------------------------------------------
-  // DUAL-METHOD 2FA SECURITY ENFORCEMENT INTERCEPTION
+  // CRIT-04: DUAL-METHOD 2FA SECURITY ENFORCEMENT
+  // Now reads from signed JWT session instead of manipulable cookies
   // -------------------------------------------------------------
   if (merchant && !isPublicDashboardPath) {
-    const supabase = createAdminClient();
-    const { data: settings } = await supabase
-      .from("settings")
-      .select("*")
-      .eq("merchant_id", merchant.id)
-      .maybeSingle();
+    const sessionTyped = session as any;
+    const twoFactorMethod = sessionTyped?.two_factor_method || 'none';
+    const twoFactorVerified = sessionTyped?.two_factor_verified || false;
 
-    const twoFactorMethod = settings?.security_json?.two_factor_method || 'none';
-
-    if (twoFactorMethod === 'totp') {
-      const hasTotp2faCookie = cookieStore.get('kbr_2fa_totp_ok')?.value === 'true';
-      if (!hasTotp2faCookie) {
+    if (twoFactorMethod !== 'none' && !twoFactorVerified) {
+      if (twoFactorMethod === 'totp') {
         redirect('/login/challenge-totp');
-      }
-    } else if (twoFactorMethod === 'email') {
-      const hasEmail2faCookie = cookieStore.get('kbr_2fa_email_ok')?.value === 'true';
-      if (!hasEmail2faCookie) {
+      } else if (twoFactorMethod === 'email') {
         redirect('/login/challenge-email');
       }
     }
