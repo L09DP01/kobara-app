@@ -14,6 +14,11 @@ class MemoryRateLimiter {
   }
 
   async limit(identifier: string) {
+    // If we're in production without Redis, we fail securely to prevent DDoS / rate limit bypass
+    if (process.env.NODE_ENV === 'production') {
+      return { success: false, limit: 0, remaining: 0, reset: Date.now() + 60000 };
+    }
+
     const now = Date.now();
     const windowStart = now - this.windowMs;
     

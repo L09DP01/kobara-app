@@ -80,7 +80,7 @@ export async function updatePaymentLink(formData: FormData) {
 
   const amount = amountStr ? parseFloat(amountStr) : null;
 
-  const { error } = await adminClient
+  const { error } = await supabase
     .from('payment_links')
     .update({
       title,

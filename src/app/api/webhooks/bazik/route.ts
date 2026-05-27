@@ -230,6 +230,8 @@ export async function POST(request: NextRequest) {
         .eq('status', 'active');
 
       if (endpoints && endpoints.length > 0) {
+        const { isSafeWebhookUrl } = await import('@/lib/server/security/url-validator');
+
         const eventPayload = {
           event_type: `payment.${newStatus}`,
           data: {
@@ -246,6 +248,11 @@ export async function POST(request: NextRequest) {
 
         for (const endpoint of endpoints) {
           try {
+            if (!isSafeWebhookUrl(endpoint.url)) {
+              console.error(`Blocked unsafe webhook URL: ${endpoint.url}`);
+              continue;
+            }
+
             const signature = crypto.createHmac('sha256', endpoint.secret)
               .update(JSON.stringify(eventPayload))
               .digest('hex');

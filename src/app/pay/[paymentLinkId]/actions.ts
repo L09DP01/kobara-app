@@ -34,6 +34,10 @@ export async function processPayment(formData: FormData) {
 
   // Determine base amount (if link has a fixed amount, use it to avoid tampering)
   const baseAmount = linkInfo.amount ? Number(linkInfo.amount) : parseFloat(amountStr);
+
+  if (isNaN(baseAmount) || baseAmount < 10) {
+    throw new Error("Montant invalide. Le montant minimum est de 10 HTG.");
+  }
   
   const { plan } = await getMerchantCurrentPlan(merchantId);
   const feePercent = plan ? (plan.transaction_fee_percent / 100) : 0.04; // Default to 4% if no plan

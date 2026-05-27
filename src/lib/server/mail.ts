@@ -4,13 +4,17 @@ import nodemailer from 'nodemailer';
 // Supporte SMTP réel si configuré, avec un simulateur pro en console en développement
 
 // MED-05: HTML escape function to prevent XSS via email content
-function escapeHtml(str: string): string {
+function escapeHtml(str: any): string {
+  if (typeof str !== 'string') {
+    str = String(str || '');
+  }
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/'/g, '&#039;')
+    .replace(/\//g, '&#x2F;');
 }
 
 function generatePremiumEmailHtml(subject: string, text: string) {
