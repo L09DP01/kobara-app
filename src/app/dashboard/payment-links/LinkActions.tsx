@@ -34,7 +34,7 @@ export default function LinkActions({ linkId, linkUrl }: { linkId: string, linkU
           </span>
         </button>
         <Link 
-          href={`/dashboard/payment-links/edit/${linkId}`}
+          href={`/payment-links/edit/${linkId}`}
           className="p-1.5 text-text-secondary hover:text-text-primary rounded hover:bg-surface-container-high transition-colors inline-flex" 
           title="Modifier"
         >

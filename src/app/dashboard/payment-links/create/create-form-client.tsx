@@ -25,7 +25,7 @@ export function CreatePaymentLinkForm() {
       }
       
       toast.success("Lien de paiement créé !");
-      window.location.href = '/dashboard/payment-links';
+      window.location.href = '/payment-links';
     } catch (err: any) {
       if (err.message === 'NEXT_REDIRECT') {
         throw err; // Let Next.js handle it
@@ -115,7 +115,7 @@ export function CreatePaymentLinkForm() {
 
       <div className="pt-4 border-t border-border-subtle flex flex-col-reverse sm:flex-row justify-end gap-3">
         <Link 
-          href="/dashboard/payment-links"
+          href="/payment-links"
           className="w-full sm:w-auto text-center px-5 py-3 sm:py-2.5 rounded-lg font-body-sm font-medium border border-border-subtle text-text-secondary hover:bg-surface-container-low hover:text-text-primary transition-colors"
         >
           Annuler

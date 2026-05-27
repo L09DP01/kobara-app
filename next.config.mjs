@@ -16,6 +16,40 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'dashboard.(?<host>.*)',
+          },
+        ],
+        destination: '/dashboard/:path*',
+      },
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'api.(?<host>.*)',
+          },
+        ],
+        destination: '/api/:path*',
+      },
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'pay.(?<host>.*)',
+          },
+        ],
+        destination: '/pay/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

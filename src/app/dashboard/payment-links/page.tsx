@@ -45,7 +45,7 @@ export default async function PaymentLinksPage() {
           <p className="text-text-secondary text-body-sm mt-1">Créez et gérez vos liens de paiement partageables.</p>
         </div>
         <Link 
-          href="/dashboard/payment-links/create"
+          href="/payment-links/create"
           className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-body-base text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[20px]">add</span>

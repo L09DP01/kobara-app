@@ -73,6 +73,25 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(cleanUrl);
   }
 
+  // Enforce subdomain: if on main domain and accessing /dashboard, redirect to dashboard subdomain
+  if (!isDashboardHost && (pathname === '/dashboard' || pathname.startsWith('/dashboard/'))) {
+    const url = request.nextUrl.clone();
+    const cleanPath = pathname === '/dashboard' ? '/' : pathname.replace('/dashboard', '');
+    url.pathname = cleanPath;
+    const protocol = request.nextUrl.protocol;
+    
+    // Construct dashboard host based on current host
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      url.host = `dashboard.localhost:${request.nextUrl.port || 3000}`;
+    } else if (hostname === 'kobara.local' || hostname.endsWith('.kobara.local')) {
+      url.host = `dashboard.kobara.local${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}`;
+    } else {
+      url.host = 'dashboard.kobara.app';
+    }
+    
+    return NextResponse.redirect(url);
+  }
+
   let isPublicRoute = publicRoutes.some(route => {
     // On dashboard subdomain, the root '/' is the dashboard itself, which is protected (not public)
     if (isDashboardHost && route === '/') {

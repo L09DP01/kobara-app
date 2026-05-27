@@ -14,31 +14,31 @@ const SIDEBAR_SECTIONS = [
   {
     title: "Général",
     links: [
-      { href: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true },
+      { href: "/", icon: "dashboard", label: "Dashboard", exact: true },
     ]
   },
   {
     title: "Opérations",
     links: [
-      { href: "/dashboard/payments", icon: "payments", label: "Paiements" },
-      { href: "/dashboard/customers", icon: "group", label: "Clients" },
-      { href: "/dashboard/withdrawals", icon: "account_balance_wallet", label: "Retraits" },
+      { href: "/payments", icon: "payments", label: "Paiements" },
+      { href: "/customers", icon: "group", label: "Clients" },
+      { href: "/withdrawals", icon: "account_balance_wallet", label: "Retraits" },
     ]
   },
   {
     title: "Développeurs",
     links: [
-      { href: "/dashboard/api-keys", icon: "vpn_key", label: "Clés API" },
-      { href: "/dashboard/webhooks", icon: "webhook", label: "Webhooks" },
-      { href: "/dashboard/developers", icon: "code", label: "Documentation" },
+      { href: "/api-keys", icon: "vpn_key", label: "Clés API" },
+      { href: "/webhooks", icon: "webhook", label: "Webhooks" },
+      { href: "/developers", icon: "code", label: "Documentation" },
     ]
   },
   {
     title: "Entreprise",
     links: [
-      { href: "/dashboard/analytics", icon: "analytics", label: "Analyses" },
-      { href: "/dashboard/kyc", icon: "verified_user", label: "Vérification KYC" },
-      { href: "/dashboard/settings", icon: "settings", label: "Paramètres" },
+      { href: "/analytics", icon: "analytics", label: "Analyses" },
+      { href: "/kyc", icon: "verified_user", label: "Vérification KYC" },
+      { href: "/settings", icon: "settings", label: "Paramètres" },
     ]
   }
 ];
@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     >
       {/* Header / Logo */}
       <div className="px-6 py-6 flex justify-between items-center h-20 shrink-0">
-        <Link href="/dashboard" className="flex items-center">
+        <Link href="/" className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
@@ -115,7 +115,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div className="p-4 border-t border-border-subtle mt-auto bg-surface-container-lowest/50 shrink-0">
         <div className="space-y-1">
           <Link 
-            href="/dashboard/support" 
+            href="/support" 
             onClick={onClose} 
             className="flex items-center gap-3 px-3 py-2.5 text-text-secondary hover:bg-surface-container-low hover:text-text-primary transition-all duration-200 rounded-xl text-sm font-medium"
           >

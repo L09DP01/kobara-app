@@ -78,7 +78,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
         </button>
 
         {/* Mobile Logo */}
-        <Link href="/dashboard" className="md:hidden flex items-center">
+        <Link href="/" className="md:hidden flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
@@ -132,10 +132,10 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                           onClick={() => {
                             markAsRead(notif.id);
                             setIsNotifOpen(false);
-                            if (notif.type.includes('payment')) router.push('/dashboard/payments');
-                            else if (notif.type.includes('withdrawal')) router.push('/dashboard/withdrawals');
-                            else if (notif.type.includes('kyc') || notif.type.includes('security')) router.push('/dashboard/settings');
-                            else router.push('/dashboard');
+                            if (notif.type.includes('payment')) router.push('/payments');
+                            else if (notif.type.includes('withdrawal')) router.push('/withdrawals');
+                            else if (notif.type.includes('kyc') || notif.type.includes('security')) router.push('/settings');
+                            else router.push('/');
                           }}
                           className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle last:border-0 relative group cursor-pointer"
                         >
@@ -174,7 +174,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
             )}
           </div>
 
-          <Link href="/dashboard/settings" className="p-2 text-text-secondary hover:bg-surface-container rounded-lg transition-colors hover:text-primary hidden sm:block">
+          <Link href="/settings" className="p-2 text-text-secondary hover:bg-surface-container rounded-lg transition-colors hover:text-primary hidden sm:block">
             <span className="material-symbols-outlined">settings_suggest</span>
           </Link>
           
@@ -201,11 +201,11 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                 </div>
                 
                 <div className="flex flex-col px-2">
-                  <Link href="/dashboard/settings" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center gap-2">
+                  <Link href="/settings" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">account_circle</span>
                     Mon profil
                   </Link>
-                  <Link href="/dashboard/billing" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-between gap-2">
+                  <Link href="/billing" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-[18px]">credit_card</span>
                       Plan Actuel
@@ -214,7 +214,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                       {merchant?.plan_slug === 'test_only' ? 'TEST' : (merchant?.plan_slug || 'TEST')}
                     </span>
                   </Link>
-                  <Link href="/dashboard/billing" className="px-3 py-2 text-xs text-primary hover:bg-primary/5 rounded-lg transition-colors flex items-center gap-2 font-medium">
+                  <Link href="/billing" className="px-3 py-2 text-xs text-primary hover:bg-primary/5 rounded-lg transition-colors flex items-center gap-2 font-medium">
                     <span className="material-symbols-outlined text-[16px]">upgrade</span>
                     Upgrade / Voir les plans
                   </Link>
