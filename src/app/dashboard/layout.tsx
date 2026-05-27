@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 
 // Pages inside /dashboard that are publicly accessible (no login required)
-const PUBLIC_DASHBOARD_PATHS = ["/dashboard/developers"];
+const PUBLIC_DASHBOARD_PATHS = ["/developers", "/dashboard/developers"];
 
 export default async function DashboardLayout({
   children,

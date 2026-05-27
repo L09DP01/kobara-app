@@ -174,55 +174,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   // -------------------------------------------------------------
-  // DASHBOARD SUBDOMAIN INTERNAL REWRITE ROUTING
-  // -------------------------------------------------------------
-  const isAssetOrApi = 
-    pathname.startsWith("/_next") || 
-    pathname.startsWith("/api/") || 
-    pathname.startsWith("/static/") ||
-    !!pathname.match(/\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$/);
-
-  const isExcludedFromRewrite = 
-    isAuthPage || 
-    isAssetOrApi || 
-    pathname.startsWith("/system-core") ||
-    pathname.startsWith("/pay");
-
-  if (isDashboardHost && !isExcludedFromRewrite) {
-    // If requesting '/', rewrite to '/dashboard'
-    // If requesting '/payments', rewrite to '/dashboard/payments'
-    if (pathname === '/' || !pathname.startsWith('/dashboard')) {
-      const rewriteUrl = request.nextUrl.clone();
-      const rewrittenPath = pathname === '/' ? '/dashboard' : `/dashboard${pathname}`;
-      rewriteUrl.pathname = rewrittenPath;
-      
-      requestHeaders.set("x-pathname", rewrittenPath);
-      
-      return NextResponse.rewrite(rewriteUrl, {
-        request: {
-          headers: requestHeaders
-        }
-      });
-    }
-  }
-
-  // Handle pay subdomain routing natively (works for localhost too)
-  if (isPayHost && !pathname.startsWith('/pay') && !pathname.startsWith('/_next') && !pathname.startsWith('/static')) {
-    const rewriteUrl = request.nextUrl.clone();
-    const rewrittenPath = pathname === '/' ? '/pay' : `/pay${pathname}`;
-    rewriteUrl.pathname = rewrittenPath;
-    requestHeaders.set("x-pathname", rewrittenPath);
-    return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
-  }
-
-  // Handle api subdomain routing natively (works for localhost too)
-  if (isApiHost && !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.startsWith('/static')) {
-    const rewriteUrl = request.nextUrl.clone();
-    const rewrittenPath = pathname === '/' ? '/api' : `/api${pathname}`;
-    rewriteUrl.pathname = rewrittenPath;
-    requestHeaders.set("x-pathname", rewrittenPath);
-    return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
-  }
+  // Next.config.mjs rewrites handle dashboard, pay, and api subdomains.
+  // We no longer need to rewrite them here, which prevents double-rewriting
+  // on dynamic routes.
 
   return supabaseResponse;
 }
