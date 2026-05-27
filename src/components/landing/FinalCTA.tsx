@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { cn, getDashboardUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useTranslation } from "@/context/LanguageContext";
 
 export function FinalCTA() {
@@ -32,7 +32,7 @@ export function FinalCTA() {
             
             <div className="flex flex-wrap items-center justify-center gap-6">
               <Link 
-                href={getDashboardUrl('/register')} 
+                href="/register" 
                 className={cn(
                   buttonVariants({ variant: "default" }),
                   "h-14 md:h-16 px-8 md:px-12 rounded-2xl bg-kobara-primary hover:bg-slate-900 text-white text-lg md:text-xl font-bold shadow-xl shadow-kobara-primary/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
