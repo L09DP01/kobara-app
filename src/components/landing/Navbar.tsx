@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslation } from "@/context/LanguageContext";
+import { getDashboardUrl } from "@/lib/utils";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getSession } from "next-auth/react";
 
@@ -74,7 +75,7 @@ export function Navbar() {
             {!loading && (
               isLoggedIn ? (
                 <Link
-                  href="/dashboard"
+                  href={getDashboardUrl()}
                   className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
                 >
                   {language === "fr" ? "Mon compte" : "My Account"}
@@ -82,13 +83,13 @@ export function Navbar() {
               ) : (
                 <>
                   <Link
-                    href="/login"
+                    href={getDashboardUrl('/login')}
                     className="text-[15px] font-semibold text-kobara-primary hover:opacity-70 transition-opacity"
                   >
                     {t("nav.login")}
                   </Link>
                   <Link
-                    href="/register"
+                    href={getDashboardUrl('/register')}
                     className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
                   >
                     {t("nav.signup")}
@@ -136,7 +137,7 @@ export function Navbar() {
               {!loading && (
                 isLoggedIn ? (
                   <Link
-                    href="/dashboard"
+                    href={getDashboardUrl()}
                     onClick={() => setMobileOpen(false)}
                     className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
                   >
@@ -145,14 +146,14 @@ export function Navbar() {
                 ) : (
                   <>
                     <Link
-                      href="/login"
+                      href={getDashboardUrl('/login')}
                       onClick={() => setMobileOpen(false)}
                       className="text-center h-11 flex items-center justify-center rounded-xl border border-slate-200 text-kobara-primary font-bold text-[15px] hover:bg-slate-50 transition-colors"
                     >
                       {t("nav.login")}
                     </Link>
                     <Link
-                      href="/register"
+                      href={getDashboardUrl('/register')}
                       onClick={() => setMobileOpen(false)}
                       className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
                     >

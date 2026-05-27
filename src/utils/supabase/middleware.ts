@@ -58,10 +58,28 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get("host")?.split(":")[0] || request.nextUrl.hostname;
-  
-  let isPublicRoute = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith(route + '/')
-  );
+
+  const isDashboardHost = 
+    hostname === "dashboard.kobara.app" || 
+    hostname.startsWith("dashboard.localhost") || 
+    hostname === "dashboard.kobara.local";
+
+  // Clean URL redirect for dashboard host:
+  // e.g., dashboard.kobara.app/dashboard -> dashboard.kobara.app/
+  // e.g., dashboard.kobara.app/dashboard/payments -> dashboard.kobara.app/payments
+  if (isDashboardHost && (pathname === '/dashboard' || pathname.startsWith('/dashboard/'))) {
+    const cleanUrl = request.nextUrl.clone();
+    cleanUrl.pathname = pathname === '/dashboard' ? '/' : pathname.replace('/dashboard', '');
+    return NextResponse.redirect(cleanUrl);
+  }
+
+  let isPublicRoute = publicRoutes.some(route => {
+    // On dashboard subdomain, the root '/' is the dashboard itself, which is protected (not public)
+    if (isDashboardHost && route === '/') {
+      return false;
+    }
+    return pathname === route || pathname.startsWith(route + '/');
+  });
 
   // If the request is for a custom subdomain, it's public (handled by rewrites)
   if (hostname === 'pay.kobara.app' || hostname === 'api.kobara.app') {
@@ -79,7 +97,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
   if (isAuthPage && userLoggedIn) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    url.pathname = isDashboardHost ? '/' : '/dashboard';
     return NextResponse.redirect(url);
   }
 
@@ -123,6 +141,39 @@ export async function updateSession(request: NextRequest) {
       } catch (e) {
         // invalid token, just let them see login page
       }
+    }
+  }
+
+  // -------------------------------------------------------------
+  // DASHBOARD SUBDOMAIN INTERNAL REWRITE ROUTING
+  // -------------------------------------------------------------
+  const isAssetOrApi = 
+    pathname.startsWith("/_next") || 
+    pathname.startsWith("/api/") || 
+    pathname.startsWith("/static/") ||
+    !!pathname.match(/\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$/);
+
+  const isExcludedFromRewrite = 
+    isAuthPage || 
+    isAssetOrApi || 
+    pathname.startsWith("/system-core") ||
+    pathname.startsWith("/pay");
+
+  if (isDashboardHost && !isExcludedFromRewrite) {
+    // If requesting '/', rewrite to '/dashboard'
+    // If requesting '/payments', rewrite to '/dashboard/payments'
+    if (pathname === '/' || !pathname.startsWith('/dashboard')) {
+      const rewriteUrl = request.nextUrl.clone();
+      const rewrittenPath = pathname === '/' ? '/dashboard' : `/dashboard${pathname}`;
+      rewriteUrl.pathname = rewrittenPath;
+      
+      requestHeaders.set("x-pathname", rewrittenPath);
+      
+      return NextResponse.rewrite(rewriteUrl, {
+        request: {
+          headers: requestHeaders
+        }
+      });
     }
   }
 

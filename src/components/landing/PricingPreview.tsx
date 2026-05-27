@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Check, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getDashboardUrl } from "@/lib/utils";
 
 const plans = [
   {
@@ -94,7 +94,7 @@ export function PricingPreview() {
               </div>
 
               <Link 
-                href="/register"
+                href={getDashboardUrl('/register')}
                 className={cn(
                   buttonVariants({ variant: plan.highlight ? "default" : "outline" }),
                   "h-14 rounded-2xl font-bold text-base transition-all active:scale-95",

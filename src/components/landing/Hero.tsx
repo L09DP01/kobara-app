@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Shield, Zap, Clock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslation } from "@/context/LanguageContext";
+import { getDashboardUrl } from "@/lib/utils";
 
 export function Hero() {
   const { t, language } = useTranslation();
@@ -60,7 +61,7 @@ export function Hero() {
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 w-full">
                 <Link
-                  href="/register"
+                  href={getDashboardUrl('/register')}
                   className="h-12 sm:h-14 px-7 sm:px-9 rounded-xl bg-kobara-primary hover:bg-slate-900 text-white text-[15px] sm:text-[16px] font-bold shadow-xl shadow-kobara-primary/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2.5"
                 >
                   {t("home.getStarted")}
