@@ -81,8 +81,18 @@ export async function updateSession(request: NextRequest) {
     return pathname === route || pathname.startsWith(route + '/');
   });
 
+  const isPayHost = 
+    hostname === 'pay.kobara.app' || 
+    hostname.startsWith('pay.localhost') || 
+    hostname === 'pay.kobara.local';
+
+  const isApiHost = 
+    hostname === 'api.kobara.app' || 
+    hostname.startsWith('api.localhost') || 
+    hostname === 'api.kobara.local';
+
   // If the request is for a custom subdomain, it's public (handled by rewrites)
-  if (hostname === 'pay.kobara.app' || hostname === 'api.kobara.app') {
+  if (isPayHost || isApiHost) {
     isPublicRoute = true;
   }
 
@@ -175,6 +185,24 @@ export async function updateSession(request: NextRequest) {
         }
       });
     }
+  }
+
+  // Handle pay subdomain routing natively (works for localhost too)
+  if (isPayHost && !pathname.startsWith('/pay') && !pathname.startsWith('/_next') && !pathname.startsWith('/static')) {
+    const rewriteUrl = request.nextUrl.clone();
+    const rewrittenPath = pathname === '/' ? '/pay' : `/pay${pathname}`;
+    rewriteUrl.pathname = rewrittenPath;
+    requestHeaders.set("x-pathname", rewrittenPath);
+    return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
+  }
+
+  // Handle api subdomain routing natively (works for localhost too)
+  if (isApiHost && !pathname.startsWith('/api') && !pathname.startsWith('/_next') && !pathname.startsWith('/static')) {
+    const rewriteUrl = request.nextUrl.clone();
+    const rewrittenPath = pathname === '/' ? '/api' : `/api${pathname}`;
+    rewriteUrl.pathname = rewrittenPath;
+    requestHeaders.set("x-pathname", rewrittenPath);
+    return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } });
   }
 
   return supabaseResponse;
