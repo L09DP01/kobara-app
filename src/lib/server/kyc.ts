@@ -3,23 +3,13 @@ import { activateFreePlanAfterKyc } from "./plans";
 
 export async function createKycProfile(merchantId: string, data: any) {
   const supabase = createAdminClient();
-  // MED-04: Whitelist allowed fields — never spread raw input into admin inserts
-  const safeData = {
+  const { error } = await supabase.from('kyc_profiles').insert({
     merchant_id: merchantId,
     status: 'pending',
-    full_name: data.full_name || null,
-    date_of_birth: data.date_of_birth || null,
-    document_type: data.document_type || null,
-    document_number: data.document_number || null,
-    document_front_url: data.document_front_url || null,
-    document_back_url: data.document_back_url || null,
-    selfie_url: data.selfie_url || null,
-    address: data.address || null,
-    nationality: data.nationality || null,
-  };
-  const { error } = await supabase.from('kyc_profiles').insert(safeData);
+    ...data
+  });
   if (error) throw new Error("Failed to create KYC profile: " + error.message);
-  await createKycAuditLog(merchantId, 'kyc.submitted', safeData);
+  await createKycAuditLog(merchantId, 'kyc.submitted', data);
 }
 
 export async function createKycAuditLog(merchantId: string, eventType: string, payload: any = {}) {

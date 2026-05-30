@@ -5,13 +5,11 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import crypto from "crypto";
 import { apiLimiter } from "@/lib/server/security/rate-limit";
 
 import { PaymentCreatePayloadSchema } from "@/lib/server/validators";
 
 import { canCreatePayment } from "@/lib/server/access";
-import { expireMerchantOldPayments } from "@/utils/supabase/auth-helper";
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,37 +41,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation Error", details: validationResult.error.issues }, { status: 400 });
     }
 
-    const { amount, currency, description, success_url, cancel_url, metadata, customer, idempotency_key } = validationResult.data;
+    const { amount, currency, description, success_url, cancel_url, metadata, customer } = validationResult.data;
 
     // Connect to Supabase
     const supabase = createAdminClient();
 
-    // Check for idempotency key (header or body)
-    const idempotencyKey = request.headers.get("idempotency-key") || idempotency_key;
-    if (idempotencyKey) {
-      const { data: existingPayment } = await supabase
-        .from('payments')
-        .select('id, kobara_reference, amount, status, metadata')
-        .eq('merchant_id', merchantId)
-        .eq('metadata->>idempotency_key', idempotencyKey)
-        .maybeSingle();
-
-      if (existingPayment) {
-        return NextResponse.json({
-          status: "success",
-          data: {
-            id: existingPayment.id,
-            reference: existingPayment.kobara_reference,
-            amount: existingPayment.amount,
-            status: existingPayment.status,
-            checkout_url: (existingPayment.metadata as any)?.checkout_url || null,
-          }
-        });
-      }
-    }
-
-    // HIGH-06: Generate cryptographically secure reference
-    const kobaraReference = `KOB-${crypto.randomBytes(16).toString('hex')}`;
+    // 1. Generate a unique Kobara Reference
+    const kobaraReference = `KOB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     // 2. Call Bazik to create the payment
     const bazikResponse = await BazikService.createMoncashPayment({
@@ -84,7 +58,6 @@ export async function POST(request: NextRequest) {
 
     // Bazik response typically gives a payment URL or an order ID.
     const bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
-    const checkoutUrl = bazikResponse.payment_url || bazikResponse.url || null;
 
     // 2.5 Resolve Customer
     let customerId = null;
@@ -152,12 +125,6 @@ export async function POST(request: NextRequest) {
     const feeAmount = parseFloat((amount * feePercent).toFixed(2));
     const netAmount = parseFloat((amount - feeAmount).toFixed(2));
 
-    const finalMetadata = {
-      ...(metadata || {}),
-      ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
-      ...(checkoutUrl ? { checkout_url: checkoutUrl } : {})
-    };
-
     const { data: payment, error: dbError } = await supabase.from('payments').insert({
       merchant_id: merchantId,
       customer_id: customerId,
@@ -170,7 +137,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       success_url: success_url,
       error_url: cancel_url,
-      metadata: finalMetadata,
+      metadata: metadata,
     }).select().single();
 
     if (dbError) {
@@ -195,7 +162,7 @@ export async function POST(request: NextRequest) {
         reference: payment.kobara_reference,
         amount: payment.amount,
         status: payment.status,
-        checkout_url: checkoutUrl, // URL for customer to pay
+        checkout_url: bazikResponse.payment_url || bazikResponse.url || null, // URL for customer to pay
       }
     });
 
@@ -218,15 +185,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
     }
 
-    // Auto-expire pending payments older than 24 hours
-    await expireMerchantOldPayments(merchantId);
-
     const supabase = createAdminClient();
 
-    // MED-03: Validate and cap the limit parameter
+    // Get search params
     const { searchParams } = new URL(request.url);
-    const rawLimit = parseInt(searchParams.get('limit') || '10');
-    const limit = Math.min(Math.max(isNaN(rawLimit) ? 10 : rawLimit, 1), 100);
+    const limit = parseInt(searchParams.get('limit') || '10');
 
     const { data, error } = await supabase
       .from('payments')

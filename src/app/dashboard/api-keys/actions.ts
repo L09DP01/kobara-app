@@ -48,9 +48,6 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
       return { error: "Erreur lors de la création de la clé API" };
     }
 
-    const { logMerchantAudit } = await import("@/lib/server/security/audit");
-    await logMerchantAudit(merchantId, 'api_key.created', { name, environment });
-
     revalidatePath('/dashboard/api-keys');
 
     return { rawKey, name, environment };
@@ -92,9 +89,6 @@ export async function revokeApiKey(id: string) {
       console.error("API Key Delete Error:", error);
       return { error: "Erreur lors de la suppression de la clé API" };
     }
-
-    const { logMerchantAudit } = await import("@/lib/server/security/audit");
-    await logMerchantAudit(merchant.id, 'api_key.revoked', { name: keyInfo.name });
 
     // Send notification to merchant
     await notifyApiKeyRevoked(merchant.id, merchant.email || user.email, keyInfo.name || "Inconnue");

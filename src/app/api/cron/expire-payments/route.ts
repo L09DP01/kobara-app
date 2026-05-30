@@ -5,10 +5,9 @@ import crypto from 'crypto';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-  // MED-01: CRON_SECRET is mandatory — reject if not configured
-  const cronSecret = process.env.CRON_SECRET;
+  // Check authorization (Vercel Cron standard)
   const authHeader = request.headers.get('authorization');
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 

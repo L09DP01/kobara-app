@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 
 // Pages inside /dashboard that are publicly accessible (no login required)
-const PUBLIC_DASHBOARD_PATHS = ["/developers", "/dashboard/developers"];
+const PUBLIC_DASHBOARD_PATHS = ["/dashboard/developers"];
 
 export default async function DashboardLayout({
   children,
@@ -71,18 +71,26 @@ export default async function DashboardLayout({
   }
 
   // -------------------------------------------------------------
-  // CRIT-04: DUAL-METHOD 2FA SECURITY ENFORCEMENT
-  // Now reads from signed JWT session instead of manipulable cookies
+  // DUAL-METHOD 2FA SECURITY ENFORCEMENT INTERCEPTION
   // -------------------------------------------------------------
   if (merchant && !isPublicDashboardPath) {
-    const sessionTyped = session as any;
-    const twoFactorMethod = sessionTyped?.two_factor_method || 'none';
-    const twoFactorVerified = sessionTyped?.two_factor_verified || false;
+    const supabase = createAdminClient();
+    const { data: settings } = await supabase
+      .from("settings")
+      .select("*")
+      .eq("merchant_id", merchant.id)
+      .maybeSingle();
 
-    if (twoFactorMethod !== 'none' && !twoFactorVerified) {
-      if (twoFactorMethod === 'totp') {
+    const twoFactorMethod = settings?.security_json?.two_factor_method || 'none';
+
+    if (twoFactorMethod === 'totp') {
+      const hasTotp2faCookie = cookieStore.get('kbr_2fa_totp_ok')?.value === 'true';
+      if (!hasTotp2faCookie) {
         redirect('/login/challenge-totp');
-      } else if (twoFactorMethod === 'email') {
+      }
+    } else if (twoFactorMethod === 'email') {
+      const hasEmail2faCookie = cookieStore.get('kbr_2fa_email_ok')?.value === 'true';
+      if (!hasEmail2faCookie) {
         redirect('/login/challenge-email');
       }
     }

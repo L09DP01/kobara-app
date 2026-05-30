@@ -102,15 +102,23 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   }
 
   // 3. Déduction du solde de l'utilisateur (le total demandé)
-  const adminClient = createAdminClient();
-  const { error: rpcError } = await adminClient.rpc('debit_merchant_balance', {
-    p_merchant_id: merchant.id,
-    p_amount: amount
-  });
+  const newBalance = Number(merchant.available_balance) - amount;
 
-  if (rpcError) {
-    console.error("Failed to debit merchant balance:", rpcError);
-    return { error: rpcError.message || "Erreur lors de la mise à jour du solde ou solde insuffisant." };
+  if (newBalance < 0) {
+    // Should never happen due to the check at the top, but just in case
+    return { error: "Fonds insuffisants." };
+  }
+
+  const adminClient = createAdminClient();
+
+  const { error: updateError } = await adminClient
+    .from('merchants')
+    .update({ available_balance: newBalance })
+    .eq('id', merchant.id);
+
+  if (updateError) {
+    console.error("Failed to update merchant balance:", updateError);
+    return { error: "Erreur lors de la mise à jour du solde." };
   }
 
   // 4. Enregistrement en base de données
@@ -132,14 +140,6 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   if (insertError) {
     console.error("Failed to record withdrawal in DB", insertError);
     return { error: "Erreur lors de l'enregistrement du retrait" };
-  }
-
-  // Audit Log: withdrawal created
-  try {
-    const { logMerchantAudit } = await import("@/lib/server/security/audit");
-    await logMerchantAudit(merchant.id, 'withdrawal.created', { amount: netAmount, reference });
-  } catch (e) {
-    console.error("Failed to write withdrawal audit log:", e);
   }
 
   // Create notification

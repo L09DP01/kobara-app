@@ -16,18 +16,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing signature or secret" }, { status: 401 });
     }
 
-    // HIGH-07: Use timing-safe comparison to prevent timing attacks
     const expectedSignature = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-    const sigBuffer = Buffer.from(signature);
-    const expectedBuffer = Buffer.from(expectedSignature);
-    if (sigBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(sigBuffer, expectedBuffer)) {
+    if (signature !== expectedSignature) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-
-    // HIGH-07: Verify timestamp to prevent replay attacks
-    const timestamp = request.headers.get("x-bazik-timestamp");
-    if (!timestamp || Math.abs(Date.now() - Number(timestamp)) > 5 * 60 * 1000) {
-      return NextResponse.json({ error: "Stale or missing timestamp" }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);
@@ -76,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (reference.startsWith('WTH-')) {
       const { data: withdrawal, error: fetchError } = await supabaseAdmin
         .from('withdrawals')
-        .select('id, status, bazik_transaction_id, processed_at, total, merchant_id, amount')
+        .select('*')
         .eq('kobara_reference', reference)
         .single();
 
@@ -116,13 +107,13 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (merchant) {
-            // CRIT-05: Atomic balance credit to prevent race conditions
-            const totalRefund = Number(withdrawal.total || 0);
-            const { error: rpcError } = await supabaseAdmin.rpc('credit_merchant_balance', {
-              p_merchant_id: withdrawal.merchant_id,
-              p_amount: totalRefund
-            });
-            if (rpcError) console.error("Atomic balance credit error:", rpcError);
+            const currentBalance = Number(merchant.available_balance || 0);
+            const totalRefund = Number(withdrawal.total || 0); // They paid the total amount
+
+            await supabaseAdmin
+              .from('merchants')
+              .update({ available_balance: currentBalance + totalRefund })
+              .eq('id', withdrawal.merchant_id);
               
             // Create notification and email for failed withdrawal refund
             if (merchant.email) {
@@ -145,7 +136,7 @@ export async function POST(request: NextRequest) {
     // Find the payment
     const { data: payment, error: fetchError } = await supabaseAdmin
       .from('payments')
-      .select('id, status, paid_at, bazik_transaction_id, merchant_id, customer_id, net_amount, amount, currency, kobara_reference, metadata')
+      .select('*')
       .eq('kobara_reference', reference)
       .single();
 
@@ -204,14 +195,18 @@ export async function POST(request: NextRequest) {
       }
       
       if (merchant) {
-        // CRIT-05: Atomic balance credit to prevent race conditions
+        const currentBalance = Number(merchant.available_balance || 0);
         const netAmount = Number(payment.net_amount || 0);
-        const { error: rpcError } = await supabaseAdmin.rpc('credit_merchant_balance', {
-          p_merchant_id: payment.merchant_id,
-          p_amount: netAmount
-        });
-        if (rpcError) {
-          console.error("Atomic balance credit error:", rpcError);
+        
+        const { error: balanceError } = await supabaseAdmin
+          .from('merchants')
+          .update({
+            available_balance: currentBalance + netAmount
+          })
+          .eq('id', payment.merchant_id);
+          
+        if (balanceError) {
+          console.error("Balance update error:", balanceError);
         }
       }
 
@@ -225,13 +220,11 @@ export async function POST(request: NextRequest) {
       // 3. Send outbound webhooks to merchant endpoints
       const { data: endpoints } = await supabaseAdmin
         .from('webhook_endpoints')
-        .select('secret, url')
+        .select('*')
         .eq('merchant_id', payment.merchant_id)
         .eq('status', 'active');
 
       if (endpoints && endpoints.length > 0) {
-        const { isSafeWebhookUrl } = await import('@/lib/server/security/url-validator');
-
         const eventPayload = {
           event_type: `payment.${newStatus}`,
           data: {
@@ -248,11 +241,6 @@ export async function POST(request: NextRequest) {
 
         for (const endpoint of endpoints) {
           try {
-            if (!isSafeWebhookUrl(endpoint.url)) {
-              console.error(`Blocked unsafe webhook URL: ${endpoint.url}`);
-              continue;
-            }
-
             const signature = crypto.createHmac('sha256', endpoint.secret)
               .update(JSON.stringify(eventPayload))
               .digest('hex');

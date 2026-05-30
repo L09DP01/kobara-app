@@ -43,13 +43,22 @@ export async function processSuccessfulPayment(reference: string) {
   }
 
   // Update Merchant Balance
-  const netAmount = Number(payment.net_amount || 0);
-  const { error: rpcError } = await supabase.rpc('credit_merchant_balance', {
-    p_merchant_id: payment.merchant_id,
-    p_amount: netAmount
-  });
-  if (rpcError) {
-    console.error("Atomic balance credit error in success action:", rpcError);
+  const { data: merchant } = await supabase
+    .from('merchants')
+    .select('available_balance')
+    .eq('id', payment.merchant_id)
+    .single();
+  
+  if (merchant) {
+    const currentBalance = Number(merchant.available_balance || 0);
+    const netAmount = Number(payment.net_amount || 0);
+    
+    await supabase
+      .from('merchants')
+      .update({
+        available_balance: currentBalance + netAmount
+      })
+      .eq('id', payment.merchant_id);
   }
 
   // Fetch Customer Name for notification
