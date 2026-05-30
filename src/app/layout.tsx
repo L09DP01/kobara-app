@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 import { NotificationPrompt } from "@/components/notification-prompt";
 import type { Viewport } from 'next';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -86,17 +87,15 @@ export default async function RootLayout({
     >
       <head>
         {/* Google Analytics */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LEP7B1MMKK"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-LEP7B1MMKK');
-            `,
-          }}
-        />
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-LEP7B1MMKK" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-LEP7B1MMKK');
+          `}
+        </Script>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
         <style>{`
           .material-symbols-outlined {
