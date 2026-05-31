@@ -124,7 +124,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <span>Support client</span>
           </Link>
           <button 
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL || "https://kobara.app" })}
             className="flex items-center w-full gap-3 px-3 py-2.5 text-status-error/80 hover:bg-status-error/10 hover:text-status-error transition-all duration-200 rounded-xl text-sm font-medium cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">logout</span>

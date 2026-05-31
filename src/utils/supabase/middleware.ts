@@ -42,52 +42,47 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get("host")?.split(":")[0] || request.nextUrl.hostname;
   
-  let isPublicRoute = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith(route + '/')
-  );
-
-  // Dashboard subdomain logic: everything on dashboard.kobara.app is private
-  if (hostname === 'dashboard.kobara.app' || hostname === 'dashboard.localhost' || hostname === 'dashboard.kobara.local') {
-    isPublicRoute = false;
-  }
-
-  // If the request is for a custom subdomain, it's public (handled by rewrites)
+  // Custom subdomains are public
   if (hostname === 'pay.kobara.app' || hostname === 'api.kobara.app') {
-    isPublicRoute = true;
+    return supabaseResponse;
   }
 
-  // Default-deny: if not a public route and no user, redirect to login
-  if (!isPublicRoute && !userLoggedIn) {
-    // Redirect to main domain login to avoid 404s on the dashboard subdomain
-    if (hostname === 'dashboard.kobara.app') {
-      return NextResponse.redirect(`https://kobara.app/login?next=${encodeURIComponent('https://' + hostname + pathname)}`);
-    } else if (hostname === 'dashboard.localhost' || hostname === 'dashboard.kobara.local') {
-      return NextResponse.redirect(`http://localhost:3000/login?next=${encodeURIComponent('http://' + hostname + pathname)}`);
+  const isMainDomain = hostname === 'kobara.app' || hostname === 'www.kobara.app' || hostname === 'localhost' || hostname === 'kobara.local';
+  const isDashboardSubdomain = hostname === 'dashboard.kobara.app' || hostname === 'dashboard.localhost' || hostname === 'dashboard.kobara.local';
+
+  if (isMainDomain) {
+    if (pathname.startsWith('/dashboard')) {
+      const pathWithoutDashboard = pathname.replace('/dashboard', '') || '/';
+      const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ? 
+        `http://dashboard.${hostname.split(':')[0]}:3000${pathWithoutDashboard}${request.nextUrl.search}` :
+        `https://dashboard.kobara.app${pathWithoutDashboard}${request.nextUrl.search}`;
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  if (isDashboardSubdomain) {
+    if (pathname === '/') {
+      const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
+        `http://${hostname.replace('dashboard.', '')}:3000/` :
+        `https://kobara.app/`;
+      return NextResponse.redirect(redirectUrl);
     }
 
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', pathname);
-    return NextResponse.redirect(url);
-  }
-
-  // Enforce dashboard subdomain: redirect /dashboard on main domain to dashboard.kobara.app
-  if (pathname.startsWith('/dashboard') && !hostname.startsWith('dashboard.')) {
-    const pathWithoutDashboard = pathname.replace('/dashboard', '') || '/';
-    if (hostname === 'kobara.app' || hostname === 'www.kobara.app') {
-      return NextResponse.redirect(`https://dashboard.kobara.app${pathWithoutDashboard}${request.nextUrl.search}`);
-    } else {
-      return NextResponse.redirect(`http://dashboard.${hostname.split(':')[0]}:3000${pathWithoutDashboard}${request.nextUrl.search}`);
+    // Require authentication for dashboard subdomain (except APIs which have their own auth)
+    if (!userLoggedIn && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+      const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
+        `http://${hostname.replace('dashboard.', '')}:3000/login` :
+        `https://kobara.app/login`;
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
   if (isAuthPage && userLoggedIn) {
-    if (hostname === 'kobara.app' || hostname === 'www.kobara.app') {
-      return NextResponse.redirect(`https://dashboard.kobara.app/`);
-    } else {
-      return NextResponse.redirect(`http://dashboard.${hostname.split(':')[0]}:3000/`);
-    }
+    const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
+      `http://dashboard.${hostname.replace('dashboard.', '').split(':')[0]}:3000/` :
+      `https://dashboard.kobara.app/`;
+    return NextResponse.redirect(redirectUrl);
   }
 
   // -------------------------------------------------------------

@@ -31,7 +31,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
   }, []);
 
   const handleLogout = async () => {
-    await signOut({ callbackUrl: '/login' });
+    await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://kobara.app' });
   };
 
   const markAsRead = async (id: string) => {
