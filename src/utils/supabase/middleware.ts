@@ -61,13 +61,6 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isDashboardSubdomain) {
-    if (pathname === '/') {
-      const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
-        `http://${hostname.replace('dashboard.', '')}:3000/` :
-        `https://kobara.app/`;
-      return NextResponse.redirect(redirectUrl);
-    }
-
     // Require authentication for dashboard subdomain (except APIs which have their own auth)
     if (!userLoggedIn && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
       const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
