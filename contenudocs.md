@@ -3329,27 +3329,27 @@ https://kobara.app/docs/quickstart
 
 Also analyze all relevant sections:
 
-* javascriptSdk: \`\${appUrl}/docs/javascript-sdk\`,
+* javascriptSdk: \`https://kobara.app/docs/javascript-sdk\`,
 
-    nodeSdk: \`\${appUrl}/docs/nodejs-sdk\`,
+    nodeSdk: \`https://kobara.app/docs/nodejs-sdk\`,
 
-    pythonSdk: \`\${appUrl}/docs/python-sdk\`,
+    pythonSdk: \`https://kobara.app/docs/python-sdk\`,
 
-    phpSdk: \`\${appUrl}/docs/php-sdk\`,
+    phpSdk: \`https://kobara.app/docs/php-sdk\`,
 
-    wordpressPlugin: \`\${appUrl}/docs/wordpress-plugin\`,
+    wordpressPlugin: \`https://kobara.app/docs/wordpress-plugin\`,
 
-    aiIntegration: \`\${appUrl}/docs/ai-integration\`,
+    aiIntegration: \`https://kobara.app/docs/ai-integration\`,
 
-    payments: \`\${appUrl}/docs/payments\`,
+    payments: \`https://kobara.app/docs/payments\`,
 
-    paymentLinks: \`\${appUrl}/docs/payment-links\`,
+    paymentLinks: \`https://kobara.app/docs/payment-links\`,
 
-    webhooks: \`\${appUrl}/docs/webhooks\`,
+    webhooks: \`https://kobara.app/docs/webhooks\`,
 
-    withdrawals: \`\${appUrl}/docs/withdrawals\`,
+    withdrawals: \`https://kobara.app/docs/withdrawals\`,
 
-    errors: \`\${appUrl}/docs/errors\`,
+    errors: \`https://kobara.app/docs/errors\`,
 
   Use the documentation as the source of truth.
 
