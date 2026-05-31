@@ -28,6 +28,7 @@ export default async function ApiKeysPage() {
     : 100;
 
   return <ApiKeysClient 
+    merchant={merchant}
     initialKeys={apiKeys || []} 
     apiCallsThisWeek={apiCallsThisWeek}
     successRate={successRate}

@@ -3,16 +3,21 @@
 import { useState } from 'react';
 import { generateApiKey, revokeApiKey } from './actions';
 
+import Link from 'next/link';
+
 export function ApiKeysClient({ 
+  merchant,
   initialKeys, 
   apiCallsThisWeek = 0, 
   successRate = 100 
 }: { 
+  merchant: any,
   initialKeys: any[], 
   apiCallsThisWeek?: number, 
   successRate?: number 
 }) {
   const [loading, setLoading] = useState(false);
+  const isKycApproved = merchant?.kyc_status === 'approved';
   const [newKey, setNewKey] = useState<{ rawKey: string, name: string, environment: string } | null>(null);
   const [environment, setEnvironment] = useState<'live' | 'test'>('test');
   const [showKey, setShowKey] = useState(false);
@@ -96,13 +101,21 @@ export function ApiKeysClient({
           <p className="text-sm text-text-secondary mt-1">Gérez vos clés secrètes pour l'intégration de l'API Kobara.</p>
         </div>
         <div className="flex items-center bg-surface-container-lowest border border-border-subtle rounded-xl p-1 shadow-sm w-fit">
-          <button 
-            onClick={() => setEnvironment('live')}
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${environment === 'live' ? 'bg-surface-card text-text-primary shadow border border-border-subtle' : 'text-text-secondary hover:text-text-primary'}`}
-          >
-            <span className={`w-2 h-2 rounded-full ${environment === 'live' ? 'bg-status-success animate-pulse' : 'bg-surface-container-high'}`}></span>
-            Live Mode
-          </button>
+          <div className="relative group">
+            <button 
+              onClick={() => isKycApproved && setEnvironment('live')}
+              className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${!isKycApproved ? 'opacity-50 cursor-not-allowed' : ''} ${environment === 'live' ? 'bg-surface-card text-text-primary shadow border border-border-subtle' : 'text-text-secondary hover:text-text-primary'}`}
+            >
+              <span className={`w-2 h-2 rounded-full ${environment === 'live' ? 'bg-status-success animate-pulse' : 'bg-surface-container-high'}`}></span>
+              Live Mode
+              {!isKycApproved && <span className="material-symbols-outlined text-[16px] ml-1">lock</span>}
+            </button>
+            {!isKycApproved && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 p-2 bg-surface-card border border-border-subtle rounded-lg shadow-lg text-xs text-text-secondary text-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                KYC requis pour le mode Live. <br/><span className="text-primary font-bold">Allez dans Vérification KYC</span>
+              </div>
+            )}
+          </div>
           <button 
             onClick={() => setEnvironment('test')}
             className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${environment === 'test' ? 'bg-surface-card text-text-primary shadow border border-border-subtle' : 'text-text-secondary hover:text-text-primary'}`}

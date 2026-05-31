@@ -2,6 +2,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import Link from "next/link";
 import { Check, X, ShieldAlert, FileText, Image as ImageIcon } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import { activateFreePlanAfterKyc } from "@/lib/server/plans";
 
 export default async function AdminKYCPage() {
   const supabase = createAdminClient();
@@ -54,6 +55,13 @@ export default async function AdminKYCPage() {
     await adminClient.from('merchants').update({ 
       kyc_status: 'approved' 
     }).eq('id', merchantId);
+
+    // Auto-activate free plan and send notification
+    try {
+      await activateFreePlanAfterKyc(merchantId);
+    } catch (e) {
+      console.error("Failed to auto-activate free plan:", e);
+    }
 
     revalidatePath('/system-core/kyc');
   }
