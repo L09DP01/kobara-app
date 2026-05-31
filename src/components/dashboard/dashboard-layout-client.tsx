@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "@/components/dashboard/sidebar";
+import { DesktopSidebar, MobileSidebar } from "@/components/dashboard/sidebar";
 import TopNav from "@/components/dashboard/top-nav";
 import { KycRequiredBanner } from "@/components/dashboard/kyc-banner";
 import { siteConfig } from "@/config/site";
@@ -58,18 +58,12 @@ export default function DashboardLayoutClient({
   }
 
   return (
-    <div className="bg-background-main font-body-base text-body-base text-on-surface antialiased min-h-[100dvh] flex">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+    <div className="bg-background-main font-body-base text-body-base text-on-surface antialiased min-h-[100dvh]">
 
-      {/* Overlay for mobile */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden h-[100dvh]"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <DesktopSidebar />
+      <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col min-h-full ml-0 md:ml-[260px] w-full md:w-[calc(100%-260px)] transition-all duration-300">
+      <div className="flex-1 flex flex-col min-h-full lg:pl-[260px] transition-all duration-300">
         <TopNav onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} merchant={merchant} user={user} initialNotifications={initialNotifications} />
         {merchant && merchant.kyc_status !== 'approved' && (
           <KycRequiredBanner />

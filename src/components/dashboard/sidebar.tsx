@@ -44,16 +44,45 @@ const SIDEBAR_SECTIONS = [
   }
 ];
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function DesktopSidebar() {
   const pathname = usePathname();
-
+  
   return (
-    <aside
-      className={clsx(
-        "fixed flex flex-col z-40 bg-surface-container-lowest text-text-primary font-body-base text-body-base docked w-[260px] left-0 top-0 bottom-0 h-[100dvh] md:h-screen overflow-y-auto border-r border-border-subtle shadow-sm transition-transform duration-300 ease-in-out md:translate-x-0 md:flex",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base border-r border-border-subtle shadow-sm">
+      <SidebarContent pathname={pathname} onClose={() => {}} />
+    </aside>
+  );
+}
+
+export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const pathname = usePathname();
+  
+  return (
+    <div className="lg:hidden">
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/50 transition-opacity h-[100dvh]" 
+          onClick={onClose} 
+        />
       )}
-    >
+      
+      {/* Sidebar Panel */}
+      <aside
+        className={clsx(
+          "fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out h-[100dvh] overflow-hidden",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <SidebarContent pathname={pathname} onClose={onClose} />
+      </aside>
+    </div>
+  );
+}
+
+function SidebarContent({ pathname, onClose }: { pathname: string | null; onClose: () => void }) {
+  return (
+    <>
       {/* Header / Logo */}
       <div className="px-6 py-6 flex justify-between items-center h-20 shrink-0">
         <a href={siteConfig.url} className="flex items-center">
@@ -66,7 +95,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </a>
         <button
           onClick={onClose}
-          className="md:hidden text-text-secondary hover:text-primary transition-colors p-1"
+          className="lg:hidden text-text-secondary hover:text-primary transition-colors p-1"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
@@ -83,7 +112,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             )}
             <div className="space-y-1">
               {section.links.map((link) => {
-                const isActive = ('exact' in link && (link as any).exact) ? pathname === link.href : pathname?.startsWith(link.href);
+                const isActive = ('exact' in link && (link as any).exact) 
+                  ? pathname === link.href 
+                  : pathname?.startsWith(link.href);
 
                 return (
                   <Link
@@ -132,6 +163,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
       </div>
-    </aside>
+    </>
   );
 }

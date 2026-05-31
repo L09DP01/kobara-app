@@ -73,13 +73,13 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
         {/* Mobile menu toggle */}
         <button 
           onClick={onToggleSidebar}
-          className="md:hidden text-text-secondary hover:text-primary transition-colors shrink-0"
+          className="lg:hidden text-text-secondary hover:text-primary transition-colors shrink-0"
         >
           <span className="material-symbols-outlined">menu</span>
         </button>
 
         {/* Mobile Logo */}
-        <a href={siteConfig.url} className="md:hidden flex items-center">
+        <a href={siteConfig.url} className="lg:hidden flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
