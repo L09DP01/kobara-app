@@ -58,8 +58,8 @@ function LoginContent() {
         setLoading(false);
       } else {
         // Success! Redirect to the dashboard
-        router.push('/dashboard');
-        router.refresh();
+        const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'https://dashboard.kobara.app';
+        window.location.href = dashboardUrl;
       }
     } catch (err: any) {
       setError(err?.message || (language === "fr" ? "Une erreur inattendue est survenue." : "An unexpected error occurred."));
@@ -255,8 +255,8 @@ function LoginContent() {
                 setError(res.error);
                 setLoading(false);
               } else {
-                router.push('/dashboard');
-                router.refresh();
+                const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'https://dashboard.kobara.app';
+                window.location.href = dashboardUrl;
               }
             } catch (err: any) {
               console.error(err);
