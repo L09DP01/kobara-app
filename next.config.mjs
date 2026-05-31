@@ -13,6 +13,16 @@ const nextConfig = {
         destination: '/api/:path*',
       },
       {
+        source: '/api/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'dashboard.kobara.app',
+          },
+        ],
+        destination: '/api/:path*',
+      },
+      {
         source: '/:path*',
         has: [
           {
