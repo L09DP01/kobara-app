@@ -3329,24 +3329,29 @@ https://kobara.app/docs/quickstart
 
 Also analyze all relevant sections:
 
-* https://kobara.app/docs/quickstart
-  https://kobara.app/docs/authentication
+* javascriptSdk: \`\${appUrl}/docs/javascript-sdk\`,
 
-  https://kobara.app/docs/javascript-sdk
-  https://kobara.app/docs/nodejs-sdk
-  https://kobara.app/docs/python-sdk
-  https://kobara.app/docs/php-sdk
+    nodeSdk: \`\${appUrl}/docs/nodejs-sdk\`,
 
-  https://kobara.app/docs/wordpress-plugin
-  https://kobara.app/docs/ai-integration
+    pythonSdk: \`\${appUrl}/docs/python-sdk\`,
 
-  https://kobara.app/docs/payments
-  https://kobara.app/docs/payment-links
-  https://kobara.app/docs/webhooks
-  https://kobara.app/docs/withdrawals
-  https://kobara.app/docs/errors
+    phpSdk: \`\${appUrl}/docs/php-sdk\`,
 
-Use the documentation as the source of truth.
+    wordpressPlugin: \`\${appUrl}/docs/wordpress-plugin\`,
+
+    aiIntegration: \`\${appUrl}/docs/ai-integration\`,
+
+    payments: \`\${appUrl}/docs/payments\`,
+
+    paymentLinks: \`\${appUrl}/docs/payment-links\`,
+
+    webhooks: \`\${appUrl}/docs/webhooks\`,
+
+    withdrawals: \`\${appUrl}/docs/withdrawals\`,
+
+    errors: \`\${appUrl}/docs/errors\`,
+
+  Use the documentation as the source of truth.
 
 Do not invent:
 
