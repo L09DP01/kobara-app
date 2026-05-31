@@ -32,6 +32,7 @@
     "@tailwindcss/forms": "^0.5.11",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^3.4.15",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",

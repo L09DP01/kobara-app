@@ -8,6 +8,7 @@ import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 import { NotificationPrompt } from "@/components/notification-prompt";
 import type { Viewport } from 'next';
 import Script from 'next/script';
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -127,6 +128,7 @@ export default async function RootLayout({
           <PwaInstallPrompt />
           <NotificationPrompt />
         </LanguageProvider>
+        <Analytics />
       </body>
     </html>
   );
