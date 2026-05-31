@@ -46,6 +46,11 @@ export async function updateSession(request: NextRequest) {
     pathname === route || pathname.startsWith(route + '/')
   );
 
+  // Dashboard subdomain logic: everything on dashboard.kobara.app is private
+  if (hostname === 'dashboard.kobara.app' || hostname === 'dashboard.localhost' || hostname === 'dashboard.kobara.local') {
+    isPublicRoute = false;
+  }
+
   // If the request is for a custom subdomain, it's public (handled by rewrites)
   if (hostname === 'pay.kobara.app' || hostname === 'api.kobara.app') {
     isPublicRoute = true;
@@ -53,6 +58,13 @@ export async function updateSession(request: NextRequest) {
 
   // Default-deny: if not a public route and no user, redirect to login
   if (!isPublicRoute && !userLoggedIn) {
+    // Redirect to main domain login to avoid 404s on the dashboard subdomain
+    if (hostname === 'dashboard.kobara.app') {
+      return NextResponse.redirect(`https://kobara.app/login?next=${encodeURIComponent('https://' + hostname + pathname)}`);
+    } else if (hostname === 'dashboard.localhost' || hostname === 'dashboard.kobara.local') {
+      return NextResponse.redirect(`http://localhost:3000/login?next=${encodeURIComponent('http://' + hostname + pathname)}`);
+    }
+
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', pathname);

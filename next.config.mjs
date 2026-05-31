@@ -17,6 +17,16 @@ const nextConfig = {
         has: [
           {
             type: 'host',
+            value: 'dashboard.kobara.app',
+          },
+        ],
+        destination: '/dashboard/:path*',
+      },
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
             value: 'pay.kobara.app',
           },
         ],
