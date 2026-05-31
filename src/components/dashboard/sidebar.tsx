@@ -50,7 +50,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <aside
       className={clsx(
-        "fixed flex flex-col z-40 bg-surface-container-lowest text-text-primary font-body-base text-body-base docked w-[260px] left-0 top-0 bottom-0 border-r border-border-subtle shadow-sm transition-transform duration-300 ease-in-out md:translate-x-0 md:flex",
+        "fixed flex flex-col z-40 bg-surface-container-lowest text-text-primary font-body-base text-body-base docked w-[260px] left-0 top-0 bottom-0 h-[100dvh] md:h-screen overflow-y-auto border-r border-border-subtle shadow-sm transition-transform duration-300 ease-in-out md:translate-x-0 md:flex",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >

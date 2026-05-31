@@ -119,9 +119,9 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="bg-background-main font-body-base text-body-base text-on-surface min-h-screen flex flex-col">
+      <body className="bg-background-main font-body-base text-body-base text-on-surface min-h-[100dvh] flex flex-col">
         <LanguageProvider>
-          <div style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }} className="flex-1 flex flex-col min-h-screen">
+          <div style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }} className="flex-1 flex flex-col min-h-full">
             {children}
           </div>
           <Toaster position="top-right" richColors />
