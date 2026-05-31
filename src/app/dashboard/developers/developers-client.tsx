@@ -5,206 +5,237 @@ import Link from 'next/link';
 import { kobaraSdks } from '@/config/sdks';
 import { docsLinks } from '@/config/docs-links';
 
-const KOBARA_AI_PROMPT = `Tu es un architecte logiciel senior spécialisé dans les infrastructures fintech, les APIs de paiement et les intégrations SaaS sécurisées.
+const KOBARA_AI_PROMPT = `# Integrate Kobara Payments Into My Application
 
-Ta mission est d’intégrer Kobara Payments dans mon application existante de manière professionnelle, sécurisée et scalable.
+You are a senior software engineer specialized in fintech APIs, payment infrastructure, SaaS integrations and secure backend architecture.
 
-IMPORTANT :
-Avant de coder quoi que ce soit :
-1. Analyse entièrement mon projet.
-2. Détecte automatiquement ma stack technique.
-3. Comprends l’architecture frontend/backend.
-4. Analyse les routes existantes.
-5. Analyse la structure de la base de données.
-6. Analyse les systèmes d’authentification existants.
-7. Vérifie les variables d’environnement.
-8. Vérifie la gestion des paiements déjà existante.
-9. Vérifie les middlewares sécurité.
-10. Vérifie les endpoints API existants.
+Your mission is to integrate Kobara Payments into my existing application in a secure, scalable and production-ready way.
 
-OBJECTIF :
-Intégrer Kobara Payments correctement dans mon application sans casser l’architecture existante.
+## IMPORTANT - READ DOCUMENTATION FIRST
 
-RÈGLES CRITIQUES :
+Before analyzing my project or generating any code:
 
-1. Ne jamais exposer les clés secrètes Kobara côté client.
-2. Toutes les requêtes sensibles doivent passer par le backend.
-3. Toujours utiliser les variables .env.
-4. Toujours utiliser HTTPS.
-5. Vérifier les signatures webhook Kobara.
-6. Utiliser uniquement les clés Kobara :
-   - kbr_pk_* côté frontend
-   - kbr_sk_* côté backend
-7. Ne jamais communiquer directement avec MonCash ou MonCash.
-8. Toute communication paiement doit passer uniquement par l’API Kobara.
-9. Utiliser les bonnes pratiques OWASP.
-10. Ajouter validation et gestion erreurs.
+Visit and analyze the Kobara documentation:
 
-ARCHITECTURE RECOMMANDÉE :
+https://kobara.app/docs/quickstart
 
-Frontend
-↓
-Backend sécurisé
-↓
-API Kobara
-↓
-Infrastructure MonCash
-↓
-MonCash
+Also analyze all relevant sections:
 
-TÂCHES À EFFECTUER :
+* https://kobara.app/docs/quickstart
+  https://kobara.app/docs/authentication
 
-1. Installer le SDK Kobara adapté à ma stack.
-2. Configurer les variables d’environnement.
-3. Créer les services Kobara backend.
-4. Créer les endpoints API nécessaires.
-5. Créer la logique de paiement.
-6. Créer la logique des retraits.
-7. Créer la logique des webhooks.
-8. Créer la gestion des statuts paiement.
-9. Ajouter les logs sécurité.
-10. Ajouter la gestion erreurs.
-11. Ajouter les protections anti-abus.
-12. Ajouter la validation des données.
-13. Ajouter les notifications temps réel.
-14. Ajouter les analytics paiement.
-15. Ajouter le mode Test et Live.
+  https://kobara.app/docs/javascript-sdk
+  https://kobara.app/docs/nodejs-sdk
+  https://kobara.app/docs/python-sdk
+  https://kobara.app/docs/php-sdk
 
-ANALYSE AUTOMATIQUE DEMANDÉE :
+  https://kobara.app/docs/wordpress-plugin
+  https://kobara.app/docs/ai-integration
 
-Détecte automatiquement :
-- Next.js
-- React
-- Vue
-- Laravel
-- Express
-- NestJS
-- FastAPI
-- Django
-- Supabase
-- PostgreSQL
-- Prisma
-- Tailwind
-- TypeScript
-- Docker
-- Vercel
+  https://kobara.app/docs/payments
+  https://kobara.app/docs/payment-links
+  https://kobara.app/docs/webhooks
+  https://kobara.app/docs/withdrawals
+  https://kobara.app/docs/errors
 
-Puis adapte l’intégration Kobara à cette stack.
+Use the documentation as the source of truth.
 
-LOGIQUE DE PAIEMENT À IMPLÉMENTER :
+Do not invent:
 
-1. Créer paiement :
-POST /api/v1/payments
+* endpoints
+* parameters
+* request bodies
+* response bodies
+* webhook events
+* SDK methods
 
-2. Retourner :
-- checkout_url
-- payment_id
-- status
+If information is missing, say so explicitly.
 
-3. Rediriger le client vers Kobara Checkout.
+---
 
-4. Après paiement :
-- recevoir webhook
-- vérifier signature
-- mettre à jour DB
-- notifier frontend
-- créditer dashboard marchand
+## Step 1 - Analyze My Project
 
-STATUTS À GÉRER :
+Before writing code:
 
-- pending
-- succeeded
-- failed
-- expired
-- refunded
+* Detect the framework automatically.
+* Detect frontend architecture.
+* Detect backend architecture.
+* Detect package manager.
+* Detect database.
+* Detect authentication.
+* Detect existing payment systems.
+* Detect environment variables.
+* Detect deployment platform.
+* Detect API routes.
 
-WEBHOOKS :
+Supported frameworks:
 
-Créer un endpoint webhook sécurisé.
+Frontend:
 
-Toujours :
-- vérifier Kobara-Signature
-- vérifier timestamp
-- logger les événements
-- éviter double traitement
+* Next.js
+* React
+* Vue
+* Nuxt
+* Angular
 
-ENV VARIABLES :
+Backend:
 
-Frontend :
+* Express
+* NestJS
+* Fastify
+* Laravel
+* Symfony
+* Django
+* FastAPI
+* Flask
+
+Database:
+
+* PostgreSQL
+* MySQL
+* MongoDB
+* Supabase
+
+---
+
+## Step 2 - Choose The Correct Kobara SDK
+
+JavaScript / React / Next.js
+
+\`\`\`bash
+npm install kobara-js
+\`\`\`
+
+Node.js / Express / NestJS
+
+\`\`\`bash
+npm install @kobara/node
+\`\`\`
+
+Python / FastAPI / Django
+
+\`\`\`bash
+pip install kobara
+\`\`\`
+
+PHP / Laravel / Symfony
+
+\`\`\`bash
+composer require kobara/php-sdk
+\`\`\`
+
+Use the SDK that best matches the detected stack.
+
+---
+
+## Step 3 - Integrate Kobara
+
+Implement:
+
+* Authentication
+* Payments
+* Payment Links
+* Webhooks
+* Withdrawals
+* Error Handling
+
+Follow the official Kobara documentation.
+
+---
+
+## Security Rules
+
+Always:
+
+* Use HTTPS.
+* Use environment variables.
+* Keep Secret Keys server-side.
+* Verify webhook signatures.
+* Validate input data.
+* Follow OWASP best practices.
+
+Public Key:
+
+\`\`\`env
 NEXT_PUBLIC_KOBARA_PUBLIC_KEY=
+\`\`\`
 
-Backend :
+Secret Key:
+
+\`\`\`env
 KOBARA_SECRET_KEY=
+\`\`\`
+
+Webhook Secret:
+
+\`\`\`env
 KOBARA_WEBHOOK_SECRET=
+\`\`\`
 
-BASE DE DONNÉES :
+Never expose secret keys to the frontend.
 
-Créer ou adapter :
-- payments
-- customers
-- payment_links
-- withdrawals
-- webhook_events
-- audit_logs
+---
 
-GESTION FRONTEND :
+## Payment Flow
 
-Créer :
-- checkout buttons
-- payment success page
-- payment failed page
-- loading states
-- error handling
-- notifications
+Customer
+↓
+My Application
+↓
+Kobara API
+↓
+Kobara Checkout
+↓
+Webhook
+↓
+Database Update
+↓
+Merchant Dashboard
 
-GESTION BACKEND :
+Supported statuses:
 
-Créer :
-- services Kobara
-- middleware auth
-- rate limiting
-- webhook verification
-- retry logic
-- logging
+* pending
+* succeeded
+* failed
+* expired
+* refunded
 
-SÉCURITÉ :
+---
 
-Ajouter :
-- validation Zod/Yup
-- rate limiting
-- CSRF protection
-- secure headers
-- anti replay webhook protection
+## Output Format
 
-QUALITÉ CODE :
+Always provide:
 
-- code propre
-- TypeScript strict
-- architecture scalable
-- composants réutilisables
-- services séparés
-- aucune duplication
+### Documentation Sections Used
 
-IMPORTANT :
+### Detected Stack
 
-Avant toute modification :
-1. explique ce que tu vas modifier ;
-2. explique pourquoi ;
-3. explique les impacts ;
-4. puis implémente proprement.
+### SDK Recommended
 
-Si une architecture existante est mauvaise :
-- explique pourquoi ;
-- propose une meilleure solution ;
-- puis migre proprement.
+### Installation Commands
 
-Le résultat final doit être :
-- sécurisé ;
-- scalable ;
-- production-ready ;
-- fintech-grade ;
-- compatible Kobara ;
-- optimisé pour MonCash.`;
+### Environment Variables
+
+### Integration Plan
+
+### Required Code Changes
+
+### Full Code Examples
+
+### Security Recommendations
+
+### Potential Issues Found
+
+---
+
+Before modifying anything:
+
+1. Explain what you found.
+2. Explain what needs to change.
+3. Explain why.
+4. Then implement the integration.
+
+The final result must be secure, scalable, production-ready and fully compatible with the official Kobara documentation.`;
 
 export function DevelopersClient({ 
   merchant, 
