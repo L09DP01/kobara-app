@@ -25,6 +25,7 @@ export function Navbar() {
     });
   }, []);
 
+  const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://dashboard.kobara.app";
   const isLoggedIn = !!session;
 
   const navLinks = [
@@ -74,12 +75,12 @@ export function Navbar() {
             <LanguageSwitcher />
             {!loading && (
               isLoggedIn ? (
-                <Link
-                  href={getDashboardUrl()}
+                <a
+                  href={`${dashboardUrl}/dashboard`}
                   className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
                 >
                   {language === "fr" ? "Mon compte" : "My Account"}
-                </Link>
+                </a>
               ) : (
                 <>
                   <Link
@@ -136,13 +137,13 @@ export function Navbar() {
             <div className="border-t border-slate-100 pt-4 flex flex-col gap-3 mt-1">
               {!loading && (
                 isLoggedIn ? (
-                  <Link
-                    href={getDashboardUrl()}
+                  <a
+                    href={`${dashboardUrl}/dashboard`}
                     onClick={() => setMobileOpen(false)}
                     className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
                   >
                     {language === "fr" ? "Mon compte" : "My Account"}
-                  </Link>
+                  </a>
                 ) : (
                   <>
                     <Link
