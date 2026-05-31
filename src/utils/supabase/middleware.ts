@@ -61,6 +61,13 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isDashboardSubdomain) {
+    if (pathname === '/') {
+      const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
+        `http://${hostname}:3000/dashboard` :
+        `https://dashboard.kobara.app/dashboard`;
+      return NextResponse.redirect(redirectUrl);
+    }
+
     // Require authentication for dashboard subdomain (except APIs which have their own auth)
     if (!userLoggedIn && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
       const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
@@ -73,8 +80,8 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
   if (isAuthPage && userLoggedIn) {
     const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
-      `http://dashboard.${hostname.replace('dashboard.', '').split(':')[0]}:3000/` :
-      `https://dashboard.kobara.app/`;
+      `http://dashboard.${hostname.replace('dashboard.', '').split(':')[0]}:3000/dashboard` :
+      `https://dashboard.kobara.app/dashboard`;
     return NextResponse.redirect(redirectUrl);
   }
 

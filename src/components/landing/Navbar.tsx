@@ -76,7 +76,7 @@ export function Navbar() {
             {!loading && (
               isLoggedIn ? (
                 <a
-                  href={`${dashboardUrl}`}
+                  href={`${dashboardUrl}/dashboard`}
                   className="bg-kobara-primary hover:bg-slate-900 text-white px-6 h-11 rounded-xl font-bold transition-all shadow-lg active:scale-95 flex items-center justify-center text-[15px]"
                 >
                   {language === "fr" ? "Mon compte" : "My Account"}
@@ -138,7 +138,7 @@ export function Navbar() {
               {!loading && (
                 isLoggedIn ? (
                   <a
-                    href={`${dashboardUrl}`}
+                    href={`${dashboardUrl}/dashboard`}
                     onClick={() => setMobileOpen(false)}
                     className="text-center h-11 flex items-center justify-center rounded-xl bg-kobara-primary text-white font-bold text-[15px] hover:bg-slate-900 transition-colors"
                   >

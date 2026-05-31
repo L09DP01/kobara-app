@@ -15,7 +15,7 @@ const SIDEBAR_SECTIONS = [
   {
     title: "Général",
     links: [
-      { href: "/", icon: "dashboard", label: "Dashboard", exact: true },
+      { href: "/dashboard", icon: "dashboard", label: "Dashboard", exact: true },
     ]
   },
   {

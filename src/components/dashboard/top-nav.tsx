@@ -136,7 +136,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                             if (notif.type.includes('payment')) router.push('/payments');
                             else if (notif.type.includes('withdrawal')) router.push('/withdrawals');
                             else if (notif.type.includes('kyc') || notif.type.includes('security')) router.push('/settings');
-                            else router.push('/');
+                            else router.push('/dashboard');
                           }}
                           className="block p-4 hover:bg-surface-container-lowest transition-colors border-b border-border-subtle last:border-0 relative group cursor-pointer"
                         >
