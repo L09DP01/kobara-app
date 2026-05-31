@@ -58,19 +58,21 @@ export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: (
   const pathname = usePathname();
   
   return (
-    <div className="lg:hidden">
+    <div className={clsx("absolute left-0 top-0 z-50 min-h-full w-full lg:hidden", !isOpen && "pointer-events-none")}>
       {/* Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/50 transition-opacity h-[100dvh]" 
-          onClick={onClose} 
-        />
-      )}
+      <button 
+        className={clsx(
+          "absolute inset-0 z-40 min-h-full w-full bg-black/50 transition-opacity duration-300 border-none cursor-default",
+          isOpen ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={onClose} 
+        aria-label="Fermer le menu"
+      />
       
       {/* Sidebar Panel */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out h-[100dvh] overflow-hidden",
+          "absolute left-0 top-0 z-50 flex w-[82vw] max-w-[360px] flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out min-h-full overflow-hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
