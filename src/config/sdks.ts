@@ -1,3 +1,5 @@
+import { docsLinks } from "./docs-links";
+
 export const kobaraSdks = [
   {
     id: "javascript",
@@ -6,7 +8,7 @@ export const kobaraSdks = [
     name: "JavaScript SDK",
     usage: "Pour les applications frontend",
     installCommand: "npm install kobara-js",
-    docsUrl: "/docs#javascript-sdk"
+    docsUrl: docsLinks.javascriptSdk
   },
   {
     id: "nodejs",
@@ -15,7 +17,7 @@ export const kobaraSdks = [
     name: "Node.js SDK",
     usage: "Pour les serveurs Node.js",
     installCommand: "npm install @kobara/node",
-    docsUrl: "/docs#nodejs-sdk"
+    docsUrl: docsLinks.nodeSdk
   },
   {
     id: "python",
@@ -24,7 +26,7 @@ export const kobaraSdks = [
     name: "Python SDK",
     usage: "Pour Django, Flask, FastAPI",
     installCommand: "pip install kobara",
-    docsUrl: "/docs#python-sdk"
+    docsUrl: docsLinks.pythonSdk
   },
   {
     id: "php",
@@ -33,6 +35,6 @@ export const kobaraSdks = [
     name: "PHP SDK",
     usage: "Pour Laravel, Symfony",
     installCommand: "composer require kobara/php-sdk",
-    docsUrl: "/docs#php-sdk"
+    docsUrl: docsLinks.phpSdk
   }
 ];

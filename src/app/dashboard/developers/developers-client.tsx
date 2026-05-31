@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { kobaraSdks } from '@/config/sdks';
+import { docsLinks } from '@/config/docs-links';
 
 const KOBARA_AI_PROMPT = `Tu es un architecte logiciel senior spécialisé dans les infrastructures fintech, les APIs de paiement et les intégrations SaaS sécurisées.
 
@@ -284,7 +285,7 @@ export function DevelopersClient({
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/docs" className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-body-base text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2">
+          <Link href={docsLinks.quickstart} className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-body-base text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2">
             <span className="material-symbols-outlined text-[18px]">menu_book</span>
             Voir la documentation
           </Link>
@@ -376,7 +377,7 @@ export function DevelopersClient({
                 <span className="material-symbols-outlined text-[18px]">download</span>
                 Download Plugin
               </a>
-              <Link href="/docs#wordpress-plugin" className="bg-surface-card border border-border-subtle text-text-primary px-6 py-3 rounded-lg font-body-base text-body-sm font-medium hover:bg-surface-container transition-colors shadow-sm">
+              <Link href={docsLinks.wordpressPlugin} className="bg-surface-card border border-border-subtle text-text-primary px-6 py-3 rounded-lg font-body-base text-body-sm font-medium hover:bg-surface-container transition-colors shadow-sm">
                 Guide d'installation
               </Link>
             </div>
@@ -458,7 +459,7 @@ export function DevelopersClient({
                   <span className="material-symbols-outlined text-[18px]">content_copy</span>
                   Copier prompt IA
                 </button>
-                <Link href="/docs#ai-integration" className="bg-transparent text-white/70 hover:text-white px-4 py-2.5 rounded-lg font-body-base text-body-sm font-medium transition-colors flex items-center gap-1">
+                <Link href={docsLinks.aiIntegration} className="bg-transparent text-white/70 hover:text-white px-4 py-2.5 rounded-lg font-body-base text-body-sm font-medium transition-colors flex items-center gap-1">
                   Voir docs <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </Link>
               </div>
