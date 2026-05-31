@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { signOut } from "next-auth/react";
+import { siteConfig } from "@/config/site";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -55,14 +56,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     >
       {/* Header / Logo */}
       <div className="px-6 py-6 flex justify-between items-center h-20 shrink-0">
-        <Link href="/" className="flex items-center">
+        <a href={siteConfig.url} className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
             alt="Kobara Logo"
             className="w-36 h-auto object-contain -ml-2"
           />
-        </Link>
+        </a>
         <button
           onClick={onClose}
           className="md:hidden text-text-secondary hover:text-primary transition-colors p-1"

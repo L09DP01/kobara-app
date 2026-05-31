@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { markNotificationAsReadAction, markAllNotificationsAsReadAction } from './actions';
+import { siteConfig } from '@/config/site';
 
 export default function TopNav({ onToggleSidebar, merchant, user, initialNotifications = [] }: { onToggleSidebar: () => void, merchant?: any, user?: any, initialNotifications?: any[] }) {
   const router = useRouter();
@@ -78,14 +79,14 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
         </button>
 
         {/* Mobile Logo */}
-        <Link href="/" className="md:hidden flex items-center">
+        <a href={siteConfig.url} className="md:hidden flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
             alt="Kobara Logo"
             className="w-32 h-auto object-contain"
           />
-        </Link>
+        </a>
 
 
       </div>

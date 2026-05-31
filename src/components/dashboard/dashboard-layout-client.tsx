@@ -4,6 +4,7 @@ import { useState } from "react";
 import Sidebar from "@/components/dashboard/sidebar";
 import TopNav from "@/components/dashboard/top-nav";
 import { KycRequiredBanner } from "@/components/dashboard/kyc-banner";
+import { siteConfig } from "@/config/site";
 
 export default function DashboardLayoutClient({
   children,
@@ -26,7 +27,7 @@ export default function DashboardLayoutClient({
       <div className="bg-background-main font-body-base text-body-base text-on-surface antialiased min-h-screen">
         {/* Minimal guest top bar with login CTA */}
         <div className="h-16 border-b border-border-subtle bg-white/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40">
-          <a href="/" className="flex items-center">
+          <a href={siteConfig.url} className="flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -36,13 +37,13 @@ export default function DashboardLayoutClient({
           </a>
           <div className="flex items-center gap-4">
             <a
-              href="/login"
+              href={`${siteConfig.url}/login`}
               className="text-sm font-semibold text-kobara-primary hover:opacity-70 transition-opacity"
             >
               Log in
             </a>
             <a
-              href="/register"
+              href={`${siteConfig.url}/register`}
               className="h-9 px-5 rounded-lg bg-kobara-primary hover:bg-slate-900 text-white text-sm font-bold transition-all flex items-center"
             >
               Sign up free
