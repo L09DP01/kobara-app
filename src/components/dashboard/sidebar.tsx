@@ -54,25 +54,38 @@ export function DesktopSidebar() {
   );
 }
 
+import { useEffect } from "react";
+
 export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
-  
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   return (
-    <div className={clsx("absolute left-0 top-0 z-50 min-h-full w-full lg:hidden", !isOpen && "pointer-events-none")}>
+    <div className="lg:hidden">
       {/* Overlay */}
-      <button 
+      <div 
         className={clsx(
-          "absolute inset-0 z-40 min-h-full w-full bg-black/50 transition-opacity duration-300 border-none cursor-default",
-          isOpen ? "opacity-100" : "opacity-0"
+          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300",
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )} 
         onClick={onClose} 
-        aria-label="Fermer le menu"
+        aria-hidden="true"
       />
       
       {/* Sidebar Panel */}
       <aside
         className={clsx(
-          "absolute left-0 top-0 z-50 flex w-[82vw] max-w-[360px] flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out min-h-full overflow-hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out overflow-hidden h-[100dvh]",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
