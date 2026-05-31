@@ -6,6 +6,18 @@ import { signSupabaseToken } from "@/lib/server/auth/supabase-jwt";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 
 export const authOptions: AuthOptions = {
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        domain: process.env.NODE_ENV === 'production' ? '.kobara.app' : 'localhost'
+      }
+    }
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
