@@ -141,7 +141,7 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
 
   // UI du Chat (Réutilisable Desktop/Mobile) - Défini comme JSX, pas comme un composant pour éviter la perte de focus
   const chatInterfaceNode = (
-    <div className="flex flex-col h-full bg-surface-container-lowest dark:bg-surface-container-lowest border-l border-border-subtle dark:border-outline-variant shadow-2xl">
+    <div className="flex flex-col h-full min-h-0 bg-surface-container-lowest dark:bg-surface-container-lowest border-l border-border-subtle dark:border-outline-variant shadow-2xl">
       {/* Header */}
       <div className="px-4 py-3 flex items-center justify-between border-b border-border-subtle bg-surface-container/50">
         <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5">
         {messages.map((m: any) => (
           <div key={m.id} className={clsx("flex gap-3", m.role === 'user' ? "flex-row-reverse" : "")}>
             <div className={clsx(
@@ -301,7 +301,7 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
                 <div className="w-full flex justify-center py-2 absolute top-0 z-10">
                   <div className="w-12 h-1.5 bg-border-subtle rounded-full" />
                 </div>
-                <div className="flex-1 mt-3">
+                <div className="flex-1 mt-3 min-h-0">
                   {chatInterfaceNode}
                 </div>
               </motion.div>
