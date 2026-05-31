@@ -71,11 +71,23 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Enforce dashboard subdomain: redirect /dashboard on main domain to dashboard.kobara.app
+  if (pathname.startsWith('/dashboard') && !hostname.startsWith('dashboard.')) {
+    const pathWithoutDashboard = pathname.replace('/dashboard', '') || '/';
+    if (hostname === 'kobara.app' || hostname === 'www.kobara.app') {
+      return NextResponse.redirect(`https://dashboard.kobara.app${pathWithoutDashboard}${request.nextUrl.search}`);
+    } else {
+      return NextResponse.redirect(`http://dashboard.${hostname.split(':')[0]}:3000${pathWithoutDashboard}${request.nextUrl.search}`);
+    }
+  }
+
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
   if (isAuthPage && userLoggedIn) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+    if (hostname === 'kobara.app' || hostname === 'www.kobara.app') {
+      return NextResponse.redirect(`https://dashboard.kobara.app/`);
+    } else {
+      return NextResponse.redirect(`http://dashboard.${hostname.split(':')[0]}:3000/`);
+    }
   }
 
   // -------------------------------------------------------------
