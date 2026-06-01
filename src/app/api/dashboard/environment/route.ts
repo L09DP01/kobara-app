@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUserAndMerchant } from '@/lib/auth/get-current-user';
-import { supabaseServer } from '@/lib/supabase/server';
+import { getCurrentUserAndMerchant } from '@/utils/supabase/auth-helper';
 
 export async function GET() {
   try {
@@ -27,7 +26,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { merchant, error } = await getCurrentUserAndMerchant();
+    const { merchant, supabase, error } = await getCurrentUserAndMerchant();
 
     if (error || !merchant) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -51,7 +50,6 @@ export async function POST(request: Request) {
     }
 
     // Update merchant's current_environment
-    const supabase = supabaseServer();
     const { error: updateError } = await supabase
       .from('merchants')
       .update({ current_environment: requestedEnvironment })
