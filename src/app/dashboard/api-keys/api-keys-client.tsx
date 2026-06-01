@@ -18,7 +18,7 @@ export function ApiKeysClient({
   successRate?: number 
 }) {
   const [loading, setLoading] = useState(false);
-  const { currentEnvironment } = useEnvironment();
+  const { currentEnvironment, setEnvironment } = useEnvironment();
   const [showKey, setShowKey] = useState(false);
   const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
 
