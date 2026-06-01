@@ -45,19 +45,24 @@ export async function processSuccessfulPayment(reference: string) {
   // Update Merchant Balance
   const { data: merchant } = await supabase
     .from('merchants')
-    .select('available_balance')
+    .select('available_balance, available_balance_test')
     .eq('id', payment.merchant_id)
     .single();
   
   if (merchant) {
-    const currentBalance = Number(merchant.available_balance || 0);
+    const isTest = payment.environment === 'test';
+    const currentBalance = isTest 
+      ? Number(merchant.available_balance_test || 0)
+      : Number(merchant.available_balance || 0);
     const netAmount = Number(payment.net_amount || 0);
     
+    const updateData = isTest 
+      ? { available_balance_test: currentBalance + netAmount }
+      : { available_balance: currentBalance + netAmount };
+
     await supabase
       .from('merchants')
-      .update({
-        available_balance: currentBalance + netAmount
-      })
+      .update(updateData)
       .eq('id', payment.merchant_id);
   }
 

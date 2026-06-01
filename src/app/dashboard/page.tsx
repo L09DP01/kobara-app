@@ -32,7 +32,9 @@ export default async function DashboardPage() {
     .eq('status', 'succeeded');
 
   const totalEncaisse = succeededPayments?.reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
-  const soldeDisponible = Number(merchant.available_balance || 0);
+  const soldeDisponible = merchant.current_environment === 'test' 
+    ? Number(merchant.available_balance_test || 0) 
+    : Number(merchant.available_balance || 0);
 
   // Calculate success rate
   const { count: totalCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test');

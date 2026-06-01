@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { requestWithdrawal } from './actions';
 import { sendEmailOtpAction } from '../settings/actions';
+import { useEnvironment } from '@/context/EnvironmentContext';
 
 export function WithdrawalsClient({ 
   withdrawals, 
@@ -28,16 +29,25 @@ export function WithdrawalsClient({
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const { currentEnvironment } = useEnvironment();
+
+  const isTest = currentEnvironment === 'test';
+  const activeBalance = isTest 
+    ? Number(merchant.available_balance_test || 0) 
+    : Number(merchant.available_balance || 0);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    if (!amount || Number(amount) < 100) return;
+    if (!amount || Number(amount) < 100) {
+      setErrorMsg("Le montant minimum est de 100 HTG");
+      return;
+    }
     if (method === 'MonCash' && !receiver) {
       setErrorMsg("Le numéro de réception est requis pour MonCash.");
       return;
     }
-    if (Number(amount) > Number(merchant.available_balance)) {
+    if (Number(amount) > activeBalance) {
       setErrorMsg("Votre solde est insuffisant.");
       return;
     }
@@ -144,7 +154,7 @@ export function WithdrawalsClient({
         <div className="relative z-10">
           <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">Solde Disponible</p>
           <h2 className="text-4xl font-bold text-white tracking-tight">
-            {Number(merchant.available_balance).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} <span className="text-lg text-white/60">HTG</span>
+            {activeBalance.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} <span className="text-lg text-white/60">HTG</span>
           </h2>
           <div className="mt-6 flex gap-4">
             <button onClick={() => setIsModalOpen(true)} className="bg-white text-[#1a1a2e] px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors flex items-center gap-2">
@@ -203,13 +213,13 @@ export function WithdrawalsClient({
               {step === 'details' ? (
                 <form onSubmit={handleInitialSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs text-text-secondary font-medium mb-1.5">Montant (HTG) - Max: {merchant.available_balance}</label>
+                    <label className="block text-xs text-text-secondary font-medium mb-1.5">Montant (HTG) - Max: {activeBalance}</label>
                     <input 
                       type="number" 
                       value={amount}
                       onChange={(e) => setAmount(Number(e.target.value))}
                       placeholder="1000.00"
-                      max={Math.max(100, Number(merchant.available_balance || 0))}
+                      max={Math.max(100, activeBalance)}
                       min={100}
                       step="0.01"
                       className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"

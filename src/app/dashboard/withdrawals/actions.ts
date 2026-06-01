@@ -22,7 +22,10 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     return { error: "Access Denied" };
   }
 
-  if (amount > Number(merchant.available_balance)) {
+  const isTest = merchant.current_environment === 'test';
+  const activeBalance = isTest ? Number(merchant.available_balance_test || 0) : Number(merchant.available_balance || 0);
+
+  if (amount > activeBalance) {
     return { error: "Solde insuffisant pour ce retrait." };
   }
 
@@ -102,7 +105,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   }
 
   // 3. Déduction du solde de l'utilisateur (le total demandé)
-  const newBalance = Number(merchant.available_balance) - amount;
+  const newBalance = activeBalance - amount;
 
   if (newBalance < 0) {
     // Should never happen due to the check at the top, but just in case
@@ -110,10 +113,13 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   }
 
   const adminClient = createAdminClient();
+  const updateData = isTest 
+    ? { available_balance_test: newBalance }
+    : { available_balance: newBalance };
 
   const { error: updateError } = await adminClient
     .from('merchants')
-    .update({ available_balance: newBalance })
+    .update(updateData)
     .eq('id', merchant.id);
 
   if (updateError) {

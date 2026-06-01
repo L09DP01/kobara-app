@@ -100,6 +100,19 @@ export function ApiKeysClient({
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Clés API</h1>
           <p className="text-sm text-text-secondary mt-1">Gérez vos clés secrètes pour l'intégration de l'API Kobara.</p>
         </div>
+        
+        {/* Mobile Environment Switcher */}
+        <div className="sm:hidden flex items-center justify-between bg-surface-container-low px-4 py-3 rounded-xl border border-border-subtle shadow-sm mt-2">
+          <span className={`text-sm font-bold ${currentEnvironment === 'test' ? 'text-amber-600' : 'text-text-secondary'}`}>Mode Test</span>
+          <button 
+            onClick={() => setEnvironment(currentEnvironment === 'test' ? 'live' : 'test')}
+            disabled={merchant?.kyc_status !== 'approved'}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${merchant?.kyc_status !== 'approved' ? 'opacity-50 cursor-not-allowed bg-gray-300' : (currentEnvironment === 'live' ? 'bg-status-success' : 'bg-amber-500')}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${currentEnvironment === 'live' ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+          <span className={`text-sm font-bold ${currentEnvironment === 'live' ? 'text-status-success' : 'text-text-secondary'}`}>Mode Live</span>
+        </div>
       </div>
 
       {/* Security Info Box */}

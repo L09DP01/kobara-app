@@ -102,17 +102,24 @@ export async function POST(request: NextRequest) {
         if (newStatus === "failed") {
           const { data: merchant } = await supabaseAdmin
             .from('merchants')
-            .select('available_balance, email')
+            .select('available_balance, available_balance_test, email')
             .eq('id', withdrawal.merchant_id)
             .single();
 
           if (merchant) {
-            const currentBalance = Number(merchant.available_balance || 0);
-            const totalRefund = Number(withdrawal.total || 0); // They paid the total amount
+            const isTest = withdrawal.environment === 'test';
+            const currentBalance = isTest 
+              ? Number(merchant.available_balance_test || 0)
+              : Number(merchant.available_balance || 0);
+            const totalRefund = Number(withdrawal.total || 0);
+
+            const updateData = isTest 
+              ? { available_balance_test: currentBalance + totalRefund }
+              : { available_balance: currentBalance + totalRefund };
 
             await supabaseAdmin
               .from('merchants')
-              .update({ available_balance: currentBalance + totalRefund })
+              .update(updateData)
               .eq('id', withdrawal.merchant_id);
               
             // Create notification and email for failed withdrawal refund
@@ -177,7 +184,7 @@ export async function POST(request: NextRequest) {
       // 1. Update Merchant Balance
       const { data: merchant } = await supabaseAdmin
         .from('merchants')
-        .select('available_balance, business_name')
+        .select('available_balance, available_balance_test, business_name')
         .eq('id', payment.merchant_id)
         .single();
       
@@ -195,14 +202,19 @@ export async function POST(request: NextRequest) {
       }
       
       if (merchant) {
-        const currentBalance = Number(merchant.available_balance || 0);
+        const isTest = payment.environment === 'test';
+        const currentBalance = isTest 
+          ? Number(merchant.available_balance_test || 0)
+          : Number(merchant.available_balance || 0);
         const netAmount = Number(payment.net_amount || 0);
         
+        const updateData = isTest 
+          ? { available_balance_test: currentBalance + netAmount }
+          : { available_balance: currentBalance + netAmount };
+
         const { error: balanceError } = await supabaseAdmin
           .from('merchants')
-          .update({
-            available_balance: currentBalance + netAmount
-          })
+          .update(updateData)
           .eq('id', payment.merchant_id);
           
         if (balanceError) {

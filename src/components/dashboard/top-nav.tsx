@@ -92,7 +92,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
 
         {/* Environment Switcher */}
         {!isLoading && (
-          <div className="flex items-center gap-2 sm:gap-3 bg-surface-container-low px-2 sm:px-3 py-1.5 rounded-full border border-border-subtle shadow-sm ml-2">
+          <div className="hidden sm:flex items-center gap-3 bg-surface-container-low px-3 py-1.5 rounded-full border border-border-subtle shadow-sm ml-2">
             <span className={`text-xs font-bold ${currentEnvironment === 'test' ? 'text-amber-600' : 'text-text-secondary'}`}>Test</span>
             <button 
               onClick={() => setEnvironment(currentEnvironment === 'test' ? 'live' : 'test')}
@@ -222,6 +222,29 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
                   <p className="text-body-sm font-medium text-text-primary truncate">{merchant?.business_name || 'Business'}</p>
                   <p className="text-[12px] text-text-secondary truncate">{merchant?.email || 'email@example.com'}</p>
                 </div>
+                
+                {!isLoading && (
+                  <div className="sm:hidden px-3 py-2 border-b border-border-subtle mb-2">
+                    <div className="flex items-center justify-between bg-surface-container-lowest px-3 py-2 rounded-xl border border-border-subtle shadow-sm mb-1">
+                      <span className={`text-xs font-bold ${currentEnvironment === 'test' ? 'text-amber-600' : 'text-text-secondary'}`}>Test</span>
+                      <button 
+                        onClick={() => setEnvironment(currentEnvironment === 'test' ? 'live' : 'test')}
+                        disabled={!canUseLive}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${!canUseLive ? 'opacity-50 cursor-not-allowed bg-gray-300' : (currentEnvironment === 'live' ? 'bg-status-success' : 'bg-amber-500')}`}
+                      >
+                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${currentEnvironment === 'live' ? 'translate-x-4' : 'translate-x-1'}`} />
+                      </button>
+                      <span className={`text-xs font-bold ${currentEnvironment === 'live' ? 'text-status-success' : 'text-text-secondary'}`}>Live</span>
+                    </div>
+                    {!canUseLive && currentEnvironment === 'test' && (
+                      <div className="text-center mb-1">
+                        <Link href="/kyc" className="text-[10px] bg-status-error/10 text-status-error px-2 py-0.5 rounded-full font-bold hover:bg-status-error/20 transition-colors">
+                          KYC Requis pour Live
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 <div className="flex flex-col px-2">
                   <Link href="/settings" className="px-3 py-2 text-body-sm text-text-primary hover:bg-surface-container-low rounded-lg transition-colors flex items-center gap-2">
