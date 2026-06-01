@@ -10,6 +10,7 @@ export default async function PaymentLinksPage() {
     .from('payment_links')
     .select('*')
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .order('created_at', { ascending: false });
 
   // Fetch payments to calculate stats per link
@@ -17,6 +18,7 @@ export default async function PaymentLinksPage() {
     .from('payments')
     .select('payment_link_id, amount, status')
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .eq('status', 'succeeded')
     .not('payment_link_id', 'is', null);
 

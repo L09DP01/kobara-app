@@ -127,6 +127,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     .from('withdrawals')
     .insert({
       merchant_id: merchant.id,
+      environment: merchant.current_environment || 'test',
       kobara_reference: reference,
       bazik_transaction_id: bazikResponse?.transaction_id || bazikResponse?.id || null, // from bazik
       amount: netAmount,

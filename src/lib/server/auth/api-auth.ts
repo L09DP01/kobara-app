@@ -62,12 +62,12 @@ export async function authenticateApiRequest(request: NextRequest) {
     const supabaseAdmin = createAdminClient();
     const { data: merchant } = await supabaseAdmin
       .from('merchants')
-      .select('id')
+      .select('id, current_environment')
       .eq('user_id', user.id)
       .single();
       
     if (merchant) {
-      return { merchantId: merchant.id, error: null };
+      return { merchantId: merchant.id, environment: merchant.current_environment || 'test', error: null };
     }
   }
 

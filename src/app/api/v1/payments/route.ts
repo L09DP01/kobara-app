@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
           .from('customers')
           .insert({
             merchant_id: merchantId,
+            environment: environment,
             name: name || 'Client inconnu',
             email: email || null,
             phone: phone || null,
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
 
     const { data: payment, error: dbError } = await supabase.from('payments').insert({
       merchant_id: merchantId,
+      environment: environment,
       customer_id: customerId,
       kobara_reference: kobaraReference,
       bazik_order_id: bazikOrderId,

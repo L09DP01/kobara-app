@@ -16,6 +16,7 @@ export async function addWebhookEndpoint(url: string) {
     .from('webhook_endpoints')
     .insert({
       merchant_id: merchant.id,
+      environment: merchant.current_environment || 'test',
       url: url,
       secret: secret,
       status: 'active'

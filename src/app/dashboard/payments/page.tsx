@@ -17,7 +17,8 @@ export default async function PaymentsPage({
   let query = supabase
     .from('payments')
     .select('*, customers(name, email)')
-    .eq('merchant_id', merchant.id);
+    .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test');
 
   if (filterStatus !== 'all') {
     query = query.eq('status', filterStatus);
@@ -39,7 +40,8 @@ export default async function PaymentsPage({
   const { data: allPaymentsForStats } = await supabase
     .from('payments')
     .select('amount, net_amount, gross_amount, fee_amount, status, created_at')
-    .eq('merchant_id', merchant.id);
+    .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test');
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);

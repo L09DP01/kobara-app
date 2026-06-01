@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { markNotificationAsReadAction, markAllNotificationsAsReadAction } from './actions';
 import { siteConfig } from '@/config/site';
+import { useEnvironment } from '@/context/EnvironmentContext';
 
 export default function TopNav({ onToggleSidebar, merchant, user, initialNotifications = [] }: { onToggleSidebar: () => void, merchant?: any, user?: any, initialNotifications?: any[] }) {
   const router = useRouter();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>(initialNotifications);
+  const { currentEnvironment, setEnvironment, canUseLive, isLoading } = useEnvironment();
   
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -88,6 +90,26 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
           />
         </a>
 
+        {/* Environment Switcher */}
+        {!isLoading && (
+          <div className="hidden sm:flex items-center gap-3 bg-surface-container-low px-3 py-1.5 rounded-full border border-border-subtle shadow-sm ml-2">
+            <span className={`text-xs font-bold ${currentEnvironment === 'test' ? 'text-amber-600' : 'text-text-secondary'}`}>Test</span>
+            <button 
+              onClick={() => setEnvironment(currentEnvironment === 'test' ? 'live' : 'test')}
+              disabled={!canUseLive}
+              title={!canUseLive ? "Vérifiez votre compte pour activer le mode Live" : ""}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${!canUseLive ? 'opacity-50 cursor-not-allowed bg-gray-300' : (currentEnvironment === 'live' ? 'bg-status-success' : 'bg-amber-500')}`}
+            >
+              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${currentEnvironment === 'live' ? 'translate-x-4' : 'translate-x-1'}`} />
+            </button>
+            <span className={`text-xs font-bold ${currentEnvironment === 'live' ? 'text-status-success' : 'text-text-secondary'}`}>Live</span>
+            {!canUseLive && currentEnvironment === 'test' && (
+              <Link href="/kyc" className="ml-1 text-[10px] bg-status-error/10 text-status-error px-2 py-0.5 rounded-full font-bold hover:bg-status-error/20 transition-colors">
+                KYC Requis
+              </Link>
+            )}
+          </div>
+        )}
 
       </div>
       

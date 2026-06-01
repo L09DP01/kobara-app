@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
+import { EnvironmentProvider } from "@/context/EnvironmentContext";
 
 // Pages inside /dashboard that are publicly accessible (no login required)
 const PUBLIC_DASHBOARD_PATHS = ["/dashboard/developers"];
@@ -98,8 +99,10 @@ export default async function DashboardLayout({
 
   // For public dashboard pages: render without sidebar if no merchant
   return (
-    <DashboardLayoutClient merchant={merchant ?? undefined} user={dbUser} isGuest={!merchant} initialNotifications={notifications}>
-      {children}
-    </DashboardLayoutClient>
+    <EnvironmentProvider>
+      <DashboardLayoutClient merchant={merchant ?? undefined} user={dbUser} isGuest={!merchant} initialNotifications={notifications}>
+        {children}
+      </DashboardLayoutClient>
+    </EnvironmentProvider>
   );
 }

@@ -10,6 +10,7 @@ export default async function DashboardPage() {
     .from('payments')
     .select('*, customers(name, email)')
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .order('created_at', { ascending: false })
     .limit(5);
 
@@ -18,6 +19,7 @@ export default async function DashboardPage() {
     .from('withdrawals')
     .select('*')
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .order('created_at', { ascending: false })
     .limit(5);
 
@@ -26,14 +28,15 @@ export default async function DashboardPage() {
     .from('payments')
     .select('amount, net_amount, created_at')
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .eq('status', 'succeeded');
 
   const totalEncaisse = succeededPayments?.reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
   const soldeDisponible = Number(merchant.available_balance || 0);
 
   // Calculate success rate
-  const { count: totalCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id);
-  const { count: successCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('status', 'succeeded');
+  const { count: totalCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test');
+  const { count: successCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test').eq('status', 'succeeded');
   
   const successRate = totalCount ? ((successCount || 0) / totalCount) * 100 : 0;
 

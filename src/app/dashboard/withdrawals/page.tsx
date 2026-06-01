@@ -10,6 +10,7 @@ export default async function WithdrawalsPage() {
     .from('withdrawals')
     .select('*')
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .order('created_at', { ascending: false });
 
   const { data: settings } = await supabase

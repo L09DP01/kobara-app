@@ -20,6 +20,7 @@ export default async function CustomersPage() {
       )
     `)
     .eq('merchant_id', merchant.id)
+    .eq('environment', merchant.current_environment || 'test')
     .order('created_at', { ascending: false });
 
   const rawCustomers = dbCustomers || [];
