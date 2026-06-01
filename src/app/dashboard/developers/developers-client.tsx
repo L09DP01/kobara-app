@@ -339,7 +339,7 @@ export function DevelopersClient({
             </button>
           </div>
           {!activeKey.includes('pk_') && (
-            <Link href="/dashboard/api-keys" className="mt-4 text-xs text-secondary hover:underline">Générer une clé</Link>
+            <Link href="/api-keys" className="mt-4 text-xs text-secondary hover:underline">Générer une clé</Link>
           )}
         </div>
         <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm flex flex-col justify-between">
@@ -373,7 +373,7 @@ export function DevelopersClient({
             ) : (
               <>
                 <p className="font-medium text-text-secondary text-sm">Aucun webhook</p>
-                <Link href="/dashboard/webhooks" className="mt-4 text-xs text-secondary hover:underline">Configurer un webhook</Link>
+                <Link href="/webhooks" className="mt-4 text-xs text-secondary hover:underline">Configurer un webhook</Link>
               </>
             )}
           </div>

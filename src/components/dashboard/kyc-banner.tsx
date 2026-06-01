@@ -14,7 +14,7 @@ export function KycRequiredBanner() {
           </p>
         </div>
         <Link
-          href="/dashboard/kyc"
+          href="/kyc"
           className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 hover:text-amber-900 transition-colors"
         >
           Vérifier mon compte <span className="material-symbols-outlined text-[18px]">arrow_forward</span>

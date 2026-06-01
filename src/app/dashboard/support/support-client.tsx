@@ -153,7 +153,7 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
           <h3 className="font-headline-sm text-text-primary mb-4">Liens utiles</h3>
           <ul className="space-y-2">
             <li>
-              <a href="/dashboard/developers" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container-lowest text-sm text-text-primary hover:text-primary transition-colors group">
+              <a href="/developers" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container-lowest text-sm text-text-primary hover:text-primary transition-colors group">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary">menu_book</span>
                   Documentation API
@@ -162,7 +162,7 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
               </a>
             </li>
             <li>
-              <a href="/dashboard/settings" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container-lowest text-sm text-text-primary hover:text-primary transition-colors group">
+              <a href="/settings" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container-lowest text-sm text-text-primary hover:text-primary transition-colors group">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary">settings</span>
                   Paramètres du compte

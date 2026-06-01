@@ -10,7 +10,7 @@ export default async function CreatePaymentLinkPage() {
       <div className="flex justify-between items-center">
         <div>
           <div className="flex items-center gap-2 text-xs sm:text-sm text-text-secondary mb-2">
-            <Link href="/dashboard/payment-links" className="hover:text-text-primary transition-colors">Liens de Paiement</Link>
+            <Link href="/payment-links" className="hover:text-text-primary transition-colors">Liens de Paiement</Link>
             <span className="material-symbols-outlined text-[14px] sm:text-[16px]">chevron_right</span>
             <span className="text-text-primary font-medium">Créer</span>
           </div>

@@ -25,7 +25,7 @@ export default async function EditPaymentLinkPage({ params }: { params: Promise<
       <div className="flex justify-between items-center">
         <div>
           <div className="flex items-center gap-2 text-body-sm text-text-secondary mb-2">
-            <Link href="/dashboard/payment-links" className="hover:text-text-primary transition-colors">Liens de Paiement</Link>
+            <Link href="/payment-links" className="hover:text-text-primary transition-colors">Liens de Paiement</Link>
             <span className="material-symbols-outlined text-[16px]">chevron_right</span>
             <span className="text-text-primary font-medium">Modifier</span>
           </div>
@@ -81,7 +81,7 @@ export default async function EditPaymentLinkPage({ params }: { params: Promise<
 
           <div className="pt-4 border-t border-border-subtle flex justify-end gap-3">
             <Link 
-              href="/dashboard/payment-links"
+              href="/payment-links"
               className="px-5 py-2.5 rounded-lg font-body-sm font-medium border border-border-subtle text-text-secondary hover:bg-surface-container-low hover:text-text-primary transition-colors"
             >
               Annuler

@@ -172,7 +172,7 @@ export default async function DashboardPage() {
           <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
             <div className="p-5 border-b border-border-subtle flex justify-between items-center">
               <h3 className="text-lg font-bold text-text-primary">Transactions Récentes</h3>
-              <Link href="/dashboard/payments" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+              <Link href="/payments" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
                 Voir Tout
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               </Link>
@@ -250,7 +250,7 @@ export default async function DashboardPage() {
           <div className="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm">
             <div className="flex justify-between items-center mb-5">
               <h3 className="text-lg font-bold text-text-primary">Retraits Récents</h3>
-              <Link href="/dashboard/withdrawals" className="p-1.5 hover:bg-surface-container rounded-lg text-text-secondary transition-colors">
+              <Link href="/withdrawals" className="p-1.5 hover:bg-surface-container rounded-lg text-text-secondary transition-colors">
                 <span className="material-symbols-outlined text-[18px]">open_in_new</span>
               </Link>
             </div>
@@ -293,7 +293,7 @@ export default async function DashboardPage() {
                 </div>
               )}
             </div>
-            <Link href="/dashboard/withdrawals" className="flex items-center justify-center gap-2 w-full mt-5 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-on-primary rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-sm">
+            <Link href="/withdrawals" className="flex items-center justify-center gap-2 w-full mt-5 py-2.5 bg-gradient-to-r from-primary to-primary/90 text-on-primary rounded-xl text-sm font-medium hover:opacity-90 transition-opacity shadow-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               Demander un retrait
             </Link>

@@ -94,7 +94,7 @@ export default async function KycPage() {
               ))}
             </div>
             <Link 
-              href="/dashboard/kyc/start"
+              href="/kyc/start"
               className="inline-flex items-center justify-center gap-2 bg-primary text-on-primary px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-sm hover:shadow-md"
             >
               Commencer la vérification
@@ -171,7 +171,7 @@ export default async function KycPage() {
               <div className="flex items-start gap-2 text-xs text-red-700"><span className="font-bold">3.</span> Utilisez un éclairage suffisant</div>
             </div>
             <Link 
-              href="/dashboard/kyc/start"
+              href="/kyc/start"
               className="inline-flex items-center justify-center gap-2 bg-status-error text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-status-error/90 transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">refresh</span>
