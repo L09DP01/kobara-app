@@ -24,6 +24,7 @@ export function ApiKeysClient({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [keyName, setKeyName] = useState('');
+  const [newKey, setNewKey] = useState<{rawKey: string, name: string, environment: string} | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
