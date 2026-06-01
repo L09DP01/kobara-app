@@ -20,8 +20,15 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
   }
 
   if (!payment) {
-    console.log("Payment not found for ID:", params.id, "and merchant:", merchant.id);
-    notFound();
+    return (
+      <div className="p-8 text-center text-status-error">
+        <h1 className="text-2xl font-bold mb-4">Erreur 404 (Debug)</h1>
+        <p>Paiement introuvable.</p>
+        <p>ID recherché : {params?.id}</p>
+        <p>Merchant ID : {merchant?.id}</p>
+        <p>Erreur Supabase : {JSON.stringify(error)}</p>
+      </div>
+    );
   }
 
   let customer = null;
