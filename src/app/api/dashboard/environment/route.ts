@@ -3,9 +3,9 @@ import { getCurrentUserAndMerchant } from '@/utils/supabase/auth-helper';
 
 export async function GET() {
   try {
-    const { merchant, error } = await getCurrentUserAndMerchant();
+    const { merchant } = await getCurrentUserAndMerchant();
 
-    if (error || !merchant) {
+    if (!merchant) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -26,9 +26,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { merchant, supabase, error } = await getCurrentUserAndMerchant();
+    const { merchant, supabase } = await getCurrentUserAndMerchant();
 
-    if (error || !merchant) {
+    if (!merchant) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
