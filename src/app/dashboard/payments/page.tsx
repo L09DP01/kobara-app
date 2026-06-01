@@ -229,7 +229,7 @@ export default async function PaymentsPage({
                     </td>
                     {/* Action */}
                     <td className="py-3 sm:py-3.5 px-4 sm:px-5 text-right">
-                      <Link href={`/dashboard/payments/${payment.id}`} className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-surface-container-low hover:bg-primary/10 text-text-secondary hover:text-primary transition-all duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                      <Link href={`/payments/${payment.id}`} className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-surface-container-low hover:bg-primary/10 text-text-secondary hover:text-primary transition-all duration-200 group-hover:bg-primary/10 group-hover:text-primary">
                         <span className="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
                       </Link>
                     </td>
@@ -244,7 +244,7 @@ export default async function PaymentsPage({
                       </div>
                       <h3 className="font-bold text-text-primary text-base sm:text-lg mb-2">Aucun paiement pour le moment</h3>
                       <p className="text-text-secondary text-xs sm:text-sm max-w-xs sm:max-w-sm mb-5 sm:mb-6">Créez votre premier lien de paiement et commencez à recevoir des paiements MonCash en quelques secondes.</p>
-                      <Link href="/dashboard/payment-links" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
+                      <Link href="/payment-links" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
                         <span className="material-symbols-outlined text-[18px]">add_link</span>
                         Créer un lien de paiement
                       </Link>

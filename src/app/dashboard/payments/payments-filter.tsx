@@ -44,7 +44,7 @@ export function PaymentsFilter({ exportButton }: { exportButton?: React.ReactNod
         {/* Export Button (passed from parent) */}
         {exportButton}
         {/* Créer un lien */}
-        <Link href="/dashboard/payment-links" className="flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-primary text-on-primary rounded-xl text-xs sm:text-sm font-semibold hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-sm whitespace-nowrap shrink-0">
+        <Link href="/payment-links" className="flex items-center gap-2 px-3 sm:px-5 py-2.5 sm:py-3 bg-primary text-on-primary rounded-xl text-xs sm:text-sm font-semibold hover:opacity-90 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 shadow-sm whitespace-nowrap shrink-0">
           <span className="material-symbols-outlined text-[16px] sm:text-[18px]">add_link</span>
           <span className="hidden sm:inline">Créer un lien</span>
         </Link>

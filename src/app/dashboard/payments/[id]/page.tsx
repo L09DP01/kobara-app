@@ -20,15 +20,8 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
   }
 
   if (!payment) {
-    return (
-      <div className="p-8 text-center text-status-error">
-        <h1 className="text-2xl font-bold mb-4">Erreur 404 (Debug)</h1>
-        <p>Paiement introuvable.</p>
-        <p>ID recherché : {params?.id}</p>
-        <p>Merchant ID : {merchant?.id}</p>
-        <p>Erreur Supabase : {JSON.stringify(error)}</p>
-      </div>
-    );
+    console.log("Payment not found for ID:", params.id, "and merchant:", merchant.id);
+    notFound();
   }
 
   let customer = null;
@@ -57,7 +50,7 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
   return (
     <div className="max-w-[1080px] w-full mx-auto space-y-8 pb-12">
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard/payments" className="p-2 rounded-full hover:bg-surface-container-high transition-colors text-text-secondary hover:text-text-primary">
+        <Link href="/payments" className="p-2 rounded-full hover:bg-surface-container-high transition-colors text-text-secondary hover:text-text-primary">
           <span className="material-symbols-outlined">arrow_back</span>
         </Link>
         <div>
