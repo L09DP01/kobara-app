@@ -92,7 +92,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
 
         {/* Environment Switcher */}
         {!isLoading && (
-          <div className="hidden sm:flex items-center gap-3 bg-surface-container-low px-3 py-1.5 rounded-full border border-border-subtle shadow-sm ml-2">
+          <div className="flex items-center gap-2 sm:gap-3 bg-surface-container-low px-2 sm:px-3 py-1.5 rounded-full border border-border-subtle shadow-sm ml-2">
             <span className={`text-xs font-bold ${currentEnvironment === 'test' ? 'text-amber-600' : 'text-text-secondary'}`}>Test</span>
             <button 
               onClick={() => setEnvironment(currentEnvironment === 'test' ? 'live' : 'test')}
