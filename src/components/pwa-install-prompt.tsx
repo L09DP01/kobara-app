@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 export function PwaInstallPrompt() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
+    if (pathname?.startsWith('/pay')) return;
+    
     // Only show the prompt if they haven't dismissed it recently
     const dismissed = localStorage.getItem('kobara_pwa_dismissed');
     if (dismissed && Date.now() - parseInt(dismissed) < 1000 * 60 * 60 * 24 * 7) {
@@ -69,6 +73,8 @@ export function PwaInstallPrompt() {
     setShowPrompt(false);
     localStorage.setItem('kobara_pwa_dismissed', Date.now().toString());
   };
+
+  if (pathname?.startsWith('/pay')) return null;
 
   return (
     <AnimatePresence>
