@@ -177,7 +177,7 @@ export default async function PricingPage() {
   ];
 
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-[100dvh]">
       <FloatingBackground />
       <Navbar />
 

@@ -105,7 +105,7 @@ export default function ChallengeTotpPage() {
 
   if (loadingFactors) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
+      <div className="min-h-[100dvh] bg-gray-50 flex flex-col justify-center items-center p-4">
         <div className="animate-pulse flex flex-col items-center space-y-4">
           <Shield className="w-12 h-12 text-kobara-red animate-bounce" />
           <p className="text-sm font-semibold text-gray-500">Sécurisation de la session...</p>
@@ -115,7 +115,7 @@ export default function ChallengeTotpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-[100dvh] bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="p-3 bg-rose-50 rounded-2xl text-kobara-red">

@@ -243,7 +243,7 @@ Pour exercer ces droits, vous pouvez soumettre une demande formelle à notre sup
 
 export default function PrivacyPage() {
   return (
-    <main className="relative min-h-screen selection:bg-rose-100 selection:text-rose-900 overflow-hidden">
+    <main className="relative min-h-[100dvh] selection:bg-rose-100 selection:text-rose-900 overflow-hidden">
       <FloatingBackground />
       <Navbar />
 

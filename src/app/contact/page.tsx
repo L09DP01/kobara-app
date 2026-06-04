@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-[100dvh]">
       <FloatingBackground />
       <Navbar />
 

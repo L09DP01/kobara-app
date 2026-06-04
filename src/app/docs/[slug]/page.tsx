@@ -57,7 +57,7 @@ export default async function DocsDocPage(props: { params: Promise<{ slug: strin
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] bg-background">
       <DocsClient 
         testPublicKey={testPublicKey} 
         testSecretKey={testSecretKey}

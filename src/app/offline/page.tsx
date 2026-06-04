@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center p-6 text-center">
       <div className="mb-8 opacity-50 grayscale">
         <Image 
           src="/logo.png" 

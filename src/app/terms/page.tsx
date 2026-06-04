@@ -226,7 +226,7 @@ Les développeurs marchands s'engagent à :
 
 export default function TermsPage() {
   return (
-    <main className="relative min-h-screen selection:bg-rose-100 selection:text-rose-900 overflow-hidden">
+    <main className="relative min-h-[100dvh] selection:bg-rose-100 selection:text-rose-900 overflow-hidden">
       <FloatingBackground />
       <Navbar />
 

@@ -110,7 +110,7 @@ export function DocsClient({
   };
 
   return (
-    <div className="bg-background-main font-body text-text-primary antialiased min-h-screen flex selection:bg-primary/20">
+    <div className="bg-background-main font-body text-text-primary antialiased min-h-[100dvh] flex selection:bg-primary/20">
       
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
@@ -148,7 +148,7 @@ export function DocsClient({
       </aside>
 
       {/* Main Content Area (adjusted for left sidebar AND right AI sidebar) */}
-      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px] lg:mr-[450px] w-full md:w-[calc(100%-280px)] lg:w-[calc(100%-280px-450px)] relative">
+      <div className="flex-1 flex flex-col min-h-[100dvh] ml-0 md:ml-[280px] lg:mr-[450px] w-full md:w-[calc(100%-280px)] lg:w-[calc(100%-280px-450px)] relative">
         
         {/* Top Nav (now spans full remaining width, above AI Assistant) */}
         <header className="bg-surface/80 backdrop-blur-xl border-b border-border-subtle fixed top-0 right-0 w-full md:w-[calc(100%-280px)] flex justify-between items-center h-16 sm:h-20 px-4 sm:px-8 z-40 transition-all duration-200">

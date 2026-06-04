@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#F3F4F6] p-4 sm:p-8">
+    <div className="min-h-[100dvh] w-full flex items-center justify-center bg-[#F3F4F6] p-4 sm:p-8">
       <div className="w-full max-w-[1300px] min-h-[750px] bg-white rounded-[2rem] shadow-2xl overflow-hidden flex relative">
         
         {/* Left Panel - The Form */}

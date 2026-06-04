@@ -40,7 +40,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
   if (link.status !== 'active' || isExpired) {
     return (
-      <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-surface-container-lowest flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-surface-card border border-border-subtle rounded-2xl p-8 text-center shadow-lg ambient-shadow">
           <div className="w-16 h-16 bg-status-warning/10 text-status-warning rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="material-symbols-outlined text-3xl">error</span>
@@ -56,7 +56,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
 
   if (resolvedSearchParams.status === 'success') {
     return (
-      <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-surface-container-lowest flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-surface-card border border-border-subtle rounded-2xl p-8 text-center shadow-lg ambient-shadow">
           <div className="w-16 h-16 bg-status-success/10 text-status-success rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="material-symbols-outlined text-3xl">check_circle</span>
@@ -71,7 +71,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
   }
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-surface-container-lowest flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-surface-card border border-border-subtle rounded-2xl overflow-hidden shadow-lg ambient-shadow">
         <div className="bg-surface-container-low p-6 border-b border-border-subtle text-center">
           {link.merchants?.logo_url ? (

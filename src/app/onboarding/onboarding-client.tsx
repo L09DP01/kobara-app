@@ -41,7 +41,7 @@ export function OnboardingClient({ defaultEmail }: { defaultEmail: string }) {
   };
 
   return (
-    <div className="min-h-screen bg-background-main flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-background-main flex items-center justify-center p-4">
       <div className="w-full max-w-lg bg-surface-card rounded-2xl border border-border-subtle p-8 shadow-sm ambient-shadow relative overflow-hidden">
         {/* Background Decoration */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>

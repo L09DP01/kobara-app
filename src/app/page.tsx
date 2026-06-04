@@ -9,7 +9,7 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen selection:bg-rose-100 selection:text-rose-900">
+    <main className="relative min-h-[100dvh] selection:bg-rose-100 selection:text-rose-900">
       <FloatingBackground />
       <Navbar />
       <Hero />

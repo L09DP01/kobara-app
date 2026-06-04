@@ -31,7 +31,7 @@ function PlanSuccessContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#07090e] text-white flex items-center justify-center p-6 relative overflow-hidden selection:bg-rose-500 selection:text-white">
+    <div className="min-h-[100dvh] bg-[#07090e] text-white flex items-center justify-center p-6 relative overflow-hidden selection:bg-rose-500 selection:text-white">
       {/* Background radial glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-tr from-kobara-red/10 via-kobara-orange/5 to-transparent blur-[160px] rounded-full pointer-events-none" />
       
@@ -210,7 +210,7 @@ function PlanSuccessContent() {
 export default function PlanSuccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#07090e] flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-[#07090e] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-kobara-orange" />
       </div>
     }>

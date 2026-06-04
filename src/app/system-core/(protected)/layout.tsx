@@ -81,7 +81,7 @@ export default function SystemCoreLayout({ children }: { children: React.ReactNo
         </aside>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-[100dvh] overflow-hidden">
           {/* Topbar for mobile and breadcrumbs/status */}
           <header className="h-16 border-b border-slate-800 bg-slate-900/30 backdrop-blur-md flex items-center justify-between px-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm">
