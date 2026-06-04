@@ -85,8 +85,8 @@ export default async function PaymentsPage({
       ═══════════════════════════════════════════════════ */}
       <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
         {/* Total Encaissé — full width on mobile */}
-        <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-success rounded-l-2xl"></div>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500 rounded-l-3xl"></div>
           <div className="p-5 sm:p-6 pl-4 sm:pl-5">
             <div className="flex justify-between items-start mb-3">
               <p className="text-text-secondary text-xs sm:text-sm font-medium">Total Encaissé ce jour</p>
@@ -109,8 +109,8 @@ export default async function PaymentsPage({
         {/* Volume Hebdo + Remboursements — side by side on mobile */}
         <div className="grid grid-cols-2 gap-3 sm:gap-4 md:contents">
           {/* Volume Hebdo */}
-          <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-2xl"></div>
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-3xl"></div>
             <div className="p-4 pl-3 sm:p-5 sm:pl-4 md:p-6 md:pl-5">
               <div className="flex justify-between items-start mb-2 sm:mb-3">
                 <p className="text-text-secondary text-[11px] sm:text-xs md:text-sm font-medium">Volume Hebdo</p>
@@ -130,8 +130,8 @@ export default async function PaymentsPage({
           </div>
 
           {/* Remboursements */}
-          <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-status-error rounded-l-2xl"></div>
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 rounded-l-3xl"></div>
             <div className="p-4 pl-3 sm:p-5 sm:pl-4 md:p-6 md:pl-5">
               <div className="flex justify-between items-start mb-2 sm:mb-3">
                 <p className="text-text-secondary text-[11px] sm:text-xs md:text-sm font-medium">Remboursements</p>
@@ -155,83 +155,83 @@ export default async function PaymentsPage({
       {/* ═══════════════════════════════════════════════════
           TRANSACTIONS TABLE
       ═══════════════════════════════════════════════════ */}
-      <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         {/* Table Header Bar */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-subtle bg-surface-container-lowest flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[18px] sm:text-[20px]">receipt_long</span>
-            <h2 className="font-semibold text-text-primary text-sm sm:text-base">Historique des transactions</h2>
+            <span className="material-symbols-outlined text-orange-500 text-[18px] sm:text-[20px]">receipt_long</span>
+            <h2 className="font-semibold text-slate-900 text-sm sm:text-base">Historique des transactions</h2>
           </div>
-          <span className="text-text-secondary text-[11px] sm:text-xs font-medium bg-surface-container px-2 py-0.5 rounded-md">{filteredPayments.length} résultat(s)</span>
+          <span className="text-slate-500 text-[11px] sm:text-xs font-medium bg-white border border-slate-200 px-2 py-0.5 rounded-md shadow-sm">{filteredPayments.length} résultat(s)</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse md:min-w-[800px]">
             <thead>
-              <tr className="border-b border-border-subtle bg-surface-container-lowest/50">
-                <th className="py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Client</th>
-                <th className="py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Montant</th>
-                <th className="py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Statut</th>
-                <th className="hidden sm:table-cell py-3 px-5 text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Méthode</th>
-                <th className="hidden md:table-cell py-3 px-5 text-[11px] text-text-secondary uppercase tracking-wider font-semibold">Date</th>
-                <th className="py-3 px-4 sm:px-5 text-right text-[10px] sm:text-[11px] text-text-secondary uppercase tracking-wider font-semibold"></th>
+              <tr className="border-b border-slate-100 bg-white">
+                <th className="py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Client</th>
+                <th className="py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Montant</th>
+                <th className="py-3 px-4 sm:px-5 text-[10px] sm:text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Statut</th>
+                <th className="hidden sm:table-cell py-3 px-5 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Méthode</th>
+                <th className="hidden md:table-cell py-3 px-5 text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Date</th>
+                <th className="py-3 px-4 sm:px-5 text-right text-[10px] sm:text-[11px] text-slate-500 uppercase tracking-wider font-semibold"></th>
               </tr>
             </thead>
             <tbody>
               {filteredPayments && filteredPayments.length > 0 ? (
                 filteredPayments.map((payment) => (
-                  <tr key={payment.id} className={`group cursor-pointer hover:bg-surface-container-low/60 transition-all duration-150 border-b border-border-subtle/60 last:border-b-0`}>
+                  <tr key={payment.id} className={`group cursor-pointer hover:bg-slate-50 transition-all duration-150 border-b border-slate-100 last:border-b-0`}>
                     {/* Client */}
                     <td className="py-3 sm:py-3.5 px-4 sm:px-5">
                       <div className="flex items-center gap-2.5 sm:gap-3">
                         <div className={`h-7 w-7 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-xs font-bold text-white shrink-0 ${
-                          payment.status === 'succeeded' ? 'bg-status-success' :
-                          payment.status === 'failed' ? 'bg-status-error' :
-                          'bg-status-warning'
+                          payment.status === 'succeeded' ? 'bg-green-500' :
+                          payment.status === 'failed' ? 'bg-red-500' :
+                          'bg-orange-500'
                         }`}>
                           {(payment.customers?.name || 'CI').substring(0, 2).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-medium text-text-primary text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px] md:max-w-none">{payment.customers?.name || 'Client Inconnu'}</div>
-                          <div className="text-text-secondary text-[10px] sm:text-[11px] font-mono truncate max-w-[100px] sm:max-w-[140px] md:max-w-none">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
+                          <div className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px] md:max-w-none">{payment.customers?.name || 'Client Inconnu'}</div>
+                          <div className="text-slate-500 text-[10px] sm:text-[11px] font-mono truncate max-w-[100px] sm:max-w-[140px] md:max-w-none">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
                         </div>
                       </div>
                     </td>
                     {/* Montant */}
                     <td className="py-3 sm:py-3.5 px-4 sm:px-5">
-                      <div className="font-semibold text-text-primary text-xs sm:text-sm">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs text-text-secondary">{payment.currency}</span></div>
-                      <div className="text-text-secondary/70 text-[10px] sm:text-[11px] mt-0.5">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')}</div>
+                      <div className={`font-bold text-xs sm:text-sm ${payment.status === 'succeeded' ? 'text-green-600' : 'text-slate-900'}`}>+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-[10px] sm:text-xs text-slate-500">{payment.currency}</span></div>
+                      <div className="text-slate-400 text-[10px] sm:text-[11px] mt-0.5">Brut: {Number(payment.gross_amount || payment.amount).toLocaleString('fr-FR')}</div>
                     </td>
                     {/* Statut */}
                     <td className="py-3 sm:py-3.5 px-4 sm:px-5">
-                      <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-semibold ${
-                        payment.status === 'succeeded' ? 'bg-status-success/10 text-status-success' :
-                        payment.status === 'failed' ? 'bg-status-error/10 text-status-error' :
-                        'bg-status-warning/10 text-status-warning'
+                      <span className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-bold border ${
+                        payment.status === 'succeeded' ? 'bg-green-50 text-green-700 border-green-200' :
+                        payment.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
+                        'bg-orange-50 text-orange-700 border-orange-200'
                       }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${
-                          payment.status === 'succeeded' ? 'bg-status-success' :
-                          payment.status === 'failed' ? 'bg-status-error' :
-                          'bg-status-warning'
+                          payment.status === 'succeeded' ? 'bg-green-500' :
+                          payment.status === 'failed' ? 'bg-red-500' :
+                          'bg-orange-500'
                         }`}></span>
                         {payment.status === 'succeeded' ? 'Succès' : payment.status === 'failed' ? 'Échoué' : 'En attente'}
                       </span>
                     </td>
                     {/* Méthode */}
                     <td className="hidden sm:table-cell py-3.5 px-5">
-                      <div className="flex items-center gap-2 text-text-secondary">
+                      <div className="flex items-center gap-2 text-slate-500">
                         <span className="material-symbols-outlined text-[16px]">smartphone</span>
-                        <span className="capitalize text-xs sm:text-sm text-text-primary font-medium">{payment.provider}</span>
+                        <span className="capitalize text-xs sm:text-sm text-slate-900 font-bold">{payment.provider}</span>
                       </div>
                     </td>
                     {/* Date */}
-                    <td className="hidden md:table-cell py-3.5 px-5 text-text-secondary">
-                      <div className="font-medium text-text-primary text-xs sm:text-sm">{new Date(payment.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    <td className="hidden md:table-cell py-3.5 px-5 text-slate-500">
+                      <div className="font-bold text-slate-900 text-xs sm:text-sm">{new Date(payment.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                       <div className="text-[10px] sm:text-xs mt-0.5">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
                     </td>
                     {/* Action */}
                     <td className="py-3 sm:py-3.5 px-4 sm:px-5 text-right">
-                      <Link href={`/payments/${payment.id}`} className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-surface-container-low hover:bg-primary/10 text-text-secondary hover:text-primary transition-all duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                      <Link href={`/payments/${payment.id}`} className="inline-flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded-lg hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition-all duration-200">
                         <span className="material-symbols-outlined text-[16px] sm:text-[18px]">arrow_forward</span>
                       </Link>
                     </td>
@@ -260,13 +260,13 @@ export default async function PaymentsPage({
 
         {/* Pagination Footer */}
         {filteredPayments && filteredPayments.length > 0 && (
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-border-subtle bg-surface-container-lowest/50 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-text-secondary text-[11px] sm:text-xs">Affichage de <span className="font-semibold text-text-primary">1</span> à <span className="font-semibold text-text-primary">{filteredPayments.length}</span> sur <span className="font-semibold text-text-primary">{filteredPayments.length}</span> résultats</p>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-slate-500 text-[11px] sm:text-xs">Affichage de <span className="font-bold text-slate-900">1</span> à <span className="font-bold text-slate-900">{filteredPayments.length}</span> sur <span className="font-bold text-slate-900">{filteredPayments.length}</span> résultats</p>
             <div className="flex gap-2">
-              <button className="px-3 py-1.5 sm:px-4 sm:py-2 border border-border-subtle rounded-lg text-[11px] sm:text-xs font-medium text-text-secondary hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+              <button className="px-3 py-1.5 sm:px-4 sm:py-2 border border-slate-200 rounded-lg text-[11px] sm:text-xs font-bold text-slate-400 bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed" disabled>
                 <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px] sm:text-[16px]">chevron_left</span> <span className="hidden sm:inline">Précédent</span></span>
               </button>
-              <button className="px-3 py-1.5 sm:px-4 sm:py-2 border border-border-subtle rounded-lg text-[11px] sm:text-xs font-medium text-text-primary hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+              <button className="px-3 py-1.5 sm:px-4 sm:py-2 border border-slate-200 rounded-lg text-[11px] sm:text-xs font-bold text-slate-900 bg-white hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed" disabled>
                 <span className="flex items-center gap-1"><span className="hidden sm:inline">Suivant</span> <span className="material-symbols-outlined text-[14px] sm:text-[16px]">chevron_right</span></span>
               </button>
             </div>

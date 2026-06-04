@@ -24,35 +24,35 @@ export function SettingsClient({ user, merchant, settings, members }: { user: an
     <div className="max-w-[1080px] mx-auto w-full space-y-6 pb-12">
       {/* Header */}
       <div className="flex items-center gap-4 mb-2">
-        <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center">
-          <span className="material-symbols-outlined text-2xl text-text-secondary">settings</span>
+        <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center">
+          <span className="material-symbols-outlined text-2xl text-slate-400">settings</span>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Paramètres</h1>
-          <p className="text-text-secondary text-sm mt-0.5">Gérez les préférences de votre compte et de votre entreprise.</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Paramètres</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Gérez les préférences de votre compte et de votre entreprise.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Settings Navigation Sidebar */}
         <div className="md:col-span-1">
-          <nav className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
+          <nav className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden py-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}
-                className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition-all duration-200 border-l-2 ${
+                className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition-all duration-200 border-l-[3px] ${
                   activeTab === tab.id 
-                    ? 'bg-primary/5 border-l-primary text-text-primary' 
-                    : 'border-l-transparent text-text-secondary hover:bg-surface-container-lowest hover:text-text-primary'
+                    ? 'bg-slate-50 border-l-orange-500 text-slate-900' 
+                    : 'border-l-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === tab.id ? 'text-primary' : 'text-text-secondary'}`}>
+                <span className={`material-symbols-outlined text-[20px] ${activeTab === tab.id ? 'text-orange-500' : 'text-slate-400'}`}>
                   {tab.icon}
                 </span>
                 <div>
-                  <span className="text-sm font-semibold block">{tab.label}</span>
-                  <span className="text-[11px] text-text-secondary/60">{tab.desc}</span>
+                  <span className="text-sm font-bold block">{tab.label}</span>
+                  <span className="text-[11px] text-slate-500 font-medium">{tab.desc}</span>
                 </div>
               </button>
             ))}

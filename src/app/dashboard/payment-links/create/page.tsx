@@ -18,7 +18,7 @@ export default async function CreatePaymentLinkPage() {
         </div>
       </div>
 
-      <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm p-4 sm:p-6">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6">
         <CreatePaymentLinkForm />
       </div>
     </div>

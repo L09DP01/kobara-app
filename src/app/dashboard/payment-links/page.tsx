@@ -48,38 +48,38 @@ export default async function PaymentLinksPage() {
         </div>
         <Link 
           href="/payment-links/create"
-          className="bg-primary text-on-primary px-5 py-2.5 rounded-lg font-body-base text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2"
+          className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[20px]">add</span>
           Créer un lien de paiement
         </Link>
       </div>
 
-      <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden ambient-shadow">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left min-w-[800px]">
-            <thead className="bg-surface-container-lowest border-b border-border-subtle">
+            <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="py-4 px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Lien</th>
-                <th className="py-4 px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Montant</th>
-                <th className="py-4 px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Ventes</th>
-                <th className="py-4 px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Statut</th>
-                <th className="py-4 px-6 font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Créé le</th>
-                <th className="py-4 px-6 text-right font-label-caps text-label-caps text-text-secondary uppercase tracking-wider font-semibold">Action</th>
+                <th className="py-4 px-6 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Lien</th>
+                <th className="py-4 px-6 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Montant</th>
+                <th className="py-4 px-6 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Ventes</th>
+                <th className="py-4 px-6 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Statut</th>
+                <th className="py-4 px-6 text-[11px] text-slate-500 uppercase tracking-wider font-bold">Créé le</th>
+                <th className="py-4 px-6 text-right text-[11px] text-slate-500 uppercase tracking-wider font-bold">Action</th>
               </tr>
             </thead>
-            <tbody className="font-body-sm text-text-primary divide-y divide-border-subtle">
+            <tbody className="text-sm text-slate-900 divide-y divide-slate-100">
               {paymentLinks && paymentLinks.length > 0 ? (
                 paymentLinks.map(link => {
                   const stats = linkStats[link.id] || { count: 0, total: 0 };
                   const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
                   let statusLabel = link.status === 'active' && !isExpired ? 'Actif' : isExpired ? 'Expiré' : 'Inactif';
                   let statusStyles = link.status === 'active' && !isExpired 
-                    ? 'bg-status-success/10 text-status-success border-status-success/20 bg-status-success'
-                    : 'bg-status-warning/10 text-status-warning border-status-warning/20 bg-status-warning';
+                    ? 'bg-green-50 text-green-700 border-green-200 bg-green-500'
+                    : 'bg-orange-50 text-orange-700 border-orange-200 bg-orange-500';
 
                   return (
-                    <tr key={link.id} className="hover:bg-surface-container-low transition-colors group">
+                    <tr key={link.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="py-4 px-6">
                         <div className="font-medium text-text-primary">{link.title}</div>
                         <div className="text-text-secondary text-xs flex items-center gap-1 mt-1 cursor-pointer hover:text-secondary transition-colors">
@@ -92,16 +92,16 @@ export default async function PaymentLinksPage() {
                         <div className="text-text-secondary text-xs">Paiement {link.amount ? 'unique' : 'ouvert'}</div>
                       </td>
                       <td className="py-4 px-6">
-                        <div className="font-medium">{stats.count}</div>
-                        <div className="text-status-success text-xs">{stats.total.toLocaleString('fr-FR')} {link.currency}</div>
+                        <div className="font-bold">{stats.count}</div>
+                        <div className="text-green-600 text-xs">{stats.total.toLocaleString('fr-FR')} {link.currency}</div>
                       </td>
                       <td className="py-4 px-6">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusStyles.split(' ').slice(0, 3).join(' ')}`}>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-bold border ${statusStyles.split(' ').slice(0, 3).join(' ')}`}>
                           <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${statusStyles.split(' ')[3]}`}></span>
                           {statusLabel}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-text-secondary">
+                      <td className="py-4 px-6 text-slate-500">
                         <div>{new Date(link.created_at).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                       </td>
                       <td className="py-4 px-6 text-right">
@@ -124,11 +124,11 @@ export default async function PaymentLinksPage() {
           </table>
         </div>
         {paymentLinks && paymentLinks.length > 0 && (
-          <div className="px-6 py-4 border-t border-border-subtle bg-surface-container-lowest flex items-center justify-between">
-            <p className="font-body-sm text-text-secondary">Affichage de 1 à {paymentLinks.length} sur {paymentLinks.length} liens</p>
+          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+            <p className="text-xs text-slate-500">Affichage de <span className="font-bold text-slate-900">1</span> à <span className="font-bold text-slate-900">{paymentLinks.length}</span> sur <span className="font-bold text-slate-900">{paymentLinks.length}</span> liens</p>
             <div className="flex gap-2">
-              <button className="px-3 py-1 border border-border-subtle rounded text-body-sm font-medium text-text-secondary hover:bg-surface-container disabled:opacity-50" disabled>Précédent</button>
-              <button className="px-3 py-1 border border-border-subtle rounded text-body-sm font-medium text-text-primary hover:bg-surface-container transition-colors disabled:opacity-50" disabled>Suivant</button>
+              <button className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-xs font-bold text-slate-400 disabled:opacity-50" disabled>Précédent</button>
+              <button className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-xs font-bold text-slate-900 hover:bg-slate-50 transition-colors disabled:opacity-50" disabled>Suivant</button>
             </div>
           </div>
         )}

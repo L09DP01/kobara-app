@@ -130,7 +130,7 @@ export function WithdrawalsClient({
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-gradient-to-r from-primary to-primary/90 text-on-primary px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
           Initier un Retrait
@@ -146,9 +146,9 @@ export function WithdrawalsClient({
       )}
 
       {/* Balance Banner */}
-      <div className="relative rounded-2xl bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] p-8 overflow-hidden">
+      <div className="relative rounded-3xl bg-[#0F1626] p-8 overflow-hidden shadow-lg">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary rounded-full blur-[100px] -mr-40 -mt-40"></div>
+          <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500 rounded-full blur-[100px] -mr-40 -mt-40"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full blur-[80px] -ml-32 -mb-32"></div>
         </div>
         <div className="relative z-10">
@@ -167,22 +167,22 @@ export function WithdrawalsClient({
 
       {/* Secondary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
-          <div className="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[22px] text-status-warning">hourglass_empty</span>
+        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-orange-500">hourglass_empty</span>
           </div>
           <div>
-            <p className="text-xs text-text-secondary font-medium">Solde en attente (Paiements)</p>
-            <h3 className="text-xl font-bold text-text-primary">{Number(merchant.pending_balance || 0).toLocaleString('fr-FR')} <span className="text-sm font-normal text-text-secondary">HTG</span></h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Solde en attente (Paiements)</p>
+            <h3 className="text-xl font-bold text-slate-900">{Number(merchant.pending_balance || 0).toLocaleString('fr-FR')} <span className="text-sm font-normal text-slate-500">HTG</span></h3>
           </div>
         </div>
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-5 shadow-sm flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
-          <div className="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[22px] text-status-success">trending_down</span>
+        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300">
+          <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-green-500">trending_down</span>
           </div>
           <div>
-            <p className="text-xs text-text-secondary font-medium">Total Retiré</p>
-            <h3 className="text-xl font-bold text-text-primary">{totalWithdrawn.toLocaleString('fr-FR')} <span className="text-sm font-normal text-text-secondary">HTG</span></h3>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Total Retiré</p>
+            <h3 className="text-xl font-bold text-slate-900">{totalWithdrawn.toLocaleString('fr-FR')} <span className="text-sm font-normal text-slate-500">HTG</span></h3>
           </div>
         </div>
       </div>
@@ -341,11 +341,11 @@ export function WithdrawalsClient({
       {/* Withdrawal History */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-text-primary">Historique des Retraits</h3>
+          <h3 className="text-lg font-bold text-slate-900">Historique des Retraits</h3>
           <select 
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-1.5 bg-surface-container border border-border-subtle rounded-lg text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all shadow-sm"
           >
             <option value="all">Tous les statuts</option>
             <option value="completed">Complétés</option>
@@ -354,34 +354,34 @@ export function WithdrawalsClient({
             <option value="failed">Échoués</option>
           </select>
         </div>
-        <div className="bg-surface-card rounded-xl border border-border-subtle overflow-hidden shadow-sm">
+        <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[600px]">
-              <thead className="bg-surface-container-lowest border-b border-border-subtle">
+              <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="py-3.5 px-5 font-semibold text-text-secondary uppercase tracking-wider text-[11px]">Date & Réf</th>
-                  <th className="py-3.5 px-5 font-semibold text-text-secondary uppercase tracking-wider text-[11px]">Méthode</th>
-                  <th className="py-3.5 px-5 font-semibold text-text-secondary uppercase tracking-wider text-[11px]">Montant</th>
-                  <th className="py-3.5 px-5 font-semibold text-text-secondary uppercase tracking-wider text-[11px]">Statut</th>
+                  <th className="py-3.5 px-5 font-bold text-slate-500 uppercase tracking-wider text-[11px]">Date & Réf</th>
+                  <th className="py-3.5 px-5 font-bold text-slate-500 uppercase tracking-wider text-[11px]">Méthode</th>
+                  <th className="py-3.5 px-5 font-bold text-slate-500 uppercase tracking-wider text-[11px]">Montant</th>
+                  <th className="py-3.5 px-5 font-bold text-slate-500 uppercase tracking-wider text-[11px]">Statut</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border-subtle">
+              <tbody className="divide-y divide-slate-100">
                 {filteredWithdrawals.length > 0 ? filteredWithdrawals.map(w => {
                   const cfg = getStatusConfig(w.status);
                   return (
-                    <tr key={w.id} className={`hover:bg-surface-container-lowest transition-colors group border-l-4 ${cfg.border}`}>
+                    <tr key={w.id} className={`hover:bg-slate-50 transition-colors group border-l-4 ${cfg.border}`}>
                       <td className="py-4 px-5">
-                        <div className="font-mono text-xs text-text-primary truncate max-w-[160px]">{w.kobara_reference}</div>
-                        <div className="text-xs text-text-secondary mt-0.5">{new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
+                        <div className="font-mono text-xs text-slate-900 truncate max-w-[160px] font-bold">{w.kobara_reference}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
                       </td>
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-[16px] text-text-secondary">smartphone</span>
-                          <span className="font-medium text-text-primary text-sm">{w.method}</span>
+                          <span className="material-symbols-outlined text-[16px] text-slate-400">smartphone</span>
+                          <span className="font-bold text-slate-900 text-sm">{w.method}</span>
                         </div>
                       </td>
                       <td className="py-4 px-5">
-                        <div className="font-semibold text-text-primary">-{Number(w.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
+                        <div className="font-bold text-slate-900">-{Number(w.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
                       </td>
                       <td className="py-4 px-5">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${cfg.bg} ${cfg.text}`}>

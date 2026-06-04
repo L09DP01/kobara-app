@@ -122,10 +122,10 @@ export function BillingClient() {
 
       {/* Current Plan Overview */}
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Plan Actuel</h3>
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Plan Actuel</h3>
           <div className="flex items-end gap-3 mb-2">
-            <span className="text-3xl font-black text-kobara-primary">
+            <span className="text-3xl font-black text-slate-900">
               {plan ? plan.name : 'Mode Test'}
             </span>
             {plan && (
@@ -139,30 +139,30 @@ export function BillingClient() {
           </p>
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Statut</span>
-              <span className="font-medium text-emerald-600">{merchant.plan_status === 'active' ? 'Actif' : 'Inactif'}</span>
+              <span className="text-slate-500 font-bold">Statut</span>
+              <span className="font-bold text-emerald-600">{merchant.plan_status === 'active' ? 'Actif' : 'Inactif'}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Frais de transaction</span>
-              <span className="font-medium">{plan ? `${plan.transaction_fee_percent}%` : 'N/A'}</span>
+              <span className="text-slate-500 font-bold">Frais de transaction</span>
+              <span className="font-bold">{plan ? `${plan.transaction_fee_percent}%` : 'N/A'}</span>
             </div>
           </div>
         </div>
 
         {/* Usage Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Utilisation ce mois</h3>
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Utilisation ce mois</h3>
           <div className="space-y-5">
             <div>
               <div className="flex justify-between text-sm mb-1.5">
-                <span className="font-medium text-slate-700">Paiements (Volume)</span>
-                <span className="text-slate-500">
+                <span className="font-bold text-slate-900">Paiements (Volume)</span>
+                <span className="text-slate-500 font-medium">
                   {usage.monthly_payments} / {plan?.monthly_payment_limit === null ? '∞' : plan?.monthly_payment_limit || '0'}
                 </span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-kobara-primary rounded-full transition-all" 
+                  className="h-full bg-slate-900 rounded-full transition-all" 
                   style={{ width: plan?.monthly_payment_limit ? `${Math.min(100, (usage.monthly_payments / plan.monthly_payment_limit) * 100)}%` : '0%' }}
                 />
               </div>
@@ -170,14 +170,14 @@ export function BillingClient() {
 
             <div>
               <div className="flex justify-between text-sm mb-1.5">
-                <span className="font-medium text-slate-700">Clés API</span>
-                <span className="text-slate-500">
+                <span className="font-bold text-slate-900">Clés API</span>
+                <span className="text-slate-500 font-medium">
                   {usage.api_keys} / {plan?.api_keys_limit === null ? '∞' : plan?.api_keys_limit || '0'}
                 </span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-blue-500 rounded-full transition-all" 
+                  className="h-full bg-slate-900 rounded-full transition-all" 
                   style={{ width: plan?.api_keys_limit ? `${Math.min(100, (usage.api_keys / plan.api_keys_limit) * 100)}%` : '0%' }}
                 />
               </div>
@@ -188,28 +188,29 @@ export function BillingClient() {
 
       {/* Plans List */}
       <div>
-        <h3 className="text-xl font-bold text-kobara-primary mb-6">Changer de plan</h3>
+        <h3 className="text-xl font-bold text-slate-900 mb-6">Changer de plan</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {plans.map((p) => {
             const isCurrent = plan?.slug === p.slug;
             return (
-              <div key={p.id} className={`bg-white rounded-2xl border-2 flex flex-col p-6 transition-all ${isCurrent ? 'border-kobara-primary shadow-md' : 'border-slate-100'}`}>
-                <h4 className="font-black text-lg mb-1">{p.name}</h4>
-                <div className="text-2xl font-black mb-4">{p.price_htg} <span className="text-sm text-slate-500 font-medium">HTG/mois</span></div>
+              <div key={p.id} className={`bg-white rounded-3xl border-2 flex flex-col p-6 transition-all ${isCurrent ? 'border-slate-900 shadow-sm' : 'border-slate-100'}`}>
+                <h4 className="font-black text-lg mb-1 text-slate-900">{p.name}</h4>
+                <div className="text-2xl font-black mb-4 text-slate-900">{p.price_htg} <span className="text-sm text-slate-500 font-medium">HTG/mois</span></div>
                 
-                <ul className="space-y-3 mb-6 flex-1 text-sm text-slate-600">
+                <ul className="space-y-3 mb-6 flex-1 text-sm text-slate-600 font-medium">
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> {p.transaction_fee_percent}% par transaction</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> {p.monthly_payment_limit || '∞'} paiements / mois</li>
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> Retrait max: {p.daily_withdrawal_limit || '∞'} HTG</li>
+                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-500" /> Clés API: {p.api_keys_limit || '∞'}</li>
                 </ul>
 
                 <button
                   disabled={isCurrent || upgrading || (!isKycApproved && p.slug !== 'free')}
                   onClick={() => handleUpgrade(p.slug)}
-                  className={`w-full py-2.5 rounded-lg font-semibold transition-all
-                    ${isCurrent ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 
-                      (!isKycApproved && p.slug !== 'free' ? 'bg-slate-100 text-slate-400 cursor-not-allowed' :
-                      'bg-kobara-primary text-white hover:bg-slate-900')}
+                  className={`w-full py-2.5 rounded-xl font-bold transition-all shadow-sm
+                    ${isCurrent ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' : 
+                      (!isKycApproved && p.slug !== 'free' ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' :
+                      'bg-slate-900 text-white hover:bg-slate-800')}
                   `}
                 >
                   {isCurrent ? 'Plan Actuel' : 'Choisir ce plan'}

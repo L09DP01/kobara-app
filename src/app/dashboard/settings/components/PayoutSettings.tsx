@@ -33,10 +33,10 @@ export function PayoutSettings({ settings }: { settings: any }) {
   };
 
   return (
-    <div className="bg-surface-card rounded-2xl border border-border-subtle shadow-sm overflow-hidden">
+    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
       <div className="p-6 md:p-8">
-        <h2 className="text-xl font-bold text-text-primary mb-1">Comptes de Retrait</h2>
-        <p className="text-sm text-text-secondary mb-8">
+        <h2 className="text-xl font-bold text-slate-900 mb-1">Comptes de Retrait</h2>
+        <p className="text-sm text-slate-500 mb-8">
           Ajoutez un compte MonCash pour recevoir vos paiements plus rapidement. Pour l'instant, seul MonCash est supporté.
         </p>
 
@@ -55,17 +55,17 @@ export function PayoutSettings({ settings }: { settings: any }) {
         )}
 
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="bg-surface-container-low p-6 rounded-xl border border-border-subtle">
+          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-lg bg-[#eb1c24]/10 flex items-center justify-center border border-[#eb1c24]/20">
                 <span className="text-[#eb1c24] font-bold text-xs tracking-tighter">MC</span>
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">MonCash</h3>
-                <p className="text-xs text-text-secondary">Transfert instantané</p>
+                <h3 className="font-bold text-slate-900">MonCash</h3>
+                <p className="text-xs text-slate-500">Transfert instantané</p>
               </div>
               <div className="ml-auto">
-                <span className="px-2.5 py-1 rounded-full bg-status-success/10 text-status-success text-xs font-medium">
+                <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs font-bold">
                   Actif
                 </span>
               </div>
@@ -73,10 +73,10 @@ export function PayoutSettings({ settings }: { settings: any }) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">Numéro de réception MonCash</label>
+                <label className="block text-sm font-bold text-slate-900 mb-2">Numéro de réception MonCash</label>
                 <div className="flex gap-3">
                   <div className="relative flex-1">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60 material-symbols-outlined text-[20px]">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-[20px]">
                       smartphone
                     </span>
                     <input 
@@ -84,22 +84,22 @@ export function PayoutSettings({ settings }: { settings: any }) {
                       value={moncashNumber}
                       onChange={(e) => setMoncashNumber(e.target.value)}
                       placeholder="3xxxxxxx ou 4xxxxxxx"
-                      className="w-full pl-12 pr-4 py-3 bg-surface-card border border-border-subtle rounded-xl text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all shadow-sm"
                     />
                   </div>
                 </div>
-                <p className="text-xs text-text-secondary/70 mt-2">
+                <p className="text-xs text-slate-500 mt-2">
                   Ce numéro sera utilisé par défaut lors de vos demandes de retrait depuis le tableau de bord.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end pt-4 border-t border-border-subtle">
+          <div className="flex justify-end pt-4 border-t border-slate-100">
             <button 
               type="submit" 
               disabled={isSaving}
-              className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-sm shadow-primary/20 disabled:opacity-70 flex items-center gap-2"
+              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-70 flex items-center gap-2"
             >
               {isSaving ? (
                 <>
@@ -113,17 +113,17 @@ export function PayoutSettings({ settings }: { settings: any }) {
           </div>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-border-subtle">
+        <div className="mt-8 pt-6 border-t border-slate-100">
           <div className="flex items-center gap-3 mb-4 opacity-50 grayscale pointer-events-none">
-            <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center border border-border-subtle">
-              <span className="material-symbols-outlined text-text-secondary">account_balance</span>
+            <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-200">
+              <span className="material-symbols-outlined text-slate-400">account_balance</span>
             </div>
             <div>
-              <h3 className="font-semibold text-text-primary">Virement Bancaire (Sogebank / Unibank)</h3>
-              <p className="text-xs text-text-secondary">Bientôt disponible</p>
+              <h3 className="font-bold text-slate-900">Virement Bancaire (Sogebank / Unibank)</h3>
+              <p className="text-xs text-slate-500">Bientôt disponible</p>
             </div>
             <div className="ml-auto">
-              <span className="px-2.5 py-1 rounded-full bg-surface-container border border-border-subtle text-text-secondary text-xs font-medium">
+              <span className="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold">
                 Bientôt
               </span>
             </div>

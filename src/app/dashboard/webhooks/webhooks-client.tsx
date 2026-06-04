@@ -59,7 +59,7 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Ajouter un endpoint
@@ -81,16 +81,16 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {endpoints.length > 0 ? (
         <div className="space-y-4">
           {endpoints.map(endpoint => (
-            <div key={endpoint.id} className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+            <div key={endpoint.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-[20px] text-text-secondary">language</span>
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined text-[24px] text-slate-400">language</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-mono text-sm font-semibold text-text-primary truncate">{endpoint.url}</p>
-                      <p className="text-xs text-text-secondary mt-0.5">Ajouté le {new Date(endpoint.created_at).toLocaleDateString('fr-FR')}</p>
+                      <p className="font-mono text-sm font-bold text-slate-900 truncate">{endpoint.url}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Ajouté le {new Date(endpoint.created_at).toLocaleDateString('fr-FR')}</p>
                     </div>
                   </div>
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold flex-shrink-0 ${
@@ -102,14 +102,14 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
                 </div>
 
                 {/* Secret */}
-                <div className="bg-surface-container-lowest rounded-lg p-3 flex items-center justify-between mb-4 border border-border-subtle">
+                <div className="bg-slate-50 rounded-xl p-3 flex items-center justify-between mb-4 border border-slate-100">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="material-symbols-outlined text-[16px] text-text-secondary">key</span>
-                    <code className="text-xs font-mono text-text-secondary truncate">{endpoint.secret?.substring(0, 20)}••••••</code>
+                    <span className="material-symbols-outlined text-[16px] text-slate-400">key</span>
+                    <code className="text-xs font-mono text-slate-500 truncate">{endpoint.secret?.substring(0, 20)}••••••</code>
                   </div>
                   <button 
                     onClick={() => navigator.clipboard.writeText(endpoint.secret || '')}
-                    className="text-text-secondary hover:text-primary transition-colors flex-shrink-0 p-1"
+                    className="text-slate-400 hover:text-slate-900 transition-colors flex-shrink-0 p-1"
                     title="Copier le secret"
                   >
                     <span className="material-symbols-outlined text-[16px]">content_copy</span>
@@ -132,10 +132,10 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
               </div>
 
               {/* Card Footer */}
-              <div className="px-5 py-3 border-t border-border-subtle bg-surface-container-lowest/50 flex justify-end gap-2">
+              <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
                 <button 
                   onClick={() => setConfirmDeleteId(endpoint.id)}
-                  className="px-3 py-1.5 text-xs font-semibold text-status-error hover:bg-status-error/5 rounded-lg transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">delete</span>
                   Supprimer
@@ -145,15 +145,15 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
           ))}
         </div>
       ) : (
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-14 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-surface-container mx-auto flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-4xl text-text-secondary/30">webhook</span>
+        <div className="bg-white rounded-3xl border border-slate-100 p-14 text-center shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 mx-auto flex items-center justify-center mb-4">
+            <span className="material-symbols-outlined text-4xl text-slate-300">webhook</span>
           </div>
-          <p className="text-sm text-text-secondary font-medium">Aucun webhook configuré</p>
-          <p className="text-xs text-text-secondary/60 mt-1 max-w-sm mx-auto">Configurez votre premier webhook pour recevoir des notifications en temps réel</p>
+          <p className="text-sm text-slate-900 font-bold">Aucun webhook configuré</p>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Configurez votre premier webhook pour recevoir des notifications en temps réel</p>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="mt-5 bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm inline-flex items-center gap-2"
+            className="mt-5 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm inline-flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Ajouter un endpoint
@@ -164,23 +164,23 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {/* Delivery Logs */}
       {events.length > 0 && (
         <div className="mt-12 space-y-4">
-          <h2 className="text-xl font-bold text-text-primary tracking-tight mb-6">Logs de livraison</h2>
-          <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
+          <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-6">Logs de livraison</h2>
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-surface-container-lowest border-b border-border-subtle text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                  <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
                     <th className="px-5 py-4">Événement</th>
                     <th className="px-5 py-4">Statut HTTP</th>
                     <th className="px-5 py-4">Date</th>
                     <th className="px-5 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle text-sm">
+                <tbody className="divide-y divide-slate-100 text-sm">
                   {events.map((event) => (
-                    <tr key={event.id} className="hover:bg-surface-container-lowest/50 transition-colors group">
-                      <td className="px-5 py-4 font-mono text-xs text-text-primary">
-                        <span className="bg-surface-container px-2 py-1 rounded-md">{event.event_type}</span>
+                    <tr key={event.id} className="hover:bg-slate-50 transition-colors group">
+                      <td className="px-5 py-4 font-mono text-xs text-slate-900">
+                        <span className="bg-white border border-slate-200 shadow-sm px-2 py-1 rounded-md">{event.event_type}</span>
                       </td>
                       <td className="px-5 py-4">
                         {event.delivery_status === 'pending' ? (
@@ -197,13 +197,13 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-text-secondary text-xs">
+                      <td className="px-5 py-4 text-slate-500 text-xs">
                         {new Date(event.created_at).toLocaleString('fr-FR')}
                       </td>
                       <td className="px-5 py-4 text-right">
                         <button 
                           onClick={() => handleResend(event.id)}
-                          className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 flex items-center gap-1 justify-end w-full"
+                          className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 flex items-center gap-1 justify-end w-full"
                         >
                           <span className="material-symbols-outlined text-[16px]">refresh</span>
                           Renvoyer

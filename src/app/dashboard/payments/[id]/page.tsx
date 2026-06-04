@@ -62,7 +62,7 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           {/* Main Info Card */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm ambient-shadow">
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-6">
               <div>
                 <p className="text-text-secondary text-body-sm mb-1">Montant Brut</p>
@@ -71,7 +71,7 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
               {getStatusBadge(payment.status)}
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-border-subtle">
+            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-100">
               <div>
                 <p className="text-text-secondary text-body-sm mb-1">Frais Kobara</p>
                 <p className="font-medium text-text-primary text-body-base">-{Number(payment.fee_amount || 0).toLocaleString('fr-FR')} {payment.currency}</p>
@@ -84,14 +84,14 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
           </div>
 
           {/* Timeline / Additional details */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm ambient-shadow">
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
             <h3 className="font-headline-sm text-text-primary mb-4">Informations Système</h3>
             <div className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-border-subtle/50">
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
                 <span className="text-text-secondary text-body-sm">Date de création</span>
                 <span className="font-medium text-text-primary text-body-sm">{new Date(payment.created_at).toLocaleString('fr-FR')}</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-border-subtle/50">
+              <div className="flex justify-between items-center py-2 border-b border-slate-100">
                 <span className="text-text-secondary text-body-sm">Méthode de paiement</span>
                 <span className="font-medium text-text-primary text-body-sm capitalize">{payment.payment_method || payment.provider || 'Moncash'}</span>
               </div>
@@ -105,12 +105,12 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
 
         <div className="space-y-6">
           {/* Customer Card */}
-          <div className="bg-surface-card rounded-xl border border-border-subtle p-6 shadow-sm ambient-shadow">
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
             <h3 className="font-headline-sm text-text-primary mb-4">Client</h3>
             {customer ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-text-secondary font-medium uppercase">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold uppercase">
                     {customer.name ? customer.name.charAt(0) : '?'}
                   </div>
                   <div>
@@ -130,7 +130,7 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
             )}
           </div>
           
-          <button className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm font-medium text-text-primary hover:bg-surface-container transition-colors shadow-sm text-status-error">
+          <button className="w-full flex justify-center items-center gap-2 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-sm font-bold text-red-600 hover:bg-red-100 transition-colors shadow-sm">
             <span className="material-symbols-outlined text-[18px]">currency_exchange</span>
             Rembourser
           </button>

@@ -46,8 +46,7 @@ export async function getApiKeysCount(merchantId: string): Promise<number> {
   const { count, error } = await supabase
     .from('api_keys')
     .select('id', { count: 'exact', head: true })
-    .eq('merchant_id', merchantId)
-    .eq('revoked', false);
+    .eq('merchant_id', merchantId);
 
   if (error) {
     console.error("Erreur comptage API keys:", error);

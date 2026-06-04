@@ -81,7 +81,7 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">person_add</span>
           Nouveau client
@@ -89,32 +89,32 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[20px] text-blue-600">group</span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-blue-600">group</span>
           </div>
           <div>
-            <p className="text-xs text-text-secondary font-medium">Total Clients</p>
-            <p className="text-lg font-bold text-text-primary">{displayStats.totalClients}</p>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Clients</p>
+            <p className="text-2xl font-bold text-slate-900">{displayStats.totalClients}</p>
           </div>
         </div>
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[20px] text-status-success">trending_up</span>
+        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-green-600">trending_up</span>
           </div>
           <div>
-            <p className="text-xs text-text-secondary font-medium">Clients Actifs</p>
-            <p className="text-lg font-bold text-text-primary">{displayStats.activeClients}</p>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Clients Actifs</p>
+            <p className="text-2xl font-bold text-slate-900">{displayStats.activeClients}</p>
           </div>
         </div>
-        <div className="bg-surface-card rounded-xl border border-border-subtle p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[20px] text-purple-600">payments</span>
+        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-purple-600">payments</span>
           </div>
           <div>
-            <p className="text-xs text-text-secondary font-medium">Volume Moyen</p>
-            <p className="text-lg font-bold text-text-primary">
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Volume Moyen</p>
+            <p className="text-2xl font-bold text-slate-900">
               {Math.round(displayStats.volumeMoyen).toLocaleString('fr-FR')} HTG
             </p>
           </div>
@@ -122,19 +122,19 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
       </div>
 
       {/* Table Card */}
-      <div className="bg-surface-card rounded-xl border border-border-subtle shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
         {/* Search & Filters */}
-        <div className="p-4 border-b border-border-subtle flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-surface-container-lowest">
+        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50">
           <div className="relative w-full sm:w-96">
-            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary/60 text-[20px]">search</span>
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
             <input 
-              className="w-full pl-11 pr-4 py-2.5 bg-surface-card border border-border-subtle rounded-xl text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm" 
+              className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all shadow-sm" 
               placeholder="Rechercher par nom, email ou téléphone..." 
               type="text"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-surface-card border border-border-subtle rounded-xl text-sm font-medium text-text-primary hover:bg-surface-container transition-colors shadow-sm">
-            <span className="material-symbols-outlined text-[18px] text-status-success">download</span>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+            <span className="material-symbols-outlined text-[18px] text-slate-500">download</span>
             Exporter CSV
           </button>
         </div>
@@ -143,49 +143,49 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="border-b border-border-subtle bg-surface-container-lowest/50">
-                <th className="py-3.5 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Client</th>
-                <th className="py-3.5 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Téléphone</th>
-                <th className="py-3.5 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Mode de paiement</th>
-                <th className="py-3.5 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Volume Total</th>
-                <th className="py-3.5 px-5 text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Dernier paiement</th>
-                <th className="py-3.5 px-5 text-right text-[11px] text-text-secondary font-semibold uppercase tracking-wider">Action</th>
+              <tr className="border-b border-slate-100 bg-white">
+                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Client</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Téléphone</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Mode de paiement</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Volume Total</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Dernier paiement</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="text-sm text-text-primary divide-y divide-border-subtle">
+            <tbody className="text-sm text-slate-900 divide-y divide-slate-100">
               {customers.length > 0 ? customers.map((customer) => {
                 const stats = getCustomerStats(customer);
                 return (
-                  <tr key={customer.id} className="hover:bg-surface-container-lowest transition-colors group cursor-pointer border-l-4 border-l-transparent hover:border-l-primary">
+                  <tr key={customer.id} className="hover:bg-slate-50 transition-colors group cursor-pointer border-l-[3px] border-l-transparent hover:border-l-orange-500">
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-bold text-xs shadow-sm`}>
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
                           {(customer.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-semibold text-text-primary">{customer.name || 'Client Inconnu'}</div>
+                          <div className="font-bold text-slate-900">{customer.name || 'Client Inconnu'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="py-3.5 px-5">
-                      <div className="text-text-secondary text-sm">{customer.phone || 'Aucun'}</div>
+                      <div className="text-slate-500 text-sm">{customer.phone || 'Aucun'}</div>
                     </td>
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-1.5">
-                        {stats.paymentMode !== 'N/A' && <span className="material-symbols-outlined text-[14px] text-text-secondary">smartphone</span>}
-                        <span className="font-semibold capitalize">{stats.paymentMode}</span>
+                        {stats.paymentMode !== 'N/A' && <span className="material-symbols-outlined text-[14px] text-slate-400">smartphone</span>}
+                        <span className="font-bold capitalize">{stats.paymentMode}</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-5">
-                      <div className="font-semibold">{stats.totalVolume.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
+                      <div className="font-bold">{stats.totalVolume.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
                     </td>
-                    <td className="py-3.5 px-5 text-text-secondary text-sm">
+                    <td className="py-3.5 px-5 text-slate-500 text-sm">
                       {stats.lastPaymentDate ? stats.lastPaymentDate.toLocaleDateString('fr-FR') : 'Aucun'}
                     </td>
                     <td className="py-3.5 px-5 text-right">
                       <Link 
                         href={`/customers/${customer.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
                       >
                         Détails
                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -209,11 +209,11 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
         </div>
 
         {/* Pagination */}
-        <div className="px-5 py-4 border-t border-border-subtle bg-surface-container-lowest flex items-center justify-between">
-          <p className="text-xs text-text-secondary font-medium">Affichage de {customers.length} client(s)</p>
+        <div className="px-5 py-4 border-t border-slate-100 bg-white flex items-center justify-between">
+          <p className="text-xs text-slate-500 font-bold">Affichage de {customers.length} client(s)</p>
           <div className="flex gap-1.5">
-            <button className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-medium text-text-secondary hover:bg-surface-container disabled:opacity-40" disabled>Précédent</button>
-            <button className="px-3 py-1.5 border border-border-subtle rounded-lg text-xs font-medium text-text-secondary hover:bg-surface-container disabled:opacity-40" disabled>Suivant</button>
+            <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-40" disabled>Précédent</button>
+            <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-40" disabled>Suivant</button>
           </div>
         </div>
       </div>

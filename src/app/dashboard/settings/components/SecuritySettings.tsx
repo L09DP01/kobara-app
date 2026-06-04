@@ -267,7 +267,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
   return (
     <div className="space-y-8">
       {/* Password Management Card */}
-      <div className="bg-surface-card rounded-xl border border-border-subtle p-6 ambient-shadow">
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-3 bg-rose-50 rounded-xl text-kobara-red">
             <KeyRound className="w-6 h-6" />
@@ -353,7 +353,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
       </div>
 
       {/* 2FA Method Selector Card */}
-      <div className="bg-surface-card rounded-xl border border-border-subtle p-6 ambient-shadow">
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-3 bg-rose-50 rounded-xl text-kobara-red">
             <Shield className="w-6 h-6" />
@@ -648,7 +648,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
       </div>
 
       {/* Passkeys Management Card */}
-      <div className="bg-surface-card rounded-xl border border-border-subtle p-6 ambient-shadow">
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
             <span className="material-symbols-outlined">fingerprint</span>
@@ -748,7 +748,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
       </div>
 
       {/* Sessions Management Card */}
-      <div className="bg-surface-card rounded-xl border border-border-subtle p-6 ambient-shadow">
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
