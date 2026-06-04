@@ -58,7 +58,7 @@ export default function DashboardLayoutClient({
   }
 
   return (
-    <div className="relative bg-slate-50 font-body-base text-body-base text-slate-900 antialiased min-h-[100dvh]">
+    <div className="relative bg-[#0F1626] font-body-base text-body-base text-white antialiased min-h-[100dvh]">
 
       <DesktopSidebar />
       <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />

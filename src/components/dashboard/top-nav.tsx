@@ -69,7 +69,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
   };
 
   return (
-    <header className="bg-white text-slate-900 font-body-base text-body-base top-0 sticky border-b border-slate-200 flex justify-between items-center h-20 px-8 z-30 transition-all duration-200 ease-in-out">
+    <header className="bg-[#0F1626]/80 backdrop-blur-md text-white font-body-base text-body-base top-0 sticky border-b border-white/10 flex justify-between items-center h-20 px-8 z-30 transition-all duration-200 ease-in-out">
       {/* Left: Greeting / Search */}
       <div className="flex items-center gap-4 md:gap-6">
         {/* Mobile menu toggle */}
@@ -92,10 +92,10 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
 
         {/* Environment Switcher */}
         {!isLoading && (
-          <div className="hidden sm:flex items-center gap-2 bg-slate-50 px-1 py-1 rounded-full border border-slate-200 ml-4">
+          <div className="hidden sm:flex items-center gap-2 bg-white/5 px-1 py-1 rounded-full border border-white/10 ml-4">
             <button 
               onClick={() => currentEnvironment === 'live' && setEnvironment('test')}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors ${currentEnvironment === 'test' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors ${currentEnvironment === 'test' ? 'bg-white/10 shadow-sm text-white' : 'text-slate-400 hover:text-white'}`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${currentEnvironment === 'test' ? 'bg-orange-500' : 'bg-transparent'}`}></span>
               Test
@@ -104,7 +104,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
               onClick={() => currentEnvironment === 'test' && canUseLive && setEnvironment('live')}
               disabled={!canUseLive}
               title={!canUseLive ? "Vérifiez votre compte pour activer le mode Live" : ""}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${currentEnvironment === 'live' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'} ${!canUseLive ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${currentEnvironment === 'live' ? 'bg-white/10 shadow-sm text-white' : 'text-slate-400 hover:text-white'} ${!canUseLive ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Live
             </button>
@@ -126,7 +126,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
           <div ref={notifRef} className="relative">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors hover:text-slate-900 relative"
+              className="p-2 text-slate-400 hover:bg-white/5 rounded-lg transition-colors hover:text-white relative"
             >
               <span className="material-symbols-outlined text-[24px]">notifications</span>
               {notifications.length > 0 && (

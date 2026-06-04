@@ -267,34 +267,34 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
   return (
     <div className="space-y-8">
       {/* Password Management Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+      <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
-          <div className="p-3 bg-rose-50 rounded-xl text-kobara-red">
+          <div className="p-3 bg-red-500/20 rounded-xl text-red-400">
             <KeyRound className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-headline-md font-headline-md text-text-primary">Mot de passe</h2>
-            <p className="text-body-sm text-text-secondary mt-0.5">Gérez votre mot de passe pour sécuriser votre compte.</p>
+            <h2 className="text-headline-md font-headline-md text-white">Mot de passe</h2>
+            <p className="text-body-sm text-slate-400 mt-0.5">Gérez votre mot de passe pour sécuriser votre compte.</p>
           </div>
         </div>
 
         {passwordSuccess && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-800 text-sm font-medium animate-in fade-in duration-300">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="mb-6 p-4 bg-green-500/20 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-400 text-sm font-medium animate-in fade-in duration-300">
+            <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
             <p>{passwordSuccess}</p>
           </div>
         )}
 
         {passwordError && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-800 text-sm font-medium animate-in fade-in duration-300">
-            <XCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm font-medium animate-in fade-in duration-300">
+            <XCircle className="w-5 h-5 text-red-400 shrink-0" />
             <p>{passwordError}</p>
           </div>
         )}
 
         <form onSubmit={handlePasswordSubmit} className="max-w-md space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="new_password">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2" htmlFor="new_password">
               Nouveau mot de passe
             </label>
             <div className="relative">
@@ -304,13 +304,13 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm text-sm"
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm text-sm"
                 placeholder="Au moins 6 caractères"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white"
               >
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -318,7 +318,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="confirm_password">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2" htmlFor="confirm_password">
               Confirmer le nouveau mot de passe
             </label>
             <div className="relative">
@@ -328,13 +328,13 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm text-sm"
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm text-sm"
                 placeholder="Répétez le mot de passe"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-white"
               >
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -344,54 +344,54 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
           <button 
             type="submit" 
             disabled={passwordLoading}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-container-low border border-border-subtle rounded-lg text-body-sm font-semibold text-text-primary hover:bg-surface-container transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-body-sm font-semibold text-white hover:bg-white/10 transition-colors disabled:opacity-50"
           >
-            {passwordLoading && <Loader2 className="w-4 h-4 animate-spin text-gray-500" />}
+            {passwordLoading && <Loader2 className="w-4 h-4 animate-spin text-slate-500" />}
             Mettre à jour le mot de passe
           </button>
         </form>
       </div>
 
       {/* 2FA Method Selector Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+      <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
-          <div className="p-3 bg-rose-50 rounded-xl text-kobara-red">
+          <div className="p-3 bg-red-500/20 rounded-xl text-red-400">
             <Shield className="w-6 h-6" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <h2 className="text-headline-md font-headline-md text-text-primary">Authentification à deux facteurs (2FA)</h2>
+              <h2 className="text-headline-md font-headline-md text-white">Authentification à deux facteurs (2FA)</h2>
               {!mfaLoading && (
                 <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                   dbMethod !== 'none' 
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                    : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/20' 
+                    : 'bg-orange-500/20 text-orange-400 border border-orange-500/20'
                 }`}>
                   {dbMethod !== 'none' ? `Activé (${dbMethod === 'email' ? 'E-mail' : 'App'})` : 'Inactif'}
                 </span>
               )}
             </div>
-            <p className="text-body-sm text-text-secondary mt-0.5">Choisissez votre méthode de double validation préférée pour sécuriser vos accès et transferts.</p>
+            <p className="text-body-sm text-slate-400 mt-0.5">Choisissez votre méthode de double validation préférée pour sécuriser vos accès et transferts.</p>
           </div>
         </div>
 
         {mfaSuccess && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 text-emerald-800 text-sm font-medium animate-in fade-in duration-300">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="mb-6 p-4 bg-green-500/20 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-400 text-sm font-medium animate-in fade-in duration-300">
+            <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
             <p>{mfaSuccess}</p>
           </div>
         )}
 
         {mfaError && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-800 text-sm font-medium animate-in fade-in duration-300">
-            <XCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm font-medium animate-in fade-in duration-300">
+            <XCircle className="w-5 h-5 text-red-400 shrink-0" />
             <p>{mfaError}</p>
           </div>
         )}
 
         {mfaLoading ? (
-          <div className="flex items-center gap-2 text-text-secondary text-sm py-4">
-            <Loader2 className="w-4 h-4 animate-spin text-kobara-red" />
+          <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
+            <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
             Chargement de la configuration de sécurité...
           </div>
         ) : (
@@ -409,20 +409,20 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                   }}
                   className={`flex flex-col text-left p-5 rounded-xl border transition-all relative ${
                     selectedMethod === 'none'
-                      ? 'border-kobara-red bg-rose-50/10 shadow-sm'
-                      : 'border-border-subtle bg-white hover:border-gray-300'
+                      ? 'border-orange-500 bg-orange-500/10 shadow-sm'
+                      : 'border-white/10 bg-white/5 hover:border-white/20'
                   }`}
                 >
                   <div className="flex items-center justify-between w-full mb-3">
-                    <div className={`p-2 rounded-lg ${selectedMethod === 'none' ? 'bg-rose-50 text-kobara-red' : 'bg-gray-50 text-gray-500'}`}>
+                    <div className={`p-2 rounded-lg ${selectedMethod === 'none' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-slate-400'}`}>
                       <ShieldAlert className="w-5 h-5" />
                     </div>
                     {dbMethod === 'none' && (
-                      <span className="text-[10px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-bold uppercase">Actif</span>
+                      <span className="text-[10px] bg-white/10 text-slate-300 px-2 py-0.5 rounded font-bold uppercase">Actif</span>
                     )}
                   </div>
-                  <h3 className="font-bold text-text-primary text-sm">Aucune protection</h3>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                  <h3 className="font-bold text-white text-sm">Aucune protection</h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                     Accédez à votre compte uniquement avec votre adresse email et votre mot de passe classique.
                   </p>
                 </button>
@@ -438,22 +438,22 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                   }}
                   className={`flex flex-col text-left p-5 rounded-xl border transition-all relative ${
                     selectedMethod === 'email'
-                      ? 'border-kobara-red bg-rose-50/10 shadow-sm'
-                      : 'border-border-subtle bg-white hover:border-gray-300'
+                      ? 'border-orange-500 bg-orange-500/10 shadow-sm'
+                      : 'border-white/10 bg-white/5 hover:border-white/20'
                   } disabled:opacity-50`}
                 >
                   <div className="flex items-center justify-between w-full mb-3">
-                    <div className={`p-2 rounded-lg ${selectedMethod === 'email' ? 'bg-rose-50 text-kobara-red' : 'bg-gray-50 text-gray-500'}`}>
+                    <div className={`p-2 rounded-lg ${selectedMethod === 'email' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-slate-400'}`}>
                       <Mail className="w-5 h-5" />
                     </div>
                     {dbMethod === 'email' ? (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase">Actif</span>
+                      <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-bold uppercase">Actif</span>
                     ) : (
-                      <span className="text-[9px] border border-gray-200 text-gray-500 px-1.5 py-0.5 rounded font-medium">Recommandé</span>
+                      <span className="text-[9px] border border-white/10 text-slate-400 px-1.5 py-0.5 rounded font-medium">Recommandé</span>
                     )}
                   </div>
-                  <h3 className="font-bold text-text-primary text-sm">Code OTP par Email</h3>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                  <h3 className="font-bold text-white text-sm">Code OTP par Email</h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                     Un code temporaire à 6 chiffres est envoyé à votre adresse de messagerie lors de chaque connexion.
                   </p>
                 </button>
@@ -469,22 +469,22 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                   }}
                   className={`flex flex-col text-left p-5 rounded-xl border transition-all relative ${
                     selectedMethod === 'totp'
-                      ? 'border-kobara-red bg-rose-50/10 shadow-sm'
-                      : 'border-border-subtle bg-white hover:border-gray-300'
+                      ? 'border-orange-500 bg-orange-500/10 shadow-sm'
+                      : 'border-white/10 bg-white/5 hover:border-white/20'
                   } disabled:opacity-50`}
                 >
                   <div className="flex items-center justify-between w-full mb-3">
-                    <div className={`p-2 rounded-lg ${selectedMethod === 'totp' ? 'bg-rose-50 text-kobara-red' : 'bg-gray-50 text-gray-500'}`}>
+                    <div className={`p-2 rounded-lg ${selectedMethod === 'totp' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/5 text-slate-400'}`}>
                       <Smartphone className="w-5 h-5" />
                     </div>
                     {dbMethod === 'totp' ? (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase">Actif</span>
+                      <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-bold uppercase">Actif</span>
                     ) : (
-                      <span className="text-[9px] bg-rose-50 text-kobara-red px-1.5 py-0.5 rounded font-bold uppercase">Ultra Securisé</span>
+                      <span className="text-[9px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-bold uppercase">Ultra Securisé</span>
                     )}
                   </div>
-                  <h3 className="font-bold text-text-primary text-sm">Application TOTP</h3>
-                  <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                  <h3 className="font-bold text-white text-sm">Application TOTP</h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
                     Utilisez Google Authenticator ou une application compatible pour générer des clés temporaires instantanées.
                   </p>
                 </button>
@@ -494,19 +494,19 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
 
             {/* Email Verification Wizard */}
             {isConfiguringEmail && (
-              <div className="border border-border-subtle rounded-xl p-6 bg-surface-container-low space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xl">
-                <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
-                  <Mail className="w-5 h-5 text-kobara-red" />
-                  <h3 className="font-bold text-text-primary text-sm">Validation de votre adresse E-mail</h3>
+              <div className="border border-white/10 rounded-xl p-6 bg-white/5 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xl">
+                <div className="flex items-center gap-2 border-b border-white/10 pb-4">
+                  <Mail className="w-5 h-5 text-orange-500" />
+                  <h3 className="font-bold text-white text-sm">Validation de votre adresse E-mail</h3>
                 </div>
 
                 <div className="space-y-4">
-                  <p className="text-xs text-text-secondary leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     Pour activer la double validation par email, nous venons d'envoyer un code temporaire à 6 chiffres à l'adresse <strong>{user.email}</strong>. Saisissez ce code ci-dessous :
                   </p>
 
                   <div className="space-y-3">
-                    <label className="block text-[10px] font-bold text-text-primary uppercase tracking-wider" htmlFor="email_otp">
+                    <label className="block text-[10px] font-bold text-white uppercase tracking-wider" htmlFor="email_otp">
                       Code de validation
                     </label>
                     <div className="flex gap-3">
@@ -519,14 +519,14 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                         required
                         value={emailOtp}
                         onChange={(e) => setEmailOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-44 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-mono text-center text-lg font-bold tracking-widest text-gray-900 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+                        className="w-44 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-mono text-center text-lg font-bold tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm"
                         placeholder="000000"
                       />
                       <button
                         type="button"
                         disabled={actionLoading}
                         onClick={handleVerifyEmailOtp}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 bg-kobara-red text-white hover:bg-rose-600 rounded-xl font-semibold text-sm transition-colors shadow-sm disabled:opacity-50"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 bg-orange-500 text-white hover:bg-orange-600 rounded-xl font-semibold text-sm transition-colors shadow-sm disabled:opacity-50"
                       >
                         {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                         Activer la protection
@@ -539,14 +539,14 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                       type="button"
                       disabled={actionLoading || resendCooldown > 0}
                       onClick={startEmailConfiguration}
-                      className="text-kobara-red font-medium hover:underline disabled:text-text-secondary disabled:no-underline"
+                      className="text-orange-500 font-medium hover:underline disabled:text-slate-400 disabled:no-underline"
                     >
                       {resendCooldown > 0 ? `Renvoyer le code dans ${resendCooldown}s` : "Renvoyer le code"}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-3 border-t border-border-subtle">
+                <div className="flex justify-end pt-3 border-t border-white/10">
                   <button 
                     type="button"
                     onClick={() => {
@@ -554,7 +554,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                       setSelectedMethod(dbMethod);
                       setMfaError('');
                     }}
-                    className="px-4 py-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors"
+                    className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
                   >
                     Annuler
                   </button>
@@ -564,42 +564,42 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
 
             {/* TOTP Verification Wizard */}
             {isConfiguringTotp && (
-              <div className="border border-border-subtle rounded-xl p-6 bg-surface-container-low space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xl">
-                <div className="flex items-center gap-2 border-b border-border-subtle pb-4">
-                  <QrCode className="w-5 h-5 text-kobara-red" />
-                  <h3 className="font-bold text-text-primary text-sm">Configurer votre application d'authentification</h3>
+              <div className="border border-white/10 rounded-xl p-6 bg-white/5 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-xl">
+                <div className="flex items-center gap-2 border-b border-white/10 pb-4">
+                  <QrCode className="w-5 h-5 text-orange-500" />
+                  <h3 className="font-bold text-white text-sm">Configurer votre application d'authentification</h3>
                 </div>
 
                 <div className="space-y-4">
-                  <p className="text-xs text-text-secondary leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     1. Scannez ce code QR avec votre application d'authentification (Google Authenticator, Microsoft Authenticator, Authy, etc.) :
                   </p>
                   
-                  <div className="flex justify-center bg-white p-4 rounded-xl border border-border-subtle w-fit mx-auto shadow-sm">
+                  <div className="flex justify-center bg-white/5 p-4 rounded-xl border border-white/10 w-fit mx-auto shadow-sm">
                     <img 
                       src={qrCodeSvg} 
                       alt="QR Code MFA" 
-                      className="w-44 h-44" 
+                      className="w-44 h-44 rounded bg-white" 
                     />
                   </div>
 
-                  <div className="text-xs text-text-secondary leading-relaxed space-y-2">
+                  <div className="text-xs text-slate-400 leading-relaxed space-y-2">
                     <p>2. Si vous ne pouvez pas scanner le code QR, saisissez manuellement cette clé secrète dans votre application :</p>
-                    <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2.5 font-mono text-gray-800 text-sm font-semibold shadow-inner w-full justify-between">
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2.5 font-mono text-white text-sm font-semibold w-full justify-between">
                       <span className="break-all tracking-wider">{secretKey}</span>
                       <button 
                         type="button" 
                         onClick={copyToClipboard}
-                        className="p-1.5 hover:bg-gray-100 rounded-md transition-colors text-gray-500"
+                        className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-slate-400"
                         title="Copier la clé secrète"
                       >
-                        {copiedKey ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        {copiedKey ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
 
-                  <div className="border-t border-border-subtle pt-4 space-y-3">
-                    <label className="block text-xs font-bold text-text-primary" htmlFor="totp_verification_code">
+                  <div className="border-t border-white/10 pt-4 space-y-3">
+                    <label className="block text-xs font-bold text-white" htmlFor="totp_verification_code">
                       3. Entrez le code de vérification à 6 chiffres généré par votre application :
                     </label>
                     <div className="flex gap-3">
@@ -612,14 +612,14 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                         required
                         value={totpCode}
                         onChange={(e) => setTotpCode(e.target.value.replace(/[^0-9]/g, ''))}
-                        className="w-44 px-4 py-2.5 bg-white border border-gray-200 rounded-xl font-mono text-center text-lg font-bold tracking-widest text-gray-900 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+                        className="w-44 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-mono text-center text-lg font-bold tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm"
                         placeholder="000000"
                       />
                       <button
                         type="button"
                         disabled={actionLoading}
                         onClick={handleVerifyTotp}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 bg-kobara-red text-white hover:bg-rose-600 rounded-xl font-semibold text-sm transition-colors shadow-sm disabled:opacity-50"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 bg-orange-500 text-white hover:bg-orange-600 rounded-xl font-semibold text-sm transition-colors shadow-sm disabled:opacity-50"
                       >
                         {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                         Activer l'A2F App
@@ -628,7 +628,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2 border-t border-border-subtle">
+                <div className="flex justify-end pt-2 border-t border-white/10">
                   <button 
                     type="button"
                     onClick={() => {
@@ -636,7 +636,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                       setSelectedMethod(dbMethod);
                       setMfaError('');
                     }}
-                    className="px-4 py-2 text-xs font-medium text-text-secondary hover:text-text-primary transition-colors"
+                    className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
                   >
                     Annuler
                   </button>
@@ -648,14 +648,14 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
       </div>
 
       {/* Passkeys Management Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+      <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
-          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+          <div className="p-3 bg-green-500/20 rounded-xl text-green-400">
             <span className="material-symbols-outlined">fingerprint</span>
           </div>
           <div>
-            <h2 className="text-headline-md font-headline-md text-text-primary">Connexion Biométrique (Passkey)</h2>
-            <p className="text-body-sm text-text-secondary mt-0.5">Utilisez Touch ID, Face ID ou Windows Hello pour vous connecter sans mot de passe.</p>
+            <h2 className="text-headline-md font-headline-md text-white">Connexion Biométrique (Passkey)</h2>
+            <p className="text-body-sm text-slate-400 mt-0.5">Utilisez Touch ID, Face ID ou Windows Hello pour vous connecter sans mot de passe.</p>
           </div>
         </div>
 
@@ -690,7 +690,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                 setActionLoading(false);
               }
             }}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-text-primary text-surface-container-lowest rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
             <span className="material-symbols-outlined text-[18px]">add</span>
@@ -698,23 +698,23 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
           </button>
 
           {(settings?.security_json?.passkeys?.length || 0) > 0 && (
-            <div className="mt-6 border border-border-subtle rounded-xl overflow-hidden">
+            <div className="mt-6 border border-white/10 rounded-xl overflow-hidden">
               <table className="w-full text-left text-sm">
-                <thead className="bg-surface-container-lowest border-b border-border-subtle text-text-secondary">
+                <thead className="bg-transparent border-b border-white/10 text-slate-400">
                   <tr>
                     <th className="py-3 px-4 font-semibold">Appareil</th>
                     <th className="py-3 px-4 font-semibold">Date d'ajout</th>
                     <th className="py-3 px-4 text-right font-semibold">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle bg-white">
+                <tbody className="divide-y divide-white/10 bg-transparent">
                   {settings.security_json.passkeys.map((pk: any) => (
                     <tr key={pk.id}>
                       <td className="py-3 px-4 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-gray-400">devices</span>
-                        <span className="font-medium text-text-primary capitalize">{pk.deviceType || 'Appareil inconnu'}</span>
+                        <span className="material-symbols-outlined text-slate-500">devices</span>
+                        <span className="font-medium text-white capitalize">{pk.deviceType || 'Appareil inconnu'}</span>
                       </td>
-                      <td className="py-3 px-4 text-text-secondary">
+                      <td className="py-3 px-4 text-slate-400">
                         {new Date(pk.created_at).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="py-3 px-4 text-right">
@@ -733,7 +733,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                               setActionLoading(false);
                             }
                           }}
-                          className="text-rose-600 hover:text-rose-800 font-medium text-sm transition-colors disabled:opacity-50"
+                          className="text-red-400 hover:text-red-300 font-medium text-sm transition-colors disabled:opacity-50"
                         >
                           Supprimer
                         </button>
@@ -748,15 +748,15 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
       </div>
 
       {/* Sessions Management Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+      <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
+            <div className="p-3 bg-indigo-500/20 rounded-xl text-indigo-400">
               <span className="material-symbols-outlined">devices</span>
             </div>
             <div>
-              <h2 className="text-headline-md font-headline-md text-text-primary">Sessions Actives</h2>
-              <p className="text-body-sm text-text-secondary mt-0.5">Appareils et navigateurs actuellement connectés à votre compte.</p>
+              <h2 className="text-headline-md font-headline-md text-white">Sessions Actives</h2>
+              <p className="text-body-sm text-slate-400 mt-0.5">Appareils et navigateurs actuellement connectés à votre compte.</p>
             </div>
           </div>
           <button 
@@ -768,7 +768,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                 setSessionsLoading(false);
               });
             }}
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high text-text-secondary transition-colors"
+            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">refresh</span>
           </button>
@@ -776,11 +776,11 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
 
         {sessionsLoading ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-text-secondary" />
+            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
           </div>
         ) : sessions.length === 0 ? (
-          <div className="text-center py-8 bg-surface-container-lowest rounded-xl border border-border-subtle border-dashed">
-            <p className="text-text-secondary text-sm">Aucune session active trouvée.</p>
+          <div className="text-center py-8 bg-transparent rounded-xl border border-white/10 border-dashed">
+            <p className="text-slate-400 text-sm">Aucune session active trouvée.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -805,16 +805,16 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
               // Since Next.js has its own session, we'll let them revoke any of them. If they revoke their own, they will be logged out eventually.
 
               return (
-                <div key={session.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-surface-container-lowest border border-border-subtle rounded-xl gap-4">
+                <div key={session.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-transparent border border-white/10 rounded-xl gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-text-secondary">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-slate-400">
                       <span className="material-symbols-outlined text-[20px]">{isMobile ? 'smartphone' : 'computer'}</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-text-primary">{os} • {browser}</p>
+                      <p className="font-semibold text-sm text-white">{os} • {browser}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-text-secondary font-mono bg-surface-container px-1.5 py-0.5 rounded">{session.ip_address}</span>
-                        <span className="text-xs text-text-secondary">Dernière activité: {new Date(session.last_active_at).toLocaleString('fr-FR')}</span>
+                        <span className="text-xs text-slate-400 font-mono bg-white/5 px-1.5 py-0.5 rounded">{session.ip_address}</span>
+                        <span className="text-xs text-slate-400">Dernière activité: {new Date(session.last_active_at).toLocaleString('fr-FR')}</span>
                       </div>
                     </div>
                   </div>
@@ -835,7 +835,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                         setActionLoading(false);
                       }
                     }}
-                    className="px-3 py-1.5 border border-border-subtle text-text-secondary hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 text-xs font-medium rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
+                    className="px-3 py-1.5 border border-white/10 text-slate-400 hover:text-red-400 hover:border-red-500/20 hover:bg-red-500/10 text-xs font-medium rounded-lg transition-colors whitespace-nowrap disabled:opacity-50"
                   >
                     Déconnecter
                   </button>

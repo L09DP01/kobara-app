@@ -76,12 +76,12 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Clients</h1>
-          <p className="text-text-secondary text-sm mt-1">Gérez vos clients et visualisez leur historique de paiement.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Clients</h1>
+          <p className="text-slate-400 text-sm mt-1">Gérez vos clients et visualisez leur historique de paiement.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
+          className="bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-all shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">person_add</span>
           Nouveau client
@@ -90,31 +90,31 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
 
       {/* Stats Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[24px] text-blue-600">group</span>
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-5 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-blue-400">group</span>
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Clients</p>
-            <p className="text-2xl font-bold text-slate-900">{displayStats.totalClients}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Clients</p>
+            <p className="text-2xl font-bold text-white">{displayStats.totalClients}</p>
           </div>
         </div>
-        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[24px] text-green-600">trending_up</span>
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-5 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-green-400">trending_up</span>
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Clients Actifs</p>
-            <p className="text-2xl font-bold text-slate-900">{displayStats.activeClients}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Clients Actifs</p>
+            <p className="text-2xl font-bold text-white">{displayStats.activeClients}</p>
           </div>
         </div>
-        <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center">
-            <span className="material-symbols-outlined text-[24px] text-purple-600">payments</span>
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-5 shadow-sm flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+            <span className="material-symbols-outlined text-[24px] text-purple-400">payments</span>
           </div>
           <div>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Volume Moyen</p>
-            <p className="text-2xl font-bold text-slate-900">
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Volume Moyen</p>
+            <p className="text-2xl font-bold text-white">
               {Math.round(displayStats.volumeMoyen).toLocaleString('fr-FR')} HTG
             </p>
           </div>
@@ -122,19 +122,19 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
       </div>
 
       {/* Table Card */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white/5 rounded-3xl border border-white/10 shadow-sm overflow-hidden">
         {/* Search & Filters */}
-        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50">
+        <div className="p-4 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/5">
           <div className="relative w-full sm:w-96">
             <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
             <input 
-              className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-all shadow-sm" 
+              className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm" 
               placeholder="Rechercher par nom, email ou téléphone..." 
               type="text"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
-            <span className="material-symbols-outlined text-[18px] text-slate-500">download</span>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-slate-400 hover:bg-white/10 transition-colors shadow-sm">
+            <span className="material-symbols-outlined text-[18px] text-slate-400">download</span>
             Exporter CSV
           </button>
         </div>
@@ -143,49 +143,49 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="border-b border-slate-100 bg-white">
-                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Client</th>
-                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Téléphone</th>
-                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Mode de paiement</th>
-                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Volume Total</th>
-                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider">Dernier paiement</th>
-                <th className="py-3.5 px-5 text-[11px] text-slate-500 font-bold uppercase tracking-wider text-right">Action</th>
+              <tr className="border-b border-white/10 bg-transparent">
+                <th className="py-3.5 px-5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Client</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Téléphone</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Mode de paiement</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Volume Total</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Dernier paiement</th>
+                <th className="py-3.5 px-5 text-[11px] text-slate-400 font-bold uppercase tracking-wider text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="text-sm text-slate-900 divide-y divide-slate-100">
+            <tbody className="text-sm text-white divide-y divide-white/10">
               {customers.length > 0 ? customers.map((customer) => {
                 const stats = getCustomerStats(customer);
                 return (
-                  <tr key={customer.id} className="hover:bg-slate-50 transition-colors group cursor-pointer border-l-[3px] border-l-transparent hover:border-l-orange-500">
+                  <tr key={customer.id} className="hover:bg-white/5 transition-colors group cursor-pointer border-l-[3px] border-l-transparent hover:border-l-orange-500">
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getAvatarColor(customer.name)} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
                           {(customer.name || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900">{customer.name || 'Client Inconnu'}</div>
+                          <div className="font-bold text-white">{customer.name || 'Client Inconnu'}</div>
                         </div>
                       </div>
                     </td>
                     <td className="py-3.5 px-5">
-                      <div className="text-slate-500 text-sm">{customer.phone || 'Aucun'}</div>
+                      <div className="text-slate-400 text-sm">{customer.phone || 'Aucun'}</div>
                     </td>
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-1.5">
-                        {stats.paymentMode !== 'N/A' && <span className="material-symbols-outlined text-[14px] text-slate-400">smartphone</span>}
+                        {stats.paymentMode !== 'N/A' && <span className="material-symbols-outlined text-[14px] text-slate-500">smartphone</span>}
                         <span className="font-bold capitalize">{stats.paymentMode}</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-5">
                       <div className="font-bold">{stats.totalVolume.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
                     </td>
-                    <td className="py-3.5 px-5 text-slate-500 text-sm">
+                    <td className="py-3.5 px-5 text-slate-400 text-sm">
                       {stats.lastPaymentDate ? stats.lastPaymentDate.toLocaleDateString('fr-FR') : 'Aucun'}
                     </td>
                     <td className="py-3.5 px-5 text-right">
                       <Link 
                         href={`/customers/${customer.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-400 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
                       >
                         Détails
                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -196,11 +196,11 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
               }) : (
                 <tr>
                   <td colSpan={6} className="py-14 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-surface-container mx-auto flex items-center justify-center mb-3">
-                      <span className="material-symbols-outlined text-4xl text-text-secondary/30">groups</span>
+                    <div className="w-16 h-16 rounded-2xl bg-white/5 mx-auto flex items-center justify-center mb-3">
+                      <span className="material-symbols-outlined text-4xl text-slate-500/30">groups</span>
                     </div>
-                    <p className="text-sm text-text-secondary font-medium">Aucun client trouvé</p>
-                    <p className="text-xs text-text-secondary/60 mt-1">Vos clients apparaîtront ici après leur premier paiement ou ajout manuel</p>
+                    <p className="text-sm text-slate-400 font-bold">Aucun client trouvé</p>
+                    <p className="text-xs text-slate-500 mt-1">Vos clients apparaîtront ici après leur premier paiement ou ajout manuel</p>
                   </td>
                 </tr>
               )}
@@ -209,11 +209,11 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
         </div>
 
         {/* Pagination */}
-        <div className="px-5 py-4 border-t border-slate-100 bg-white flex items-center justify-between">
-          <p className="text-xs text-slate-500 font-bold">Affichage de {customers.length} client(s)</p>
+        <div className="px-5 py-4 border-t border-white/10 bg-white/5 flex items-center justify-between">
+          <p className="text-xs text-slate-400 font-bold">Affichage de {customers.length} client(s)</p>
           <div className="flex gap-1.5">
-            <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-40" disabled>Précédent</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-40" disabled>Suivant</button>
+            <button className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-slate-500 hover:bg-white/10 disabled:opacity-40" disabled>Précédent</button>
+            <button className="px-3 py-1.5 border border-white/10 rounded-lg text-xs font-bold text-white hover:bg-white/10 disabled:opacity-40" disabled>Suivant</button>
           </div>
         </div>
       </div>
@@ -221,38 +221,38 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
       {/* New Customer Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-surface-card w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border-subtle animate-in zoom-in-95 duration-200">
+          <div className="bg-[#131B2C] w-full max-w-md rounded-2xl p-6 shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-text-primary">Nouveau Client</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-text-secondary hover:text-text-primary p-1 rounded-full hover:bg-surface-container transition-colors">
+              <h3 className="text-xl font-bold text-white">Nouveau Client</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-white/5 transition-colors">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="bg-red-50 text-status-error text-sm p-3 rounded-lg border border-red-200">
+                <div className="bg-red-500/20 text-red-400 text-sm p-3 rounded-lg border border-red-500/20">
                   {error}
                 </div>
               )}
               <div>
-                <label className="block text-sm font-semibold text-text-primary mb-1">Nom Complet</label>
+                <label className="block text-sm font-bold text-white mb-1">Nom Complet</label>
                 <input 
                   type="text" 
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary"
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-white"
                   placeholder="Jean Exemple"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-text-primary mb-1">Téléphone</label>
+                <label className="block text-sm font-bold text-white mb-1">Téléphone</label>
                 <input 
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-container-low border border-border-subtle rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-text-primary"
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-white"
                   placeholder="+509 XXXX XXXX"
                 />
               </div>
@@ -261,14 +261,14 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 border border-border-subtle rounded-xl font-semibold text-sm text-text-secondary hover:bg-surface-container transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-white/10 rounded-xl font-bold text-sm text-slate-400 hover:bg-white/5 transition-colors"
                 >
                   Annuler
                 </button>
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="flex-1 px-4 py-2.5 bg-primary text-on-primary rounded-xl font-semibold text-sm hover:opacity-90 transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 bg-orange-500 text-white rounded-xl font-bold text-sm hover:bg-orange-600 transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {loading && <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>}
                   Ajouter le client

@@ -78,20 +78,20 @@ export default async function DashboardPage() {
       {/* Welcome Section */}
       <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-2">
             {merchant.business_name}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-slate-400 text-sm mt-1">
             Voici un aperçu de votre activité aujourd'hui.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="hidden sm:flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-colors">
-            <span className="material-symbols-outlined text-[18px] text-slate-500">calendar_today</span>
+          <button className="hidden sm:flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2.5 rounded-xl text-sm font-semibold text-white hover:bg-white/10 shadow-sm transition-colors">
+            <span className="material-symbols-outlined text-[18px] text-slate-400">calendar_today</span>
             {now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
-            <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
+            <span className="material-symbols-outlined text-[18px] text-slate-500">expand_more</span>
           </button>
-          <Link href="/payment-links" className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-400 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 transition-all">
+          <Link href="/payment-links" className="flex items-center gap-2 bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-all shadow-sm">
             <span className="material-symbols-outlined text-[18px]">add</span>
             Créer un lien de paiement
           </Link>
@@ -101,81 +101,81 @@ export default async function DashboardPage() {
       {/* Overview Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         {/* Card 1 - Total Encaissé */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-600 font-bold">Total Encaissé</span>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <span className="text-sm text-slate-400 font-bold">Total Encaissé</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
               <span className="material-symbols-outlined text-[22px]">payments</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{totalEncaisse.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-400">HTG</span></h3>
+            <h3 className="text-3xl font-bold text-white tracking-tight">{totalEncaisse.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-500">HTG</span></h3>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">
+            <span className="inline-flex items-center gap-0.5 bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[11px] font-bold">
               <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 12.4%
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
+            <span className="text-[11px] text-slate-500 font-medium">vs mois dernier</span>
           </div>
         </div>
 
         {/* Card 2 - Solde Disponible */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-600 font-bold">Solde Disponible</span>
-            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+            <span className="text-sm text-slate-400 font-bold">Solde Disponible</span>
+            <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400">
               <span className="material-symbols-outlined text-[22px]">credit_card</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-400">HTG</span></h3>
+            <h3 className="text-3xl font-bold text-white tracking-tight">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-500">HTG</span></h3>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">
+            <span className="inline-flex items-center gap-0.5 bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[11px] font-bold">
               <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 8.7%
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
+            <span className="text-[11px] text-slate-500 font-medium">vs mois dernier</span>
           </div>
         </div>
 
         {/* Card 3 - Taux de Succès */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-600 font-bold">Taux de Succès</span>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <span className="text-sm text-slate-400 font-bold">Taux de Succès</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
               <span className="material-symbols-outlined text-[22px]">verified_user</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{successRate.toFixed(1)}<span className="text-sm font-medium text-slate-400">%</span></h3>
-            <div className="w-full bg-slate-100 rounded-full h-1 mt-3">
-              <div className="bg-blue-600 h-1 rounded-full transition-all duration-500" style={{ width: `${successRate}%` }}></div>
+            <h3 className="text-3xl font-bold text-white tracking-tight">{successRate.toFixed(1)}<span className="text-sm font-medium text-slate-500">%</span></h3>
+            <div className="w-full bg-white/10 rounded-full h-1 mt-3">
+              <div className="bg-blue-500 h-1 rounded-full transition-all duration-500" style={{ width: `${successRate}%` }}></div>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">
+            <span className="inline-flex items-center gap-0.5 bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[11px] font-bold">
               <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 2.1%
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
+            <span className="text-[11px] text-slate-500 font-medium">vs mois dernier</span>
           </div>
         </div>
 
         {/* Card 4 - Revenu Mensuel */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-600 font-bold">Revenu Mensuel</span>
-            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+            <span className="text-sm text-slate-400 font-bold">Revenu Mensuel</span>
+            <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400">
               <span className="material-symbols-outlined text-[22px]">monitoring</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{monthlyRevenue.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-400">HTG</span></h3>
+            <h3 className="text-3xl font-bold text-white tracking-tight">{monthlyRevenue.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-500">HTG</span></h3>
           </div>
           <div className="flex items-center gap-2 mt-1">
-            <span className="inline-flex items-center gap-0.5 bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[11px] font-bold">
+            <span className="inline-flex items-center gap-0.5 bg-white/10 text-slate-400 px-2 py-0.5 rounded text-[11px] font-bold">
               0%
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
+            <span className="text-[11px] text-slate-500 font-medium">vs mois dernier</span>
           </div>
         </div>
       </section>
@@ -189,10 +189,10 @@ export default async function DashboardPage() {
           <DashboardChartWrapper payments={succeededPayments || []} />
 
           {/* Recent Transactions Table */}
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Transactions Récentes</h3>
-              <Link href="/payments" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors flex items-center gap-1">
+          <div className="bg-white/5 rounded-3xl border border-white/10 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white tracking-tight">Transactions Récentes</h3>
+              <Link href="/payments" className="text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors flex items-center gap-1">
                 Voir Tout
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </Link>
@@ -200,40 +200,40 @@ export default async function DashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50/50">
-                    <th className="py-3 px-6 text-xs text-slate-500 font-bold uppercase tracking-wider">Client</th>
-                    <th className="py-3 px-6 text-xs text-slate-500 font-bold uppercase tracking-wider">Montant</th>
-                    <th className="hidden sm:table-cell py-3 px-6 text-xs text-slate-500 font-bold uppercase tracking-wider">Méthode</th>
-                    <th className="py-3 px-6 text-xs text-slate-500 font-bold uppercase tracking-wider">Statut</th>
-                    <th className="hidden md:table-cell py-3 px-6 text-xs text-slate-500 font-bold uppercase tracking-wider">Date</th>
+                  <tr className="border-b border-white/10 bg-white/5">
+                    <th className="py-3 px-6 text-xs text-slate-400 font-bold uppercase tracking-wider">Client</th>
+                    <th className="py-3 px-6 text-xs text-slate-400 font-bold uppercase tracking-wider">Montant</th>
+                    <th className="hidden sm:table-cell py-3 px-6 text-xs text-slate-400 font-bold uppercase tracking-wider">Méthode</th>
+                    <th className="py-3 px-6 text-xs text-slate-400 font-bold uppercase tracking-wider">Statut</th>
+                    <th className="hidden md:table-cell py-3 px-6 text-xs text-slate-400 font-bold uppercase tracking-wider">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-white/10">
                   {recentPayments && recentPayments.length > 0 ? (
                     recentPayments.map((payment) => (
-                      <tr key={payment.id} className="hover:bg-slate-50/80 transition-colors group">
+                      <tr key={payment.id} className="hover:bg-white/5 transition-colors group">
                         <td className="py-4 px-6 flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-xs border border-slate-200">
+                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-xs border border-white/10">
                             {payment.customers?.name?.charAt(0)?.toUpperCase() || "?"}
                           </div>
-                          <span className="text-sm text-slate-900 font-semibold truncate max-w-[140px]">
+                          <span className="text-sm text-white font-bold truncate max-w-[140px]">
                             {payment.customers?.name || payment.kobara_reference}
                           </span>
                         </td>
                         <td className="py-4 px-6">
-                          <div className="text-sm font-bold text-slate-900">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-xs text-slate-500 font-medium">{payment.currency}</span></div>
+                          <div className="text-sm font-bold text-white">+{Number(payment.net_amount || payment.amount).toLocaleString('fr-FR')} <span className="text-xs text-slate-400 font-medium">{payment.currency}</span></div>
                         </td>
                         <td className="hidden sm:table-cell py-4 px-6">
                           <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[16px] text-slate-400">smartphone</span>
-                            <span className="text-sm text-slate-600 font-medium capitalize">{payment.provider}</span>
+                            <span className="material-symbols-outlined text-[16px] text-slate-500">smartphone</span>
+                            <span className="text-sm text-slate-400 font-medium capitalize">{payment.provider}</span>
                           </div>
                         </td>
                         <td className="py-4 px-6">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
-                            payment.status === 'succeeded' ? 'bg-green-50 text-green-700 border border-green-200' :
-                            payment.status === 'failed' ? 'bg-red-50 text-red-700 border border-red-200' :
-                            'bg-orange-50 text-orange-700 border border-orange-200'
+                            payment.status === 'succeeded' ? 'bg-green-500/20 text-green-400 border border-green-500/20' :
+                            payment.status === 'failed' ? 'bg-red-500/20 text-red-400 border border-red-500/20' :
+                            'bg-orange-500/20 text-orange-400 border border-orange-500/20'
                           }`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${
                               payment.status === 'succeeded' ? 'bg-green-500' :
@@ -251,9 +251,9 @@ export default async function DashboardPage() {
                   ) : (
                     <tr>
                       <td colSpan={5} className="py-12 text-center">
-                        <span className="material-symbols-outlined text-4xl text-text-secondary/30 mb-2">receipt_long</span>
-                        <p className="text-sm text-text-secondary">Aucune transaction récente</p>
-                        <p className="text-xs text-text-secondary/60 mt-1">Vos paiements apparaîtront ici</p>
+                        <span className="material-symbols-outlined text-4xl text-slate-600 mb-2">receipt_long</span>
+                        <p className="text-sm text-slate-400">Aucune transaction récente</p>
+                        <p className="text-xs text-slate-500 mt-1">Vos paiements apparaîtront ici</p>
                       </td>
                     </tr>
                   )}
@@ -267,10 +267,10 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-6">
           
           {/* Withdrawals Widget */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Retraits Récents</h3>
-              <Link href="/withdrawals" className="p-1.5 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-colors">
+              <h3 className="text-lg font-bold text-white tracking-tight">Retraits Récents</h3>
+              <Link href="/withdrawals" className="p-1.5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-colors">
                 <span className="material-symbols-outlined text-[18px]">open_in_new</span>
               </Link>
             </div>
@@ -278,18 +278,18 @@ export default async function DashboardPage() {
             <div className="flex justify-between items-center mb-6">
               <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Solde disponible</p>
-                  <p className="text-2xl font-bold text-slate-900 leading-none">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-xs text-slate-400">HTG</span></p>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Solde disponible</p>
+                  <p className="text-2xl font-bold text-white leading-none">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-xs text-slate-500">HTG</span></p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Retrait minimum</p>
-                  <p className="text-sm font-bold text-slate-900">100 <span className="text-[10px] text-slate-400">HTG</span></p>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Retrait minimum</p>
+                  <p className="text-sm font-bold text-white">100 <span className="text-[10px] text-slate-500">HTG</span></p>
                 </div>
               </div>
               <div className="w-24 h-24 relative opacity-90 -mr-2">
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
                   <rect x="15" y="30" width="70" height="45" rx="8" fill="#F97316" fillOpacity="0.1"/>
-                  <rect x="20" y="35" width="60" height="40" rx="6" fill="#FFF"/>
+                  <rect x="20" y="35" width="60" height="40" rx="6" fill="#FFF" fillOpacity="0.1"/>
                   <path d="M70 45H80C82.2091 45 84 46.7909 84 49V59C84 61.2091 82.2091 63 80 63H70V45Z" fill="#F97316"/>
                   <circle cx="77" cy="54" r="3" fill="#FFF"/>
                   <circle cx="40" cy="55" r="10" fill="#F97316" fillOpacity="0.15"/>
@@ -299,28 +299,28 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <Link href="/withdrawals" className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
+            <Link href="/withdrawals" className="flex items-center justify-center gap-2 w-full py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
               <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               Demander un retrait
             </Link>
           </div>
 
           {/* Activité API Widget */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Activité API <span className="text-xs text-slate-400 font-medium ml-1">(Aujourd'hui)</span></h3>
-              <div className="text-slate-400">
+              <h3 className="text-lg font-bold text-white tracking-tight">Activité API <span className="text-xs text-slate-500 font-medium ml-1">(Aujourd'hui)</span></h3>
+              <div className="text-slate-500">
                 <span className="material-symbols-outlined text-[18px]">code</span>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Requêtes</p>
-                <p className="text-xl font-bold text-slate-900">{apiTotal}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Requêtes</p>
+                <p className="text-xl font-bold text-white">{apiTotal}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Taux de succès</p>
-                <p className="text-xl font-bold text-slate-900">{apiSuccessRate}<span className="text-[10px] text-slate-400">%</span></p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Taux de succès</p>
+                <p className="text-xl font-bold text-white">{apiSuccessRate}<span className="text-[10px] text-slate-500">%</span></p>
                 <div className="mt-2 w-full h-4">
                   <svg viewBox="0 0 100 20" className="w-full h-full stroke-green-500" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M0 15 Q 15 5, 30 15 T 60 10 T 100 5"/>
@@ -328,8 +328,8 @@ export default async function DashboardPage() {
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Erreurs</p>
-                <p className="text-xl font-bold text-slate-900">{apiErrors}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Erreurs</p>
+                <p className="text-xl font-bold text-white">{apiErrors}</p>
                 <div className="mt-2 w-full h-4">
                   <svg viewBox="0 0 100 20" className="w-full h-full stroke-red-500" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M0 10 Q 15 15, 30 5 T 60 15 T 100 10"/>
@@ -340,25 +340,25 @@ export default async function DashboardPage() {
           </div>
 
           {/* Webhooks Widget */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Webhooks <span className="text-xs text-slate-400 font-medium ml-1">(Aujourd'hui)</span></h3>
-              <div className="text-slate-400">
+              <h3 className="text-lg font-bold text-white tracking-tight">Webhooks <span className="text-xs text-slate-500 font-medium ml-1">(Aujourd'hui)</span></h3>
+              <div className="text-slate-500">
                 <span className="material-symbols-outlined text-[18px]">webhook</span>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Événements</p>
-                <p className="text-xl font-bold text-slate-900">{webhooksTotal}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Événements</p>
+                <p className="text-xl font-bold text-white">{webhooksTotal}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Livrés</p>
-                <p className="text-xl font-bold text-green-600">{webhooksSuccess}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Livrés</p>
+                <p className="text-xl font-bold text-green-400">{webhooksSuccess}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Échoués</p>
-                <p className="text-xl font-bold text-red-500">{webhooksFailed}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Échoués</p>
+                <p className="text-xl font-bold text-red-400">{webhooksFailed}</p>
               </div>
             </div>
           </div>

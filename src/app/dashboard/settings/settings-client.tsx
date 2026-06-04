@@ -24,30 +24,30 @@ export function SettingsClient({ user, merchant, settings, members }: { user: an
     <div className="max-w-[1080px] mx-auto w-full space-y-6 pb-12">
       {/* Header */}
       <div className="flex items-center gap-4 mb-2">
-        <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
           <span className="material-symbols-outlined text-2xl text-slate-400">settings</span>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Paramètres</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Gérez les préférences de votre compte et de votre entreprise.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Paramètres</h1>
+          <p className="text-slate-400 text-sm mt-0.5">Gérez les préférences de votre compte et de votre entreprise.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Settings Navigation Sidebar */}
         <div className="md:col-span-1">
-          <nav className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden py-2">
+          <nav className="bg-white/5 rounded-3xl border border-white/10 shadow-sm overflow-hidden py-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}
                 className={`w-full text-left px-4 py-3.5 flex items-center gap-3 transition-all duration-200 border-l-[3px] ${
                   activeTab === tab.id 
-                    ? 'bg-slate-50 border-l-orange-500 text-slate-900' 
-                    : 'border-l-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-white/5 border-l-orange-500 text-white' 
+                    : 'border-l-transparent text-slate-400 hover:bg-white/5 hover:text-white'
                 }`}
               >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === tab.id ? 'text-orange-500' : 'text-slate-400'}`}>
+                <span className={`material-symbols-outlined text-[20px] ${activeTab === tab.id ? 'text-orange-500' : 'text-slate-500'}`}>
                   {tab.icon}
                 </span>
                 <div>

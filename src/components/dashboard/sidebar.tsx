@@ -48,7 +48,7 @@ export function DesktopSidebar() {
   const pathname = usePathname();
   
   return (
-    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-[#0F1626] text-slate-300 font-body-base text-body-base border-r border-slate-900/50 shadow-xl">
+    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-[#0F1626] text-slate-300 font-body-base text-body-base border-r border-white/10 shadow-xl">
       <SidebarContent pathname={pathname} onClose={() => {}} />
     </aside>
   );
