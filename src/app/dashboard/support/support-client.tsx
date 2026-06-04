@@ -38,8 +38,8 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Contact Form */}
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-surface-card rounded-2xl border border-border-subtle p-6 shadow-sm">
-          <h2 className="font-headline-md text-text-primary mb-6">Envoyer un message</h2>
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 shadow-sm">
+          <h2 className="font-headline-md text-white mb-6">Envoyer un message</h2>
           
           {success && (
             <div className="mb-6 p-4 rounded-xl bg-status-success/10 border border-status-success/20 flex items-start gap-3">
@@ -54,12 +54,12 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-1.5">
-                <label className="text-body-sm font-semibold text-text-primary">Catégorie</label>
+                <label className="text-body-sm font-semibold text-white">Catégorie</label>
                 <select 
                   required
                   value={formData.category}
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full bg-surface-container-low border border-border-subtle rounded-xl px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-primary/20 focus:border-primary text-text-primary"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-white"
                 >
                   <option value="">Sélectionner une catégorie</option>
                   <option value="technical">Problème technique / API</option>
@@ -70,36 +70,36 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-body-sm font-semibold text-text-primary">Sujet</label>
+                <label className="text-body-sm font-semibold text-white">Sujet</label>
                 <input 
                   required
                   type="text"
                   placeholder="Ex: Erreur lors de l'intégration API"
                   value={formData.subject}
                   onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full bg-surface-container-low border border-border-subtle rounded-xl px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-primary/20 focus:border-primary text-text-primary"
+                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-body-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-white"
                 />
               </div>
             </div>
             
             <div className="space-y-1.5">
-              <label className="text-body-sm font-semibold text-text-primary">Votre message</label>
+              <label className="text-body-sm font-semibold text-white">Votre message</label>
               <textarea 
                 required
                 rows={6}
                 placeholder="Décrivez votre problème en détail..."
                 value={formData.message}
                 onChange={e => setFormData({ ...formData, message: e.target.value })}
-                className="w-full bg-surface-container-low border border-border-subtle rounded-xl px-4 py-3 text-body-sm focus:ring-2 focus:ring-primary/20 focus:border-primary text-text-primary resize-y"
+                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-body-sm focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-white resize-y"
               />
-              <p className="text-[12px] text-text-secondary mt-1">Veuillez ne pas inclure de mots de passe ou d'informations bancaires sensibles dans ce formulaire.</p>
+              <p className="text-[12px] text-slate-400 mt-1">Veuillez ne pas inclure de mots de passe ou d'informations bancaires sensibles dans ce formulaire.</p>
             </div>
 
             <div className="flex justify-end pt-2">
               <button 
                 type="submit"
                 disabled={loading}
-                className="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-sm hover:shadow-md disabled:opacity-50 flex items-center gap-2"
+                className="bg-orange-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-sm hover:shadow-md disabled:opacity-50 flex items-center gap-2"
               >
                 {loading ? (
                   <>
@@ -120,51 +120,51 @@ export function SupportClient({ merchant, user }: { merchant: any, user: any }) 
 
       {/* Contact Info & FAQ Sidebar */}
       <div className="space-y-6">
-        <div className="bg-surface-card rounded-2xl border border-border-subtle p-6 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -z-10"></div>
-          <h3 className="font-headline-sm text-text-primary mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">contact_support</span>
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-bl-full -z-10"></div>
+          <h3 className="font-headline-sm text-white mb-4 flex items-center gap-2">
+            <span className="material-symbols-outlined text-orange-400">contact_support</span>
             Contact direct
           </h3>
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[18px] text-text-secondary">mail</span>
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[18px] text-slate-400">mail</span>
               </div>
               <div>
-                <p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-0.5">Email Support</p>
-                <a href="mailto:support@kobara.app" className="text-sm font-semibold text-primary hover:underline">support@kobara.app</a>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Email Support</p>
+                <a href="mailto:support@kobara.app" className="text-sm font-semibold text-orange-400 hover:underline">support@kobara.app</a>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[18px] text-text-secondary">phone_in_talk</span>
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[18px] text-slate-400">phone_in_talk</span>
               </div>
               <div>
-                <p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-0.5">Téléphone / WhatsApp</p>
-                <a href="tel:+50940035664" className="text-sm font-semibold text-text-primary hover:text-primary transition-colors">+509 4003 5664</a>
-                <p className="text-xs text-text-secondary mt-0.5">Lun-Ven, 9h-17h</p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Téléphone / WhatsApp</p>
+                <a href="tel:+50940035664" className="text-sm font-semibold text-white hover:text-orange-400 transition-colors">+509 4003 5664</a>
+                <p className="text-xs text-slate-400 mt-0.5">Lun-Ven, 9h-17h</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-surface-card rounded-2xl border border-border-subtle p-6 shadow-sm">
-          <h3 className="font-headline-sm text-text-primary mb-4">Liens utiles</h3>
+        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 shadow-sm">
+          <h3 className="font-headline-sm text-white mb-4">Liens utiles</h3>
           <ul className="space-y-2">
             <li>
-              <a href="/developers" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container-lowest text-sm text-text-primary hover:text-primary transition-colors group">
+              <a href="/developers" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-black/20est text-sm text-white hover:text-orange-400 transition-colors group">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary">menu_book</span>
+                  <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-orange-400">menu_book</span>
                   Documentation API
                 </div>
                 <span className="material-symbols-outlined text-[16px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">arrow_forward</span>
               </a>
             </li>
             <li>
-              <a href="/settings" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-surface-container-lowest text-sm text-text-primary hover:text-primary transition-colors group">
+              <a href="/settings" className="flex items-center justify-between p-2.5 rounded-xl hover:bg-black/20est text-sm text-white hover:text-orange-400 transition-colors group">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px] text-text-secondary group-hover:text-primary">settings</span>
+                  <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-orange-400">settings</span>
                   Paramètres du compte
                 </div>
                 <span className="material-symbols-outlined text-[16px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">arrow_forward</span>

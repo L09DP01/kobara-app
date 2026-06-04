@@ -212,8 +212,8 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
               className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none"
             >
               <div className="hidden sm:block text-right">
-                <p className="text-sm font-bold text-slate-900 leading-tight">{merchant?.business_name || 'Business'}</p>
-                <p className="text-[11px] font-medium text-slate-500 leading-tight">Marchand</p>
+                <p className="text-sm font-bold text-white leading-tight">{merchant?.business_name || 'Business'}</p>
+                <p className="text-[11px] font-medium text-slate-400 leading-tight">Marchand</p>
               </div>
               <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-700 font-bold">
                 {merchant?.logo_url ? (
