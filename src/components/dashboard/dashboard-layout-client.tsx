@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DesktopSidebar, MobileSidebar } from "@/components/dashboard/sidebar";
 import TopNav from "@/components/dashboard/top-nav";
 import { KycRequiredBanner } from "@/components/dashboard/kyc-banner";
@@ -20,6 +20,16 @@ export default function DashboardLayoutClient({
   initialNotifications?: any[];
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Apply dark theme to body to prevent white backgrounds from parent paddings
+  useEffect(() => {
+    if (!isGuest) {
+      document.body.style.backgroundColor = '#0F1626';
+    }
+    return () => {
+      document.body.style.backgroundColor = '';
+    };
+  }, [isGuest]);
 
   // Guest view: no sidebar, no top-nav toggle — just the content
   if (isGuest) {
