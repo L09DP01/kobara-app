@@ -112,11 +112,11 @@ export function WithdrawalsClient({
 
   const getStatusConfig = (status: string) => {
     switch(status) {
-      case 'completed': return { label: 'Complété', bg: 'bg-status-success/10', text: 'text-status-success', dot: 'bg-status-success', border: 'border-l-status-success' };
-      case 'pending': return { label: 'En attente', bg: 'bg-status-warning/10', text: 'text-status-warning', dot: 'bg-status-warning', border: 'border-l-status-warning' };
-      case 'processing': return { label: 'En traitement', bg: 'bg-primary/10', text: 'text-primary', dot: 'bg-primary', border: 'border-l-primary' };
-      case 'failed': return { label: 'Échoué', bg: 'bg-status-error/10', text: 'text-status-error', dot: 'bg-status-error', border: 'border-l-status-error' };
-      default: return { label: status, bg: 'bg-surface-container', text: 'text-text-secondary', dot: 'bg-text-secondary', border: 'border-l-border-subtle' };
+      case 'completed': return { label: 'Complété', bg: 'bg-green-500/10', text: 'text-green-400', dot: 'bg-green-500', border: 'border-l-green-500' };
+      case 'pending': return { label: 'En attente', bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500', border: 'border-l-amber-500' };
+      case 'processing': return { label: 'En traitement', bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500', border: 'border-l-blue-500' };
+      case 'failed': return { label: 'Échoué', bg: 'bg-red-500/10', text: 'text-red-400', dot: 'bg-red-500', border: 'border-l-red-500' };
+      default: return { label: status, bg: 'bg-white/5', text: 'text-slate-400', dot: 'bg-slate-500', border: 'border-l-white/10' };
     }
   };
 

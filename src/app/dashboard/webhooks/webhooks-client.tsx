@@ -54,12 +54,12 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Webhooks</h1>
-          <p className="text-text-secondary text-sm mt-1">Configurez des endpoints pour recevoir des événements en temps réel.</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Webhooks</h1>
+          <p className="text-slate-400 text-sm mt-1">Configurez des endpoints pour recevoir des événements en temps réel.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
+          className="bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-all shadow-sm flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
           Ajouter un endpoint
@@ -67,13 +67,13 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       </div>
 
       {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-start gap-3">
-        <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-          <span className="material-symbols-outlined text-[20px] text-blue-600">info</span>
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-start gap-3">
+        <div className="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+          <span className="material-symbols-outlined text-[20px] text-blue-400">info</span>
         </div>
         <div>
-          <p className="text-sm font-medium text-blue-900">Comment fonctionnent les webhooks ?</p>
-          <p className="text-xs text-blue-700 mt-0.5">Kobara envoie des requêtes HTTP POST à vos endpoints lorsqu'un événement se produit (paiement réussi, échoué, etc.). Chaque requête est signée avec votre clé secrète.</p>
+          <p className="text-sm font-medium text-blue-400">Comment fonctionnent les webhooks ?</p>
+          <p className="text-xs text-blue-500 mt-0.5">Kobara envoie des requêtes HTTP POST à vos endpoints lorsqu'un événement se produit (paiement réussi, échoué, etc.). Chaque requête est signée avec votre clé secrète.</p>
         </div>
       </div>
 
@@ -81,35 +81,35 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {endpoints.length > 0 ? (
         <div className="space-y-4">
           {endpoints.map(endpoint => (
-            <div key={endpoint.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+            <div key={endpoint.id} className="bg-white/5 rounded-3xl border border-white/10 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
               <div className="p-5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-[24px] text-slate-400">language</span>
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10">
+                      <span className="material-symbols-outlined text-[24px] text-slate-500">language</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="font-mono text-sm font-bold text-slate-900 truncate">{endpoint.url}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">Ajouté le {new Date(endpoint.created_at).toLocaleDateString('fr-FR')}</p>
+                      <p className="font-mono text-sm font-bold text-white truncate">{endpoint.url}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">Ajouté le {new Date(endpoint.created_at).toLocaleDateString('fr-FR')}</p>
                     </div>
                   </div>
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold flex-shrink-0 ${
-                    endpoint.status === 'active' ? 'bg-status-success/10 text-status-success' : 'bg-status-warning/10 text-status-warning'
+                    endpoint.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'
                   }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${endpoint.status === 'active' ? 'bg-status-success animate-pulse' : 'bg-status-warning'}`}></span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${endpoint.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`}></span>
                     {endpoint.status === 'active' ? 'Actif' : 'Inactif'}
                   </span>
                 </div>
 
                 {/* Secret */}
-                <div className="bg-slate-50 rounded-xl p-3 flex items-center justify-between mb-4 border border-slate-100">
+                <div className="bg-transparent rounded-xl p-3 flex items-center justify-between mb-4 border border-white/10">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="material-symbols-outlined text-[16px] text-slate-400">key</span>
-                    <code className="text-xs font-mono text-slate-500 truncate">{endpoint.secret?.substring(0, 20)}••••••</code>
+                    <span className="material-symbols-outlined text-[16px] text-slate-500">key</span>
+                    <code className="text-xs font-mono text-slate-400 truncate">{endpoint.secret?.substring(0, 20)}••••••</code>
                   </div>
                   <button 
                     onClick={() => navigator.clipboard.writeText(endpoint.secret || '')}
-                    className="text-slate-400 hover:text-slate-900 transition-colors flex-shrink-0 p-1"
+                    className="text-slate-400 hover:text-white transition-colors flex-shrink-0 p-1"
                     title="Copier le secret"
                   >
                     <span className="material-symbols-outlined text-[16px]">content_copy</span>
@@ -120,10 +120,10 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {webhookEvents.map(event => (
                     <span key={event} className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border ${
-                      event.includes('succeeded') ? 'bg-green-50 text-green-700 border-green-100' :
-                      event.includes('failed') ? 'bg-red-50 text-red-700 border-red-100' :
-                      event.includes('pending') ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                      'bg-blue-50 text-blue-700 border-blue-100'
+                      event.includes('succeeded') ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                      event.includes('failed') ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                      event.includes('pending') ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                      'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
                       {event}
                     </span>
@@ -132,10 +132,10 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
               </div>
 
               {/* Card Footer */}
-              <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+              <div className="px-5 py-3 border-t border-white/10 bg-transparent flex justify-end gap-2">
                 <button 
                   onClick={() => setConfirmDeleteId(endpoint.id)}
-                  className="px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-[16px]">delete</span>
                   Supprimer
@@ -145,15 +145,15 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-100 p-14 text-center shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-slate-50 mx-auto flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-4xl text-slate-300">webhook</span>
+        <div className="bg-white/5 rounded-3xl border border-white/10 p-14 text-center shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-white/5 mx-auto flex items-center justify-center mb-4 border border-white/10">
+            <span className="material-symbols-outlined text-4xl text-slate-500">webhook</span>
           </div>
-          <p className="text-sm text-slate-900 font-bold">Aucun webhook configuré</p>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Configurez votre premier webhook pour recevoir des notifications en temps réel</p>
+          <p className="text-sm text-white font-bold">Aucun webhook configuré</p>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Configurez votre premier webhook pour recevoir des notifications en temps réel</p>
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="mt-5 bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-sm inline-flex items-center gap-2"
+            className="mt-5 bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-all shadow-sm inline-flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Ajouter un endpoint
@@ -164,46 +164,46 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {/* Delivery Logs */}
       {events.length > 0 && (
         <div className="mt-12 space-y-4">
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight mb-6">Logs de livraison</h2>
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+          <h2 className="text-xl font-bold text-white tracking-tight mb-6">Logs de livraison</h2>
+          <div className="bg-white/5 rounded-3xl border border-white/10 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-transparent border-b border-white/10 text-xs font-bold text-slate-500 uppercase tracking-wider">
                     <th className="px-5 py-4">Événement</th>
                     <th className="px-5 py-4">Statut HTTP</th>
                     <th className="px-5 py-4">Date</th>
                     <th className="px-5 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm">
+                <tbody className="divide-y divide-white/10 text-sm">
                   {events.map((event) => (
-                    <tr key={event.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="px-5 py-4 font-mono text-xs text-slate-900">
-                        <span className="bg-white border border-slate-200 shadow-sm px-2 py-1 rounded-md">{event.event_type}</span>
+                    <tr key={event.id} className="hover:bg-white/5 transition-colors group">
+                      <td className="px-5 py-4 font-mono text-xs text-white">
+                        <span className="bg-white/5 border border-white/10 shadow-sm px-2 py-1 rounded-md">{event.event_type}</span>
                       </td>
                       <td className="px-5 py-4">
                         {event.delivery_status === 'pending' ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400">
                             En attente
                           </span>
                         ) : event.response_status && event.response_status >= 200 && event.response_status < 300 ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-status-success/10 text-status-success">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-green-500/10 text-green-400">
                             {event.response_status} OK
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-status-error/10 text-status-error" title={event.response_body}>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-red-500/10 text-red-400" title={event.response_body}>
                             {event.response_status || 'Erreur'} Échoué
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-4 text-slate-500 text-xs">
+                      <td className="px-5 py-4 text-slate-400 text-xs">
                         {new Date(event.created_at).toLocaleString('fr-FR')}
                       </td>
                       <td className="px-5 py-4 text-right">
                         <button 
                           onClick={() => handleResend(event.id)}
-                          className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 flex items-center gap-1 justify-end w-full"
+                          className="text-xs font-bold text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 flex items-center gap-1 justify-end w-full"
                         >
                           <span className="material-symbols-outlined text-[16px]">refresh</span>
                           Renvoyer
@@ -221,36 +221,36 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {/* Add Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-surface-card rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-            <div className="p-6 border-b border-border-subtle">
-              <h2 className="text-lg font-bold text-text-primary">Ajouter un endpoint</h2>
-              <p className="text-xs text-text-secondary mt-1">Kobara enverra des requêtes POST à cette URL</p>
+          <div className="bg-[#131b2f] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="p-6 border-b border-white/10">
+              <h2 className="text-lg font-bold text-white">Ajouter un endpoint</h2>
+              <p className="text-xs text-slate-400 mt-1">Kobara enverra des requêtes POST à cette URL</p>
             </div>
             <form onSubmit={handleAdd} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs text-text-secondary font-medium mb-1.5">URL de l'endpoint</label>
+                <label className="block text-xs text-slate-400 font-medium mb-1.5">URL de l'endpoint</label>
                 <input 
                   type="url" 
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://votre-site.com/api/webhooks"
-                  className="w-full px-4 py-3 bg-surface-container-low border border-border-subtle rounded-xl text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 bg-[#0F1626] border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
                   required
                 />
-                <p className="text-xs text-text-secondary/60 mt-1.5">L'URL doit être publiquement accessible et supporter les requêtes POST</p>
+                <p className="text-xs text-slate-500 mt-1.5">L'URL doit être publiquement accessible et supporter les requêtes POST</p>
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 text-text-secondary hover:bg-surface-container rounded-xl transition-colors text-sm font-medium"
+                  className="px-5 py-2.5 text-slate-400 hover:bg-white/5 rounded-xl transition-colors text-sm font-medium border border-transparent hover:border-white/10"
                 >
                   Annuler
                 </button>
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="px-5 py-2.5 bg-primary text-on-primary rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-sm font-semibold shadow-sm"
+                  className="px-5 py-2.5 bg-orange-500 text-white rounded-xl hover:opacity-90 disabled:opacity-50 transition-all text-sm font-semibold shadow-sm"
                 >
                   {loading ? 'Ajout...' : 'Ajouter'}
                 </button>
@@ -263,22 +263,22 @@ export function WebhooksClient({ endpoints, events = [] }: { endpoints: any[], e
       {/* Delete Confirmation Modal */}
       {confirmDeleteId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-surface-card rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <div className="w-12 h-12 rounded-2xl bg-status-error/10 mx-auto flex items-center justify-center mb-4">
-              <span className="material-symbols-outlined text-2xl text-status-error">delete_forever</span>
+          <div className="bg-[#131b2f] border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 mx-auto flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-2xl text-red-500">delete_forever</span>
             </div>
-            <h3 className="text-lg font-bold text-text-primary text-center mb-2">Supprimer ce webhook ?</h3>
-            <p className="text-sm text-text-secondary text-center mb-6">Cette action est irréversible. Vous ne recevrez plus de notifications sur cet endpoint.</p>
+            <h3 className="text-lg font-bold text-white text-center mb-2">Supprimer ce webhook ?</h3>
+            <p className="text-sm text-slate-400 text-center mb-6">Cette action est irréversible. Vous ne recevrez plus de notifications sur cet endpoint.</p>
             <div className="flex gap-3">
               <button 
                 onClick={() => setConfirmDeleteId(null)}
-                className="flex-1 px-4 py-2.5 border border-border-subtle text-text-secondary rounded-xl text-sm font-medium hover:bg-surface-container transition-colors"
+                className="flex-1 px-4 py-2.5 border border-white/10 text-slate-400 rounded-xl text-sm font-medium hover:bg-white/5 transition-colors"
               >
                 Annuler
               </button>
               <button 
                 onClick={() => handleDelete(confirmDeleteId)}
-                className="flex-1 px-4 py-2.5 bg-status-error text-white rounded-xl text-sm font-semibold hover:bg-status-error/90 transition-colors"
+                className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors"
               >
                 Supprimer
               </button>
