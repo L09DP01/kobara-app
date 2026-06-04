@@ -1,6 +1,6 @@
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import Link from "next/link";
-import RevenueChart from "./analytics/RevenueChart";
+import DashboardChartWrapper from "./analytics/DashboardChartWrapper";
 
 export default async function DashboardPage() {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
@@ -47,36 +47,31 @@ export default async function DashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthlyRevenue = succeededPayments?.filter(p => new Date(p.created_at) >= monthStart).reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
 
-  // Prepare Chart Data (Group last 30 days)
-  const chartDataMap = new Map();
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Webhooks data
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
 
-  for (let i = 0; i <= 30; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() - (30 - i));
-    const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-    chartDataMap.set(dateStr, 0);
-  }
+  const { data: webhookEvents } = await supabase
+    .from('webhook_events')
+    .select('delivery_status')
+    .eq('merchant_id', merchant.id)
+    .gte('created_at', todayStart.toISOString());
 
-  if (succeededPayments) {
-    succeededPayments.forEach(p => {
-      if (!p.created_at) return;
-      const d = new Date(p.created_at);
-      if (d >= thirtyDaysAgo) {
-        const dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-        if (chartDataMap.has(dateStr)) {
-          chartDataMap.set(dateStr, chartDataMap.get(dateStr) + Number(p.net_amount || p.amount));
-        }
-      }
-    });
-  }
+  const webhooksTotal = webhookEvents?.length || 0;
+  const webhooksSuccess = webhookEvents?.filter(w => w.delivery_status === 'success' || w.delivery_status === 'delivered').length || 0;
+  const webhooksFailed = webhooksTotal - webhooksSuccess;
 
-  const chartData = Array.from(chartDataMap.entries()).map(([date, revenue]) => ({ date, revenue }));
+  // API Activity data (using audit_logs as proxy)
+  const { data: apiLogs } = await supabase
+    .from('audit_logs')
+    .select('metadata')
+    .eq('merchant_id', merchant.id)
+    .gte('created_at', todayStart.toISOString());
 
-  // Greeting based on time
-  const hour = now.getHours();
-  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const apiTotal = apiLogs?.length || 0;
+  const apiSuccess = apiLogs?.filter(log => !log.metadata?.error).length || 0;
+  const apiErrors = apiTotal - apiSuccess;
+  const apiSuccessRate = apiTotal > 0 ? ((apiSuccess / apiTotal) * 100).toFixed(1) : "0";
 
   return (
     <>
@@ -84,7 +79,7 @@ export default async function DashboardPage() {
       <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            {greeting}, {merchant.business_name} <span className="text-2xl">👋</span>
+            {merchant.business_name}
           </h1>
           <p className="text-slate-500 text-sm mt-1">
             Voici un aperçu de votre activité aujourd'hui.
@@ -191,19 +186,7 @@ export default async function DashboardPage() {
         {/* Left Column */}
         <div className="xl:col-span-2 flex flex-col gap-6">
           {/* Chart Section */}
-          <div className="hidden md:block bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Flux Financier</h3>
-              <div className="flex items-center bg-slate-100/50 border border-slate-200 rounded-lg p-1">
-                <button className="px-4 py-1.5 text-xs font-semibold rounded-md text-slate-500 hover:text-slate-900 transition-colors">7j</button>
-                <button className="px-4 py-1.5 text-xs font-semibold rounded-md bg-orange-500 text-white shadow-sm">30j</button>
-                <button className="px-4 py-1.5 text-xs font-semibold rounded-md text-slate-500 hover:text-slate-900 transition-colors">90j</button>
-              </div>
-            </div>
-            <div className="h-[300px] w-full">
-              <RevenueChart data={chartData} />
-            </div>
-          </div>
+          <DashboardChartWrapper payments={succeededPayments || []} />
 
           {/* Recent Transactions Table */}
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
@@ -300,7 +283,7 @@ export default async function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Retrait minimum</p>
-                  <p className="text-sm font-bold text-slate-900">50 <span className="text-[10px] text-slate-400">HTG</span></p>
+                  <p className="text-sm font-bold text-slate-900">100 <span className="text-[10px] text-slate-400">HTG</span></p>
                 </div>
               </div>
               <div className="w-24 h-24 relative opacity-90 -mr-2">
@@ -333,11 +316,11 @@ export default async function DashboardPage() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Requêtes</p>
-                <p className="text-xl font-bold text-slate-900">124</p>
+                <p className="text-xl font-bold text-slate-900">{apiTotal}</p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Taux de succès</p>
-                <p className="text-xl font-bold text-slate-900">98.6<span className="text-[10px] text-slate-400">%</span></p>
+                <p className="text-xl font-bold text-slate-900">{apiSuccessRate}<span className="text-[10px] text-slate-400">%</span></p>
                 <div className="mt-2 w-full h-4">
                   <svg viewBox="0 0 100 20" className="w-full h-full stroke-green-500" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M0 15 Q 15 5, 30 15 T 60 10 T 100 5"/>
@@ -346,7 +329,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Erreurs</p>
-                <p className="text-xl font-bold text-slate-900">2</p>
+                <p className="text-xl font-bold text-slate-900">{apiErrors}</p>
                 <div className="mt-2 w-full h-4">
                   <svg viewBox="0 0 100 20" className="w-full h-full stroke-red-500" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M0 10 Q 15 15, 30 5 T 60 15 T 100 10"/>
@@ -367,15 +350,15 @@ export default async function DashboardPage() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Événements</p>
-                <p className="text-xl font-bold text-slate-900">32</p>
+                <p className="text-xl font-bold text-slate-900">{webhooksTotal}</p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Livrés</p>
-                <p className="text-xl font-bold text-green-600">30</p>
+                <p className="text-xl font-bold text-green-600">{webhooksSuccess}</p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Échoués</p>
-                <p className="text-xl font-bold text-red-500">2</p>
+                <p className="text-xl font-bold text-red-500">{webhooksFailed}</p>
               </div>
             </div>
           </div>
