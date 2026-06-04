@@ -48,7 +48,7 @@ export function DesktopSidebar() {
   const pathname = usePathname();
   
   return (
-    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base border-r border-border-subtle shadow-sm">
+    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-slate-950 text-slate-300 font-body-base text-body-base border-r border-slate-900 shadow-xl">
       <SidebarContent pathname={pathname} onClose={() => {}} />
     </aside>
   );
@@ -85,7 +85,7 @@ export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: (
       {/* Sidebar Panel */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-surface-container-lowest text-text-primary font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out overflow-hidden h-full",
+          "fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-slate-950 text-slate-300 font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out overflow-hidden h-full",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -110,7 +110,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
         </a>
         <button
           onClick={onClose}
-          className="lg:hidden text-text-secondary hover:text-primary transition-colors p-1"
+          className="lg:hidden text-slate-400 hover:text-white transition-colors p-1"
         >
           <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
@@ -121,7 +121,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
         {SIDEBAR_SECTIONS.map((section, idx) => (
           <div key={idx}>
             {section.title !== "Général" && (
-              <h3 className="px-3 mb-2 text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+              <h3 className="px-3 mb-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 {section.title}
               </h3>
             )}
@@ -137,15 +137,15 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
                     href={link.href}
                     onClick={onClose}
                     className={clsx(
-                      "flex items-center gap-3 px-3 py-2.5 group rounded-xl transition-all duration-200",
+                      "flex items-center gap-3 px-3 py-2.5 group rounded-lg transition-all duration-200 mx-2",
                       isActive
-                        ? "bg-primary/10 text-primary font-semibold shadow-sm"
-                        : "text-text-secondary hover:bg-surface-container-low hover:text-text-primary"
+                        ? "bg-orange-500/10 text-orange-500 font-semibold"
+                        : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
                     )}
                   >
                     <span className={clsx(
                       "material-symbols-outlined text-[20px] transition-colors duration-200",
-                      isActive ? "text-primary" : "text-text-secondary group-hover:text-text-primary"
+                      isActive ? "text-orange-500" : "text-slate-500 group-hover:text-slate-300"
                     )}>
                       {link.icon}
                     </span>
@@ -159,19 +159,19 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
       </nav>
 
       {/* Footer / User Area */}
-      <div className="p-4 border-t border-border-subtle mt-auto bg-surface-container-lowest/50 shrink-0">
+      <div className="p-4 border-t border-slate-800 mt-auto bg-slate-950 shrink-0">
         <div className="space-y-1">
           <Link 
             href="/support" 
             onClick={onClose} 
-            className="flex items-center gap-3 px-3 py-2.5 text-text-secondary hover:bg-surface-container-low hover:text-text-primary transition-all duration-200 rounded-xl text-sm font-medium"
+            className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all duration-200 rounded-lg text-sm font-medium mx-2"
           >
             <span className="material-symbols-outlined text-[20px]">support_agent</span>
             <span>Support client</span>
           </Link>
           <button 
             onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL || "https://kobara.app" })}
-            className="flex items-center w-full gap-3 px-3 py-2.5 text-status-error/80 hover:bg-status-error/10 hover:text-status-error transition-all duration-200 rounded-xl text-sm font-medium cursor-pointer"
+            className="flex items-center w-full gap-3 px-3 py-2.5 text-red-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 rounded-lg text-sm font-medium cursor-pointer mx-2"
           >
             <span className="material-symbols-outlined text-[20px]">logout</span>
             <span>Déconnexion</span>

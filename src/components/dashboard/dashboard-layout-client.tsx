@@ -58,7 +58,7 @@ export default function DashboardLayoutClient({
   }
 
   return (
-    <div className="relative bg-background-main font-body-base text-body-base text-on-surface antialiased min-h-[100dvh]">
+    <div className="relative bg-slate-50 font-body-base text-body-base text-slate-900 antialiased min-h-[100dvh]">
 
       <DesktopSidebar />
       <MobileSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
@@ -68,7 +68,7 @@ export default function DashboardLayoutClient({
         {merchant && merchant.kyc_status !== 'approved' && (
           <KycRequiredBanner />
         )}
-        <main className="flex-1 p-container-padding flex flex-col gap-8">
+        <main className="flex-1 p-6 lg:p-8 flex flex-col gap-8 max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>

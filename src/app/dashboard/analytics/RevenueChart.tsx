@@ -22,11 +22,12 @@ interface RevenueChartProps {
 export default function RevenueChart({ data }: RevenueChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="flex-1 bg-surface-container-lowest border border-dashed border-border-subtle rounded-lg flex items-center justify-center">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-text-secondary text-4xl mb-2">bar_chart</span>
-          <p className="text-text-secondary font-medium">Aucune donnée disponible pour cette période</p>
+      <div className="flex-1 bg-slate-50 border border-slate-200 rounded-3xl flex flex-col items-center justify-center min-h-[300px]">
+        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-slate-400 text-3xl">bar_chart</span>
         </div>
+        <p className="text-slate-600 font-bold">Aucune donnée disponible</p>
+        <p className="text-slate-400 text-sm mt-1">Les données de cette période n'ont pas encore été générées.</p>
       </div>
     );
   }
@@ -45,8 +46,8 @@ export default function RevenueChart({ data }: RevenueChartProps) {
         >
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+              <stop offset="5%" stopColor="#F97316" stopOpacity={0.4} />
+              <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -70,7 +71,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
           <Area 
             type="monotone" 
             dataKey="revenue" 
-            stroke="#EF4444" 
+            stroke="#F97316" 
             strokeWidth={3}
             fillOpacity={1} 
             fill="url(#colorRevenue)" 
