@@ -69,7 +69,7 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
   };
 
   return (
-    <header className="bg-surface/80 backdrop-blur-md dark:bg-primary/80 text-primary dark:text-on-primary font-headline-md text-headline-md docked full-width top-0 sticky border-b border-border-subtle dark:border-outline-variant flat flex justify-between items-center h-20 px-container-padding z-30 transition-all duration-200 ease-in-out">
+    <header className="bg-white text-slate-900 font-body-base text-body-base top-0 sticky border-b border-slate-200 flex justify-between items-center h-20 px-8 z-30 transition-all duration-200 ease-in-out">
       {/* Left: Greeting / Search */}
       <div className="flex items-center gap-4 md:gap-6">
         {/* Mobile menu toggle */}
@@ -92,19 +92,24 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
 
         {/* Environment Switcher */}
         {!isLoading && (
-          <div className="hidden sm:flex items-center gap-3 bg-surface-container-low px-3 py-1.5 rounded-full border border-border-subtle shadow-sm ml-2">
-            <span className={`text-xs font-bold ${currentEnvironment === 'test' ? 'text-amber-600' : 'text-text-secondary'}`}>Test</span>
+          <div className="hidden sm:flex items-center gap-2 bg-slate-50 px-1 py-1 rounded-full border border-slate-200 ml-4">
             <button 
-              onClick={() => setEnvironment(currentEnvironment === 'test' ? 'live' : 'test')}
+              onClick={() => currentEnvironment === 'live' && setEnvironment('test')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition-colors ${currentEnvironment === 'test' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${currentEnvironment === 'test' ? 'bg-orange-500' : 'bg-transparent'}`}></span>
+              Test
+            </button>
+            <button 
+              onClick={() => currentEnvironment === 'test' && canUseLive && setEnvironment('live')}
               disabled={!canUseLive}
               title={!canUseLive ? "Vérifiez votre compte pour activer le mode Live" : ""}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${!canUseLive ? 'opacity-50 cursor-not-allowed bg-gray-300' : (currentEnvironment === 'live' ? 'bg-status-success' : 'bg-amber-500')}`}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${currentEnvironment === 'live' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'} ${!canUseLive ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${currentEnvironment === 'live' ? 'translate-x-4' : 'translate-x-1'}`} />
+              Live
             </button>
-            <span className={`text-xs font-bold ${currentEnvironment === 'live' ? 'text-status-success' : 'text-text-secondary'}`}>Live</span>
             {!canUseLive && currentEnvironment === 'test' && (
-              <Link href="/kyc" className="ml-1 text-[10px] bg-status-error/10 text-status-error px-2 py-0.5 rounded-full font-bold hover:bg-status-error/20 transition-colors">
+              <Link href="/kyc" className="ml-1 text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold hover:bg-red-100 transition-colors">
                 KYC Requis
               </Link>
             )}
@@ -121,11 +126,11 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
           <div ref={notifRef} className="relative">
             <button 
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="p-2 text-text-secondary hover:bg-surface-container rounded-lg transition-colors hover:text-primary relative"
+              className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors hover:text-slate-900 relative"
             >
-              <span className="material-symbols-outlined">notifications</span>
+              <span className="material-symbols-outlined text-[24px]">notifications</span>
               {notifications.length > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-status-error rounded-full border-2 border-surface animate-pulse"></span>
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white animate-pulse"></span>
               )}
             </button>
             
@@ -197,23 +202,26 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
             )}
           </div>
 
-          <Link href="/settings" className="p-2 text-text-secondary hover:bg-surface-container rounded-lg transition-colors hover:text-primary hidden sm:block">
-            <span className="material-symbols-outlined">settings_suggest</span>
+          <Link href="/settings" className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors hover:text-slate-900 hidden sm:block">
+            <span className="material-symbols-outlined text-[24px]">settings</span>
           </Link>
           
-          {/* Profile Dropdown */}
           <div ref={profileRef} className="relative ml-2">
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-10 h-10 rounded-full border border-border-subtle overflow-hidden hover:opacity-80 transition-opacity focus:ring-2 focus:ring-primary focus:outline-none"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none"
             >
-              {merchant?.logo_url ? (
-                <img alt="User profile" className="w-full h-full object-cover" src={merchant.logo_url} />
-              ) : (
-                <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                  {merchant?.business_name ? merchant.business_name.charAt(0) : 'U'}
-                </div>
-              )}
+              <div className="hidden sm:block text-right">
+                <p className="text-sm font-bold text-slate-900 leading-tight">{merchant?.business_name || 'Business'}</p>
+                <p className="text-[11px] font-medium text-slate-500 leading-tight">Marchand</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-700 font-bold">
+                {merchant?.logo_url ? (
+                  <img alt="User profile" className="w-full h-full object-cover" src={merchant.logo_url} />
+                ) : (
+                  merchant?.business_name ? merchant.business_name.charAt(0).toUpperCase() : 'U'
+                )}
+              </div>
             </button>
 
             {isProfileOpen && (

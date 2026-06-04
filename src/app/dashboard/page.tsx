@@ -80,80 +80,107 @@ export default async function DashboardPage() {
 
   return (
     <>
-      {/* Welcome Banner */}
-      <section className="relative rounded-3xl bg-slate-950 p-8 mb-6 overflow-hidden border border-slate-900 shadow-md">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-orange-500/20 rounded-full blur-[100px]"></div>
-          <div className="absolute -bottom-24 left-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px]"></div>
-        </div>
-        <div className="relative z-10">
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-2">{greeting}, {merchant.business_name}</h1>
-          <p className="text-slate-400 text-sm font-medium flex items-center gap-4">
-            {now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            {succeededPayments && succeededPayments.length > 0 && (
-              <span className="inline-flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-1 rounded-full text-slate-300 text-xs shadow-sm backdrop-blur-sm">
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                {succeededPayments.length} paiement(s) réussi(s)
-              </span>
-            )}
+      {/* Welcome Section */}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            {greeting}, {merchant.business_name} <span className="text-2xl">👋</span>
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Voici un aperçu de votre activité aujourd'hui.
           </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="hidden sm:flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-colors">
+            <span className="material-symbols-outlined text-[18px] text-slate-500">calendar_today</span>
+            {now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+            <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
+          </button>
+          <Link href="/payment-links" className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-400 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/20 transition-all">
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            Créer un lien de paiement
+          </Link>
         </div>
       </section>
 
       {/* Overview Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
         {/* Card 1 - Total Encaissé */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 p-6 flex flex-col gap-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-lg transition-all duration-300">
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-500 font-medium">Total Encaissé</span>
-            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">
-              <span className="material-symbols-outlined text-[20px]">account_balance</span>
+            <span className="text-sm text-slate-600 font-bold">Total Encaissé</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <span className="material-symbols-outlined text-[22px]">payments</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{totalEncaisse.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-500">HTG</span></h3>
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{totalEncaisse.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-400">HTG</span></h3>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">
+              <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 12.4%
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
           </div>
         </div>
 
         {/* Card 2 - Solde Disponible */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 p-6 flex flex-col gap-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-lg transition-all duration-300">
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-500 font-medium">Solde Disponible</span>
-            <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
-              <span className="material-symbols-outlined text-[20px]">wallet</span>
+            <span className="text-sm text-slate-600 font-bold">Solde Disponible</span>
+            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+              <span className="material-symbols-outlined text-[22px]">credit_card</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-500">HTG</span></h3>
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-400">HTG</span></h3>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">
+              <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 8.7%
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
           </div>
         </div>
 
         {/* Card 3 - Taux de Succès */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 p-6 flex flex-col gap-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-lg transition-all duration-300">
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-500 font-medium">Taux de Succès</span>
-            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
+            <span className="text-sm text-slate-600 font-bold">Taux de Succès</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+              <span className="material-symbols-outlined text-[22px]">verified_user</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{successRate.toFixed(1)}<span className="text-sm font-medium text-slate-500">%</span></h3>
-            <div className="w-full bg-slate-100 rounded-full h-1.5 mt-3">
-              <div className="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style={{ width: `${successRate}%` }}></div>
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{successRate.toFixed(1)}<span className="text-sm font-medium text-slate-400">%</span></h3>
+            <div className="w-full bg-slate-100 rounded-full h-1 mt-3">
+              <div className="bg-blue-600 h-1 rounded-full transition-all duration-500" style={{ width: `${successRate}%` }}></div>
             </div>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">
+              <span className="material-symbols-outlined text-[14px]">arrow_upward</span> 2.1%
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
           </div>
         </div>
 
         {/* Card 4 - Revenu Mensuel */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 p-6 flex flex-col gap-4 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-lg transition-all duration-300">
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
-            <span className="text-sm text-slate-500 font-medium">Revenu Mensuel</span>
-            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-              <span className="material-symbols-outlined text-[20px]">monitoring</span>
+            <span className="text-sm text-slate-600 font-bold">Revenu Mensuel</span>
+            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+              <span className="material-symbols-outlined text-[22px]">monitoring</span>
             </div>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{monthlyRevenue.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-500">HTG</span></h3>
+            <h3 className="text-3xl font-bold text-slate-900 tracking-tight">{monthlyRevenue.toLocaleString('fr-FR')} <span className="text-sm font-medium text-slate-400">HTG</span></h3>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="inline-flex items-center gap-0.5 bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[11px] font-bold">
+              0%
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">vs mois dernier</span>
           </div>
         </div>
       </section>
@@ -164,7 +191,7 @@ export default async function DashboardPage() {
         {/* Left Column */}
         <div className="xl:col-span-2 flex flex-col gap-6">
           {/* Chart Section */}
-          <div className="hidden md:block bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div className="hidden md:block bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-slate-900 tracking-tight">Flux Financier</h3>
               <div className="flex items-center bg-slate-100/50 border border-slate-200 rounded-lg p-1">
@@ -179,7 +206,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Recent Transactions Table */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
             <div className="p-6 border-b border-slate-200 flex justify-between items-center">
               <h3 className="text-xl font-bold text-slate-900 tracking-tight">Transactions Récentes</h3>
               <Link href="/payments" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors flex items-center gap-1">
@@ -257,56 +284,100 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-6">
           
           {/* Withdrawals Widget */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Retraits Récents</h3>
-              <Link href="/withdrawals" className="p-2 hover:bg-slate-100 rounded-xl text-slate-500 hover:text-slate-900 transition-colors">
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Retraits Récents</h3>
+              <Link href="/withdrawals" className="p-1.5 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-colors">
                 <span className="material-symbols-outlined text-[18px]">open_in_new</span>
               </Link>
             </div>
-            <div className="space-y-3">
-              {recentWithdrawals && recentWithdrawals.length > 0 ? (
-                recentWithdrawals.map(w => (
-                  <div key={w.id} className="flex justify-between items-center p-3 hover:bg-slate-50 rounded-2xl transition-colors border border-transparent hover:border-slate-200 group">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                        w.status === 'completed' ? 'bg-green-50 text-green-600' :
-                        w.status === 'pending' ? 'bg-orange-50 text-orange-600' :
-                        'bg-red-50 text-red-600'
-                      }`}>
-                        <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
-                      </div>
-                      <div>
-                        <p className="text-sm text-slate-900 font-semibold">{w.wallet}</p>
-                        <p className="text-xs text-slate-500 font-medium">{new Date(w.created_at).toLocaleDateString('fr-FR')}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-slate-900">-{Number(w.amount).toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500 font-medium">HTG</span></p>
-                      <span className={`inline-block mt-1 text-[10px] px-2.5 py-0.5 rounded-full font-bold ${
-                        w.status === 'completed' ? 'bg-green-50 text-green-700 border border-green-200' :
-                        w.status === 'pending' ? 'bg-orange-50 text-orange-700 border border-orange-200' :
-                        'bg-red-50 text-red-700 border border-red-200'
-                      }`}>
-                        {w.status === 'completed' ? 'Traité' : w.status === 'pending' ? 'En attente' : 'Échoué'}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-10">
-                  <div className="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center mb-4">
-                    <span className="material-symbols-outlined text-3xl text-slate-400">account_balance_wallet</span>
-                  </div>
-                  <p className="text-sm text-slate-600 font-bold">Aucun retrait</p>
-                  <p className="text-xs text-slate-400 font-medium mt-1">Effectuez votre premier retrait</p>
+            
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Solde disponible</p>
+                  <p className="text-2xl font-bold text-slate-900 leading-none">{soldeDisponible.toLocaleString('fr-FR')} <span className="text-xs text-slate-400">HTG</span></p>
                 </div>
-              )}
+                <div>
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Retrait minimum</p>
+                  <p className="text-sm font-bold text-slate-900">50 <span className="text-[10px] text-slate-400">HTG</span></p>
+                </div>
+              </div>
+              <div className="w-24 h-24 relative opacity-90 -mr-2">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-md">
+                  <rect x="15" y="30" width="70" height="45" rx="8" fill="#F97316" fillOpacity="0.1"/>
+                  <rect x="20" y="35" width="60" height="40" rx="6" fill="#FFF"/>
+                  <path d="M70 45H80C82.2091 45 84 46.7909 84 49V59C84 61.2091 82.2091 63 80 63H70V45Z" fill="#F97316"/>
+                  <circle cx="77" cy="54" r="3" fill="#FFF"/>
+                  <circle cx="40" cy="55" r="10" fill="#F97316" fillOpacity="0.15"/>
+                  <text x="40" y="59" fontSize="12" fontWeight="bold" fill="#F97316" textAnchor="middle">K</text>
+                  <path d="M30 20C30 18.8954 30.8954 18 32 18H68C69.1046 18 70 18.8954 70 20V35H30V20Z" fill="#FB923C" fillOpacity="0.3"/>
+                </svg>
+              </div>
             </div>
-            <Link href="/withdrawals" className="flex items-center justify-center gap-2 w-full mt-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
-              <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+
+            <Link href="/withdrawals" className="flex items-center justify-center gap-2 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition-all shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
               Demander un retrait
             </Link>
+          </div>
+
+          {/* Activité API Widget */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Activité API <span className="text-xs text-slate-400 font-medium ml-1">(Aujourd'hui)</span></h3>
+              <div className="text-slate-400">
+                <span className="material-symbols-outlined text-[18px]">code</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Requêtes</p>
+                <p className="text-xl font-bold text-slate-900">124</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Taux de succès</p>
+                <p className="text-xl font-bold text-slate-900">98.6<span className="text-[10px] text-slate-400">%</span></p>
+                <div className="mt-2 w-full h-4">
+                  <svg viewBox="0 0 100 20" className="w-full h-full stroke-green-500" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M0 15 Q 15 5, 30 15 T 60 10 T 100 5"/>
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Erreurs</p>
+                <p className="text-xl font-bold text-slate-900">2</p>
+                <div className="mt-2 w-full h-4">
+                  <svg viewBox="0 0 100 20" className="w-full h-full stroke-red-500" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M0 10 Q 15 15, 30 5 T 60 15 T 100 10"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Webhooks Widget */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Webhooks <span className="text-xs text-slate-400 font-medium ml-1">(Aujourd'hui)</span></h3>
+              <div className="text-slate-400">
+                <span className="material-symbols-outlined text-[18px]">webhook</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Événements</p>
+                <p className="text-xl font-bold text-slate-900">32</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Livrés</p>
+                <p className="text-xl font-bold text-green-600">30</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Échoués</p>
+                <p className="text-xl font-bold text-red-500">2</p>
+              </div>
+            </div>
           </div>
 
         </div>

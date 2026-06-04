@@ -48,7 +48,7 @@ export function DesktopSidebar() {
   const pathname = usePathname();
   
   return (
-    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-slate-950 text-slate-300 font-body-base text-body-base border-r border-slate-900 shadow-xl">
+    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-40 lg:flex lg:w-[260px] lg:flex-col bg-[#0F1626] text-slate-300 font-body-base text-body-base border-r border-slate-900/50 shadow-xl">
       <SidebarContent pathname={pathname} onClose={() => {}} />
     </aside>
   );
@@ -85,7 +85,7 @@ export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: (
       {/* Sidebar Panel */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-slate-950 text-slate-300 font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out overflow-hidden h-full",
+          "fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col bg-[#0F1626] text-slate-300 font-body-base text-body-base shadow-xl transition-transform duration-300 ease-in-out overflow-hidden h-full",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -103,9 +103,9 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
         <a href={siteConfig.url} className="flex items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/logo.png"
+            src="/logo2.png"
             alt="Kobara Logo"
-            className="w-36 h-auto object-contain -ml-2"
+            className="w-32 h-auto object-contain"
           />
         </a>
         <button
@@ -137,10 +137,10 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
                     href={link.href}
                     onClick={onClose}
                     className={clsx(
-                      "flex items-center gap-3 px-3 py-2.5 group rounded-lg transition-all duration-200 mx-2",
+                      "flex items-center gap-3 px-6 py-3 group transition-all duration-200",
                       isActive
-                        ? "bg-orange-500/10 text-orange-500 font-semibold"
-                        : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
+                        ? "bg-gradient-to-r from-orange-500/20 to-transparent text-white font-semibold border-l-[3px] border-orange-500"
+                        : "text-slate-400 hover:bg-white/5 hover:text-slate-200 border-l-[3px] border-transparent"
                     )}
                   >
                     <span className={clsx(
@@ -159,12 +159,12 @@ function SidebarContent({ pathname, onClose }: { pathname: string | null; onClos
       </nav>
 
       {/* Footer / User Area */}
-      <div className="p-4 border-t border-slate-800 mt-auto bg-slate-950 shrink-0">
+      <div className="p-4 border-t border-slate-800/50 mt-auto bg-[#0F1626] shrink-0">
         <div className="space-y-1">
           <Link 
             href="/support" 
             onClick={onClose} 
-            className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all duration-200 rounded-lg text-sm font-medium mx-2"
+            className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-white/5 hover:text-slate-200 transition-all duration-200 rounded-lg text-sm font-medium mx-2"
           >
             <span className="material-symbols-outlined text-[20px]">support_agent</span>
             <span>Support client</span>
