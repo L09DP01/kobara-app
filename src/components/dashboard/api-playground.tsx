@@ -24,11 +24,11 @@ interface ApiResponse {
 }
 
 // ── Base URL ──
-const API_BASE = 'https://kobara.app/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app';
 
 // ── Endpoint presets ──
 const ENDPOINTS = [
-  { method: 'POST' as HttpMethod, path: '/payments', label: 'Créer un paiement', body: JSON.stringify({
+  { method: 'POST' as HttpMethod, path: '/v1/payments', label: 'Créer un paiement', body: JSON.stringify({
     amount: 1000,
     currency: "HTG",
     description: "Commande #1001",
@@ -36,14 +36,14 @@ const ENDPOINTS = [
     successUrl: "https://site.com/success",
     errorUrl: "https://site.com/error"
   }, null, 2) },
-  { method: 'GET' as HttpMethod, path: '/payments', label: 'Lister les paiements', body: '' },
-  { method: 'POST' as HttpMethod, path: '/payment-links', label: 'Créer un lien de paiement', body: JSON.stringify({
+  { method: 'GET' as HttpMethod, path: '/v1/payments', label: 'Lister les paiements', body: '' },
+  { method: 'POST' as HttpMethod, path: '/v1/payment-links', label: 'Créer un lien de paiement', body: JSON.stringify({
     title: "Paiement boutique",
     amount: 500,
     currency: "HTG",
     description: "Lien de paiement test"
   }, null, 2) },
-  { method: 'GET' as HttpMethod, path: '/payment-links', label: 'Lister les liens', body: '' },
+  { method: 'GET' as HttpMethod, path: '/v1/payment-links', label: 'Lister les liens', body: '' },
 ];
 
 const METHOD_COLORS: Record<HttpMethod, string> = {
