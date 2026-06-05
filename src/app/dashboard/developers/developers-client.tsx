@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { kobaraSdks } from '@/config/sdks';
 import { docsLinks } from '@/config/docs-links';
+import { ApiPlayground } from '@/components/dashboard/api-playground';
 
 const KOBARA_AI_PROMPT = `# Integrate Kobara Payments Into My Application
 
@@ -260,7 +261,6 @@ export function DevelopersClient({
   isGuest?: boolean,
 }) {
   const [isTestMode, setIsTestMode] = useState(true);
-  const [activeTab, setActiveTab] = useState<'curl' | 'javascript' | 'python' | 'php'>('curl');
 
   const activeKey = isTestMode ? testPublicKey : livePublicKey;
 
@@ -505,174 +505,7 @@ export function DevelopersClient({
       </div>
 
       {/* API Playground */}
-      <div>
-        <h2 className="text-headline-md text-xl font-bold text-white mb-6">API Playground</h2>
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm font-body-sm mb-2">
-              <span className="material-symbols-outlined text-[18px]">bolt</span>
-              API Endpoints
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-              <span className="text-white font-medium">Créer un paiement</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="bg-white/5 text-green-400 px-3 py-1 rounded-full text-xs font-bold tracking-wider border border-white/10">POST</span>
-              <h2 className="text-2xl font-bold text-white">/api/v1/payments</h2>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column: Request Details */}
-          <div className="space-y-8">
-            <div className="bg-white/5 rounded-3xl border border-white/10 p-6 ambient-shadow">
-              <h3 className="text-headline-md font-headline-md mb-6 text-white">Request</h3>
-              
-              <div className="flex gap-4 mb-6">
-                <div className="w-32">
-                  <select className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm font-bold text-white focus:ring-orange-500 focus:border-orange-500 appearance-none">
-                    <option>POST</option>
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <input 
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-body-base font-mono-code focus:ring-primary focus:border-primary text-white" 
-                    readOnly 
-                    type="text" 
-                    value={`${process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app'}/api/v1/payments`}
-                  />
-                </div>
-              </div>
-              
-              <div className="mb-6 space-y-2">
-                <p className="text-body-sm font-medium text-white">Authorization</p>
-                <div className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 flex items-center gap-2">
-                  <span className="text-text-secondary text-sm">Bearer</span>
-                  <code className="text-sm font-mono-code text-white truncate flex-1">{isTestMode ? 'kbr_sk_test_...' : 'kbr_sk_live_...'}</code>
-                </div>
-              </div>
-              
-              <button className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mb-8 shadow-sm">
-                <span className="material-symbols-outlined text-[20px]">play_arrow</span>
-                Send Request
-              </button>
-              
-              <div className="border-b border-border-subtle mb-6">
-                <div className="flex gap-8 px-2">
-                  <button className="pb-3 border-b-2 border-primary text-white font-medium text-body-sm">Body</button>
-                  <button className="pb-3 border-b-2 border-transparent text-text-secondary font-medium text-body-sm hover:text-white">Headers</button>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="bg-code-bg rounded-lg p-4 font-mono-code text-[13px] text-white/90">
-                  <pre>
-                    {`{
-  "amount": 1000,
-  "currency": "HTG",
-  "description": "Commande #1001",
-  "customer": {
-    "name": "Jean Exemple",
-    "phone": "50900000000"
-  },
-  "successUrl": "https://site.com/success",
-  "errorUrl": "https://site.com/error"
-}`}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Response / Code */}
-          <div className="bg-white/5 rounded-3xl border border-white/10 flex flex-col h-full ambient-shadow">
-            <div className="flex border-b border-border-subtle bg-white/5 overflow-x-auto rounded-t-xl">
-              <button onClick={() => setActiveTab('curl')} className={`px-6 py-3 text-center border-b-2 font-medium text-body-sm whitespace-nowrap transition-colors ${activeTab === 'curl' ? 'border-primary text-white bg-surface-container-low' : 'border-transparent text-text-secondary hover:bg-surface-container-low'}`}>cURL</button>
-              <button onClick={() => setActiveTab('javascript')} className={`px-6 py-3 text-center border-b-2 font-medium text-body-sm whitespace-nowrap transition-colors ${activeTab === 'javascript' ? 'border-primary text-white bg-surface-container-low' : 'border-transparent text-text-secondary hover:bg-surface-container-low'}`}>JavaScript</button>
-              <button onClick={() => setActiveTab('python')} className={`px-6 py-3 text-center border-b-2 font-medium text-body-sm whitespace-nowrap transition-colors ${activeTab === 'python' ? 'border-primary text-white bg-surface-container-low' : 'border-transparent text-text-secondary hover:bg-surface-container-low'}`}>Python</button>
-              <button onClick={() => setActiveTab('php')} className={`px-6 py-3 text-center border-b-2 font-medium text-body-sm whitespace-nowrap transition-colors ${activeTab === 'php' ? 'border-primary text-white bg-surface-container-low' : 'border-transparent text-text-secondary hover:bg-surface-container-low'}`}>PHP</button>
-            </div>
-            
-            <div className="p-4 bg-code-bg flex-1 rounded-b-xl overflow-y-auto relative group">
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm transition-colors border border-white/10 flex items-center gap-1 text-xs">
-                  <span className="material-symbols-outlined text-[16px]">content_copy</span>
-                  Copy
-                </button>
-              </div>
-              <pre className="text-[13px] font-mono-code text-white/90 leading-relaxed overflow-x-auto pt-2">
-                {activeTab === 'curl' && (
-                  <>
-                    <span className="text-[#56b6c2]">curl</span> -X POST {process.env.NEXT_PUBLIC_KOBARA_API_URL || 'https://api.kobara.app'}/api/v1/payments \{'\n'}
-                    {'  '}-H <span className="text-[#98c379]" >"Authorization: Bearer {isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}"</span> \{'\n'}
-                    {'  '}-H <span className="text-[#98c379]" >"Content-Type: application/json"</span> \{'\n'}
-                    {'  '}-d <span className="text-[#98c379]">'{'{'}
-  "amount": 1000,
-  "currency": "HTG",
-  "description": "Commande #1001",
-  "customer": {'{'}
-    "name": "Jean Exemple",
-    "phone": "50900000000"
-  {'}'},
-  "successUrl": "https://site.com/success",
-  "errorUrl": "https://site.com/error"
-{'}'}'</span>
-                  </>
-                )}
-                {activeTab === 'javascript' && (
-                  <>
-                    <span className="text-[#c678dd]">const</span> <span className="text-[#e5c07b]">kobara</span> = <span className="text-[#61afef]">require</span>(<span className="text-[#98c379]">'@kobara/node'</span>)(<span className="text-[#98c379]">'{isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}'</span>);{'\n\n'}
-                    <span className="text-[#c678dd]">const</span> <span className="text-[#e5c07b]">payment</span> = <span className="text-[#c678dd]">await</span> kobara.payments.<span className="text-[#61afef]">create</span>({'{'}{'\n'}
-                    {'  '}amount: <span className="text-[#d19a66]">1000</span>,{'\n'}
-                    {'  '}currency: <span className="text-[#98c379]">'HTG'</span>,{'\n'}
-                    {'  '}description: <span className="text-[#98c379]">'Commande #1001'</span>,{'\n'}
-                    {'  '}customer: {'{'}{'\n'}
-                    {'    '}name: <span className="text-[#98c379]">'Jean Exemple'</span>,{'\n'}
-                    {'    '}phone: <span className="text-[#98c379]">'50900000000'</span>{'\n'}
-                    {'  '}{'}'},{'\n'}
-                    {'  '}successUrl: <span className="text-[#98c379]">'https://site.com/success'</span>,{'\n'}
-                    {'  '}errorUrl: <span className="text-[#98c379]">'https://site.com/error'</span>{'\n'}
-                    {'}'});
-                  </>
-                )}
-                {activeTab === 'python' && (
-                  <>
-                    <span className="text-[#c678dd]">import</span> kobara{'\n\n'}
-                    kobara.api_key = <span className="text-[#98c379]">"{isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}"</span>{'\n\n'}
-                    payment = kobara.Payment.<span className="text-[#61afef]">create</span>({'\n'}
-                    {'  '}amount=<span className="text-[#d19a66]">1000</span>,{'\n'}
-                    {'  '}currency=<span className="text-[#98c379]">"HTG"</span>,{'\n'}
-                    {'  '}description=<span className="text-[#98c379]">"Commande #1001"</span>,{'\n'}
-                    {'  '}customer={'{'}{'\n'}
-                    {'    '}<span className="text-[#98c379]">"name"</span>: <span className="text-[#98c379]">"Jean Exemple"</span>,{'\n'}
-                    {'    '}<span className="text-[#98c379]">"phone"</span>: <span className="text-[#98c379]">"50900000000"</span>{'\n'}
-                    {'  '}{'}'},{'\n'}
-                    {'  '}success_url=<span className="text-[#98c379]">"https://site.com/success"</span>,{'\n'}
-                    {'  '}error_url=<span className="text-[#98c379]">"https://site.com/error"</span>{'\n'}
-                    )
-                  </>
-                )}
-                {activeTab === 'php' && (
-                  <>
-                    <span className="text-[#e5c07b]">$kobara</span> = <span className="text-[#c678dd]">new</span> \Kobara\Client(<span className="text-[#98c379]">'{isTestMode ? 'kbr_sk_test_xxx' : 'kbr_sk_live_xxx'}'</span>);{'\n\n'}
-                    <span className="text-[#e5c07b]">$payment</span> = <span className="text-[#e5c07b]">$kobara</span><span className="text-[#56b6c2]">-&gt;</span>payments<span className="text-[#56b6c2]">-&gt;</span><span className="text-[#61afef]">create</span>([{'\n'}
-                    {'  '}<span className="text-[#98c379]">'amount'</span> =&gt; <span className="text-[#d19a66]">1000</span>,{'\n'}
-                    {'  '}<span className="text-[#98c379]">'currency'</span> =&gt; <span className="text-[#98c379]">'HTG'</span>,{'\n'}
-                    {'  '}<span className="text-[#98c379]">'description'</span> =&gt; <span className="text-[#98c379]">'Commande #1001'</span>,{'\n'}
-                    {'  '}<span className="text-[#98c379]">'customer'</span> =&gt; [{'\n'}
-                    {'    '}<span className="text-[#98c379]">'name'</span> =&gt; <span className="text-[#98c379]">'Jean Exemple'</span>,{'\n'}
-                    {'    '}<span className="text-[#98c379]">'phone'</span> =&gt; <span className="text-[#98c379]">'50900000000'</span>{'\n'}
-                    {'  '}],{'\n'}
-                    {'  '}<span className="text-[#98c379]">'successUrl'</span> =&gt; <span className="text-[#98c379]">'https://site.com/success'</span>,{'\n'}
-                    {'  '}<span className="text-[#98c379]">'errorUrl'</span> =&gt; <span className="text-[#98c379]">'https://site.com/error'</span>{'\n'}
-                    ]);
-                  </>
-                )}
-              </pre>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ApiPlayground isTestMode={isTestMode} activeKey={activeKey} />
     </div>
   );
 }
