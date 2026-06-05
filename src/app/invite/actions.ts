@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/utils/supabase/admin";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 
 export async function acceptInviteAction(token: string, password?: string) {

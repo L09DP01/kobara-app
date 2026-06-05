@@ -87,7 +87,6 @@ export async function getCurrentUserAndMerchant() {
   await expireMerchantOldPayments(merchant.id);
 
   // Create an RLS-enabled client for the current user
-  const cookieStore = await cookies();
   const supabase = createClient(cookieStore, session?.supabaseAccessToken);
 
   return { user, merchant, userRole, supabase };
