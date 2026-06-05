@@ -143,7 +143,8 @@ export async function processPayment(formData: FormData) {
     });
 
     // Cherche l'URL dans la réponse de Bazik
-    paymentUrl = bazikResponse.redirectUrl || bazikResponse.url || bazikResponse.payment_url || bazikResponse.checkout_url || bazikResponse.redirect_url;
+    const bazikData = bazikResponse.data || bazikResponse;
+    paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
     
     if (!paymentUrl) {
       console.error("Réponse Bazik invalide (sans URL):", bazikResponse);

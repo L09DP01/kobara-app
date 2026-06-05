@@ -156,6 +156,9 @@ export async function POST(request: NextRequest) {
       }
     } catch(e) { console.error("Notification failed", e); }
 
+    const bazikData = bazikResponse.data || bazikResponse;
+    const paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
+
     // 4. Return response to merchant
     return NextResponse.json({
       status: "success",
@@ -164,7 +167,7 @@ export async function POST(request: NextRequest) {
         reference: payment.kobara_reference,
         amount: payment.amount,
         status: payment.status,
-        checkout_url: bazikResponse.payment_url || bazikResponse.url || null, // URL for customer to pay
+        checkout_url: paymentUrl, // URL for customer to pay
       }
     });
 
