@@ -31,7 +31,7 @@ export function ApiKeysClient({
 
   const filteredKeys = initialKeys.filter(k => k.environment === currentEnvironment);
 
-  const isFreePlan = merchant?.plan === 'free' || !merchant?.plan;
+  const isFreePlan = merchant?.plan_slug === 'free' || !merchant?.plan_slug;
   const hasReachedLimit = isFreePlan && filteredKeys.length >= 1;
 
   const handleGenerate = async (e?: React.FormEvent) => {

@@ -4,8 +4,20 @@ import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import { redirect } from "next/navigation";
 
 export default async function KycPage() {
-  const { merchant } = await getCurrentUserAndMerchant();
+  const { merchant, userRole } = await getCurrentUserAndMerchant();
   if (!merchant) redirect('/login');
+
+  if (userRole !== 'owner') {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+        <div className="bg-white/5 border border-white/10 p-8 rounded-2xl text-center max-w-md">
+          <span className="material-symbols-outlined text-4xl text-red-500 mb-4">lock</span>
+          <h2 className="text-xl font-bold text-white mb-2">Accès restreint</h2>
+          <p className="text-slate-400">Seul le propriétaire du compte peut accéder à la page de vérification KYC.</p>
+        </div>
+      </div>
+    );
+  }
 
   const profile = await getKycStatus();
   const status = profile?.status || 'not_started';

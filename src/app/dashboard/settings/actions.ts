@@ -25,13 +25,30 @@ export async function updatePayoutSettings(savedMoncashNumber: string) {
   generalSettings.saved_moncash_number = savedMoncashNumber;
 
   const adminClient = createAdminClient();
-  const { error } = await adminClient
-    .from('settings')
-    .update({ settings_json: generalSettings })
-    .eq('merchant_id', merchant.id);
 
-  if (error) {
-    throw new Error("Erreur lors de la mise à jour des paramètres de retrait");
+  if (currentSettings) {
+    const { error } = await adminClient
+      .from('settings')
+      .update({ settings_json: generalSettings })
+      .eq('merchant_id', merchant.id);
+
+    if (error) {
+      throw new Error("Erreur lors de la mise à jour des paramètres de retrait");
+    }
+  } else {
+    const { error } = await adminClient
+      .from('settings')
+      .insert({
+        merchant_id: merchant.id,
+        settings_json: generalSettings,
+        security_json: { two_factor_method: 'none' },
+        transaction_fee_percent: 2.9,
+        settlement_method: 'manual'
+      });
+
+    if (error) {
+      throw new Error("Erreur lors de la création des paramètres de retrait");
+    }
   }
 
   revalidatePath('/dashboard/settings');

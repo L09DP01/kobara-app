@@ -130,6 +130,9 @@ export async function activateFreePlanAfterKyc(merchantId: string) {
   if (!freePlan) throw new Error("Plan Gratuit introuvable en base");
 
   // 3. Create Subscription
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() + 30);
+
   const { error: subError } = await supabase
     .from('subscriptions')
     .insert({
@@ -137,7 +140,8 @@ export async function activateFreePlanAfterKyc(merchantId: string) {
       plan_id: freePlan.id,
       status: 'active',
       amount_htg: 0,
-      billing_cycle: 'monthly'
+      billing_cycle: 'monthly',
+      current_period_end: expirationDate.toISOString()
     });
 
   if (subError) throw new Error("Erreur création souscription: " + subError.message);
@@ -189,6 +193,9 @@ export async function upgradeMerchantPlan(merchantId: string, planSlug: string) 
     .eq('status', 'active');
 
   // Create new subscription
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() + 30);
+
   const { error: subError } = await supabase
     .from('subscriptions')
     .insert({
@@ -196,7 +203,8 @@ export async function upgradeMerchantPlan(merchantId: string, planSlug: string) 
       plan_id: newPlan.id,
       status: 'active',
       amount_htg: newPlan.price_htg,
-      billing_cycle: 'monthly'
+      billing_cycle: 'monthly',
+      current_period_end: expirationDate.toISOString()
     });
 
   if (subError) throw new Error("Erreur création nouvelle souscription: " + subError.message);

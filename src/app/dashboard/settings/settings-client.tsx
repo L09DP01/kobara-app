@@ -9,16 +9,18 @@ import { PayoutSettings } from './components/PayoutSettings';
 
 type Tab = 'profile' | 'payouts' | 'security' | 'notifications' | 'team';
 
-export function SettingsClient({ user, merchant, settings, members }: { user: any, merchant: any, settings: any, members: any[] }) {
+export function SettingsClient({ user, merchant, settings, members, userRole = 'owner' }: { user: any, merchant: any, settings: any, members: any[], userRole?: string }) {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
 
   const tabs = [
     { id: 'profile', label: 'Profil Entreprise', icon: 'store', desc: 'Logo, nom, adresse' },
-    { id: 'payouts', label: 'Comptes de Retrait', icon: 'account_balance', desc: 'MonCash, banques' },
-    { id: 'security', label: 'Sécurité', icon: 'shield', desc: 'Mot de passe, 2FA' },
+    { id: 'payouts', label: 'Comptes de Retrait', icon: 'account_balance', desc: 'MonCash, banques', ownerOnly: true },
+    { id: 'security', label: 'Sécurité', icon: 'shield', desc: 'Mot de passe, 2FA', ownerOnly: true },
     { id: 'notifications', label: 'Notifications', icon: 'notifications', desc: 'Email, push, alertes' },
-    { id: 'team', label: "Membres d'équipe", icon: 'group', desc: 'Rôles et accès' },
+    { id: 'team', label: "Membres d'équipe", icon: 'group', desc: 'Rôles et accès', ownerOnly: true },
   ] as const;
+
+  const visibleTabs = tabs.filter(t => !t.ownerOnly || userRole === 'owner');
 
   return (
     <div className="max-w-[1080px] mx-auto w-full space-y-6 pb-12">
@@ -37,7 +39,7 @@ export function SettingsClient({ user, merchant, settings, members }: { user: an
         {/* Settings Navigation Sidebar */}
         <div className="md:col-span-1">
           <nav className="bg-white/5 rounded-3xl border border-white/10 shadow-sm overflow-hidden py-2">
-            {tabs.map((tab) => (
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as Tab)}

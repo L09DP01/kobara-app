@@ -8,10 +8,14 @@ import { canCreateWithdrawal } from "@/lib/server/access";
 import speakeasy from 'speakeasy';
 
 export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, _unused?: any, saveNumber?: boolean) {
-  const { merchant, supabase } = await getCurrentUserAndMerchant();
+  const { merchant, userRole, supabase } = await getCurrentUserAndMerchant();
 
   if (!merchant) {
     return { error: "Merchant not found" };
+  }
+
+  if (userRole !== 'owner') {
+    return { error: "Accès refusé. Seul le propriétaire peut effectuer des retraits." };
   }
 
   const accessCheck = await canCreateWithdrawal(merchant.id, amount);

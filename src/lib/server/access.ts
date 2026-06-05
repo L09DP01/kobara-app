@@ -51,7 +51,7 @@ export async function canCreateApiKey(merchantId: string, environment: 'test' | 
   try {
     const { plan } = await ensureCanUseLiveMode(merchantId, environment);
 
-    const limit = plan && plan.api_keys_limit !== null ? plan.api_keys_limit : 1;
+    const limit = plan ? plan.api_keys_limit : 1;
     
     if (limit !== null) {
       const currentCount = await getApiKeysCount(merchantId);

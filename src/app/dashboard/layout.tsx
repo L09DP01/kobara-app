@@ -30,16 +30,38 @@ export default async function DashboardLayout({
   let notifications = [];
   const user = session?.user as any;
 
+  let accessibleMerchants: any[] = [];
+  let userRole = 'owner';
+
   if (user) {
     const supabase = createAdminClient();
-    const { data: merchantData } = await supabase
-      .from("merchants")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const activeMerchantId = cookieStore.get('kobara_active_merchant')?.value;
+    
+    // Fetch all owned merchants
+    const { data: owned } = await supabase.from('merchants').select('*').eq('user_id', user.id);
+    if (owned) accessibleMerchants.push(...owned.map((m: any) => ({ ...m, role: 'owner' })));
+    
+    // Fetch all member merchants
+    const { data: memberships } = await supabase.from('merchant_members').select('role, merchants(*)').eq('user_id', user.id).eq('status', 'active');
+    if (memberships) {
+       accessibleMerchants.push(...memberships.map((m: any) => ({ ...m.merchants, role: m.role || 'developer' })));
+    }
 
-    if (merchantData) {
-      merchant = merchantData;
+    // Determine current merchant
+    if (activeMerchantId) {
+      const selected = accessibleMerchants.find((m: any) => m.id === activeMerchantId);
+      if (selected) {
+         merchant = selected;
+         userRole = selected.role;
+      }
+    }
+    
+    if (!merchant && accessibleMerchants.length > 0) {
+      merchant = accessibleMerchants[0];
+      userRole = accessibleMerchants[0].role;
+    }
+
+    if (merchant) {
       
       const { data: notifs } = await supabase
         .from('notifications')
@@ -100,7 +122,7 @@ export default async function DashboardLayout({
   // For public dashboard pages: render without sidebar if no merchant
   return (
     <EnvironmentProvider>
-      <DashboardLayoutClient merchant={merchant ?? undefined} user={dbUser} isGuest={!merchant} initialNotifications={notifications}>
+      <DashboardLayoutClient merchant={merchant ?? undefined} user={dbUser} isGuest={!merchant} initialNotifications={notifications} accessibleMerchants={accessibleMerchants} userRole={userRole}>
         {children}
       </DashboardLayoutClient>
     </EnvironmentProvider>

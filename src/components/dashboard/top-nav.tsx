@@ -8,7 +8,7 @@ import { markNotificationAsReadAction, markAllNotificationsAsReadAction } from '
 import { siteConfig } from '@/config/site';
 import { useEnvironment } from '@/context/EnvironmentContext';
 
-export default function TopNav({ onToggleSidebar, merchant, user, initialNotifications = [] }: { onToggleSidebar: () => void, merchant?: any, user?: any, initialNotifications?: any[] }) {
+export default function TopNav({ onToggleSidebar, merchant, user, initialNotifications = [], accessibleMerchants = [], userRole = 'owner' }: { onToggleSidebar: () => void, merchant?: any, user?: any, initialNotifications?: any[], accessibleMerchants?: any[], userRole?: string }) {
   const router = useRouter();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -227,9 +227,32 @@ export default function TopNav({ onToggleSidebar, merchant, user, initialNotific
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-surface-card border border-border-subtle rounded-xl shadow-lg overflow-hidden z-50 py-2">
                 <div className="px-4 py-3 border-b border-border-subtle mb-2">
-                  <p className="text-body-sm font-medium text-text-primary truncate">{merchant?.business_name || 'Business'}</p>
+                  <p className="text-body-sm font-medium text-text-primary truncate">{merchant?.business_name || 'Business'} <span className="ml-2 text-[10px] bg-white/10 text-slate-300 px-1.5 py-0.5 rounded">{userRole === 'owner' ? 'Propriétaire' : 'Développeur'}</span></p>
                   <p className="text-[12px] text-text-secondary truncate">{merchant?.email || 'email@example.com'}</p>
                 </div>
+
+                {accessibleMerchants && accessibleMerchants.length > 1 && (
+                  <div className="px-2 py-2 border-b border-border-subtle mb-2">
+                    <p className="px-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Changer de compte</p>
+                    {accessibleMerchants.map((m: any) => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          document.cookie = `kobara_active_merchant=${m.id}; path=/; max-age=31536000`;
+                          window.location.href = '/dashboard';
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between ${m.id === merchant?.id ? 'bg-orange-500/10 text-orange-400 font-bold' : 'text-slate-300 hover:bg-white/5'}`}
+                      >
+                        <span className="truncate">{m.business_name}</span>
+                        {m.role === 'owner' ? (
+                          <span className="text-[10px] bg-white/5 text-slate-400 px-1.5 py-0.5 rounded ml-2 shrink-0">Propriétaire</span>
+                        ) : (
+                          <span className="text-[10px] bg-white/5 text-slate-400 px-1.5 py-0.5 rounded ml-2 shrink-0">Développeur</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 
                 {!isLoading && (
                   <div className="sm:hidden px-3 py-2 border-b border-border-subtle mb-2">

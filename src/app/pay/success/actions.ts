@@ -8,6 +8,24 @@ export async function processSuccessfulPayment(reference: string) {
 
   const supabase = createAdminClient();
 
+  if (reference.startsWith('UPGRADE::')) {
+    const parts = reference.split('::');
+    if (parts.length >= 3) {
+      const merchantId = parts[1];
+      const planSlug = parts[2];
+      const { upgradeMerchantPlan } = await import("@/lib/server/plans");
+      try {
+        await upgradeMerchantPlan(merchantId, planSlug);
+        revalidatePath('/dashboard');
+        revalidatePath('/dashboard/settings');
+        revalidatePath('/dashboard/billing');
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err.message };
+      }
+    }
+  }
+
   // Find the payment
   const { data: payment, error: fetchError } = await supabase
     .from('payments')

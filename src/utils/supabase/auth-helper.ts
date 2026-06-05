@@ -14,11 +14,70 @@ export async function getCurrentUserAndMerchant() {
   }
 
   const supabaseAdmin = createAdminClient();
-  const { data: merchant } = await supabaseAdmin
-    .from("merchants")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const cookieStore = await cookies();
+  const activeMerchantId = cookieStore.get('kobara_active_merchant')?.value;
+
+  let merchant = null;
+  let userRole = 'owner';
+
+  // If a specific merchant is selected via switcher
+  if (activeMerchantId) {
+    // Check if user is owner of this merchant
+    const { data: ownerMerchant } = await supabaseAdmin
+      .from("merchants")
+      .select("*")
+      .eq("id", activeMerchantId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+      
+    if (ownerMerchant) {
+      merchant = ownerMerchant;
+      userRole = 'owner';
+    } else {
+      // Check if user is a member of this merchant
+      const { data: membership } = await supabaseAdmin
+        .from('merchant_members')
+        .select('role, merchants(*)')
+        .eq('merchant_id', activeMerchantId)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (membership && membership.merchants) {
+        merchant = membership.merchants as any;
+        userRole = membership.role || 'developer';
+      }
+    }
+  }
+
+  // Fallback if no specific merchant selected or selection is invalid
+  if (!merchant) {
+    // Try their owned merchant
+    const { data: ownedMerchant } = await supabaseAdmin
+      .from("merchants")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (ownedMerchant) {
+      merchant = ownedMerchant;
+      userRole = 'owner';
+    } else {
+      // Try any member merchant
+      const { data: firstMembership } = await supabaseAdmin
+        .from('merchant_members')
+        .select('role, merchants(*)')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+
+      if (firstMembership && firstMembership.merchants) {
+        merchant = firstMembership.merchants as any;
+        userRole = firstMembership.role || 'developer';
+      }
+    }
+  }
 
   if (!merchant || !merchant.phone || !merchant.category) {
     redirect("/onboarding");
@@ -31,7 +90,7 @@ export async function getCurrentUserAndMerchant() {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore, session?.supabaseAccessToken);
 
-  return { user, merchant, supabase };
+  return { user, merchant, userRole, supabase };
 }
 
 async function triggerExpiredWebhooks(merchantId: string, expiredPayments: any[]) {

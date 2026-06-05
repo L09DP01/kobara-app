@@ -25,7 +25,8 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
         language: { label: "Language", type: "text" },
-        passkey_response: { label: "Passkey Response", type: "text" }
+        passkey_response: { label: "Passkey Response", type: "text" },
+        otp: { label: "OTP Code", type: "text" }
       },
       async authorize(credentials) {
         const lang = credentials?.language || "fr";
@@ -106,6 +107,51 @@ export const authOptions: AuthOptions = {
         const passwordMatches = await bcrypt.compare(credentials.password, user.password_hash);
         if (!passwordMatches) {
           throw new Error(lang === "en" ? "Incorrect password." : "Mot de passe incorrect.");
+        }
+
+        // 2FA VERIFICATION (Global logic)
+        let requires2FA = false;
+
+        const { data: ownedMerchants } = await supabase.from('merchants').select('id').eq('user_id', user.id);
+        if (ownedMerchants && ownedMerchants.length > 0) {
+          for (const m of ownedMerchants) {
+            const { data: mSet } = await supabase.from('settings').select('security_json').eq('merchant_id', m.id).maybeSingle();
+            if (mSet?.security_json?.['2fa_enabled']) requires2FA = true;
+          }
+        }
+
+        const { data: memberships } = await supabase.from('merchant_members').select('merchant_id').eq('user_id', user.id).eq('status', 'active');
+        if (memberships && memberships.length > 0) {
+          for (const mem of memberships) {
+            const { data: mSet } = await supabase.from('settings').select('security_json').eq('merchant_id', mem.merchant_id).maybeSingle();
+            if (mSet?.security_json?.['2fa_enabled']) requires2FA = true;
+          }
+        }
+
+        if (requires2FA) {
+           if (credentials.otp) {
+              const { Redis } = await import('@upstash/redis');
+              const redis = Redis.fromEnv();
+              const storedOtp = await redis.get(`otp:${user.email}`);
+              if (!storedOtp || String(storedOtp) !== credentials.otp) {
+                 throw new Error("Code de sécurité incorrect ou expiré.");
+              }
+              await redis.del(`otp:${user.email}`);
+           } else {
+              const { Redis } = await import('@upstash/redis');
+              const redis = Redis.fromEnv();
+              const otp = Math.floor(100000 + Math.random() * 900000).toString();
+              await redis.set(`otp:${user.email}`, otp, { ex: 600 });
+              
+              const { sendEmail } = await import('@/lib/server/mail');
+              await sendEmail({
+                to: user.email,
+                subject: "Connexion - Code de vérification",
+                text: "Votre code de vérification temporaire à 6 chiffres pour votre compte Kobara est : " + otp
+              });
+              
+              throw new Error("2FA_REQUIRED");
+           }
         }
 
         return {
