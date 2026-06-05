@@ -19,8 +19,11 @@ function SuccessContent() {
 
   useEffect(() => {
     if (reference && !processed) {
-      processSuccessfulPayment(reference).then(() => {
+      processSuccessfulPayment(reference).then((res) => {
         setProcessed(true);
+        if (res.success && res.redirectUrl) {
+          window.location.href = res.redirectUrl;
+        }
       }).catch(console.error);
     }
   }, [reference, processed]);

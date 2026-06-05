@@ -38,7 +38,7 @@ export async function processSuccessfulPayment(reference: string) {
   }
 
   if (payment.status === 'succeeded') {
-    return { success: true, alreadyProcessed: true };
+    return { success: true, alreadyProcessed: true, redirectUrl: payment.success_url };
   }
 
   // In a real app, we would verify with Bazik API here.
@@ -107,5 +107,5 @@ export async function processSuccessfulPayment(reference: string) {
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/payments');
 
-  return { success: true };
+  return { success: true, redirectUrl: payment.success_url };
 }
