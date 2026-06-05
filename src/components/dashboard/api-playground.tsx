@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 
 // ── Types ──
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
-type RequestTab = 'body' | 'headers' | 'params';
+type RequestTab = 'body' | 'headers';
 type ResponseTab = 'response' | 'headers' | 'logs';
 type CodeTab = 'curl' | 'javascript' | 'python' | 'php';
 type RequestState = 'idle' | 'loading' | 'success' | 'error';
@@ -23,9 +23,12 @@ interface ApiResponse {
   time: number;
 }
 
+// ── Base URL ──
+const API_BASE = 'https://kobara.app/api/v1';
+
 // ── Endpoint presets ──
 const ENDPOINTS = [
-  { method: 'POST' as HttpMethod, path: '/api/v1/payments', label: 'Créer un paiement', body: JSON.stringify({
+  { method: 'POST' as HttpMethod, path: '/payments', label: 'Créer un paiement', body: JSON.stringify({
     amount: 1000,
     currency: "HTG",
     description: "Commande #1001",
@@ -33,14 +36,14 @@ const ENDPOINTS = [
     successUrl: "https://site.com/success",
     errorUrl: "https://site.com/error"
   }, null, 2) },
-  { method: 'GET' as HttpMethod, path: '/api/v1/payments', label: 'Lister les paiements', body: '' },
-  { method: 'POST' as HttpMethod, path: '/api/v1/payment-links', label: 'Créer un lien de paiement', body: JSON.stringify({
+  { method: 'GET' as HttpMethod, path: '/payments', label: 'Lister les paiements', body: '' },
+  { method: 'POST' as HttpMethod, path: '/payment-links', label: 'Créer un lien de paiement', body: JSON.stringify({
     title: "Paiement boutique",
     amount: 500,
     currency: "HTG",
     description: "Lien de paiement test"
   }, null, 2) },
-  { method: 'GET' as HttpMethod, path: '/api/v1/payment-links', label: 'Lister les liens', body: '' },
+  { method: 'GET' as HttpMethod, path: '/payment-links', label: 'Lister les liens', body: '' },
 ];
 
 const METHOD_COLORS: Record<HttpMethod, string> = {
@@ -66,10 +69,10 @@ function getStatusColor(status: number) {
 export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; activeKey: string }) {
   const [selectedEndpoint, setSelectedEndpoint] = useState(0);
   const [method, setMethod] = useState<HttpMethod>(ENDPOINTS[0].method);
-  const [url, setUrl] = useState(`${typeof window !== 'undefined' ? window.location.origin : 'https://kobara.app'}${ENDPOINTS[0].path}`);
+  const [url, setUrl] = useState(`${API_BASE}${ENDPOINTS[0].path}`);
   const [body, setBody] = useState(ENDPOINTS[0].body);
   const [headers, setHeaders] = useState<{ key: string; value: string; enabled: boolean }[]>([
-    { key: 'Authorization', value: `Bearer ${isTestMode ? 'kbr_sk_test_...' : 'kbr_sk_live_...'}`, enabled: true },
+    { key: 'Authorization', value: `Bearer ${isTestMode ? 'kbr_sk_test_YOUR_KEY' : 'kbr_sk_live_YOUR_KEY'}`, enabled: true },
     { key: 'Content-Type', value: 'application/json', enabled: true },
   ]);
 
@@ -86,8 +89,9 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
   const abortRef = useRef<AbortController | null>(null);
 
   const addLog = useCallback((type: LogEntry['type'], message: string) => {
+    const now = new Date();
     setLogs(prev => [...prev, {
-      timestamp: new Date().toISOString().split('T')[1].split('.')[0],
+      timestamp: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`,
       type,
       message,
     }]);
@@ -98,36 +102,23 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
     const ep = ENDPOINTS[index];
     setSelectedEndpoint(index);
     setMethod(ep.method);
-    setUrl(`${window.location.origin}${ep.path}`);
+    setUrl(`${API_BASE}${ep.path}`);
     setBody(ep.body);
     setResponse(null);
     setRequestState('idle');
     setLogs([]);
   };
 
-  // Add header row
-  const addHeader = () => {
-    setHeaders(prev => [...prev, { key: '', value: '', enabled: true }]);
-  };
+  // Header helpers
+  const addHeader = () => setHeaders(prev => [...prev, { key: '', value: '', enabled: true }]);
+  const removeHeader = (i: number) => setHeaders(prev => prev.filter((_, idx) => idx !== i));
+  const updateHeader = (i: number, field: 'key' | 'value', val: string) =>
+    setHeaders(prev => prev.map((h, idx) => idx === i ? { ...h, [field]: val } : h));
+  const toggleHeader = (i: number) =>
+    setHeaders(prev => prev.map((h, idx) => idx === i ? { ...h, enabled: !h.enabled } : h));
 
-  // Remove header row
-  const removeHeader = (index: number) => {
-    setHeaders(prev => prev.filter((_, i) => i !== index));
-  };
-
-  // Update header
-  const updateHeader = (index: number, field: 'key' | 'value', val: string) => {
-    setHeaders(prev => prev.map((h, i) => i === index ? { ...h, [field]: val } : h));
-  };
-
-  // Toggle header
-  const toggleHeader = (index: number) => {
-    setHeaders(prev => prev.map((h, i) => i === index ? { ...h, enabled: !h.enabled } : h));
-  };
-
-  // Send the request
+  // ── Send request through server-side proxy ──
   const sendRequest = async () => {
-    // Cancel any pending request
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -137,86 +128,65 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
     setLogs([]);
     setResponseTab('response');
 
-    addLog('info', `Preparing ${method} request to ${url}`);
-
-    // Build headers object
+    // Build headers
     const reqHeaders: Record<string, string> = {};
-    headers.filter(h => h.enabled && h.key).forEach(h => {
-      reqHeaders[h.key] = h.value;
-    });
+    headers.filter(h => h.enabled && h.key).forEach(h => { reqHeaders[h.key] = h.value; });
 
+    addLog('info', `Preparing ${method} request to ${url}`);
     addLog('request', `Headers: ${JSON.stringify(reqHeaders, null, 2)}`);
     if (body && method !== 'GET') {
-      addLog('request', `Body: ${body.substring(0, 200)}${body.length > 200 ? '...' : ''}`);
+      addLog('request', `Body: ${body.length > 200 ? body.substring(0, 200) + '...' : body}`);
     }
-
-    const startTime = performance.now();
+    addLog('info', 'Sending request via server proxy...');
 
     try {
-      const fetchOptions: RequestInit = {
-        method,
-        headers: reqHeaders,
+      // Call our server-side proxy to avoid CORS
+      const proxyRes = await fetch('/api/playground/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-      };
-
-      if (body && method !== 'GET') {
-        fetchOptions.body = body;
-      }
-
-      addLog('info', 'Sending request...');
-
-      const res = await fetch(url, fetchOptions);
-      const elapsed = Math.round(performance.now() - startTime);
-
-      // Extract response headers
-      const resHeaders: Record<string, string> = {};
-      res.headers.forEach((value, key) => {
-        resHeaders[key] = value;
+        body: JSON.stringify({
+          url,
+          method,
+          headers: reqHeaders,
+          body: body && method !== 'GET' ? body : undefined,
+        }),
       });
 
-      let resBody = '';
+      const data = await proxyRes.json();
+
+      // Pretty-print JSON body if possible
+      let prettyBody = data.body || '';
       try {
-        const text = await res.text();
-        // Try to pretty-print JSON
-        try {
-          resBody = JSON.stringify(JSON.parse(text), null, 2);
-        } catch {
-          resBody = text;
-        }
-      } catch {
-        resBody = '[Unable to read response body]';
-      }
+        prettyBody = JSON.stringify(JSON.parse(prettyBody), null, 2);
+      } catch { /* keep as-is */ }
 
       const apiResponse: ApiResponse = {
-        status: res.status,
-        statusText: res.statusText,
-        headers: resHeaders,
-        body: resBody,
-        time: elapsed,
+        status: data.status,
+        statusText: data.statusText,
+        headers: data.headers || {},
+        body: prettyBody,
+        time: data.time,
       };
 
       setResponse(apiResponse);
-      setRequestState(res.ok ? 'success' : 'error');
+      setRequestState(data.status >= 200 && data.status < 400 ? 'success' : 'error');
 
-      addLog('response', `Status: ${res.status} ${res.statusText}`);
-      addLog('response', `Time: ${elapsed}ms`);
+      addLog('response', `Status: ${data.status} ${data.statusText}`);
+      addLog('response', `Time: ${data.time}ms`);
       addLog('info', 'Request completed.');
-
     } catch (err: any) {
-      const elapsed = Math.round(performance.now() - startTime);
-
       if (err.name === 'AbortError') {
         addLog('info', 'Request cancelled.');
         setRequestState('idle');
         return;
       }
-
       setResponse({
         status: 0,
         statusText: 'Network Error',
         headers: {},
         body: JSON.stringify({ error: err.message || 'Failed to connect' }, null, 2),
-        time: elapsed,
+        time: 0,
       });
       setRequestState('error');
       addLog('error', `Error: ${err.message}`);
@@ -232,26 +202,22 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
     }
   };
 
-  // Generate code examples
+  // ── Code generation (dynamic) ──
   const generateCode = (): string => {
-    const authHeader = headers.find(h => h.key === 'Authorization')?.value || '';
-
     switch (codeTab) {
       case 'curl': {
         let cmd = `curl -X ${method} "${url}"`;
         headers.filter(h => h.enabled && h.key).forEach(h => {
           cmd += ` \\\n  -H "${h.key}: ${h.value}"`;
         });
-        if (body && method !== 'GET') {
-          cmd += ` \\\n  -d '${body}'`;
-        }
+        if (body && method !== 'GET') cmd += ` \\\n  -d '${body}'`;
         return cmd;
       }
       case 'javascript': {
         const opts = [`  method: '${method}'`];
-        if (headers.filter(h => h.enabled).length > 0) {
-          const hObj: Record<string, string> = {};
-          headers.filter(h => h.enabled && h.key).forEach(h => { hObj[h.key] = h.value; });
+        const hObj: Record<string, string> = {};
+        headers.filter(h => h.enabled && h.key).forEach(h => { hObj[h.key] = h.value; });
+        if (Object.keys(hObj).length) {
           opts.push(`  headers: ${JSON.stringify(hObj, null, 4).split('\n').map((l, i) => i === 0 ? l : '  ' + l).join('\n')}`);
         }
         if (body && method !== 'GET') {
@@ -260,36 +226,24 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
         return `const response = await fetch('${url}', {\n${opts.join(',\n')}\n});\n\nconst data = await response.json();\nconsole.log(data);`;
       }
       case 'python': {
-        let code = `import requests\n\n`;
         const hObj: Record<string, string> = {};
         headers.filter(h => h.enabled && h.key).forEach(h => { hObj[h.key] = h.value; });
-        code += `headers = ${JSON.stringify(hObj, null, 4)}\n\n`;
+        let code = `import requests\n\nheaders = ${JSON.stringify(hObj, null, 4)}\n\n`;
         if (body && method !== 'GET') {
-          code += `payload = ${body}\n\n`;
-          code += `response = requests.${method.toLowerCase()}(\n    '${url}',\n    headers=headers,\n    json=payload\n)\n\n`;
+          code += `payload = ${body}\n\nresponse = requests.${method.toLowerCase()}(\n    '${url}',\n    headers=headers,\n    json=payload\n)\n\n`;
         } else {
           code += `response = requests.${method.toLowerCase()}(\n    '${url}',\n    headers=headers\n)\n\n`;
         }
-        code += `print(response.json())`;
-        return code;
+        return code + `print(response.json())`;
       }
       case 'php': {
-        let code = `<?php\n\n$ch = curl_init();\n\n`;
-        code += `curl_setopt($ch, CURLOPT_URL, '${url}');\n`;
-        code += `curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n`;
+        let code = `<?php\n\n$ch = curl_init();\n\ncurl_setopt($ch, CURLOPT_URL, '${url}');\ncurl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n`;
         if (method === 'POST') code += `curl_setopt($ch, CURLOPT_POST, true);\n`;
-        if (method === 'PUT') code += `curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');\n`;
-        if (method === 'DELETE') code += `curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');\n`;
-
+        else if (method !== 'GET') code += `curl_setopt($ch, CURLOPT_CUSTOMREQUEST, '${method}');\n`;
         const hArr = headers.filter(h => h.enabled && h.key).map(h => `    '${h.key}: ${h.value}'`);
-        if (hArr.length > 0) {
-          code += `curl_setopt($ch, CURLOPT_HTTPHEADER, [\n${hArr.join(',\n')}\n]);\n`;
-        }
-        if (body && method !== 'GET') {
-          code += `curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(${body.split('\n').map((l, i) => i === 0 ? l : '    ' + l).join('\n')}));\n`;
-        }
-        code += `\n$response = curl_exec($ch);\ncurl_close($ch);\n\n$data = json_decode($response, true);\nprint_r($data);`;
-        return code;
+        if (hArr.length) code += `curl_setopt($ch, CURLOPT_HTTPHEADER, [\n${hArr.join(',\n')}\n]);\n`;
+        if (body && method !== 'GET') code += `curl_setopt($ch, CURLOPT_POSTFIELDS, '${body.replace(/'/g, "\\'")}');\n`;
+        return code + `\n$response = curl_exec($ch);\ncurl_close($ch);\n\n$data = json_decode($response, true);\nprint_r($data);`;
       }
     }
   };
@@ -309,7 +263,7 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
 
   return (
     <div className="space-y-6">
-      {/* Section Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -319,7 +273,7 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
             <h2 className="text-xl font-bold text-white tracking-tight">API Playground</h2>
             <span className="bg-green-500/20 text-green-400 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider border border-green-500/30 uppercase">Live</span>
           </div>
-          <p className="text-slate-400 text-sm">Testez les endpoints Kobara en temps réel. Les requêtes sont exécutées directement.</p>
+          <p className="text-slate-400 text-sm">Testez les endpoints Kobara en temps réel. Les requêtes sont exécutées sur le serveur.</p>
         </div>
       </div>
 
@@ -343,11 +297,10 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
         ))}
       </div>
 
-      {/* Main Layout */}
+      {/* Main 2-col Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* ═══════════════════════════════════════════
-            LEFT: Request Panel
-        ═══════════════════════════════════════════ */}
+
+        {/* ── LEFT: Request ── */}
         <div className="bg-[#0F172A] rounded-2xl border border-[rgba(255,255,255,0.08)] overflow-hidden flex flex-col">
           {/* URL Bar */}
           <div className="p-4 border-b border-[rgba(255,255,255,0.08)] bg-[#0D1321]">
@@ -425,24 +378,22 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
           {/* Request Content */}
           <div className="flex-1 p-4 min-h-[300px] max-h-[500px] overflow-auto">
             {requestTab === 'body' && (
-              <div className="h-full">
-                {method === 'GET' ? (
-                  <div className="flex items-center justify-center h-full text-slate-500 text-sm">
-                    <div className="text-center">
-                      <span className="material-symbols-outlined text-[32px] block mb-2 opacity-40">info</span>
-                      Les requêtes GET n&apos;ont pas de body
-                    </div>
+              method === 'GET' ? (
+                <div className="flex items-center justify-center h-full text-slate-500 text-sm">
+                  <div className="text-center">
+                    <span className="material-symbols-outlined text-[32px] block mb-2 opacity-40">info</span>
+                    Les requêtes GET n&apos;ont pas de body
                   </div>
-                ) : (
-                  <textarea
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    className="w-full h-full bg-[#0D1321] border border-[rgba(255,255,255,0.06)] rounded-lg p-4 font-mono text-[13px] text-white/90 leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-orange-500/30 focus:border-orange-500/20 placeholder-slate-600"
-                    placeholder='{ "key": "value" }'
-                    spellCheck={false}
-                  />
-                )}
-              </div>
+                </div>
+              ) : (
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  className="w-full h-full min-h-[280px] bg-[#0D1321] border border-[rgba(255,255,255,0.06)] rounded-lg p-4 font-mono text-[13px] text-white/90 leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-orange-500/30 focus:border-orange-500/20 placeholder-slate-600"
+                  placeholder='{ "key": "value" }'
+                  spellCheck={false}
+                />
+              )
             )}
 
             {requestTab === 'headers' && (
@@ -489,11 +440,9 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════
-            RIGHT: Response Panel
-        ═══════════════════════════════════════════ */}
+        {/* ── RIGHT: Response ── */}
         <div className="bg-[#0F172A] rounded-2xl border border-[rgba(255,255,255,0.08)] overflow-hidden flex flex-col">
-          {/* Response Status Bar */}
+          {/* Status Bar */}
           <div className="p-4 border-b border-[rgba(255,255,255,0.08)] bg-[#0D1321] flex items-center justify-between min-h-[60px]">
             {requestState === 'idle' && !response && (
               <span className="text-slate-500 text-sm font-medium">En attente d&apos;une requête...</span>
@@ -583,7 +532,7 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
                 )}
                 {response && requestState !== 'loading' && (
                   <pre className="font-mono text-[13px] leading-relaxed whitespace-pre-wrap break-words">
-                    <ResponseHighlight json={response.body} isError={requestState === 'error'} />
+                    <JsonHighlight json={response.body} isError={requestState === 'error'} />
                   </pre>
                 )}
               </div>
@@ -632,29 +581,19 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════
-          Code Generation Panel
-      ═══════════════════════════════════════════ */}
+      {/* ── Code Generation ── */}
       <div className="bg-[#0F172A] rounded-2xl border border-[rgba(255,255,255,0.08)] overflow-hidden">
-        {/* Code Tabs */}
         <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] bg-[#0D1321]">
           <div className="flex">
-            {([
-              { id: 'curl' as CodeTab, label: 'cURL' },
-              { id: 'javascript' as CodeTab, label: 'JavaScript' },
-              { id: 'python' as CodeTab, label: 'Python' },
-              { id: 'php' as CodeTab, label: 'PHP' },
-            ]).map(tab => (
+            {(['curl', 'javascript', 'python', 'php'] as CodeTab[]).map(tab => (
               <button
-                key={tab.id}
-                onClick={() => setCodeTab(tab.id)}
+                key={tab}
+                onClick={() => setCodeTab(tab)}
                 className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  codeTab === tab.id
-                    ? 'border-orange-500 text-white'
-                    : 'border-transparent text-slate-500 hover:text-slate-300'
+                  codeTab === tab ? 'border-orange-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {tab.label}
+                {tab === 'curl' ? 'cURL' : tab === 'javascript' ? 'JavaScript' : tab === 'python' ? 'Python' : 'PHP'}
               </button>
             ))}
           </div>
@@ -666,48 +605,38 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
             {copiedCode ? 'Copié!' : 'Copy'}
           </button>
         </div>
-
-        {/* Code Content */}
         <div className="p-4 bg-[#0B1120] max-h-[400px] overflow-auto">
-          <pre className="font-mono text-[13px] text-white/90 leading-relaxed whitespace-pre-wrap">
-            {generateCode()}
-          </pre>
+          <pre className="font-mono text-[13px] text-white/90 leading-relaxed whitespace-pre-wrap">{generateCode()}</pre>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Simple JSON syntax highlighter ──
-function ResponseHighlight({ json, isError }: { json: string; isError: boolean }) {
-  // Simple tokenizer for JSON display
+// ── JSON Syntax Highlighter ──
+function JsonHighlight({ json, isError }: { json: string; isError: boolean }) {
   try {
-    const highlighted = json
-      .replace(/("(?:[^"\\]|\\.)*")\s*:/g, '<key>$1</key>:') // keys
-      .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <str>$1</str>') // string values
-      .replace(/:\s*(true|false)/g, ': <bool>$1</bool>') // booleans
-      .replace(/:\s*(\d+\.?\d*)/g, ': <num>$1</num>') // numbers
-      .replace(/:\s*(null)/g, ': <null>$1</null>'); // null
-
-    const parts = highlighted.split(/(<key>.*?<\/key>|<str>.*?<\/str>|<bool>.*?<\/bool>|<num>.*?<\/num>|<null>.*?<\/null>)/);
-
+    const parts = json.split(/("(?:[^"\\]|\\.)*")\s*(?=:)|:\s*("(?:[^"\\]|\\.)*")|:\s*(true|false)|:\s*(\d+\.?\d*)|:\s*(null)/g);
     return (
       <>
         {parts.map((part, i) => {
-          if (part.startsWith('<key>')) {
-            return <span key={i} className="text-[#7dd3fc]">{part.replace(/<\/?key>/g, '')}</span>;
+          if (!part) return null;
+          // Keys (followed by colon)
+          if (i > 0 && parts[i - 1] === undefined && part.startsWith('"') && json.includes(part + ':')) {
+            return <span key={i} className="text-[#7dd3fc]">{part}</span>;
           }
-          if (part.startsWith('<str>')) {
-            return <span key={i} className={isError ? 'text-red-300' : 'text-[#86efac]'}>{part.replace(/<\/?str>/g, '')}</span>;
+          // String values
+          if (part.startsWith('"')) {
+            return <span key={i} className={isError ? 'text-red-300' : 'text-[#86efac]'}>{part}</span>;
           }
-          if (part.startsWith('<bool>')) {
-            return <span key={i} className="text-[#c4b5fd]">{part.replace(/<\/?bool>/g, '')}</span>;
+          if (part === 'true' || part === 'false') {
+            return <span key={i} className="text-[#c4b5fd]">{part}</span>;
           }
-          if (part.startsWith('<num>')) {
-            return <span key={i} className="text-[#fbbf24]">{part.replace(/<\/?num>/g, '')}</span>;
+          if (part === 'null') {
+            return <span key={i} className="text-slate-500">{part}</span>;
           }
-          if (part.startsWith('<null>')) {
-            return <span key={i} className="text-slate-500">{part.replace(/<\/?null>/g, '')}</span>;
+          if (/^\d+\.?\d*$/.test(part)) {
+            return <span key={i} className="text-[#fbbf24]">{part}</span>;
           }
           return <span key={i} className="text-white/80">{part}</span>;
         })}
