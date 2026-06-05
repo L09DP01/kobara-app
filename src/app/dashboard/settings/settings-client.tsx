@@ -12,13 +12,13 @@ type Tab = 'profile' | 'payouts' | 'security' | 'notifications' | 'team';
 export function SettingsClient({ user, merchant, settings, members, userRole = 'owner' }: { user: any, merchant: any, settings: any, members: any[], userRole?: string }) {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
 
-  const tabs = [
+  const tabs: { id: Tab, label: string, icon: string, desc: string, ownerOnly?: boolean }[] = [
     { id: 'profile', label: 'Profil Entreprise', icon: 'store', desc: 'Logo, nom, adresse' },
     { id: 'payouts', label: 'Comptes de Retrait', icon: 'account_balance', desc: 'MonCash, banques', ownerOnly: true },
     { id: 'security', label: 'Sécurité', icon: 'shield', desc: 'Mot de passe, 2FA', ownerOnly: true },
     { id: 'notifications', label: 'Notifications', icon: 'notifications', desc: 'Email, push, alertes' },
     { id: 'team', label: "Membres d'équipe", icon: 'group', desc: 'Rôles et accès', ownerOnly: true },
-  ] as const;
+  ];
 
   const visibleTabs = tabs.filter(t => !t.ownerOnly || userRole === 'owner');
 
