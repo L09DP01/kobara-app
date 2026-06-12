@@ -30,7 +30,7 @@ export function AuthVisual() {
             <motion.div
               key={ring}
               animate={{ rotateZ: 360 }}
-              transition={{ duration: 20 + ring * 5, repeat: Infinity, ease: "linear", direction: ring % 2 === 0 ? "reverse" : "normal" }}
+              transition={{ duration: 20 + ring * 5, repeat: Infinity, ease: "linear", repeatType: ring % 2 === 0 ? "reverse" : "loop" }}
               className="absolute inset-[-20%] border border-[#FF4A1C]/30 rounded-full"
               style={{ transform: `translateZ(${-20 + ring * 10}px)`, opacity: 0.5 - ring * 0.1 }}
             />
