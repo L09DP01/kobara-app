@@ -24,9 +24,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Access Denied", reason: accessCheck.reason }, { status: 403 });
     }
 
-    const { success } = await apiLimiter.limit(`api_payments_${merchantId}`);
+    const { paymentsLimiter } = await import('@/lib/server/security/rate-limit');
+    const { success, remaining, reset } = await paymentsLimiter.limit(`api_payments_${merchantId}`);
     if (!success) {
-      return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { status: 429 });
+      return NextResponse.json({ error: "Rate limit exceeded. Please try again later." }, { 
+        status: 429,
+        headers: {
+          'Retry-After': Math.ceil((reset - Date.now()) / 1000).toString()
+        }
+      });
     }
 
     let body;
@@ -42,6 +48,31 @@ export async function POST(request: NextRequest) {
     }
 
     const { amount, currency, description, success_url, cancel_url, metadata, customer } = validationResult.data;
+
+    // Idempotency check
+    const idempotencyKey = request.headers.get('idempotency-key');
+    if (!idempotencyKey) {
+      return NextResponse.json({ error: "idempotency_key_required" }, { status: 400 });
+    }
+
+    const { checkIdempotency, saveIdempotencyResponse, markIdempotencyFailed } = await import('@/lib/server/security/idempotency');
+    const idempotencyResult = await checkIdempotency(merchantId, idempotencyKey, '/api/v1/payments', body);
+
+    if (idempotencyResult.status === 'cached') {
+      return NextResponse.json(idempotencyResult.response, { 
+        status: idempotencyResult.statusCode,
+        headers: {
+          'Idempotency-Key': idempotencyKey,
+          'X-Idempotency-Cached': 'true'
+        }
+      });
+    }
+
+    if (idempotencyResult.status === 'conflict') {
+      return NextResponse.json({ error: "idempotency_key_conflict", message: idempotencyResult.error }, { status: 409 });
+    }
+
+    const idempotencyKeyId = idempotencyResult.keyId;
 
     // Connect to Supabase
     const supabase = createAdminClient();
@@ -152,7 +183,7 @@ export async function POST(request: NextRequest) {
     try {
       const { data: mData } = await supabase.from('merchants').select('email').eq('id', merchantId).single();
       if (mData) {
-        await notifyPaymentCreated(merchantId, mData.email, amount, currency);
+        await notifyPaymentCreated(merchantId, mData.email, amount, currency, payment.id);
       }
     } catch(e) { console.error("Notification failed", e); }
 
@@ -160,7 +191,7 @@ export async function POST(request: NextRequest) {
     const paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
 
     // 4. Return response to merchant
-    return NextResponse.json({
+    const responsePayload = {
       status: "success",
       data: {
         id: payment.id,
@@ -169,10 +200,20 @@ export async function POST(request: NextRequest) {
         status: payment.status,
         checkout_url: paymentUrl, // URL for customer to pay
       }
+    };
+
+    // Save response for idempotency
+    await saveIdempotencyResponse(idempotencyKeyId, responsePayload, 200);
+
+    return NextResponse.json(responsePayload, {
+      headers: {
+        'Idempotency-Key': idempotencyKey
+      }
     });
 
   } catch (error: any) {
     console.error("API Payment Error:", error);
+    // If we have an idempotency key id, we should mark it failed so it can be retried safely
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

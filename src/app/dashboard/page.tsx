@@ -5,73 +5,127 @@ import DashboardChartWrapper from "./analytics/DashboardChartWrapper";
 export default async function DashboardPage() {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
 
-  // Fetch recent payments
-  const { data: recentPayments } = await supabase
-    .from('payments')
-    .select('*, customers(name, email)')
-    .eq('merchant_id', merchant.id)
-    .eq('environment', merchant.current_environment || 'test')
-    .order('created_at', { ascending: false })
-    .limit(5);
+  // Check Redis Cache
+  const { safeRedis } = await import('@/lib/server/redis');
+  const cacheKey = `dashboard:stats:${merchant.id}:${merchant.current_environment || 'test'}`;
+  
+  let stats: any = await safeRedis(async (redis) => {
+    return await redis.get(cacheKey);
+  }, null);
 
-  // Fetch recent withdrawals
-  const { data: recentWithdrawals } = await supabase
-    .from('withdrawals')
-    .select('*')
-    .eq('merchant_id', merchant.id)
-    .eq('environment', merchant.current_environment || 'test')
-    .order('created_at', { ascending: false })
-    .limit(5);
+  if (!stats) {
+    // Cache miss, compute stats from PostgreSQL
+    
+    // Fetch recent payments
+    const { data: recentPayments } = await supabase
+      .from('payments')
+      .select('*, customers(name, email)')
+      .eq('merchant_id', merchant.id)
+      .eq('environment', merchant.current_environment || 'test')
+      .order('created_at', { ascending: false })
+      .limit(5);
 
-  // Aggregate stats (Total Encaissé)
-  const { data: succeededPayments } = await supabase
-    .from('payments')
-    .select('amount, net_amount, created_at')
-    .eq('merchant_id', merchant.id)
-    .eq('environment', merchant.current_environment || 'test')
-    .eq('status', 'succeeded');
+    // Fetch recent withdrawals
+    const { data: recentWithdrawals } = await supabase
+      .from('withdrawals')
+      .select('*')
+      .eq('merchant_id', merchant.id)
+      .eq('environment', merchant.current_environment || 'test')
+      .order('created_at', { ascending: false })
+      .limit(5);
 
-  const totalEncaisse = succeededPayments?.reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
+    // Aggregate stats (Total Encaissé)
+    const { data: succeededPayments } = await supabase
+      .from('payments')
+      .select('amount, net_amount, created_at')
+      .eq('merchant_id', merchant.id)
+      .eq('environment', merchant.current_environment || 'test')
+      .eq('status', 'succeeded');
+
+    const totalEncaisse = succeededPayments?.reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
+    
+    // Calculate success rate
+    const { count: totalCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test');
+    const { count: successCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test').eq('status', 'succeeded');
+    
+    const successRate = totalCount ? ((successCount || 0) / totalCount) * 100 : 0;
+
+    // Monthly revenue
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyRevenue = succeededPayments?.filter(p => new Date(p.created_at) >= monthStart).reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
+
+    // Webhooks data
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const { data: webhookEvents } = await supabase
+      .from('webhook_events')
+      .select('delivery_status')
+      .eq('merchant_id', merchant.id)
+      .gte('created_at', todayStart.toISOString());
+
+    const webhooksTotal = webhookEvents?.length || 0;
+    const webhooksSuccess = webhookEvents?.filter(w => w.delivery_status === 'success' || w.delivery_status === 'delivered').length || 0;
+    const webhooksFailed = webhooksTotal - webhooksSuccess;
+
+    // API Activity data (using audit_logs as proxy)
+    const { data: apiLogs } = await supabase
+      .from('audit_logs')
+      .select('metadata')
+      .eq('merchant_id', merchant.id)
+      .gte('created_at', todayStart.toISOString());
+
+    const apiTotal = apiLogs?.length || 0;
+    const apiSuccess = apiLogs?.filter(log => !log.metadata?.error).length || 0;
+    const apiErrors = apiTotal - apiSuccess;
+    const apiSuccessRate = apiTotal > 0 ? ((apiSuccess / apiTotal) * 100).toFixed(1) : "0";
+
+    stats = {
+      recentPayments,
+      recentWithdrawals,
+      succeededPayments,
+      totalEncaisse,
+      successRate,
+      monthlyRevenue,
+      webhooksTotal,
+      webhooksSuccess,
+      webhooksFailed,
+      apiTotal,
+      apiSuccess,
+      apiErrors,
+      apiSuccessRate
+    };
+
+    // Save to cache for 5 minutes
+    await safeRedis(async (redis) => {
+      await redis.set(cacheKey, stats, { ex: 300 });
+      return null;
+    }, null);
+  }
+
+  // Solde disponible is always calculated from merchant real-time data to avoid cache stale
   const soldeDisponible = merchant.current_environment === 'test' 
     ? Number(merchant.available_balance_test || 0) 
     : Number(merchant.available_balance || 0);
 
-  // Calculate success rate
-  const { count: totalCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test');
-  const { count: successCount } = await supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', merchant.id).eq('environment', merchant.current_environment || 'test').eq('status', 'succeeded');
+  const {
+    recentPayments,
+    recentWithdrawals,
+    succeededPayments,
+    totalEncaisse,
+    successRate,
+    monthlyRevenue,
+    webhooksTotal,
+    webhooksSuccess,
+    webhooksFailed,
+    apiTotal,
+    apiSuccess,
+    apiErrors,
+    apiSuccessRate
+  } = stats;
   
-  const successRate = totalCount ? ((successCount || 0) / totalCount) * 100 : 0;
-
-  // Monthly revenue
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthlyRevenue = succeededPayments?.filter(p => new Date(p.created_at) >= monthStart).reduce((sum, p) => sum + Number(p.net_amount || p.amount), 0) || 0;
-
-  // Webhooks data
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const { data: webhookEvents } = await supabase
-    .from('webhook_events')
-    .select('delivery_status')
-    .eq('merchant_id', merchant.id)
-    .gte('created_at', todayStart.toISOString());
-
-  const webhooksTotal = webhookEvents?.length || 0;
-  const webhooksSuccess = webhookEvents?.filter(w => w.delivery_status === 'success' || w.delivery_status === 'delivered').length || 0;
-  const webhooksFailed = webhooksTotal - webhooksSuccess;
-
-  // API Activity data (using audit_logs as proxy)
-  const { data: apiLogs } = await supabase
-    .from('audit_logs')
-    .select('metadata')
-    .eq('merchant_id', merchant.id)
-    .gte('created_at', todayStart.toISOString());
-
-  const apiTotal = apiLogs?.length || 0;
-  const apiSuccess = apiLogs?.filter(log => !log.metadata?.error).length || 0;
-  const apiErrors = apiTotal - apiSuccess;
-  const apiSuccessRate = apiTotal > 0 ? ((apiSuccess / apiTotal) * 100).toFixed(1) : "0";
 
   return (
     <>
@@ -210,7 +264,7 @@ export default async function DashboardPage() {
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {recentPayments && recentPayments.length > 0 ? (
-                    recentPayments.map((payment) => (
+                    recentPayments.map((payment: any) => (
                       <tr key={payment.id} className="hover:bg-white/5 transition-colors group">
                         <td className="py-4 px-6 flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-xs border border-white/10">

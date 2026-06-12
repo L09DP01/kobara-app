@@ -1,5 +1,5 @@
 import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { redis, hasRedis } from "../redis";
 
 // Basic memory cache fallback if Redis is not configured
 const memoryCache = new Map<string, number>();
@@ -38,14 +38,14 @@ class MemoryRateLimiter {
 // Singleton instances
 let authLimiter: Ratelimit | MemoryRateLimiter;
 let apiLimiter: Ratelimit | MemoryRateLimiter;
+let paymentsLimiter: Ratelimit | MemoryRateLimiter;
+let paymentLinksLimiter: Ratelimit | MemoryRateLimiter;
+let withdrawalsLimiter: Ratelimit | MemoryRateLimiter;
+let webhooksTestLimiter: Ratelimit | MemoryRateLimiter;
 
-const hasRedis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
+const { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } = process.env;
 
-if (hasRedis) {
-  const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+if (hasRedis && redis) {
 
   authLimiter = new Ratelimit({
     redis: redis,
@@ -58,10 +58,46 @@ if (hasRedis) {
     limiter: Ratelimit.slidingWindow(100, "1 m"), // 100 requests per minute for API
     analytics: true,
   });
+
+  paymentsLimiter = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(60, "1 m"), // 60 requests per minute
+    analytics: true,
+  });
+
+  paymentLinksLimiter = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(30, "1 m"), // 30 requests per minute
+    analytics: true,
+  });
+
+  withdrawalsLimiter = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(10, "1 m"), // 10 requests per minute
+    analytics: true,
+  });
+
+  webhooksTestLimiter = new Ratelimit({
+    redis: redis,
+    limiter: Ratelimit.slidingWindow(100, "1 m"), // 100 requests per minute
+    analytics: true,
+  });
 } else {
   // Fallback memory rate limiters
   authLimiter = new MemoryRateLimiter(5, 5 * 60 * 1000);
   apiLimiter = new MemoryRateLimiter(100, 60 * 1000);
+  paymentsLimiter = new MemoryRateLimiter(60, 60 * 1000);
+  paymentLinksLimiter = new MemoryRateLimiter(30, 60 * 1000);
+  withdrawalsLimiter = new MemoryRateLimiter(10, 60 * 1000);
+  webhooksTestLimiter = new MemoryRateLimiter(100, 60 * 1000);
 }
 
-export { authLimiter, apiLimiter, hasRedis };
+export { 
+  authLimiter, 
+  apiLimiter, 
+  paymentsLimiter, 
+  paymentLinksLimiter, 
+  withdrawalsLimiter, 
+  webhooksTestLimiter, 
+  hasRedis 
+};

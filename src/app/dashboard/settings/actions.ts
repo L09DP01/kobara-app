@@ -210,42 +210,27 @@ async function getOrCreateSettings(supabase: any, merchantId: string) {
 }
 
 export async function sendEmailOtpAction() {
-  const { user, merchant, supabase } = await getAuthUserAndMerchant();
+  const { user, merchant } = await getAuthUserAndMerchant();
 
-  const settings = await getOrCreateSettings(supabase, merchant.id);
-  const security = settings.security_json || {};
-
+  const { safeRedis } = await import("@/lib/server/redis");
+  
   // Rate limit check: wait 60s between sends
-  const emailOtp = security.email_otp || {};
-  if (emailOtp.last_sent_at) {
-    const lastSent = new Date(emailOtp.last_sent_at).getTime();
-    const now = Date.now();
-    if (now - lastSent < 60000) {
-      throw new Error("Veuillez attendre 60 secondes avant de demander un nouveau code.");
-    }
+  const rlKey = `otp:rate_limit:${user.email}`;
+  const isRateLimited = await safeRedis(async (r) => await r.get(rlKey), null);
+  if (isRateLimited) {
+    throw new Error("Veuillez attendre 60 secondes avant de demander un nouveau code.");
   }
 
   // Generate 6-digit code
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
-  const updatedSecurity = {
-    ...security,
-    email_otp: {
-      code,
-      expires_at: expiresAt,
-      last_sent_at: new Date().toISOString()
-    }
-  };
-
-  const { error } = await createAdminClient().from('settings')
-    .update({ security_json: updatedSecurity })
-    .eq('merchant_id', merchant.id);
-
-  if (error) {
-    console.error("Failed to save OTP code:", error);
-    throw new Error("Impossible d'enregistrer le code de vérification");
-  }
+  // Save to Redis (10 minutes expiration)
+  const otpKey = `otp:email:${user.email}`;
+  await safeRedis(async (r) => {
+    await r.set(otpKey, code, { ex: 600 });
+    await r.set(rlKey, "1", { ex: 60 });
+    return true;
+  }, false);
 
   // Send email
   const { sendEmail } = await import("@/lib/server/mail");
@@ -259,21 +244,28 @@ export async function sendEmailOtpAction() {
 }
 
 export async function verifyEmailOtpAction(code: string) {
-  const { merchant, supabase } = await getAuthUserAndMerchant();
+  const { user, merchant, supabase } = await getAuthUserAndMerchant();
   const cookieStore = await cookies();
 
-  const settings = await getOrCreateSettings(supabase, merchant.id);
-  const security = settings.security_json || {};
-  const emailOtp = security.email_otp || {};
+  const { safeRedis } = await import("@/lib/server/redis");
+  const otpKey = `otp:email:${user.email}`;
+  
+  const savedCode = await safeRedis(async (r) => await r.get(otpKey), null);
 
-  if (!emailOtp.code || emailOtp.code !== code) {
+  if (!savedCode) {
+    throw new Error("Le code a expiré ou n'existe pas. Veuillez en demander un nouveau.");
+  }
+
+  if (savedCode !== code) {
     throw new Error("Le code saisi est incorrect.");
   }
 
-  const expiresAt = new Date(emailOtp.expires_at).getTime();
-  if (Date.now() > expiresAt) {
-    throw new Error("Le code a expiré. Veuillez en demander un nouveau.");
-  }
+  // Delete the OTP after successful verification
+  await safeRedis(async (r) => await r.del(otpKey), null);
+
+  // Update settings in DB
+  const settings = await getOrCreateSettings(supabase, merchant.id);
+  const security = settings.security_json || {};
 
   // Set method as email in security_json
   const updatedSecurity = {

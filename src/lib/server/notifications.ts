@@ -6,7 +6,8 @@ export async function createNotification(
   type: string, 
   title: string, 
   message: string, 
-  emailDest?: string
+  emailDest?: string,
+  resourceId?: string
 ) {
   const supabase = createAdminClient();
   
@@ -17,10 +18,16 @@ export async function createNotification(
       merchant_id: merchantId,
       type,
       title,
-      message
+      message,
+      resource_id: resourceId
     });
     
   if (error) {
+    // If it's a unique constraint violation (23505), it means this notification was already created
+    if (error.code === '23505') {
+      console.log(`Notification deduplicated: [${type}] for resource ${resourceId}`);
+      return; // Do not send email again
+    }
     console.error("Failed to insert notification:", error);
   }
 
@@ -35,33 +42,36 @@ export async function createNotification(
 }
 
 // 1. Nouvelle Paiement (succeeded)
-export async function notifyPaymentSucceeded(merchantId: string, email: string, amount: number, currency: string) {
+export async function notifyPaymentSucceeded(merchantId: string, email: string, amount: number, currency: string, paymentId?: string) {
   await createNotification(
     merchantId,
     'payment_succeeded',
     'Paiement reçu',
     `Vous avez reçu un paiement de ${amount} ${currency}.`,
-    email
+    email,
+    paymentId
   );
 }
 
-export async function notifyPaymentCreated(merchantId: string, email: string, amount: number, currency: string) {
+export async function notifyPaymentCreated(merchantId: string, email: string, amount: number, currency: string, paymentId?: string) {
   await createNotification(
     merchantId,
     'payment_created',
     'Nouveau paiement créé',
     `Un paiement de ${amount} ${currency} est en attente.`,
-    email
+    email,
+    paymentId
   );
 }
 
-export async function notifyPaymentFailed(merchantId: string, email: string, amount: number, currency: string) {
+export async function notifyPaymentFailed(merchantId: string, email: string, amount: number, currency: string, paymentId?: string) {
   await createNotification(
     merchantId,
     'payment_failed',
     'Paiement échoué',
     `Un paiement de ${amount} ${currency} a échoué.`,
-    email
+    email,
+    paymentId
   );
 }
 
@@ -143,34 +153,37 @@ export async function notifyPasskeyAdded(merchantId: string, email: string) {
 }
 
 // 9. Retrait effectué avec succès
-export async function notifyWithdrawalSuccess(merchantId: string, email: string, amount: number) {
+export async function notifyWithdrawalSuccess(merchantId: string, email: string, amount: number, withdrawalId?: string) {
   await createNotification(
     merchantId,
     'withdrawal_completed',
     '💸 Retrait complété',
     `Votre retrait de ${amount} HTG a été envoyé avec succès à votre compte MonCash.`,
-    email
+    email,
+    withdrawalId
   );
 }
 
 // 10. Retrait échoué
-export async function notifyWithdrawalFailed(merchantId: string, email: string, amount: number) {
+export async function notifyWithdrawalFailed(merchantId: string, email: string, amount: number, withdrawalId?: string) {
   await createNotification(
     merchantId,
     'withdrawal_failed',
     '⚠️ Retrait échoué',
     `Votre retrait de ${amount} HTG a échoué. Le montant a été recrédité sur votre solde disponible.`,
-    email
+    email,
+    withdrawalId
   );
 }
 
 // 11. Retrait créé
-export async function notifyWithdrawalCreated(merchantId: string, email: string, amount: number) {
+export async function notifyWithdrawalCreated(merchantId: string, email: string, amount: number, withdrawalId?: string) {
   await createNotification(
     merchantId,
     'withdrawal_created',
     'Demande de retrait',
     `Votre demande de retrait de ${amount} HTG a été reçue et est en cours de traitement.`,
-    email
+    email,
+    withdrawalId
   );
 }

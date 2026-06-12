@@ -32,6 +32,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing reference" }, { status: 400 });
     }
 
+    const eventId = transaction_id || reference || crypto.randomUUID();
+    const redisLockKey = `webhook_event:bazik:${eventId}`;
+
+    // 1. Redis Fast Dedup
+    const { safeRedis } = await import("@/lib/server/redis");
+    const lockAcquired = await safeRedis(async (redis) => {
+      return await redis.set(redisLockKey, "processing", { nx: true, ex: 604800 }); // 7 days expiration for webhook lock
+    }, null);
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -41,6 +50,26 @@ export async function POST(request: NextRequest) {
         setAll() { }
       }
     });
+
+    // 2. Postgres Source of Truth & Audit
+    const { error: auditError } = await supabaseAdmin.from('incoming_webhook_events').insert({
+      event_id: `bazik:${eventId}`,
+      provider: 'bazik',
+      payload: body,
+      status: 'processed'
+    });
+
+    if (auditError) {
+      if (auditError.code === '23505') {
+        // Webhook already processed
+        console.log(`Webhook deduplicated via Postgres for event_id: bazik:${eventId}`);
+        return NextResponse.json({ received: true });
+      }
+      // If other DB error, we log but continue since Redis lock might be our safety net.
+      console.error("Webhook audit insertion failed:", auditError);
+    } else if (lockAcquired !== "OK") {
+       // If lock wasn't acquired but insertion succeeded, it means Redis was down or key was deleted. Proceed normally.
+    }
 
     // Intercepter les paiements pour mise à niveau d'abonnement
     if (reference.startsWith('UPGRADE::')) {

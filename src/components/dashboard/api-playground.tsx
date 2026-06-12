@@ -210,40 +210,135 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
         headers.filter(h => h.enabled && h.key).forEach(h => {
           cmd += ` \\\n  -H "${h.key}: ${h.value}"`;
         });
+        if (method === 'POST') {
+          cmd += ` \\\n  -H "Idempotency-Key: $(uuidgen)"`;
+        }
         if (body && method !== 'GET') cmd += ` \\\n  -d '${body}'`;
         return cmd;
       }
       case 'javascript': {
-        const opts = [`  method: '${method}'`];
         const hObj: Record<string, string> = {};
         headers.filter(h => h.enabled && h.key).forEach(h => { hObj[h.key] = h.value; });
-        if (Object.keys(hObj).length) {
-          opts.push(`  headers: ${JSON.stringify(hObj, null, 4).split('\n').map((l, i) => i === 0 ? l : '  ' + l).join('\n')}`);
+        
+        let code = '';
+        if (method === 'POST') {
+          code += `// Generate unique Idempotency-Key for sensitive operations\n`;
+          code += `const headers = ${JSON.stringify(hObj, null, 2)};\n`;
+          code += `headers['Idempotency-Key'] = crypto.randomUUID();\n\n`;
+        } else {
+          code += `const headers = ${JSON.stringify(hObj, null, 2)};\n\n`;
         }
+
+        code += `const options = {\n  method: '${method}',\n  headers,\n`;
         if (body && method !== 'GET') {
-          opts.push(`  body: JSON.stringify(${body.split('\n').map((l, i) => i === 0 ? l : '    ' + l).join('\n')})`);
+          code += `  body: JSON.stringify(${body.split('\n').map((l, i) => i === 0 ? l : '  ' + l).join('\n')})\n`;
         }
-        return `const response = await fetch('${url}', {\n${opts.join(',\n')}\n});\n\nconst data = await response.json();\nconsole.log(data);`;
+        code += `};\n\n`;
+
+        code += `// Exponential backoff with jitter for network or 5xx errors\n`;
+        code += `async function fetchWithRetry(url, options, maxRetries = 3) {\n`;
+        code += `  const delays = [500, 1500, 3500];\n`;
+        code += `  for (let i = 0; i <= maxRetries; i++) {\n`;
+        code += `    try {\n`;
+        code += `      const res = await fetch(url, options);\n`;
+        code += `      if (res.ok) return await res.json();\n`;
+        code += `      if (res.status >= 400 && res.status < 500) {\n`;
+        code += `        if (res.status === 409) throw new Error("Idempotency conflict");\n`;
+        code += `        throw new Error(\`Client error \${res.status}\`);\n`;
+        code += `      }\n`;
+        code += `      if (i === maxRetries) throw new Error(\`Server error \${res.status}\`);\n`;
+        code += `    } catch (err) {\n`;
+        code += `      if (err.message.includes("Client error") || err.message.includes("conflict")) throw err;\n`;
+        code += `      if (i === maxRetries) throw err;\n`;
+        code += `    }\n`;
+        code += `    const jitter = Math.floor(Math.random() * 200);\n`;
+        code += `    await new Promise(r => setTimeout(r, delays[i] + jitter));\n`;
+        code += `  }\n}\n\n`;
+        code += `fetchWithRetry('${url}', options)\n  .then(console.log)\n  .catch(console.error);`;
+
+        return code;
       }
       case 'python': {
         const hObj: Record<string, string> = {};
         headers.filter(h => h.enabled && h.key).forEach(h => { hObj[h.key] = h.value; });
-        let code = `import requests\n\nheaders = ${JSON.stringify(hObj, null, 4)}\n\n`;
-        if (body && method !== 'GET') {
-          code += `payload = ${body}\n\nresponse = requests.${method.toLowerCase()}(\n    '${url}',\n    headers=headers,\n    json=payload\n)\n\n`;
-        } else {
-          code += `response = requests.${method.toLowerCase()}(\n    '${url}',\n    headers=headers\n)\n\n`;
+        let code = `import requests\nimport time\nimport random\nimport uuid\n\nheaders = ${JSON.stringify(hObj, null, 4)}\n`;
+        
+        if (method === 'POST') {
+          code += `headers['Idempotency-Key'] = str(uuid.uuid4())\n`;
         }
-        return code + `print(response.json())`;
+        
+        code += `\n`;
+        if (body && method !== 'GET') {
+          code += `payload = ${body}\n\n`;
+        }
+        
+        code += `def request_with_retry():\n`;
+        code += `    delays = [0.5, 1.5, 3.5]\n`;
+        code += `    for i in range(4):\n`;
+        code += `        try:\n`;
+        if (body && method !== 'GET') {
+          code += `            res = requests.${method.toLowerCase()}('${url}', headers=headers, json=payload)\n`;
+        } else {
+          code += `            res = requests.${method.toLowerCase()}('${url}', headers=headers)\n`;
+        }
+        code += `            if res.status_code < 400:\n`;
+        code += `                return res.json()\n`;
+        code += `            if 400 <= res.status_code < 500:\n`;
+        code += `                if res.status_code == 409:\n`;
+        code += `                    raise Exception("Idempotency conflict")\n`;
+        code += `                raise Exception(f"Client error: {res.status_code}")\n`;
+        code += `            if i == 3:\n`;
+        code += `                raise Exception(f"Server error: {res.status_code}")\n`;
+        code += `        except requests.RequestException as e:\n`;
+        code += `            if i == 3:\n`;
+        code += `                raise e\n`;
+        code += `        \n`;
+        code += `        jitter = random.uniform(0, 0.2)\n`;
+        code += `        time.sleep(delays[i] + jitter)\n\n`;
+        code += `print(request_with_retry())\n`;
+        
+        return code;
       }
       case 'php': {
         let code = `<?php\n\n$ch = curl_init();\n\ncurl_setopt($ch, CURLOPT_URL, '${url}');\ncurl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n`;
         if (method === 'POST') code += `curl_setopt($ch, CURLOPT_POST, true);\n`;
         else if (method !== 'GET') code += `curl_setopt($ch, CURLOPT_CUSTOMREQUEST, '${method}');\n`;
-        const hArr = headers.filter(h => h.enabled && h.key).map(h => `    '${h.key}: ${h.value}'`);
-        if (hArr.length) code += `curl_setopt($ch, CURLOPT_HTTPHEADER, [\n${hArr.join(',\n')}\n]);\n`;
+        
+        const hArr = headers.filter(h => h.enabled && h.key).map(h => `'${h.key}: ${h.value}'`);
+        if (method === 'POST') {
+          hArr.push(`'Idempotency-Key: ' . bin2hex(random_bytes(16))`);
+        }
+        
+        if (hArr.length) {
+          code += `$headers = [\n    ${hArr.join(',\n    ')}\n];\n`;
+          code += `curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);\n`;
+        }
+        
         if (body && method !== 'GET') code += `curl_setopt($ch, CURLOPT_POSTFIELDS, '${body.replace(/'/g, "\\'")}');\n`;
-        return code + `\n$response = curl_exec($ch);\ncurl_close($ch);\n\n$data = json_decode($response, true);\nprint_r($data);`;
+        
+        code += `\n$delays = [500, 1500, 3500];\n`;
+        code += `$maxRetries = 3;\n`;
+        code += `$attempt = 0;\n\n`;
+        code += `while ($attempt <= $maxRetries) {\n`;
+        code += `    $response = curl_exec($ch);\n`;
+        code += `    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);\n\n`;
+        code += `    if ($httpCode >= 200 && $httpCode < 400) {\n`;
+        code += `        $data = json_decode($response, true);\n`;
+        code += `        print_r($data);\n`;
+        code += `        break;\n`;
+        code += `    }\n\n`;
+        code += `    if ($httpCode >= 400 && $httpCode < 500) {\n`;
+        code += `        die("Client Error: " . $httpCode);\n`;
+        code += `    }\n\n`;
+        code += `    if ($attempt == $maxRetries) {\n`;
+        code += `        die("Server Error after retries");\n`;
+        code += `    }\n\n`;
+        code += `    $jitter = mt_rand(0, 200);\n`;
+        code += `    usleep(($delays[$attempt] + $jitter) * 1000);\n`;
+        code += `    $attempt++;\n`;
+        code += `}\n\ncurl_close($ch);\n`;
+        
+        return code;
       }
     }
   };

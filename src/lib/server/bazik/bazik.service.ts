@@ -59,29 +59,43 @@ export const BazikService = {
   }) {
     const token = await this.getAccessToken();
 
-    const response = await fetch(`${BAZIK_API_URL}/moncash/token`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        gdes: params.amount,
-        userID: BAZIK_USER_ID,
-        referenceId: params.reference,
-        description: params.description || "Paiement Kobara",
-        successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/success?reference=${params.reference}&amount=${params.amount}`,
-        cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
-        errorUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "Erreur lors de la création du paiement Bazik");
+    try {
+      const response = await fetch(`${BAZIK_API_URL}/moncash/token`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gdes: params.amount,
+          userID: BAZIK_USER_ID,
+          referenceId: params.reference,
+          description: params.description || "Paiement Kobara",
+          successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/success?reference=${params.reference}&amount=${params.amount}`,
+          cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
+          errorUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Erreur lors de la création du paiement Bazik");
+      }
+
+      return await response.json(); // typically contains payment URL or ID
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') {
+        throw new Error('Bazik provider timeout');
+      }
+      throw err;
     }
-
-    return await response.json(); // typically contains payment URL or ID
   },
 
   /**
