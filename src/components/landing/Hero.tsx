@@ -1,160 +1,170 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Shield, Zap, Clock } from "lucide-react";
+import { CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { useTranslation } from "@/context/LanguageContext";
-import { getDashboardUrl } from "@/lib/utils";
 
 export function Hero() {
-  const { t, language } = useTranslation();
-
   return (
-    <section className="relative w-full flex flex-col min-h-[600px] lg:min-h-0" style={{ height: 'auto' }}>
-      {/* Outer padding — thin margin on all sides, below the 80px navbar */}
-      <div className="flex-1 px-4 sm:px-5 pb-4 sm:pb-5 flex flex-col lg:h-[calc(100vh/0.67)]" style={{ paddingTop: "84px" }}>
-        {/*
-          Main hero card — fills remaining space.
-          On mobile: stacked column. On desktop: two columns side by side.
-          Both halves share the SAME white/glass background for visual unity.
-        */}
-        <div className="flex-1 rounded-[24px] sm:rounded-[28px] overflow-hidden relative bg-white/65 backdrop-blur-md border border-white/90 shadow-[0_20px_60px_rgba(7,20,43,0.07)] flex flex-col lg:flex-row">
+    <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-[#020B14]">
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#FF4A1C]/10 rounded-full blur-[120px] pointer-events-none" />
 
-          {/* ── Left column: text content ── */}
-          <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left lg:w-[52%] px-4 sm:px-10 lg:pl-16 lg:pr-8 py-8 lg:py-12 z-10 relative">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="space-y-5 lg:space-y-7 flex flex-col items-center lg:items-start w-full"
-            >
-              {/* Badge */}
-              <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-sm font-bold text-kobara-red">
-                {t("home.heroBadge")}
-              </div>
-
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-[4.2rem] leading-[1.06] font-black text-kobara-primary tracking-tighter">
-                {language === "fr" ? (
-                  <>
-                    La Passerelle de Paiement<br />
-                    Pour Entreprises et<br />
-                    Développeurs<span className="text-kobara-red">.</span>
-                  </>
-                ) : (
-                  <>
-                    The Payment Gateway API<br />
-                    For Businesses And<br />
-                    Developers<span className="text-kobara-red">.</span>
-                  </>
-                )}
-              </h1>
-
-              {/* Subtext */}
-              <h2 className="text-sm sm:text-base xl:text-lg text-kobara-secondary max-w-[460px] leading-relaxed font-medium mx-auto lg:mx-0">
-                {language === "fr"
-                  ? "La meilleure API de paiement en Haïti. Intégrez facilement notre passerelle sur votre site web pour accepter MonCash. Créez des liens de paiement et automatisez vos encaissements."
-                  : "The best payment gateway API in Haiti. Easily integrate our gateway into your website to accept MonCash. Create payment links in seconds and automate your payouts."}
-              </h2>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 w-full">
-                <Link
-                  href={getDashboardUrl('/register')}
-                  className="h-12 sm:h-14 px-7 sm:px-9 rounded-xl bg-kobara-primary hover:bg-slate-900 text-white text-[15px] sm:text-[16px] font-bold shadow-xl shadow-kobara-primary/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2.5"
-                >
-                  {t("home.getStarted")}
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link
-                  href="/dashboard/developers"
-                  className="h-12 sm:h-14 px-7 sm:px-9 rounded-xl border border-slate-200 bg-white/70 backdrop-blur-sm text-kobara-primary text-[15px] sm:text-[16px] font-bold transition-all hover:bg-white flex items-center gap-2.5"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  {t("home.viewDocs")}
-                </Link>
-              </div>
-
-              {/* Stats */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-5 pt-1 w-full">
-                <div className="flex items-center gap-3 bg-white/80 border border-slate-100 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-sm">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-50 flex items-center justify-center text-kobara-red shrink-0">
-                    <Shield className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-[16px] sm:text-[18px] font-black text-kobara-primary tracking-tight leading-none">HTG 12M+</div>
-                    <div className="text-[11px] sm:text-[12px] text-kobara-secondary font-semibold mt-0.5">
-                      {language === "fr" ? "Traité" : "Processed"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white/80 border border-slate-100 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-sm">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-[16px] sm:text-[18px] font-black text-kobara-primary tracking-tight leading-none">1,200+</div>
-                    <div className="text-[11px] sm:text-[12px] text-kobara-secondary font-semibold mt-0.5">
-                      {language === "fr" ? "Requêtes API" : "API Requests"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 bg-white/80 border border-slate-100 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl shadow-sm">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-orange-50 flex items-center justify-center text-kobara-orange shrink-0">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-[16px] sm:text-[18px] font-black text-kobara-primary tracking-tight leading-none">99.9%</div>
-                    <div className="text-[11px] sm:text-[12px] text-kobara-secondary font-semibold mt-0.5">Uptime</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/*
-            ── Right column: isometric visual ──
-            Background is TRANSPARENT so it inherits the same white/glass
-            background as the whole card — unified look as requested.
-            A very subtle radial tint adds depth without a hard color split.
-          */}
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          
+          {/* Left Column - Content */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex-1 relative overflow-hidden hidden lg:flex items-center justify-center min-h-[280px]"
-            style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(249,241,241,0.9) 0%, rgba(245,247,250,0.4) 100%)' }}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="max-w-xl"
           >
-            {/* Isometric image — aggressive radial mask fades all edges into bg */}
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              className="relative w-full h-full flex items-center justify-center"
-            >
-              <div
-                className="relative w-[88%] h-[88%]"
-                style={{
-                  maskImage: 'radial-gradient(ellipse 75% 72% at 50% 50%, black 20%, rgba(0,0,0,0.7) 45%, transparent 75%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 75% 72% at 50% 50%, black 20%, rgba(0,0,0,0.7) 45%, transparent 75%)',
-                }}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#07111F] border border-[#1E2A38] text-sm text-[#AAB3C2] mb-8">
+              <span className="w-2 h-2 rounded-full bg-[#FF4A1C] animate-pulse" />
+              Powered by <strong className="text-white font-medium">MonCash</strong>
+            </div>
+
+            <h1 className="text-5xl lg:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
+              Accept Payment <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF4A1C] to-[#FF2E14]">
+                MonCash.
+              </span><br />
+              Start Instantly.
+            </h1>
+
+            <p className="text-lg text-[#AAB3C2] mb-10 leading-relaxed max-w-lg">
+              The fastest and most secure way to accept MonCash payments in Haiti. Integrate in minutes and grow your business today.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
+              <Link
+                href="/register"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-semibold transition-all shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] flex items-center justify-center gap-2 group"
               >
-                <Image
-                  src="/images/isometric.png"
-                  alt="Kobara API Infrastructure"
-                  fill
-                  className="object-contain"
-                  style={{ mixBlendMode: "multiply" }}
-                  priority
-                />
-              </div>
-            </motion.div>
+                Get Started Free
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/contact"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-transparent border border-[#1E2A38] hover:border-[#AAB3C2] text-white font-semibold transition-colors flex items-center justify-center"
+              >
+                Contact Sales
+              </Link>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-6 text-[#AAB3C2] text-sm font-medium">
+              {['No setup fee', 'No monthly fee', 'Secure & Reliable'].map((benefit, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-[#FF4A1C]" />
+                  {benefit}
+                </div>
+              ))}
+            </div>
           </motion.div>
+
+          {/* Right Column - Isometric Visual */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            className="relative lg:h-[600px] flex items-center justify-center perspective-[1200px]"
+          >
+            {/* 3D Container */}
+            <div className="relative w-[320px] h-[640px] transform-gpu rotate-x-[20deg] rotate-y-[-25deg] rotate-z-[5deg] hover:rotate-x-[15deg] hover:rotate-y-[-15deg] transition-transform duration-700 ease-out preserve-3d">
+              
+              {/* Base Platform Shadow (Deeper, more realistic) */}
+              <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[300px] h-[40px] bg-black/60 blur-[30px] rounded-[100%] translate-z-[-50px]" />
+              <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[450px] h-[120px] bg-[#FF4A1C]/20 blur-[60px] rounded-[100%] translate-z-[-100px]" />
+
+              {/* Smartphone Body */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#1E2A38] to-[#020B14] rounded-[3.5rem] border-[6px] border-[#07111F] shadow-[20px_20px_60px_rgba(0,0,0,0.8),inset_0_0_10px_rgba(255,255,255,0.1)] overflow-hidden flex flex-col translate-z-0">
+                
+                {/* Screen Reflection (Glass effect) */}
+                <div className="absolute top-[-20%] left-[-20%] w-[150%] h-[50%] bg-gradient-to-b from-white/5 to-transparent rotate-12 pointer-events-none z-50" />
+                
+                {/* Dynamic Island / Notch */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-8 bg-black rounded-full z-40 shadow-[inset_0_-2px_5px_rgba(255,255,255,0.1)]" />
+                
+                {/* Phone Screen Background */}
+                <div className="flex-1 bg-gradient-to-b from-[#0A1628] to-[#020B14] pt-24 px-6 flex flex-col items-center relative z-10">
+                  
+                  {/* Glowing Grid Background inside screen */}
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(30,42,56,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(30,42,56,0.3)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20" />
+
+                  {/* Payment Info */}
+                  <div className="w-full bg-[#07111F]/80 backdrop-blur-md border border-[#1E2A38] rounded-2xl p-5 mb-8 shadow-lg relative z-20">
+                    <div className="text-[#AAB3C2] text-xs uppercase tracking-wider mb-3">Amount Due</div>
+                    <div className="text-4xl font-bold text-white mb-1">2,500.00</div>
+                    <div className="text-[#AAB3C2] text-sm mb-4">HTG</div>
+                    <div className="w-full h-px bg-[#1E2A38] mb-4" />
+                    <div className="flex justify-between text-sm">
+                      <span className="text-[#AAB3C2]">Merchant</span>
+                      <span className="text-white font-medium">Kobara Store</span>
+                    </div>
+                  </div>
+
+                  {/* Success Animation Container */}
+                  <motion.div 
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 1, type: "spring", stiffness: 200 }}
+                    className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#FF4A1C] to-[#FF2E14] flex items-center justify-center shadow-[0_0_40px_rgba(255,74,28,0.4),inset_0_5px_15px_rgba(255,255,255,0.2)] mb-6 relative z-20"
+                  >
+                    <CheckCircle2 className="w-12 h-12 text-white" strokeWidth={2.5} />
+                  </motion.div>
+
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 1.2 }}
+                    className="text-center relative z-20"
+                  >
+                    <div className="text-white font-bold text-xl mb-1">Payment Successful</div>
+                    <div className="text-[#AAB3C2] text-sm">Transaction #KB-2039</div>
+                  </motion.div>
+
+                  {/* Bottom Home Indicator */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-white/20 rounded-full z-20" />
+                </div>
+              </div>
+
+              {/* Floating Cards (Realistic Isometric with depth) */}
+              
+              {/* Floating Kobara Card */}
+              <motion.div
+                animate={{ y: [-15, 15, -15] }}
+                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                className="absolute -right-20 top-[20%] w-40 p-4 bg-[#07111F]/90 backdrop-blur-xl border border-[#1E2A38] rounded-2xl shadow-[20px_20px_40px_rgba(0,0,0,0.6)] translate-z-[50px]"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#FF4A1C] flex items-center justify-center font-bold text-white shadow-lg">K</div>
+                  <span className="text-white font-bold text-sm">API Call</span>
+                </div>
+                <div className="h-2 w-full bg-[#1E2A38] rounded-full mb-2" />
+                <div className="h-2 w-3/4 bg-[#1E2A38] rounded-full" />
+              </motion.div>
+
+              {/* Floating MonCash Card */}
+              <motion.div
+                animate={{ y: [15, -15, 15] }}
+                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
+                className="absolute -left-20 bottom-[25%] w-44 p-4 bg-gradient-to-br from-red-600 to-red-700 border border-red-500/50 rounded-2xl shadow-[20px_20px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(220,38,38,0.2)] translate-z-[80px]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-red-600 font-bold text-sm shadow-inner">M</div>
+                  <div>
+                    <div className="text-white font-bold text-sm">MonCash</div>
+                    <div className="text-red-200 text-xs">Authorized</div>
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
+          </motion.div>
+
         </div>
       </div>
     </section>
   );
 }
-

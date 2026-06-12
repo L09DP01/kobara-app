@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { FloatingBackground } from "@/components/landing/FloatingBackground";
-import { Check, Zap, ArrowRight } from "lucide-react";
+import { Check, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { getServerTranslation } from "@/lib/server/i18n";
 
@@ -177,21 +177,21 @@ export default async function PricingPage() {
   ];
 
   return (
-    <main className="relative min-h-[100dvh]">
+    <main className="relative min-h-[100dvh] bg-[#020B14] selection:bg-[#FF4A1C] selection:text-white font-sans text-white">
       <FloatingBackground />
       <Navbar />
 
       {/* ── Hero ── */}
       <section className="pt-40 pb-16 relative text-center">
         <div className="max-w-[860px] mx-auto px-5 sm:px-10">
-          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-sm font-bold text-kobara-red mb-6">
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#FF4A1C]/10 border border-[#FF4A1C]/20 text-sm font-bold text-[#FF4A1C] mb-6 shadow-[0_0_15px_rgba(255,74,28,0.2)]">
             {language === "fr" ? "Tarification transparente" : "Transparent pricing"}
           </div>
-          <h1 className="text-5xl sm:text-6xl font-black text-kobara-primary tracking-tighter leading-[1.05] mb-5">
+          <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tighter leading-[1.05] mb-5">
             {language === "fr" ? "Le bon plan pour" : "The right plan for"}<br />
-            <span className="text-kobara-red">{language === "fr" ? "chaque étape." : "every stage."}</span>
+            <span className="text-[#FF4A1C]">{language === "fr" ? "chaque étape." : "every stage."}</span>
           </h1>
-          <p className="text-lg text-kobara-secondary font-medium leading-relaxed max-w-xl mx-auto">
+          <p className="text-lg text-[#AAB3C2] font-medium leading-relaxed max-w-xl mx-auto">
             {language === "fr" 
               ? "Commencez gratuitement. Scalez quand vous êtes prêt. Aucun frais caché, jamais."
               : "Get started for free. Scale when you are ready. No hidden fees, ever."}
@@ -202,41 +202,42 @@ export default async function PricingPage() {
       {/* ── Plans grid ── */}
       <section className="pb-24 relative">
         <div className="max-w-[1340px] mx-auto px-5 sm:px-8">
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex flex-col rounded-[28px] overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl
+                className={`relative flex flex-col rounded-[28px] overflow-hidden border transition-all duration-300 hover:-translate-y-2 group
                   ${plan.highlight
-                    ? "bg-kobara-primary border-kobara-primary shadow-2xl shadow-kobara-primary/20 ring-2 ring-kobara-red/40"
-                    : "bg-white/65 backdrop-blur-md border-white/90 shadow-lg"
+                    ? "bg-[#07111F] border-[#FF4A1C]/50 shadow-[0_10px_40px_rgba(255,74,28,0.2)]"
+                    : "bg-[#07111F] border-[#1E2A38] hover:border-[#AAB3C2]/30 shadow-lg"
                   }`}
               >
+                {/* Highlight Glow inside card */}
+                {plan.highlight && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-[#FF4A1C] to-transparent opacity-80" />
+                )}
+
                 {/* Badge */}
                 {plan.badge && (
-                  <div className="absolute top-5 right-5">
-                    <span className={`text-xs font-black px-3 py-1 rounded-full
-                      ${plan.highlight
-                        ? "bg-kobara-red text-white"
-                        : "bg-kobara-primary text-white"
-                      }`}>
+                  <div className="absolute top-5 right-5 z-10">
+                    <span className="text-xs font-black px-3 py-1 rounded-full bg-[#FF4A1C]/10 border border-[#FF4A1C]/20 text-[#FF4A1C] shadow-[0_0_10px_rgba(255,74,28,0.2)]">
                       {plan.badge}
                     </span>
                   </div>
                 )}
 
-                <div className="p-7 flex flex-col flex-1">
+                <div className="p-8 flex flex-col flex-1 relative z-10">
                   {/* Plan name */}
-                  <div className={`text-xs font-black uppercase tracking-widest mb-3 ${plan.highlight ? "text-white/60" : "text-kobara-secondary"}`}>
+                  <div className={`text-sm font-bold uppercase tracking-widest mb-3 ${plan.highlight ? "text-[#FF4A1C]" : "text-[#AAB3C2]"}`}>
                     {plan.name}
                   </div>
 
                   {/* Price */}
-                  <div className="mb-3">
-                    <div className={`text-[3.2rem] font-black leading-none tracking-tighter ${plan.highlight ? "text-white" : "text-kobara-primary"}`}>
+                  <div className="mb-4">
+                    <div className="text-[3.5rem] font-black leading-none tracking-tighter text-white">
                       {plan.priceLabel}
                       {plan.period && (
-                        <span className={`text-base font-semibold ml-1 ${plan.highlight ? "text-white/60" : "text-kobara-secondary"}`}>
+                        <span className="text-base font-semibold ml-2 text-[#AAB3C2] tracking-normal">
                           {plan.period}
                         </span>
                       )}
@@ -244,37 +245,32 @@ export default async function PricingPage() {
                   </div>
 
                   {/* Description */}
-                  <p className={`text-sm font-medium leading-relaxed mb-6 ${plan.highlight ? "text-white/70" : "text-kobara-secondary"}`}>
+                  <p className="text-sm font-medium leading-relaxed mb-8 text-[#AAB3C2] min-h-[40px]">
                     {plan.description}
                   </p>
 
                   {/* CTA Button */}
                   <Link
                     href={plan.ctaHref}
-                    className={`w-full h-12 rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 mb-7 transition-all active:scale-95
+                    className={`w-full h-13 rounded-xl font-bold text-[15px] flex items-center justify-center gap-2 mb-8 transition-all
                       ${plan.highlight
-                        ? "bg-kobara-red hover:bg-rose-600 text-white shadow-lg shadow-kobara-red/30 hover:scale-105"
-                        : plan.name === "Free"
-                          ? "bg-slate-100 hover:bg-slate-200 text-kobara-primary"
-                          : "bg-kobara-primary hover:bg-slate-900 text-white hover:scale-105"
+                        ? "bg-[#FF4A1C] hover:bg-[#FF2E14] text-white shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] active:scale-95"
+                        : "bg-[#020B14] border border-[#1E2A38] hover:border-[#AAB3C2] text-white active:scale-95"
                       }`}
                   >
                     {plan.cta}
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
 
                   {/* Divider */}
-                  <div className={`border-t mb-6 ${plan.highlight ? "border-white/10" : "border-slate-100"}`} />
+                  <div className="border-t border-[#1E2A38] mb-8" />
 
                   {/* Features */}
-                  <ul className="space-y-3 flex-1">
+                  <ul className="space-y-4 flex-1">
                     {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-start gap-2.5">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5
-                          ${plan.highlight ? "bg-white/10" : "bg-emerald-50"}`}>
-                          <Check className={`w-3 h-3 ${plan.highlight ? "text-emerald-300" : "text-emerald-500"}`} />
-                        </div>
-                        <span className={`text-sm font-medium leading-snug ${plan.highlight ? "text-white/85" : "text-kobara-primary"}`}>
+                      <li key={j} className="flex items-start gap-3">
+                        <CheckCircle2 className={`w-5 h-5 shrink-0 ${plan.highlight ? "text-[#FF4A1C]" : "text-[#AAB3C2]"}`} />
+                        <span className="text-sm font-medium leading-snug text-[#AAB3C2]">
                           {feature}
                         </span>
                       </li>
@@ -283,7 +279,7 @@ export default async function PricingPage() {
 
                   {/* Fee note */}
                   {plan.feeNote && (
-                    <p className="text-[11px] text-kobara-secondary font-medium mt-5 leading-relaxed">
+                    <p className="text-[12px] text-[#AAB3C2]/70 font-medium mt-6 leading-relaxed">
                       {plan.feeNote}
                     </p>
                   )}
@@ -293,8 +289,8 @@ export default async function PricingPage() {
           </div>
 
           {/* Comparison note */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-kobara-secondary font-medium">
+          <div className="mt-12 text-center">
+            <p className="text-[#AAB3C2] font-medium">
               {language === "fr" 
                 ? "Tous les plans incluent l'accès au dashboard, les notifications et l'intégration MonCash."
                 : "All plans include dashboard access, notifications, and MonCash integration."}
@@ -304,27 +300,27 @@ export default async function PricingPage() {
       </section>
 
       {/* ── Comparison table ── */}
-      <section className="py-16 relative">
+      <section className="py-24 relative">
         <div className="max-w-[1100px] mx-auto px-5 sm:px-10">
-          <h2 className="text-3xl font-black text-kobara-primary tracking-tighter text-center mb-10">
+          <h2 className="text-4xl font-black text-white tracking-tighter text-center mb-12">
             {language === "fr" ? "Comparaison détaillée" : "Detailed comparison"}
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="text-left py-4 px-5 text-sm font-black text-kobara-secondary uppercase tracking-wider">
+                  <th className="text-left py-6 px-6 text-sm font-bold text-[#AAB3C2] uppercase tracking-wider border-b border-[#1E2A38]">
                     {language === "fr" ? "Fonctionnalité" : "Feature"}
                   </th>
                   {["Free", "Pro", "Premium", "Business"].map((n) => (
-                    <th key={n} className={`text-center py-4 px-4 text-sm font-black uppercase tracking-wider rounded-t-xl
-                      ${n === "Premium" ? "bg-kobara-primary text-white" : "text-kobara-primary"}`}>
+                    <th key={n} className={`text-center py-6 px-4 text-sm font-bold uppercase tracking-wider border-b border-[#1E2A38]
+                      ${n === "Premium" ? "text-[#FF4A1C]" : "text-white"}`}>
                       {n}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#1E2A38]">
                 {[
                   { 
                     label: language === "fr" ? "Prix mensuel" : "Monthly price",          
@@ -382,16 +378,16 @@ export default async function PricingPage() {
                     values: ["—", "—", "—", "✓"] 
                   },
                 ].map((row, i) => (
-                  <tr key={i} className={i % 2 === 0 ? "bg-white/40" : ""}>
-                    <td className="py-3.5 px-5 text-sm font-semibold text-kobara-primary rounded-l-xl">{row.label}</td>
+                  <tr key={i} className="hover:bg-[#07111F]/50 transition-colors">
+                    <td className="py-5 px-6 text-sm font-semibold text-white">{row.label}</td>
                     {row.values.map((val, j) => (
                       <td
                         key={j}
-                        className={`py-3.5 px-4 text-sm text-center font-bold
-                          ${j === 2 ? "bg-kobara-primary/5 text-kobara-primary" : "text-kobara-secondary"}
-                          ${j === 3 ? "rounded-r-xl" : ""}`}
+                        className={`py-5 px-4 text-sm text-center font-medium
+                          ${j === 2 ? "text-[#FF4A1C]" : "text-[#AAB3C2]"}
+                          ${val === "✓" ? "text-[#FF4A1C]" : ""}`}
                       >
-                        {val}
+                        {val === "✓" ? <Check className="w-5 h-5 mx-auto text-[#FF4A1C]" /> : val}
                       </td>
                     ))}
                   </tr>
@@ -403,16 +399,21 @@ export default async function PricingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-20 relative">
-        <div className="max-w-[760px] mx-auto px-5 sm:px-10">
-          <h2 className="text-3xl font-black text-kobara-primary tracking-tighter text-center mb-10">
+      <section className="py-24 relative bg-[#07111F] border-y border-[#1E2A38]">
+        <div className="max-w-[800px] mx-auto px-5 sm:px-10">
+          <h2 className="text-4xl font-black text-white tracking-tighter text-center mb-12">
             {language === "fr" ? "Questions fréquentes" : "Frequently asked questions"}
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {faqItems.map((item, i) => (
-              <div key={i} className="bg-white/60 backdrop-blur-md border border-white/90 rounded-2xl p-6">
-                <h3 className="font-bold text-kobara-primary mb-2">{item.q}</h3>
-                <p className="text-kobara-secondary font-medium leading-relaxed">{item.a}</p>
+              <div key={i} className="bg-[#020B14] border border-[#1E2A38] rounded-2xl p-8 hover:border-[#AAB3C2]/30 transition-colors">
+                <h3 className="font-bold text-lg text-white mb-3 flex items-start gap-4">
+                  <span className="text-[#FF4A1C] mt-0.5">Q.</span>
+                  {item.q}
+                </h3>
+                <p className="text-[#AAB3C2] font-medium leading-relaxed pl-8">
+                  {item.a}
+                </p>
               </div>
             ))}
           </div>
@@ -420,26 +421,30 @@ export default async function PricingPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-20 relative">
-        <div className="max-w-[700px] mx-auto px-5 sm:px-10 text-center">
-          <div className="bg-kobara-primary rounded-[32px] p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-kobara-red/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+      <section className="py-32 relative overflow-hidden">
+        <div className="max-w-[900px] mx-auto px-5 sm:px-10 text-center relative z-10">
+          <div className="bg-[#07111F] rounded-[40px] p-12 md:p-20 relative overflow-hidden border border-[#1E2A38] shadow-2xl">
+            {/* Animated Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#FF4A1C]/10 rounded-full blur-[100px] pointer-events-none" />
+            
             <div className="relative z-10">
-              <Zap className="w-8 h-8 text-kobara-red mx-auto mb-5" />
-              <h2 className="text-3xl font-black text-white tracking-tighter mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-[#020B14] border border-[#1E2A38] flex items-center justify-center mx-auto mb-8 shadow-lg">
+                <Zap className="w-8 h-8 text-[#FF4A1C]" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-6">
                 {language === "fr" ? "Prêt à accepter vos premiers paiements ?" : "Ready to accept your first payments?"}
               </h2>
-              <p className="text-white/70 font-medium mb-8 leading-relaxed">
+              <p className="text-xl text-[#AAB3C2] font-medium mb-10 leading-relaxed max-w-2xl mx-auto">
                 {language === "fr" 
                   ? "Créez votre compte gratuitement et commencez à recevoir des paiements MonCash en quelques minutes."
                   : "Create your account for free and start receiving MonCash payments in minutes."}
               </p>
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2.5 h-13 px-10 rounded-xl bg-kobara-red hover:bg-rose-600 text-white font-bold text-[16px] shadow-xl shadow-kobara-red/30 transition-all hover:scale-105 active:scale-95"
+                className="inline-flex items-center justify-center gap-3 h-14 px-10 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-bold text-lg shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] transition-all hover:scale-105 active:scale-95"
               >
                 {language === "fr" ? "Commencer gratuitement" : "Start for free"}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
           </div>

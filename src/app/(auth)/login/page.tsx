@@ -4,8 +4,7 @@ import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
-import Image from 'next/image'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '@/context/LanguageContext'
 import { verifyCredentialsAction } from '../actions'
 
@@ -68,41 +67,24 @@ function LoginContent() {
   };
 
   return (
-    <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out">
-      {/* Back to Home & Mobile Logo */}
-      <div className="flex flex-col gap-6 mb-10">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {language === "fr" ? "Retour à l'accueil" : "Back to home"}
-        </Link>
-        
-        <div className="lg:hidden flex items-center gap-2">
-          <div className="bg-white rounded-xl shadow-lg flex items-center justify-center w-10 h-10 p-1">
-            <Image src="/Icone.png" alt="Kobara Logo" width={32} height={32} />
-          </div>
-          <span className="text-kobara-primary font-bold text-lg tracking-tight">Kobara</span>
-        </div>
-      </div>
-
+    <div className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out">
+      
       <div className="mb-10">
-        <h1 className="text-4xl font-black text-kobara-primary tracking-tight mb-3">
+        <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tighter mb-4">
           {t("auth.loginTitle")}
         </h1>
-        <p className="text-gray-500 font-medium leading-relaxed">
+        <p className="text-[#AAB3C2] font-medium leading-relaxed text-lg">
           {t("auth.loginSubtitle")}
         </p>
       </div>
 
       {/* Success Notification Banner */}
       {registered && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-emerald-800 text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="mb-8 p-5 bg-[#27C93F]/10 border border-[#27C93F]/20 rounded-2xl flex items-start gap-4 text-white text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300 shadow-[0_0_20px_rgba(39,201,63,0.1)]">
+          <CheckCircle2 className="w-5 h-5 text-[#27C93F] shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-emerald-900 mb-0.5">{t("auth.successTitle")}</p>
-            <p className="text-emerald-700 leading-relaxed text-xs">
+            <p className="font-bold text-[#27C93F] mb-1">{t("auth.successTitle")}</p>
+            <p className="text-[#AAB3C2] leading-relaxed text-[13px]">
               {t("auth.successDesc")}
             </p>
           </div>
@@ -111,13 +93,13 @@ function LoginContent() {
 
       {/* Reset Password Success Banner */}
       {resetSuccess && (
-        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-emerald-800 text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="mb-8 p-5 bg-[#27C93F]/10 border border-[#27C93F]/20 rounded-2xl flex items-start gap-4 text-white text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300 shadow-[0_0_20px_rgba(39,201,63,0.1)]">
+          <CheckCircle2 className="w-5 h-5 text-[#27C93F] shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-emerald-900 mb-0.5">
+            <p className="font-bold text-[#27C93F] mb-1">
               {language === "fr" ? "Mot de passe réinitialisé" : "Password reset successfully"}
             </p>
-            <p className="text-emerald-700 leading-relaxed text-xs">
+            <p className="text-[#AAB3C2] leading-relaxed text-[13px]">
               {language === "fr"
                 ? "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
                 : "Your password has been successfully reset. You can now log in with your new password."}
@@ -128,25 +110,25 @@ function LoginContent() {
 
       {/* Error Notification Banner */}
       {error && (
-        <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-800 text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300">
-          <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+        <div className="mb-8 p-5 bg-[#FF5F56]/10 border border-[#FF5F56]/20 rounded-2xl flex items-start gap-4 text-white text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300 shadow-[0_0_20px_rgba(255,95,86,0.1)]">
+          <XCircle className="w-5 h-5 text-[#FF5F56] shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-rose-900 mb-0.5">{language === "fr" ? "Erreur de connexion" : "Login error"}</p>
-            <p className="text-rose-700 leading-relaxed text-xs">
+            <p className="font-bold text-[#FF5F56] mb-1">{language === "fr" ? "Erreur d'authentification" : "Authentication error"}</p>
+            <p className="text-[#AAB3C2] leading-relaxed text-[13px]">
               {error}
             </p>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="email">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="group relative">
+          <label className="block text-[11px] font-bold text-[#AAB3C2] uppercase tracking-wider mb-2.5 transition-colors group-focus-within:text-[#FF4A1C]" htmlFor="email">
             {t("auth.emailLabel")}
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-gray-400" />
+          <div className="relative flex items-center">
+            <div className="absolute left-4 flex items-center pointer-events-none text-[#AAB3C2] group-focus-within:text-[#FF4A1C] transition-colors">
+              <Mail className="h-5 w-5" />
             </div>
             <input 
               id="email"
@@ -155,24 +137,24 @@ function LoginContent() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+              className="w-full pl-12 pr-4 py-4 bg-[#07111F] border border-[#1E2A38] rounded-2xl font-medium text-white placeholder-[#1E2A38] focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all shadow-inner"
               placeholder="you@company.com"
             />
           </div>
         </div>
         
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider" htmlFor="password">
+        <div className="group relative">
+          <div className="flex items-center justify-between mb-2.5">
+            <label className="block text-[11px] font-bold text-[#AAB3C2] uppercase tracking-wider transition-colors group-focus-within:text-[#FF4A1C]" htmlFor="password">
               {t("auth.passwordLabel")}
             </label>
-            <Link href="/forgot-password" className="text-sm font-bold text-kobara-red hover:text-rose-600 transition-colors">
+            <Link href="/forgot-password" className="text-[13px] font-bold text-[#AAB3C2] hover:text-[#FF4A1C] transition-colors">
               {t("auth.forgotPassword")}
             </Link>
           </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-gray-400" />
+          <div className="relative flex items-center">
+            <div className="absolute left-4 flex items-center pointer-events-none text-[#AAB3C2] group-focus-within:text-[#FF4A1C] transition-colors">
+              <Lock className="h-5 w-5" />
             </div>
             <input 
               id="password"
@@ -181,13 +163,13 @@ function LoginContent() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-11 pr-12 py-3.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+              className="w-full pl-12 pr-12 py-4 bg-[#07111F] border border-[#1E2A38] rounded-2xl font-medium text-white placeholder-[#1E2A38] focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all shadow-inner"
               placeholder="••••••••"
             />
             <button 
               type="button" 
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-4 flex items-center text-[#AAB3C2] hover:text-white transition-colors p-1"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -197,7 +179,7 @@ function LoginContent() {
         <button 
           type="submit"
           disabled={loading}
-          className="w-full bg-[#E53E3E] text-white rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-red-600 transition-all flex items-center justify-center gap-2 mt-6 disabled:opacity-50"
+          className="w-full h-14 bg-[#FF4A1C] hover:bg-[#FF2E14] text-white rounded-2xl font-bold text-[15px] transition-all flex items-center justify-center gap-3 mt-8 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] active:scale-95 group/btn"
         >
           {loading ? (
             <>
@@ -205,14 +187,17 @@ function LoginContent() {
               {language === "fr" ? "Connexion en cours..." : "Signing in..."}
             </>
           ) : (
-            t("auth.loginBtn")
+            <>
+              {t("auth.loginBtn")}
+              <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+            </>
           )}
         </button>
 
-        <div className="flex items-center gap-4 my-6">
-          <div className="h-[1px] flex-1 bg-gray-200"></div>
-          <span className="text-xs font-medium text-gray-400">{language === "fr" ? "Ou continuer avec" : "Or continue with"}</span>
-          <div className="h-[1px] flex-1 bg-gray-200"></div>
+        <div className="flex items-center gap-4 my-8">
+          <div className="h-[1px] flex-1 bg-[#1E2A38]"></div>
+          <span className="text-[11px] font-bold text-[#AAB3C2] uppercase tracking-widest">{language === "fr" ? "Ou continuer avec" : "Or continue with"}</span>
+          <div className="h-[1px] flex-1 bg-[#1E2A38]"></div>
         </div>
 
         <button 
@@ -265,15 +250,15 @@ function LoginContent() {
             }
           }}
           disabled={loading}
-          className="w-full bg-white border border-gray-200 text-gray-700 rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center gap-3 mb-4"
+          className="w-full h-14 bg-[#07111F] border border-[#1E2A38] text-white rounded-2xl font-bold text-[14px] hover:border-[#AAB3C2]/50 transition-all flex items-center justify-center gap-3 mb-4 active:scale-95 group/passkey"
         >
-          <span className="material-symbols-outlined text-[20px] text-kobara-red">fingerprint</span>
+          <span className="material-symbols-outlined text-[20px] text-[#AAB3C2] group-hover/passkey:text-[#FF4A1C] transition-colors">fingerprint</span>
           {language === "fr" ? "Se connecter avec Passkey" : "Sign in with Passkey"}
         </button>
 
         <button 
           type="button"
-          className="w-full bg-white border border-gray-200 text-gray-700 rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center gap-3"
+          className="w-full h-14 bg-[#07111F] border border-[#1E2A38] text-white rounded-2xl font-bold text-[14px] hover:border-[#AAB3C2]/50 transition-all flex items-center justify-center gap-3 active:scale-95"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -285,10 +270,10 @@ function LoginContent() {
         </button>
       </form>
 
-      <div className="mt-8 text-center">
-        <p className="text-sm font-medium text-gray-500">
+      <div className="mt-10 text-center">
+        <p className="text-[14px] font-medium text-[#AAB3C2]">
           {t("auth.dontHaveAccount")}{' '}
-          <Link href="/register" className="font-bold text-kobara-red hover:text-red-700 transition-colors">
+          <Link href="/register" className="font-bold text-white hover:text-[#FF4A1C] transition-colors underline underline-offset-4 decoration-[#1E2A38] hover:decoration-[#FF4A1C]">
             {t("auth.signUpNow")}
           </Link>
         </p>
@@ -301,7 +286,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="w-full flex justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-kobara-red" />
+        <Loader2 className="w-8 h-8 animate-spin text-[#FF4A1C]" />
       </div>
     }>
       <LoginContent />

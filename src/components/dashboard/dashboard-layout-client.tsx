@@ -38,33 +38,34 @@ export default function DashboardLayoutClient({
   // Guest view: no sidebar, no top-nav toggle — just the content
   if (isGuest) {
     return (
-      <div className="bg-background-main font-body-base text-body-base text-on-surface antialiased min-h-[100dvh]">
+      <div className="bg-[#0F1626] font-body-base text-body-base text-white antialiased min-h-[100dvh]">
         {/* Minimal guest top bar with login CTA */}
-        <div className="h-16 border-b border-border-subtle bg-white/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40">
-          <a href={siteConfig.url} className="flex items-center">
+        <div className="h-16 border-b border-[#1E2A38] bg-[#020B14]/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40">
+          <a href={siteConfig.url} className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
+              src="/Icone.png"
               alt="Kobara"
-              className="w-32 h-auto object-contain"
+              className="w-8 h-8 object-contain"
             />
+            <span className="text-xl font-bold text-white tracking-tight">Kobara</span>
           </a>
           <div className="flex items-center gap-4">
             <a
               href={`${siteConfig.url}/login`}
-              className="text-sm font-semibold text-kobara-primary hover:opacity-70 transition-opacity"
+              className="text-sm font-semibold text-[#AAB3C2] hover:text-white transition-colors"
             >
-              Log in
+              Connexion
             </a>
             <a
               href={`${siteConfig.url}/register`}
-              className="h-9 px-5 rounded-lg bg-kobara-primary hover:bg-slate-900 text-white text-sm font-bold transition-all flex items-center"
+              className="h-9 px-5 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white text-sm font-bold transition-all shadow-[0_0_15px_rgba(255,74,28,0.3)] hover:shadow-[0_0_25px_rgba(255,74,28,0.5)] flex items-center"
             >
-              Sign up free
+              Créer un compte
             </a>
           </div>
         </div>
-        <main className="flex-1 p-container-padding flex flex-col gap-8">
+        <main className="flex-1 p-6 lg:p-8 flex flex-col gap-8 max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>

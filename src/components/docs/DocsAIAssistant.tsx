@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -120,86 +119,86 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
     if (!inline && match) {
       const isCopied = copiedCode === codeString;
       return (
-        <div className="relative group my-4 rounded-lg overflow-hidden border border-border-subtle bg-[#0d1117]">
-          <div className="flex items-center justify-between px-3 py-1.5 bg-[#161b22] border-b border-border-subtle">
-            <span className="text-xs font-mono text-white/70 uppercase tracking-wider">{match[1]}</span>
+        <div className="relative group my-4 rounded-lg overflow-hidden border border-[#1E2A38] bg-[#020B14]">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-[#07111F] border-b border-[#1E2A38]">
+            <span className="text-xs font-mono text-[#AAB3C2] uppercase tracking-wider">{match[1]}</span>
             <button 
               onClick={() => copyToClipboard(codeString)}
-              className="p-1.5 rounded-md hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+              className="p-1.5 rounded-md hover:bg-[#1E2A38] text-[#AAB3C2] hover:text-white transition-colors"
             >
-              {isCopied ? <Check size={14} className="text-status-success" /> : <Copy size={14} />}
+              {isCopied ? <Check size={14} className="text-[#27C93F]" /> : <Copy size={14} />}
             </button>
           </div>
-          <pre className="p-3 text-[13px] overflow-x-auto text-white/90">
+          <pre className="p-3 text-[13px] overflow-x-auto text-[#AAB3C2]">
             <code className={className} {...props}>{children}</code>
           </pre>
         </div>
       );
     }
-    return <code className="bg-surface-container px-1.5 py-0.5 rounded text-[13px] text-primary font-mono" {...props}>{children}</code>;
+    return <code className="bg-[#1E2A38]/50 px-1.5 py-0.5 rounded text-[13px] text-[#FF4A1C] font-mono border border-[#1E2A38]" {...props}>{children}</code>;
   };
 
-  // UI du Chat (Réutilisable Desktop/Mobile) - Défini comme JSX, pas comme un composant pour éviter la perte de focus
+  // UI du Chat (Réutilisable Desktop/Mobile)
   const chatInterfaceNode = (
-    <div className="flex flex-col h-full min-h-0 bg-surface-container-lowest dark:bg-surface-container-lowest border-l border-border-subtle dark:border-outline-variant shadow-2xl">
+    <div className="flex flex-col h-full min-h-0 bg-[#07111F] border-l border-[#1E2A38] shadow-2xl">
       {/* Header */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-border-subtle bg-surface-container/50">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white">
-            <Sparkles size={16} />
+      <div className="px-5 py-4 flex items-center justify-between border-b border-[#1E2A38] bg-[#020B14]">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#07111F] border border-[#1E2A38] flex items-center justify-center text-[#FF4A1C] shadow-[0_0_15px_rgba(255,74,28,0.2)]">
+            <Sparkles size={18} className="animate-pulse" />
           </div>
           <div>
-            <h3 className="font-semibold text-sm text-text-primary">Kobara AI</h3>
-            <p className="text-[11px] text-text-secondary leading-none">Assistant Intégration</p>
+            <h3 className="font-bold text-[15px] text-white">Kobara AI</h3>
+            <p className="text-[12px] text-[#AAB3C2] font-medium leading-none mt-1">Assistant Intégration</p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {messages.length > 1 && (
             <button 
               onClick={clearChat}
               title="Effacer la conversation"
-              className="p-2 text-text-secondary hover:text-status-error rounded-full hover:bg-status-error/10 transition-colors"
+              className="p-2 text-[#AAB3C2] hover:text-[#FF4A1C] rounded-lg hover:bg-[#FF4A1C]/10 transition-colors"
             >
-              <Trash2 size={16} />
+              <Trash2 size={18} />
             </button>
           )}
           <button 
             onClick={() => setIsOpenMobile(false)}
-            className="md:hidden p-2 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-container transition-colors"
+            className="md:hidden p-2 text-[#AAB3C2] hover:text-white rounded-lg hover:bg-[#1E2A38] transition-colors"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-6 scrollbar-thin">
         {messages.map((m: any) => (
-          <div key={m.id} className={clsx("flex gap-3", m.role === 'user' ? "flex-row-reverse" : "")}>
+          <div key={m.id} className={clsx("flex gap-4", m.role === 'user' ? "flex-row-reverse" : "")}>
             <div className={clsx(
-              "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+              "w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 shadow-md",
               m.role === 'user' 
-                ? "bg-surface-container-high text-text-primary" 
-                : "bg-primary/10 text-primary border border-primary/20"
+                ? "bg-[#020B14] border border-[#1E2A38] text-white" 
+                : "bg-[#FF4A1C]/10 border border-[#FF4A1C]/20 text-[#FF4A1C]"
             )}>
-              {m.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+              {m.role === 'user' ? <User size={14} /> : <Bot size={14} />}
             </div>
             
             <div className={clsx(
-              "max-w-[85%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm",
+              "max-w-[85%] px-5 py-4 text-[14px] leading-relaxed shadow-lg",
               m.role === 'user'
-                ? "bg-primary text-on-primary rounded-tr-sm"
-                : "bg-surface-container-lowest border border-border-subtle text-text-primary rounded-tl-sm"
+                ? "bg-[#020B14] border border-[#1E2A38] text-white rounded-2xl rounded-tr-sm"
+                : "bg-[#07111F] border border-[#1E2A38] text-[#AAB3C2] rounded-2xl rounded-tl-sm"
             )}>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={{
                   code: CodeBlock,
-                  p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>,
-                  a: ({href, children}) => <a href={href} className="text-primary hover:underline font-medium">{children}</a>,
-                  ul: ({children}) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
-                  ol: ({children}) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
-                  strong: ({children}) => <strong className="font-semibold">{children}</strong>,
+                  p: ({children}) => <p className="mb-3 last:mb-0 text-[14px] font-medium leading-relaxed">{children}</p>,
+                  a: ({href, children}) => <a href={href} className="text-[#FF4A1C] hover:text-[#FF2E14] underline font-semibold transition-colors">{children}</a>,
+                  ul: ({children}) => <ul className="list-disc ml-5 mb-3 space-y-1">{children}</ul>,
+                  ol: ({children}) => <ol className="list-decimal ml-5 mb-3 space-y-1">{children}</ol>,
+                  strong: ({children}) => <strong className="font-bold text-white">{children}</strong>,
                 }}
               >
                 {m.content}
@@ -208,13 +207,13 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
           </div>
         ))}
         {isLoading && (
-          <div className="flex gap-3">
-             <div className="w-8 h-8 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
-              <Bot size={16} />
+          <div className="flex gap-4">
+             <div className="w-8 h-8 rounded-full bg-[#FF4A1C]/10 border border-[#FF4A1C]/20 text-[#FF4A1C] flex items-center justify-center shrink-0 mt-1 shadow-md">
+              <Bot size={14} />
             </div>
-            <div className="bg-surface-container-lowest border border-border-subtle rounded-2xl rounded-tl-sm px-4 py-4 flex items-center gap-2 text-text-secondary">
-              <Loader2 size={16} className="animate-spin text-primary" />
-              <span className="text-[13px] animate-pulse">L'IA analyse le contexte...</span>
+            <div className="bg-[#07111F] border border-[#1E2A38] rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-3 text-[#AAB3C2] shadow-lg">
+              <Loader2 size={16} className="animate-spin text-[#FF4A1C]" />
+              <span className="text-[14px] animate-pulse font-medium">L'IA analyse le contexte...</span>
             </div>
           </div>
         )}
@@ -222,13 +221,13 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
       </div>
 
       {/* Input */}
-      <div className="p-3 bg-surface-container-lowest border-t border-border-subtle">
+      <div className="p-4 bg-[#020B14] border-t border-[#1E2A38]">
         <form onSubmit={handleSubmit} className="relative flex items-end">
           <textarea
             value={input}
             onChange={handleInputChange}
-            placeholder="Posez une question ou collez votre code..."
-            className="w-full bg-surface-container dark:bg-[#1A1D24] text-text-primary placeholder:text-text-secondary/50 text-[14px] rounded-xl pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none max-h-32 min-h-[50px] border border-border-subtle transition-shadow"
+            placeholder="Posez une question ou collez du code..."
+            className="w-full bg-[#07111F] text-white placeholder:text-[#AAB3C2]/50 text-[14px] rounded-xl pl-4 pr-12 py-3 focus:outline-none focus:ring-1 focus:ring-[#FF4A1C] focus:border-[#FF4A1C] resize-none max-h-32 min-h-[50px] border border-[#1E2A38] transition-all font-medium scrollbar-thin"
             rows={input.split('\n').length > 1 ? Math.min(input.split('\n').length, 5) : 1}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -240,14 +239,14 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
           <button 
             type="submit" 
             disabled={isLoading || !input.trim()}
-            className="absolute right-2 bottom-2 w-8 h-8 bg-primary hover:bg-primary/90 text-on-primary rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            className="absolute right-2 bottom-2 w-8 h-8 bg-[#FF4A1C] hover:bg-[#FF2E14] text-white rounded-lg flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(255,74,28,0.3)] hover:shadow-[0_0_20px_rgba(255,74,28,0.5)] active:scale-95"
           >
             <Send size={14} className="ml-0.5" />
           </button>
         </form>
-        <div className="text-center mt-2">
-          <span className="text-[10px] text-text-secondary uppercase tracking-widest font-semibold flex items-center justify-center gap-1">
-            <TerminalSquare size={10} />
+        <div className="text-center mt-3">
+          <span className="text-[10px] text-[#AAB3C2]/60 uppercase tracking-widest font-bold flex items-center justify-center gap-1.5">
+            <TerminalSquare size={12} />
             Copiez-collez votre code pour l'analyser
           </span>
         </div>
@@ -272,7 +271,7 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               onClick={() => setIsOpenMobile(true)}
-              className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-105 transition-transform"
+              className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#FF4A1C] text-white rounded-full shadow-[0_0_30px_rgba(255,74,28,0.4)] flex items-center justify-center hover:scale-105 transition-transform border border-white/10"
             >
               <Sparkles size={24} />
             </motion.button>
@@ -295,13 +294,13 @@ export function DocsAIAssistant({ currentSlug = '' }: { currentSlug?: string }) 
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed inset-x-0 bottom-0 top-[10vh] z-50 bg-surface-container-lowest rounded-t-3xl overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.2)] flex flex-col"
+                className="fixed inset-x-0 bottom-0 top-[10vh] z-50 bg-[#07111F] rounded-t-3xl overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col border-t border-[#1E2A38]"
               >
                 {/* Handle for drawer */}
-                <div className="w-full flex justify-center py-2 absolute top-0 z-10">
-                  <div className="w-12 h-1.5 bg-border-subtle rounded-full" />
+                <div className="w-full flex justify-center py-3 absolute top-0 z-10">
+                  <div className="w-12 h-1.5 bg-[#1E2A38] rounded-full" />
                 </div>
-                <div className="flex-1 mt-3 min-h-0">
+                <div className="flex-1 mt-6 min-h-0">
                   {chatInterfaceNode}
                 </div>
               </motion.div>

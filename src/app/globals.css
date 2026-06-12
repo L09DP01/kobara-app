@@ -284,3 +284,7 @@ html {
     @apply font-sans;
   }
 }
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}

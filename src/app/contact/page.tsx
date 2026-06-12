@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="relative min-h-[100dvh]">
+    <main className="relative min-h-[100dvh] bg-[#020B14] selection:bg-[#FF4A1C] selection:text-white font-sans text-white">
       <FloatingBackground />
       <Navbar />
 
@@ -18,14 +18,14 @@ export default function ContactPage() {
         <div className="max-w-[1100px] mx-auto px-5 sm:px-10">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-50 border border-rose-100 text-sm font-bold text-kobara-red mb-6">
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#FF4A1C]/10 border border-[#FF4A1C]/20 text-sm font-bold text-[#FF4A1C] mb-6 shadow-[0_0_15px_rgba(255,74,28,0.2)]">
               Get in touch
             </div>
-            <h1 className="text-5xl sm:text-6xl font-black text-kobara-primary tracking-tighter leading-[1.05] mb-4">
+            <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tighter leading-[1.05] mb-5">
               We&apos;d love to hear<br />
-              <span className="text-kobara-red">from you.</span>
+              <span className="text-[#FF4A1C]">from you.</span>
             </h1>
-            <p className="text-lg text-kobara-secondary font-medium max-w-xl mx-auto leading-relaxed">
+            <p className="text-lg text-[#AAB3C2] font-medium max-w-xl mx-auto leading-relaxed">
               Have a question, need support, or want to partner with Kobara? Reach out and we&apos;ll get back to you quickly.
             </p>
           </div>
@@ -41,22 +41,26 @@ export default function ContactPage() {
                 <a
                   key={i}
                   href={item.href}
-                  className="flex items-center gap-5 p-6 bg-white/60 backdrop-blur-md border border-white/90 rounded-2xl hover:shadow-lg hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center gap-5 p-6 bg-[#07111F] border border-[#1E2A38] rounded-2xl hover:border-[#AAB3C2]/30 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:-translate-y-0.5 transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-kobara-red shrink-0 group-hover:scale-110 transition-transform">
-                    <item.icon className="w-5 h-5" />
+                  <div className="w-14 h-14 rounded-xl bg-[#020B14] border border-[#1E2A38] flex items-center justify-center text-[#FF4A1C] shrink-0 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(255,74,28,0.1)] group-hover:shadow-[0_0_20px_rgba(255,74,28,0.3)]">
+                    <item.icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-sm text-kobara-secondary font-semibold">{item.label}</div>
-                    <div className="text-kobara-primary font-bold">{item.value}</div>
+                    <div className="text-sm text-[#AAB3C2] font-semibold">{item.label}</div>
+                    <div className="text-white font-bold text-lg">{item.value}</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-kobara-secondary ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ArrowRight className="w-5 h-5 text-[#AAB3C2] ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </a>
               ))}
 
-              <div className="p-6 bg-kobara-primary rounded-2xl text-white">
-                <h3 className="font-bold text-lg mb-2">Business Hours</h3>
-                <p className="text-white/70 font-medium leading-relaxed">
+              <div className="p-8 bg-[#FF4A1C]/5 border border-[#FF4A1C]/20 rounded-2xl text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF4A1C]/10 rounded-full blur-[40px] -translate-y-1/2 translate-x-1/2" />
+                <h3 className="font-bold text-xl mb-3 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#FF4A1C] animate-pulse" />
+                  Business Hours
+                </h3>
+                <p className="text-[#AAB3C2] font-medium leading-relaxed">
                   Monday – Friday: 8:00 AM – 6:00 PM (EST)<br />
                   Saturday: 9:00 AM – 1:00 PM (EST)<br />
                   Sunday: Closed
@@ -65,38 +69,41 @@ export default function ContactPage() {
             </div>
 
             {/* Contact form */}
-            <form className="bg-white/60 backdrop-blur-md border border-white/90 rounded-[24px] p-8 space-y-5" action="mailto:support@kobara.app" method="get" encType="text/plain">
-              <div className="grid sm:grid-cols-2 gap-4">
+            <form className="bg-[#07111F] border border-[#1E2A38] rounded-[32px] p-8 md:p-10 space-y-6 shadow-2xl relative overflow-hidden" action="mailto:support@kobara.app" method="get" encType="text/plain">
+              {/* Subtle background glow */}
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#FF4A1C]/5 rounded-full blur-[80px] pointer-events-none" />
+
+              <div className="grid sm:grid-cols-2 gap-5 relative z-10">
                 <div>
-                  <label className="block text-sm font-bold text-kobara-primary mb-2">First name</label>
-                  <input name="firstname" type="text" placeholder="Jean" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-kobara-primary placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-kobara-red/30 focus:border-kobara-red transition-all" />
+                  <label className="block text-sm font-bold text-[#AAB3C2] mb-2">First name</label>
+                  <input name="firstname" type="text" placeholder="Jean" className="w-full h-13 px-5 rounded-xl border border-[#1E2A38] bg-[#020B14] text-white placeholder:text-[#1E2A38] font-medium focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-kobara-primary mb-2">Last name</label>
-                  <input name="lastname" type="text" placeholder="Pierre" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-kobara-primary placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-kobara-red/30 focus:border-kobara-red transition-all" />
+                  <label className="block text-sm font-bold text-[#AAB3C2] mb-2">Last name</label>
+                  <input name="lastname" type="text" placeholder="Pierre" className="w-full h-13 px-5 rounded-xl border border-[#1E2A38] bg-[#020B14] text-white placeholder:text-[#1E2A38] font-medium focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all" />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-kobara-primary mb-2">Email address</label>
-                <input name="email" type="email" placeholder="jean@example.com" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-kobara-primary placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-kobara-red/30 focus:border-kobara-red transition-all" />
+              <div className="relative z-10">
+                <label className="block text-sm font-bold text-[#AAB3C2] mb-2">Email address</label>
+                <input name="email" type="email" placeholder="jean@example.com" className="w-full h-13 px-5 rounded-xl border border-[#1E2A38] bg-[#020B14] text-white placeholder:text-[#1E2A38] font-medium focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all" />
               </div>
-              <div>
-                <label className="block text-sm font-bold text-kobara-primary mb-2">Subject</label>
-                <select name="subject" className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-kobara-primary font-medium focus:outline-none focus:ring-2 focus:ring-kobara-red/30 focus:border-kobara-red transition-all">
-                  <option value="">Select a topic...</option>
+              <div className="relative z-10">
+                <label className="block text-sm font-bold text-[#AAB3C2] mb-2">Subject</label>
+                <select name="subject" className="w-full h-13 px-5 rounded-xl border border-[#1E2A38] bg-[#020B14] text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all appearance-none">
+                  <option value="" className="text-[#1E2A38]">Select a topic...</option>
                   <option value="support">Technical Support</option>
                   <option value="sales">Sales &amp; Pricing</option>
                   <option value="partnership">Partnership</option>
                   <option value="other">Other</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-kobara-primary mb-2">Message</label>
-                <textarea name="body" rows={5} placeholder="Tell us how we can help..." className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-kobara-primary placeholder:text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-kobara-red/30 focus:border-kobara-red transition-all resize-none" />
+              <div className="relative z-10">
+                <label className="block text-sm font-bold text-[#AAB3C2] mb-2">Message</label>
+                <textarea name="body" rows={5} placeholder="Tell us how we can help..." className="w-full px-5 py-4 rounded-xl border border-[#1E2A38] bg-[#020B14] text-white placeholder:text-[#1E2A38] font-medium focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/30 focus:border-[#FF4A1C] transition-all resize-none" />
               </div>
-              <button type="submit" className="w-full h-13 rounded-xl bg-kobara-primary hover:bg-slate-900 text-white font-bold text-[16px] transition-all hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-2.5 shadow-xl shadow-kobara-primary/10">
+              <button type="submit" className="w-full h-14 rounded-xl bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-bold text-[16px] transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2.5 shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] relative z-10 mt-4">
                 Send Message
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </button>
             </form>
           </div>
