@@ -20,38 +20,30 @@ export default async function RegisterPage(props: { searchParams: Promise<{ erro
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out">
       {/* Back to Home & Mobile Logo */}
-      <div className="flex flex-col gap-6 mb-10">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-fit"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          {language === "fr" ? "Retour à l'accueil" : "Back to home"}
-        </Link>
-        
-        <div className="lg:hidden flex items-center gap-2">
-          <div className="bg-white rounded-xl shadow-lg flex items-center justify-center w-10 h-10 p-1">
-            <Image src="/Icone.png" alt="Kobara Logo" width={32} height={32} />
+      <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-[#020B14] border border-[#1E2A38] flex items-center justify-center shadow-lg">
+            <span className="text-[#FF4A1C] font-black text-sm" style={{ transform: "rotateZ(45deg) rotateX(-60deg)" }}>K</span>
           </div>
-          <span className="text-kobara-primary font-bold text-lg tracking-tight">Kobara</span>
+          <span className="text-white font-bold text-lg tracking-tight">Kobara</span>
         </div>
       </div>
 
       <div className="mb-10">
-        <h1 className="text-4xl font-black text-kobara-primary tracking-tight mb-3">
+        <h1 className="text-4xl font-black text-white tracking-tight mb-3">
           {t("auth.registerTitle")}
         </h1>
-        <p className="text-gray-500 font-medium leading-relaxed">
+        <p className="text-[#AAB3C2] font-medium leading-relaxed">
           {t("auth.registerSubtitle")}
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-800 text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300">
-          <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+        <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-3 text-rose-400 text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300">
+          <XCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-rose-900 mb-0.5">{language === "fr" ? "Erreur d'inscription" : "Registration error"}</p>
-            <p className="text-rose-700 leading-relaxed text-xs">
+            <p className="font-bold text-rose-500 mb-0.5">{language === "fr" ? "Erreur d'inscription" : "Registration error"}</p>
+            <p className="text-rose-400/80 leading-relaxed text-xs">
               {error === "Please use a professional email (consumer domains like Gmail, Yahoo, or Hotmail are not allowed)." || error.includes("professional") 
                 ? t("auth.invalidDomainError")
                 : error}
@@ -62,50 +54,50 @@ export default async function RegisterPage(props: { searchParams: Promise<{ erro
 
       <form action={signup} className="space-y-5">
         <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="business_name">
+          <label className="block text-[10px] font-bold text-[#AAB3C2] uppercase tracking-wider mb-2" htmlFor="business_name">
             {t("auth.businessNameLabel")}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Building2 className="h-5 w-5 text-gray-400" />
+              <Building2 className="h-5 w-5 text-[#AAB3C2]" />
             </div>
             <input 
               id="business_name"
               name="business_name"
               type="text" 
               required
-              className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-3.5 bg-[#020B14]/50 border border-[#1E2A38] rounded-xl font-medium text-white placeholder-[#AAB3C2]/50 focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/20 focus:border-[#FF4A1C] transition-all shadow-inner"
               placeholder={language === "fr" ? "ex: Acme SARL" : "e.g. Acme Corp"}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="email">
+          <label className="block text-[10px] font-bold text-[#AAB3C2] uppercase tracking-wider mb-2" htmlFor="email">
             {t("auth.emailLabel")}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-gray-400" />
+              <Mail className="h-5 w-5 text-[#AAB3C2]" />
             </div>
             <input 
               id="email"
               name="email"
               type="email" 
               required
-              className="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-3.5 bg-[#020B14]/50 border border-[#1E2A38] rounded-xl font-medium text-white placeholder-[#AAB3C2]/50 focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/20 focus:border-[#FF4A1C] transition-all shadow-inner"
               placeholder="you@company.com"
             />
           </div>
         </div>
         
         <div>
-          <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="password">
+          <label className="block text-[10px] font-bold text-[#AAB3C2] uppercase tracking-wider mb-2" htmlFor="password">
             {t("auth.passwordLabel")}
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-gray-400" />
+              <Lock className="h-5 w-5 text-[#AAB3C2]" />
             </div>
             <input 
               id="password"
@@ -113,28 +105,31 @@ export default async function RegisterPage(props: { searchParams: Promise<{ erro
               type="password" 
               required
               minLength={8}
-              className="w-full pl-11 pr-12 py-3.5 bg-white border border-gray-200 rounded-xl font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-kobara-red/20 focus:border-kobara-red transition-all shadow-sm"
+              className="w-full pl-11 pr-12 py-3.5 bg-[#020B14]/50 border border-[#1E2A38] rounded-xl font-medium text-white placeholder-[#AAB3C2]/50 focus:outline-none focus:ring-2 focus:ring-[#FF4A1C]/20 focus:border-[#FF4A1C] transition-all shadow-inner"
               placeholder={language === "fr" ? "Min. 8 caractères" : "Min. 8 characters"}
             />
+            <button type="button" className="absolute inset-y-0 right-0 pr-4 flex items-center">
+              <Eye className="h-5 w-5 text-[#AAB3C2] hover:text-white transition-colors" />
+            </button>
           </div>
         </div>
 
         <button 
           type="submit"
-          className="w-full bg-[#E53E3E] text-white rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-red-600 transition-all flex items-center justify-center gap-2 mt-6"
+          className="w-full bg-[#FF4A1C] text-white rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-[#FF5A2A] transition-all flex items-center justify-center gap-2 mt-6 shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_25px_rgba(255,74,28,0.5)]"
         >
           {t("auth.registerBtn")}
         </button>
 
         <div className="flex items-center gap-4 my-6">
-          <div className="h-[1px] flex-1 bg-gray-200"></div>
-          <span className="text-xs font-medium text-gray-400">{language === "fr" ? "Ou continuer avec" : "Or continue with"}</span>
-          <div className="h-[1px] flex-1 bg-gray-200"></div>
+          <div className="h-[1px] flex-1 bg-[#1E2A38]"></div>
+          <span className="text-xs font-medium text-[#AAB3C2] uppercase tracking-wider">{language === "fr" ? "Ou continuer avec" : "Or continue with"}</span>
+          <div className="h-[1px] flex-1 bg-[#1E2A38]"></div>
         </div>
 
         <button 
           type="button"
-          className="w-full bg-white border border-gray-200 text-gray-700 rounded-xl px-4 py-3.5 font-bold text-[15px] hover:bg-gray-50 transition-all flex items-center justify-center gap-3"
+          className="w-full bg-[#020B14] border border-[#1E2A38] text-white rounded-xl px-4 py-3.5 font-bold text-[14px] hover:bg-[#1E2A38]/50 transition-all flex items-center justify-center gap-3 shadow-sm"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -147,20 +142,20 @@ export default async function RegisterPage(props: { searchParams: Promise<{ erro
       </form>
 
       <div className="mt-8 text-center">
-        <p className="text-xs text-gray-400 leading-relaxed mb-6">
+        <p className="text-xs text-[#AAB3C2] leading-relaxed mb-6">
           {t("auth.iAgreeTo")}{' '}
-          <Link href="/terms" className="font-bold text-gray-500 hover:text-gray-700 transition-colors underline decoration-2 underline-offset-2 decoration-gray-200">
+          <Link href="/terms" className="font-bold text-white hover:text-[#FF4A1C] transition-colors underline decoration-2 underline-offset-2 decoration-[#1E2A38]">
             {t("nav.terms")}
           </Link>
           {' '}{t("auth.andThe")}{' '}
-          <Link href="/privacy" className="font-bold text-gray-500 hover:text-gray-700 transition-colors underline decoration-2 underline-offset-2 decoration-gray-200">
+          <Link href="/privacy" className="font-bold text-white hover:text-[#FF4A1C] transition-colors underline decoration-2 underline-offset-2 decoration-[#1E2A38]">
             {t("nav.privacy")}
           </Link>.
         </p>
 
-        <p className="text-sm font-medium text-gray-500">
+        <p className="text-sm font-medium text-[#AAB3C2]">
           {t("auth.alreadyHaveAccount")}{' '}
-          <Link href="/login" className="font-bold text-kobara-red hover:text-red-700 transition-colors">
+          <Link href="/login" className="font-bold text-[#FF4A1C] hover:text-[#FF5A2A] transition-colors">
             {t("auth.logInNow")}
           </Link>
         </p>
@@ -168,4 +163,3 @@ export default async function RegisterPage(props: { searchParams: Promise<{ erro
     </div>
   )
 }
-

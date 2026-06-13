@@ -119,7 +119,7 @@ export function AuthVisual() {
         <motion.div 
           animate={{ y: [10, -10, 10] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -right-[5%] bottom-[10%] w-[320px] bg-[#000000]/80 backdrop-blur-3xl border border-[#334155] rounded-xl shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-hidden z-20"
+          className="absolute right-[2%] xl:right-[5%] bottom-[10%] w-[280px] xl:w-[320px] bg-[#000000]/80 backdrop-blur-3xl border border-[#334155] rounded-xl shadow-[0_40px_80px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-hidden z-20"
         >
           <div className="h-10 bg-[#1E2A38]/30 flex items-center px-4 gap-2 border-b border-[#334155]/50">
             <Terminal className="w-4 h-4 text-[#AAB3C2]" />
