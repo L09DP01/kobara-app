@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 
 export function Footer() {
@@ -104,8 +105,11 @@ export function Footer() {
             <Link href="/contact" className="text-[#AAB3C2] hover:text-white transition-colors">Contact</Link>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#07111F] border border-[#1E2A38] text-xs text-[#AAB3C2]">
-            Powered by <strong className="text-[#FF4A1C] font-bold">MonCash</strong>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#07111F] border border-[#1E2A38] text-xs text-[#AAB3C2]">
+              Powered by <strong className="text-[#FF4A1C] font-bold">MonCash</strong>
+            </div>
           </div>
         </div>
 

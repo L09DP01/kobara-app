@@ -7,7 +7,7 @@ export async function getServerTranslation() {
   try {
     const cookieStore = await cookies();
     const langCookie = cookieStore.get("kbr_lang")?.value as Language | undefined;
-    if (langCookie === "fr" || langCookie === "en") {
+    if (langCookie === "fr" || langCookie === "en" || langCookie === "ht") {
       language = langCookie;
     }
   } catch (e) {
