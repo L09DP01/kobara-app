@@ -1,51 +1,45 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Rocket } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/context/LanguageContext";
 
 export function CTA() {
+  const { t } = useTranslation();
   return (
-    <section className="py-24 bg-[#020B14] relative overflow-hidden">
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
-        
+    <section className="py-24 relative overflow-hidden bg-[#020B14]">
+      {/* Background Effects */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#FF4A1C]/5 rounded-full blur-[100px] pointer-events-none" />
+      
+      <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="relative bg-[#07111F] rounded-3xl border border-[#1E2A38] p-10 md:p-16 text-center shadow-2xl overflow-hidden group"
         >
-          {/* Animated Background Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-[500px] max-h-[500px] bg-[#FF4A1C]/20 rounded-full blur-[100px] group-hover:bg-[#FF4A1C]/30 transition-colors duration-700 pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#020B14] border border-[#1E2A38] flex items-center justify-center mb-8 shadow-lg">
-              <Rocket className="w-8 h-8 text-[#FF4A1C]" />
-            </div>
-
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 max-w-2xl">
-              Ready to grow your business with <span className="text-[#FF4A1C]">Kobara</span>?
-            </h2>
-            
-            <p className="text-[#AAB3C2] text-lg md:text-xl mb-10 max-w-xl">
-              Join businesses in Haiti already accepting MonCash payments online.
-            </p>
-
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-bold text-lg transition-all shadow-[0_0_20px_rgba(255,74,28,0.4)] hover:shadow-[0_0_40px_rgba(255,74,28,0.6)] w-full sm:w-auto"
-            >
-              Create Your Free Account
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            
-            <p className="mt-4 text-[#AAB3C2] text-sm">
-              No credit card required
-            </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1E2A38]/30 border border-[#1E2A38] text-sm text-[#AAB3C2] mb-8">
+            <Sparkles className="w-4 h-4 text-[#FF4A1C]" />
+            {t("home.devBadge")}
           </div>
-        </motion.div>
 
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+            {t("home.ctaTitle")}
+          </h2>
+          
+          <p className="text-lg text-[#AAB3C2] mb-12 max-w-2xl mx-auto leading-relaxed">
+            {t("home.ctaDesc")}
+          </p>
+
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-semibold text-lg transition-all shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] group"
+          >
+            {t("home.ctaBtn")}
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

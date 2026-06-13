@@ -24,14 +24,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     };
 
     const savedCookie = getCookie("kbr_lang") as Language | null;
-    if (savedCookie === "fr" || savedCookie === "en") {
+    if (savedCookie === "fr" || savedCookie === "en" || savedCookie === "ht") {
       setLanguageState(savedCookie);
       return;
     }
 
     // 2. Check localStorage
     const savedLocal = localStorage.getItem("kbr_lang") as Language | null;
-    if (savedLocal === "fr" || savedLocal === "en") {
+    if (savedLocal === "fr" || savedLocal === "en" || savedLocal === "ht") {
       setLanguageState(savedLocal);
       return;
     }

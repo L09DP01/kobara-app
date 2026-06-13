@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/context/LanguageContext";
 
 export function Navbar() {
+  const { t } = useTranslation();
+
   return (
     <motion.header
       initial={{ y: -100, opacity: 0 }}
@@ -22,10 +25,10 @@ export function Navbar() {
         {/* Desktop Menu */}
         <nav className="hidden md:flex items-center gap-8">
           {[
-            { name: 'Développeurs', href: '/dashboard/developers' },
-            { name: 'Tarifs', href: '/pricing' },
-            { name: 'Documentation', href: '/docs' },
-            { name: 'Contact', href: '/contact' }
+            { name: t("nav.developers"), href: '/dashboard/developers' },
+            { name: t("nav.pricing"), href: '/pricing' },
+            { name: t("nav.documentation"), href: '/docs' },
+            { name: t("nav.contact"), href: '/contact' }
           ].map((item) => (
             <Link
               key={item.name}
@@ -43,13 +46,13 @@ export function Navbar() {
             href="/login"
             className="hidden md:block text-[#AAB3C2] hover:text-white transition-colors text-sm font-medium"
           >
-            Connexion
+            {t("nav.login")}
           </Link>
           <Link
             href="/register"
             className="px-5 py-2 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white text-sm font-semibold transition-all shadow-[0_0_15px_rgba(255,74,28,0.3)] hover:shadow-[0_0_25px_rgba(255,74,28,0.5)]"
           >
-            Créer un compte
+            {t("nav.signup")}
           </Link>
         </div>
       </div>

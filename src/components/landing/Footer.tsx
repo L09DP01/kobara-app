@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslation } from "@/context/LanguageContext";
 
 
 export function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-[#020B14] border-t border-[#1E2A38] pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-6">
@@ -17,7 +22,7 @@ export function Footer() {
               <span className="text-xl font-bold text-white tracking-tight">Kobara</span>
             </Link>
             <p className="text-[#AAB3C2] text-sm max-w-xs mb-8 leading-relaxed">
-              The fastest and most secure way to accept MonCash payments in Haiti.
+              {t("home.heroDesc")}
             </p>
             <div className="flex gap-4">
               {/* Social Icons */}
@@ -41,15 +46,15 @@ export function Footer() {
 
           {/* Links Columns */}
           <div>
-            <h4 className="text-white font-bold mb-6">Produit</h4>
+            <h4 className="text-white font-bold mb-6">Kobara</h4>
             <ul className="space-y-4">
               {[
-                { name: 'Tarifs', href: '/pricing' },
-                { name: 'Développeurs', href: '/dashboard/developers' },
-                { name: 'Liens de paiement', href: '/register' },
+                { name: t("nav.pricing"), href: '/pricing' },
+                { name: t("nav.developers"), href: '/dashboard/developers' },
+                { name: t("home.featureLinksTitle"), href: '/register' },
                 { name: 'API', href: '/dashboard/developers' }
-              ].map(item => (
-                <li key={item.name}>
+              ].map((item, i) => (
+                <li key={i}>
                   <Link href={item.href} className="text-[#AAB3C2] hover:text-[#FF4A1C] text-sm transition-colors">
                     {item.name}
                   </Link>
@@ -62,11 +67,10 @@ export function Footer() {
             <h4 className="text-white font-bold mb-6">Société</h4>
             <ul className="space-y-4">
               {[
-                { name: 'Contact', href: '/contact' },
-                { name: 'À propos', href: '/' },
-                { name: 'Support', href: '/contact' }
-              ].map(item => (
-                <li key={item.name}>
+                { name: t("nav.contact"), href: '/contact' },
+                { name: t("nav.helpCenter"), href: '/contact' }
+              ].map((item, i) => (
+                <li key={i}>
                   <Link href={item.href} className="text-[#AAB3C2] hover:text-[#FF4A1C] text-sm transition-colors">
                     {item.name}
                   </Link>
@@ -79,11 +83,11 @@ export function Footer() {
             <h4 className="text-white font-bold mb-6">Ressources</h4>
             <ul className="space-y-4">
               {[
-                { name: 'Documentation', href: '/docs' },
-                { name: 'Connexion', href: '/login' },
-                { name: 'Inscription', href: '/register' }
-              ].map(item => (
-                <li key={item.name}>
+                { name: t("nav.documentation"), href: '/docs' },
+                { name: t("nav.login"), href: '/login' },
+                { name: t("nav.signup"), href: '/register' }
+              ].map((item, i) => (
+                <li key={i}>
                   <Link href={item.href} className="text-[#AAB3C2] hover:text-[#FF4A1C] text-sm transition-colors">
                     {item.name}
                   </Link>
@@ -100,9 +104,9 @@ export function Footer() {
           </div>
           
           <div className="flex items-center gap-6 text-sm">
-            <Link href="/terms" className="text-[#AAB3C2] hover:text-white transition-colors">Conditions d&apos;utilisation</Link>
-            <Link href="/privacy" className="text-[#AAB3C2] hover:text-white transition-colors">Politique de confidentialité</Link>
-            <Link href="/contact" className="text-[#AAB3C2] hover:text-white transition-colors">Contact</Link>
+            <Link href="/terms" className="text-[#AAB3C2] hover:text-white transition-colors">{t("nav.terms")}</Link>
+            <Link href="/privacy" className="text-[#AAB3C2] hover:text-white transition-colors">{t("nav.privacy")}</Link>
+            <Link href="/contact" className="text-[#AAB3C2] hover:text-white transition-colors">{t("nav.contact")}</Link>
           </div>
 
           <div className="flex items-center gap-4">

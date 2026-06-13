@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { useTranslation } from "@/context/LanguageContext";
+
 export function Hero() {
+  const { t } = useTranslation();
+
   return (
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-[#020B14]">
       {/* Background Glow */}
@@ -22,19 +26,15 @@ export function Hero() {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#07111F] border border-[#1E2A38] text-sm text-[#AAB3C2] mb-8">
               <span className="w-2 h-2 rounded-full bg-[#FF4A1C] animate-pulse" />
-              Powered by <strong className="text-white font-medium">MonCash</strong>
+              {t("home.heroBadge")}
             </div>
 
             <h1 className="text-5xl lg:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
-              Accept Payment <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF4A1C] to-[#FF2E14]">
-                MonCash.
-              </span><br />
-              Start Instantly.
+              {t("home.heroTitle")}
             </h1>
 
             <p className="text-lg text-[#AAB3C2] mb-10 leading-relaxed max-w-lg">
-              The fastest and most secure way to accept MonCash payments in Haiti. Integrate in minutes and grow your business today.
+              {t("home.heroDesc")}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
@@ -42,14 +42,14 @@ export function Hero() {
                 href="/register"
                 className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-semibold transition-all shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] flex items-center justify-center gap-2 group"
               >
-                Get Started Free
+                {t("home.getStarted")}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/contact"
+                href="/docs"
                 className="w-full sm:w-auto px-8 py-4 rounded-full bg-transparent border border-[#1E2A38] hover:border-[#AAB3C2] text-white font-semibold transition-colors flex items-center justify-center"
               >
-                Contact Sales
+                {t("home.viewDocs")}
               </Link>
             </div>
 
