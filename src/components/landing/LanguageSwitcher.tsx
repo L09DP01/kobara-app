@@ -20,7 +20,7 @@ export function LanguageSwitcher() {
   const changeLanguage = (newLang: string) => {
     document.cookie = `kbr_lang=${newLang}; path=/; max-age=31536000`;
     setLang(newLang);
-    router.refresh();
+    window.location.reload();
   };
 
   if (!mounted) return <div className="w-32 h-8" />;
