@@ -2,27 +2,30 @@
 
 import { motion } from "framer-motion";
 import { User, Server, ShieldCheck, Smartphone, Database, Layout } from "lucide-react";
-
-const steps = [
-  { id: 1, label: "create a account", icon: User, desc: "Sign up and configure" },
-  { id: 2, label: "Kobara API", icon: Server, desc: "Process the request" },
-  { id: 3, label: "MonCash", icon: ShieldCheck, desc: "Authorize payment" },
-  { id: 4, label: "Customer", icon: Smartphone, desc: "Confirms payment" },
-  { id: 5, label: "Kobara", icon: Database, desc: "Verifies & stores transaction" },
-  { id: 6, label: "Your Frontend", icon: Layout, desc: "Show success to customer" },
-];
+import { useTranslation } from "@/context/LanguageContext";
 
 export function HowItWorks() {
+  const { t } = useTranslation();
+
+  const steps = [
+    { id: 1, label: t("home.step1"), icon: User, desc: t("home.step1Desc") },
+    { id: 2, label: t("home.step2"), icon: Server, desc: t("home.step2Desc") },
+    { id: 3, label: t("home.step3"), icon: ShieldCheck, desc: t("home.step3Desc") },
+    { id: 4, label: t("home.step4"), icon: Smartphone, desc: t("home.step4Desc") },
+    { id: 5, label: t("home.step5"), icon: Database, desc: t("home.step5Desc") },
+    { id: 6, label: t("home.step6"), icon: Layout, desc: t("home.step6Desc") },
+  ];
+
   return (
     <section className="py-24 bg-[#07111F] relative overflow-hidden border-y border-[#1E2A38]">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
         <div className="text-center max-w-3xl mx-auto mb-20">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            How it works
+            {t("home.howTitle")}
           </h2>
           <p className="text-[#AAB3C2] text-lg">
-            Your backend creates the request. Kobara processes it. Your frontend shows the result.
+            {t("home.howSubtitle")}
           </p>
         </div>
 

@@ -2,8 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Server, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "@/context/LanguageContext";
 
 export function ApiProcessing() {
+  const { t } = useTranslation();
+
   return (
     <section className="py-24 bg-[#020B14] relative overflow-hidden">
       {/* Background Grid */}
@@ -16,13 +19,13 @@ export function ApiProcessing() {
         
         <div className="text-center max-w-3xl mx-auto mb-20">
           <p className="text-sm font-bold text-[#FF4A1C] tracking-widest uppercase mb-4">
-            API-FIRST INFRASTRUCTURE
+            {t("home.apiPreTitle")}
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Developer-friendly <br className="hidden md:block"/> payment processing.
+            {t("home.apiTitle1")} <br className="hidden md:block"/> {t("home.apiTitle2")}
           </h2>
           <p className="text-[#AAB3C2] text-lg">
-            Your backend sends the request, Kobara handles MonCash securely, and your frontend receives real-time payment status via webhooks.
+            {t("home.apiSubtitle")}
           </p>
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslation } from "@/context/LanguageContext";
 
 const partners = [
   "Digicel",
@@ -13,11 +14,13 @@ const partners = [
 ];
 
 export function TrustedBy() {
+  const { t } = useTranslation();
+
   return (
     <section className="py-12 border-y border-[#1E2A38] bg-[#020B14] overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <p className="text-center text-sm text-[#AAB3C2] font-medium mb-8">
-          TRUSTED BY INNOVATIVE COMPANIES IN HAITI
+        <p className="text-center text-sm text-[#AAB3C2] font-medium mb-8 uppercase">
+          {t("home.trustedBy")}
         </p>
         
         {/* We use a simple scrolling marquee or flex wrap */}

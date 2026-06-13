@@ -2,54 +2,57 @@
 
 import { motion } from "framer-motion";
 import { ShoppingCart, Link2, QrCode, Smartphone, FileText, Code2 } from "lucide-react";
-
-const ways = [
-  {
-    title: "Online Payments",
-    description: "Accept payments on your website with our Pay Button.",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Payment Links",
-    description: "Create and share payment links instantly.",
-    icon: Link2,
-  },
-  {
-    title: "QR Codes",
-    description: "Generate QR codes for fast and easy payments.",
-    icon: QrCode,
-  },
-  {
-    title: "Payment Terminal",
-    description: "Accept in-store payments with a smart terminal.",
-    icon: Smartphone,
-  },
-  {
-    title: "Invoices",
-    description: "Send professional invoices and get paid faster.",
-    icon: FileText,
-  },
-  {
-    title: "API Integration",
-    description: "Seamlessly integrate payments into your platform.",
-    icon: Code2,
-  },
-];
+import { useTranslation } from "@/context/LanguageContext";
 
 export function SixWays() {
+  const { t } = useTranslation();
+
+  const ways = [
+    {
+      title: t("home.way1Title"),
+      description: t("home.way1Desc"),
+      icon: ShoppingCart,
+    },
+    {
+      title: t("home.way2Title"),
+      description: t("home.way2Desc"),
+      icon: Link2,
+    },
+    {
+      title: t("home.way3Title"),
+      description: t("home.way3Desc"),
+      icon: QrCode,
+    },
+    {
+      title: t("home.way4Title"),
+      description: t("home.way4Desc"),
+      icon: Smartphone,
+    },
+    {
+      title: t("home.way5Title"),
+      description: t("home.way5Desc"),
+      icon: FileText,
+    },
+    {
+      title: t("home.way6Title"),
+      description: t("home.way6Desc"),
+      icon: Code2,
+    },
+  ];
+
   return (
     <section className="py-24 bg-[#020B14] relative">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-sm font-bold text-[#FF4A1C] tracking-widest uppercase mb-4">
-            Six Ways To Get Paid
+            {t("home.waysPreTitle")}
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Get paid <span className="text-[#FF4A1C]">your</span> way
+            {t("home.waysTitle")} <span className="text-[#FF4A1C]">{t("home.waysTitleHighlight")}</span> {t("home.waysTitleEnd")}
           </h2>
           <p className="text-[#AAB3C2] text-lg">
-            Multiple solutions to collect payments and grow your business.
+            {t("home.waysSubtitle")}
           </p>
         </div>
 
