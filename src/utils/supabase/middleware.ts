@@ -71,14 +71,16 @@ export async function updateSession(request: NextRequest) {
     // Require authentication for dashboard subdomain (except APIs which have their own auth)
     if (!userLoggedIn && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
       const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
-        `http://${hostname.replace('dashboard.', '')}:3000/login` :
-        `https://kobara.app/login`;
+        `http://${hostname.replace('dashboard.', '')}:3000/login${request.nextUrl.search}` :
+        `https://kobara.app/login${request.nextUrl.search}`;
       return NextResponse.redirect(redirectUrl);
     }
   }
 
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/confirmed'].includes(pathname);
-  if (isAuthPage && userLoggedIn) {
+  const hasAuthMessage = request.nextUrl.searchParams.has('success') || request.nextUrl.searchParams.has('error') || request.nextUrl.searchParams.has('registered') || request.nextUrl.searchParams.has('reset');
+  
+  if (isAuthPage && userLoggedIn && !hasAuthMessage) {
     const redirectUrl = hostname.includes('localhost') || hostname.includes('local') ?
       `http://dashboard.${hostname.replace('dashboard.', '').split(':')[0]}:3000/dashboard` :
       `https://dashboard.kobara.app/dashboard`;
