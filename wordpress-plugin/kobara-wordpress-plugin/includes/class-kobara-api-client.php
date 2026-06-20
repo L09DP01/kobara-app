@@ -27,14 +27,17 @@ class Kobara_API_Client {
                 'name' => $customer_name,
                 'phone' => $customer_phone
             ),
-            'successUrl' => $success_url,
-            'errorUrl' => $error_url
+            'success_url' => $success_url,
+            'cancel_url' => $error_url
         );
+
+        $idempotency_key = uniqid('wc_' . $order_id . '_', true);
 
         $response = wp_remote_post($endpoint, array(
             'headers' => array(
                 'Authorization' => 'Bearer ' . $this->secret_key,
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Idempotency-Key' => $idempotency_key
             ),
             'body' => wp_json_encode($body),
             'timeout' => 30
