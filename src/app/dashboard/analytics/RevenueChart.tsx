@@ -34,7 +34,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
 
   return (
     <div className="w-full h-full min-h-[300px]">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={300}>
         <AreaChart
           data={data}
           margin={{

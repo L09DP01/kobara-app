@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUserAndMerchant } from "@/utils/supabase/auth-helper";
 import Link from "next/link";
 import DashboardChartWrapper from "./analytics/DashboardChartWrapper";
@@ -5,13 +7,11 @@ import DashboardChartWrapper from "./analytics/DashboardChartWrapper";
 export default async function DashboardPage() {
   const { merchant, supabase } = await getCurrentUserAndMerchant();
 
-  // Check Redis Cache
-  const { safeRedis } = await import('@/lib/server/redis');
-  const cacheKey = `dashboard:stats:${merchant.id}:${merchant.current_environment || 'test'}`;
+  // Check Redis Cache (Bypassed temporarily for real-time dashboard data)
+  // const { safeRedis } = await import('@/lib/server/redis');
+  // const cacheKey = `dashboard:stats:${merchant.id}:${merchant.current_environment || 'test'}`;
   
-  let stats: any = await safeRedis(async (redis) => {
-    return await redis.get(cacheKey);
-  }, null);
+  let stats: any = null; // Force fetch from PostgreSQL for real-time
 
   if (!stats) {
     // Cache miss, compute stats from PostgreSQL
@@ -97,11 +97,11 @@ export default async function DashboardPage() {
       apiSuccessRate
     };
 
-    // Save to cache for 5 minutes
-    await safeRedis(async (redis) => {
-      await redis.set(cacheKey, stats, { ex: 300 });
-      return null;
-    }, null);
+    // Save to cache for 5 minutes (Bypassed)
+    // await safeRedis(async (redis) => {
+    //   await redis.set(cacheKey, stats, { ex: 300 });
+    //   return null;
+    // }, null);
   }
 
   // Solde disponible is always calculated from merchant real-time data to avoid cache stale
