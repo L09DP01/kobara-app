@@ -4,62 +4,66 @@ import crypto from 'crypto';
 import { sendWelcomeEmail } from '@/lib/server/mail';
 
 export async function GET() {
-  const emails = [
-    "kerlensdelmazin144@gmail.com",
-    "bazelaisfanfan10@gmail.com",
-    "contact@lakay-company.com"
-  ];
-  
   const supabase = createAdminClient();
   const results = [];
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kobara.app';
 
-  for (const email of emails) {
-    try {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('id, email_verified')
-        .eq('email', email)
-        .maybeSingle();
+  try {
+    // 1. Fetch all unverified users whose token has expired
+    const now = new Date().toISOString();
+    const { data: expiredUsers, error: fetchError } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email_verified', false)
+      .lt('verification_token_expires', now);
 
-      if (error || !user) {
-        results.push({ email, status: 'error', reason: 'Not found' });
-        continue;
-      }
-
-      if (user.email_verified) {
-        results.push({ email, status: 'skipped', reason: 'Already verified' });
-        continue;
-      }
-
-      const token = crypto.randomBytes(32).toString('hex');
-      const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({
-          verification_token: token,
-          verification_token_expires: tokenExpires
-        })
-        .eq('id', user.id);
-
-      if (updateError) {
-        results.push({ email, status: 'error', reason: 'DB update failed' });
-        continue;
-      }
-
-      const verificationLink = `${appUrl}/api/auth/verify-email?token=${token}`;
-
-      await sendWelcomeEmail({
-        to: email,
-        verificationLink
-      });
-
-      results.push({ email, status: 'success' });
-    } catch (e: any) {
-      results.push({ email, status: 'error', reason: e.message });
+    if (fetchError) {
+      throw new Error(`Database error: ${fetchError.message}`);
     }
-  }
 
-  return NextResponse.json({ success: true, results });
+    if (!expiredUsers || expiredUsers.length === 0) {
+      return NextResponse.json({ success: true, message: "Aucun utilisateur avec un jeton expiré trouvé.", results: [] });
+    }
+
+    // 2. Loop through them to generate new tokens and send emails
+    for (const user of expiredUsers) {
+      const email = user.email;
+      try {
+        const token = crypto.randomBytes(32).toString('hex');
+        const tokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({
+            verification_token: token,
+            verification_token_expires: tokenExpires
+          })
+          .eq('id', user.id);
+
+        if (updateError) {
+          results.push({ email, status: 'error', reason: 'DB update failed' });
+          continue;
+        }
+
+        const verificationLink = `${appUrl}/api/auth/verify-email?token=${token}`;
+
+        await sendWelcomeEmail({
+          to: email,
+          verificationLink
+        });
+
+        results.push({ email, status: 'success' });
+      } catch (e: any) {
+        results.push({ email, status: 'error', reason: e.message });
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: `${results.filter(r => r.status === 'success').length} e-mails renvoyés avec succès.`,
+      results 
+    });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }
