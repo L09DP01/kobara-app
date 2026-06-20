@@ -1,5 +1,5 @@
 param(
-    [string]$Destination = "kobara-wordpress-plugin.zip"
+    [string]$Destination = "kobara-woocommerce.zip"
 )
 
 # Remove the old zip if it exists

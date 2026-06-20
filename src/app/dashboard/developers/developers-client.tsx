@@ -409,7 +409,7 @@ export function DevelopersClient({
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <a href="/downloads/kobara-wordpress-plugin.zip" download className="bg-primary text-on-primary px-6 py-3 rounded-lg font-body-base text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2">
+              <a href="/downloads/kobara-woocommerce.zip" download className="bg-primary text-on-primary px-6 py-3 rounded-lg font-body-base text-body-sm font-medium hover:opacity-90 transition-opacity shadow-sm flex items-center gap-2">
                 <span className="material-symbols-outlined text-[18px]">download</span>
                 Download Plugin
               </a>
