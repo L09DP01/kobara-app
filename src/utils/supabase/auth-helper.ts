@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "./admin";
 import { createClient } from "./server";
 import { cookies } from "next/headers";

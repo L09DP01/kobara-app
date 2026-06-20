@@ -1,7 +1,6 @@
 'use server'
 
 import { auth } from "@/auth";
-import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";

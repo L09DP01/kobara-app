@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { ApiKeySecurity } from "@/lib/server/security/api-keys";
 import { auth } from "@/auth";
-import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function authenticateApiRequest(request: NextRequest) {

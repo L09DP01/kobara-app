@@ -3,7 +3,6 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 import { ApiKeySecurity } from "@/lib/server/security/api-keys";
 import { auth } from "@/auth";
-import { authOptions } from "@/lib/auth/auth-options";
 
 export async function completeOnboarding(formData: {
   first_name: string;

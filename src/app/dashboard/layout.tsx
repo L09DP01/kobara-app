@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/auth";
-import { authOptions } from "@/lib/auth/auth-options";
 import { EnvironmentProvider } from "@/context/EnvironmentContext";
 
 // Pages inside /dashboard that are publicly accessible (no login required)

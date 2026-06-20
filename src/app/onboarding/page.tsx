@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import { OnboardingClient } from "./onboarding-client";
