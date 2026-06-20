@@ -8,7 +8,7 @@ import { useTranslation } from "@/context/LanguageContext";
 export function CTA() {
   const { t } = useTranslation();
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden bg-[#020B14]">
+    <section className="py-10 md:py-16 relative overflow-hidden bg-[#020B14]">
       {/* Background Effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#FF4A1C]/5 rounded-full blur-[80px] md:blur-[100px] pointer-events-none" />
       

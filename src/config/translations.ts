@@ -37,7 +37,7 @@ export const translations = {
       terms: "Conditions d'utilisation",
     },
     home: {
-      heroBadge: "🚀 La Passerelle de Paiement MonCash pour Haïti",
+      heroBadge: "La Passerelle de Paiement MonCash pour Haïti",
       heroTitle1: "Acceptez les paiements",
       heroTitle2: "MonCash.",
       heroTitle3: "Dès aujourd'hui.",
