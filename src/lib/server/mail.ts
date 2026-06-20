@@ -1,7 +1,5 @@
-import nodemailer from 'nodemailer';
-
-// Module d'envoi d'e-mails pour Kobara
-// Supporte SMTP réel si configuré, avec un simulateur pro en console en développement
+// Module d'envoi d'e-mails pour Kobara utilisant Resend
+// Fonctionne de manière native sur les environnements Edge et Serverless comme Vercel
 
 function generatePremiumEmailHtml(subject: string, text: string) {
   // Convert text into beautiful paragraphs and buttons/codes
@@ -19,8 +17,6 @@ function generatePremiumEmailHtml(subject: string, text: string) {
     }
     
     // Check if paragraph contains exactly a 6 digit code (like OTP)
-    // Wait, the OTP email is "Votre code de vérification temporaire à 6 chiffres pour votre compte Kobara est : 123456"
-    // It's all in one paragraph. Let's extract the code if the paragraph ends with it.
     const codeMatch = trimmed.match(/ :\s*(\d{6})$/);
     if (codeMatch) {
       const textBefore = trimmed.replace(codeMatch[0], '');
@@ -80,19 +76,13 @@ export async function sendEmail({
   html?: string;
   text: string;
 }) {
-  const smtpHost = process.env.SMTP_HOST || process.env.MAIL_HOST;
-  const smtpPort = process.env.SMTP_PORT || process.env.MAIL_PORT;
-  const smtpUser = process.env.SMTP_USER || process.env.MAIL_USERNAME;
-  const smtpPass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
-  const smtpFrom = process.env.SMTP_FROM || process.env.MAIL_FROM_ADDRESS || 'no-reply@kobara.app';
-
   const generatedHtml = html || generatePremiumEmailHtml(subject, text);
 
-  // Formatage propre pour l'affichage en console
+  // Formatage propre pour l'affichage en console (mode dev)
   const separator = "─".repeat(56);
   console.log(`
 ┌${separator}┐
-│ 📧 [KOBARA EMAIL SIMULATOR]                            │
+│ 📧 [KOBARA EMAIL LOG]                                  │
 │                                                        │
 │ Destinataire : ${to.padEnd(39)} │
 │ Sujet        : ${subject.padEnd(39)} │
@@ -112,7 +102,7 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: process.env.RESEND_FROM_EMAIL || 'Kobara <no-reply@kobara.app>',
+          from: process.env.RESEND_FROM_EMAIL || 'Kobara <noreply@kobara.app>',
           to: [to],
           subject: subject,
           html: generatedHtml,
@@ -128,31 +118,8 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
     } catch (error) {
       console.error(`[RESEND ERROR] Exception lors de l'envoi à ${to} :`, error);
     }
-  } else if (smtpHost && smtpUser && smtpPass) {
-    try {
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: parseInt(smtpPort || '587'),
-        secure: smtpPort === '465',
-        auth: {
-          user: smtpUser,
-          pass: smtpPass
-        }
-      });
-
-      await transporter.sendMail({
-        from: smtpFrom,
-        to,
-        subject,
-        text,
-        html: generatedHtml
-      });
-      console.log(`[SMTP] E-mail envoyé avec succès à ${to}`);
-    } catch (error) {
-      console.error(`[SMTP ERROR] Échec de l'envoi de l'e-mail à ${to} :`, error);
-    }
   } else {
-    console.log(`[SMTP INFO] Aucun serveur configuré (ni Resend ni SMTP). E-mail simulé avec succès en console.`);
+    console.log(`[INFO] Clé RESEND_API_KEY manquante. L'e-mail a été généré mais n'a pas été envoyé réellement.`);
   }
 
   return { success: true };
