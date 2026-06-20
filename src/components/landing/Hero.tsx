@@ -67,15 +67,15 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* Right Column - Isometric Visual (Responsive on all screens) */}
+          {/* Right Column - Isometric Visual (HIDDEN ON MOBILE, VISIBLE ON LG) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            className="flex relative h-[350px] sm:h-[450px] lg:h-[600px] items-center justify-center perspective-[800px] sm:perspective-[1000px] lg:perspective-[1200px] mt-8 lg:mt-0 w-full overflow-visible"
+            className="hidden lg:flex relative h-[600px] items-center justify-center perspective-[1200px] mt-8 lg:mt-0 w-full overflow-visible"
           >
             {/* 3D Container */}
-            <div className="relative w-[320px] h-[640px] transform-gpu rotate-x-[20deg] rotate-y-[-25deg] rotate-z-[5deg] hover:rotate-x-[15deg] hover:rotate-y-[-15deg] transition-transform duration-700 ease-out preserve-3d scale-[0.6] sm:scale-[0.75] lg:scale-100 origin-center">
+            <div className="relative w-[320px] h-[640px] transform-gpu rotate-x-[20deg] rotate-y-[-25deg] rotate-z-[5deg] hover:rotate-x-[15deg] hover:rotate-y-[-15deg] transition-transform duration-700 ease-out preserve-3d origin-center">
               
               {/* Base Platform Shadow (Deeper, more realistic) */}
               <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[300px] h-[40px] bg-black/60 blur-[30px] rounded-[100%] translate-z-[-50px]" />

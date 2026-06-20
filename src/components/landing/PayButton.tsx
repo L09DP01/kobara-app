@@ -48,13 +48,13 @@ export function PayButton() {
             </Link>
           </motion.div>
 
-          {/* Right Column - Visual Mockup */}
+          {/* Right Column - Visual Mockup (HIDDEN ON MOBILE) */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "0px" }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            className="hidden lg:block relative"
           >
             {/* Main Mockup Card */}
             <div className="bg-[#07111F] rounded-2xl border border-[#1E2A38] shadow-2xl p-0 relative z-20 overflow-hidden flex flex-col">
