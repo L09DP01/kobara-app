@@ -2,6 +2,7 @@ import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import bcrypt from "bcryptjs"
+import { SignJWT } from "jose"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -58,12 +59,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       // Exposer le rôle dans la session
       if (session.user) {
         session.user.role = token.role as string
         // Expose l'ID de l'utilisateur
         session.user.id = token.sub as string
+        
+        // Signer un token Supabase pour que RLS fonctionne (compatible Edge)
+        const payload = {
+          aud: "authenticated",
+          sub: session.user.id,
+          email: session.user.email,
+          role: "authenticated",
+        }
+        
+        if (process.env.SUPABASE_JWT_SECRET) {
+          const secret = new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET);
+          ;(session as any).supabaseAccessToken = await new SignJWT(payload)
+            .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+            .setIssuedAt()
+            .setExpirationTime(Math.floor(new Date(session.expires).getTime() / 1000))
+            .sign(secret);
+        }
       }
       return session
     },
