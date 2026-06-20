@@ -165,7 +165,8 @@ export const authOptions: any = {
   ],
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60 // 30 days
+    maxAge: 2 * 60 * 60, // 2 hours of inactivity
+    updateAge: 15 * 60, // update token every 15 minutes to keep it alive
   },
   callbacks: {
     async jwt({ token, user }: any) {
