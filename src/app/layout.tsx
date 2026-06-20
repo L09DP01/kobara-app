@@ -84,7 +84,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jakarta.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jakarta.variable} bg-background-main antialiased`}
     >
       <head>
         {/* Google Analytics */}
@@ -121,7 +121,7 @@ export default async function RootLayout({
       </head>
       <body className="bg-background-main font-body-base text-body-base text-on-surface min-h-[100dvh] flex flex-col">
         <LanguageProvider>
-          <div style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }} className="flex-1 flex flex-col min-h-full">
+          <div style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }} className="flex-1 flex flex-col">
             {children}
           </div>
           <Toaster position="top-right" richColors />
@@ -129,6 +129,13 @@ export default async function RootLayout({
           <NotificationPrompt />
         </LanguageProvider>
         <Analytics />
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (max-width: 768px) {
+            html, body {
+              background-color: #020B14 !important;
+            }
+          }
+        `}} />
       </body>
     </html>
   );
