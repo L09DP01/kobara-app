@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createAdminClient } from '@/utils/supabase/admin'
-import { sendEmail } from '@/lib/server/mail'
+import { sendWelcomeEmail, sendPasswordResetEmail } from '@/lib/server/mail'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import dns from 'dns'
@@ -130,14 +130,13 @@ export async function signup(formData: FormData) {
     }
   }
 
-  // 7. Send activation e-mail via SMTP
+  // 7. Send activation e-mail via Resend
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const verificationLink = `${appUrl}/api/auth/verify-email?token=${token}`;
 
-  await sendEmail({
+  await sendWelcomeEmail({
     to: email,
-    subject: "Activez votre compte Kobara",
-    text: `Bonjour,\n\nMerci de vous être inscrit sur Kobara. Pour activer votre compte marchand et commencer à accepter des paiements MonCash, veuillez cliquer sur le lien suivant :\n\n${verificationLink}\n\nCe lien est valide pendant 24 heures.\n\nSi vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.\n\nCordialement,\nL'équipe Kobara`
+    verificationLink
   });
 
   // 8. Redirect user to login with explicit verification prompt
@@ -196,12 +195,9 @@ export async function requestPasswordReset(emailInput: string, lang: string = 'f
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const resetLink = `${appUrl}/reset-password?token=${token}`;
 
-  await sendEmail({
+  await sendPasswordResetEmail({
     to: email,
-    subject: lang === 'en' ? "Reset your Kobara password" : "Réinitialisation de votre mot de passe Kobara",
-    text: lang === 'en' 
-      ? `Hello,\n\nYou requested a password reset for your Kobara account. Please click the link below to set a new password:\n\n${resetLink}\n\nThis link is valid for 1 hour.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nThe Kobara Team`
-      : `Bonjour,\n\nVous avez demandé la réinitialisation de votre mot de passe Kobara. Veuillez cliquer sur le lien suivant pour définir un nouveau mot de passe :\n\n${resetLink}\n\nCe lien est valide pendant 1 heure.\n\nSi vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.\n\nCordialement,\nL'équipe Kobara`
+    resetLink
   });
 
   return { success: true };
