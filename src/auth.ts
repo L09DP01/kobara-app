@@ -3,6 +3,9 @@ import Credentials from "next-auth/providers/credentials"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import bcrypt from "bcryptjs"
 
+const isProduction = process.env.NODE_ENV === "production"
+const cookieDomain = isProduction ? ".kobara.app" : undefined
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
@@ -66,6 +69,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub as string
       }
       return session
+    },
+  },
+  cookies: {
+    sessionToken: {
+      name: isProduction ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+        domain: cookieDomain,
+      },
+    },
+    callbackUrl: {
+      name: isProduction ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+        domain: cookieDomain,
+      },
+    },
+    csrfToken: {
+      name: isProduction ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProduction,
+      },
     },
   },
   pages: {
