@@ -6,7 +6,7 @@ export const cguRuleExecutor = {
   async loadActiveRules(): Promise<CGUAnalysisRule[]> {
     const cached = await riskRedis.getCachedActiveRules()
     if (cached) {
-      return JSON.parse(cached) as CGUAnalysisRule[]
+      return (typeof cached === 'string' ? JSON.parse(cached) : cached) as CGUAnalysisRule[]
     }
 
     const { data: rules, error } = await supabaseAdmin

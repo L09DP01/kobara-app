@@ -1,13 +1,14 @@
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { cguRuleExecutor } from "./cgu-rule-executor"
 import { riskNotifier } from "../notifications/risk-notifier"
+import { RuleViolation } from "@/types/risk"
 
 export const riskEngine = {
   async runSystemRules(merchantId: string) {
     // Implémentation des 10 règles système codées en dur
     // login abuse, payment abuse, API abuse, webhook failure, volume spike, 
     // structuring AML, suspicious withdrawal, IP/device anomaly, KYC failure patterns, multi-account
-    const violations = []
+    const violations: RuleViolation[] = []
     
     // Simulation pour le scaffold
     return violations
