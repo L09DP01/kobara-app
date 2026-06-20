@@ -11,7 +11,6 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: kobara-payments-for-woocommerce
- * Domain Path: /languages
  * Requires Plugins: woocommerce
  * WC requires at least: 7.0
  * WC tested up to: 9.0
@@ -41,7 +40,7 @@ function kobara_init_gateway_class() {
     // Register Gateway
     add_filter('woocommerce_payment_gateways', 'kobara_add_gateway_class');
     function kobara_add_gateway_class($methods) {
-        $methods[] = 'WC_Gateway_Kobara';
+        $methods[] = 'Kobara_WC_Gateway';
         return $methods;
     }
 }

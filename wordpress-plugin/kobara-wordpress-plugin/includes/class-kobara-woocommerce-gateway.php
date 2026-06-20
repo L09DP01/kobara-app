@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class WC_Gateway_Kobara extends WC_Payment_Gateway {
+class Kobara_WC_Gateway extends WC_Payment_Gateway {
     public function __construct() {
         $this->id = 'kobara';
         $this->icon = 'kobara-wordpress-plugin/moncashicon.png'; // URL vers l'icône MonCash/Kobara

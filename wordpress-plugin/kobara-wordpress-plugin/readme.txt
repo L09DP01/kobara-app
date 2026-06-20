@@ -1,27 +1,27 @@
 === Kobara Payments for WooCommerce ===
 Contributors: kobara
 Tags: woocommerce, payment gateway, moncash, haiti
-Requires at least: 5.0
+Requires at least: 6.0
 Tested up to: 7.0
 Stable tag: 1.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 
-Acceptez les paiements MonCash sur WooCommerce via l'API Kobara.
+Accept MonCash payments in WooCommerce through Kobara.
 
 == Description ==
 
-Ce plugin permet aux marchands haïtiens d'accepter facilement les paiements MonCash sur leur boutique WooCommerce via la plateforme Kobara.app.
+This plugin allows Haitian merchants to easily accept MonCash payments on their WooCommerce store via the Kobara.app platform.
 
 == Installation ==
 
-1. Téléchargez le fichier zip du plugin.
-2. Allez dans WordPress > Extensions > Ajouter > Téléverser.
-3. Activez l'extension.
-4. Rendez-vous dans WooCommerce > Réglages > Paiements > Kobara.
-5. Entrez vos clés d'API (Mode Test ou Live) récupérées sur le dashboard Kobara.
+1. Download the plugin zip file.
+2. Go to WordPress > Plugins > Add New > Upload Plugin.
+3. Activate the plugin.
+4. Go to WooCommerce > Settings > Payments > Kobara.
+5. Enter your API keys (Test or Live mode) retrieved from your Kobara dashboard.
 
 == Changelog ==
 
 = 1.0.0 =
-* Version initiale.
+* Initial release.

@@ -13,7 +13,7 @@ class Kobara_Webhook {
 
     public function handle_webhook() {
         $payload = file_get_contents('php://input');
-        $signature_header = isset($_SERVER['HTTP_KOBARA_SIGNATURE']) ? $_SERVER['HTTP_KOBARA_SIGNATURE'] : '';
+        $signature_header = isset($_SERVER['HTTP_KOBARA_SIGNATURE']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_KOBARA_SIGNATURE'])) : '';
 
         if (empty($signature_header) || empty($payload)) {
             status_header(400);
