@@ -103,7 +103,32 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
 └${separator}┘
   `);
 
-  if (smtpHost && smtpUser && smtpPass) {
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM_EMAIL || 'Kobara <no-reply@kobara.app>',
+          to: [to],
+          subject: subject,
+          html: generatedHtml,
+          text: text
+        })
+      });
+      if (!res.ok) {
+        const errData = await res.text();
+        console.error(`[RESEND ERROR] Échec de l'envoi à ${to} :`, errData);
+      } else {
+        console.log(`[RESEND] E-mail envoyé avec succès à ${to}`);
+      }
+    } catch (error) {
+      console.error(`[RESEND ERROR] Exception lors de l'envoi à ${to} :`, error);
+    }
+  } else if (smtpHost && smtpUser && smtpPass) {
     try {
       const transporter = nodemailer.createTransport({
         host: smtpHost,
@@ -127,7 +152,7 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
       console.error(`[SMTP ERROR] Échec de l'envoi de l'e-mail à ${to} :`, error);
     }
   } else {
-    console.log(`[SMTP INFO] Aucun serveur SMTP configuré. E-mail simulé avec succès en console.`);
+    console.log(`[SMTP INFO] Aucun serveur configuré (ni Resend ni SMTP). E-mail simulé avec succès en console.`);
   }
 
   return { success: true };
