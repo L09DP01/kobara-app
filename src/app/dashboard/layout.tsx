@@ -85,7 +85,7 @@ export default async function DashboardLayout({
 
   // For protected pages: redirect non-authenticated or non-merchants
   if (!user && !isPublicDashboardPath) {
-    redirect("/login");
+    redirect("/logout");
   }
 
   if (user && (!merchant || !merchant.phone || !merchant.category) && !isPublicDashboardPath) {
