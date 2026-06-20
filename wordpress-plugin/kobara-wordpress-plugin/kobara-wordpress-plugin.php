@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Kobara Payments for WooCommerce
- * Plugin URI: https://kobara.app
+ * Plugin URI: https://kobara.app/docs/wordpress-plugin
  * Description: Acceptez les paiements MonCash sur WooCommerce via l'API Kobara.
  * Version: 1.0.0
  * Author: Kobara Team
