@@ -101,7 +101,7 @@ export default function ChallengeEmailPage() {
       const res = await verifyEmailOtpAction(otp);
       if (res.success) {
         setSuccess(true);
-        window.location.href = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'https://dashboard.kobara.app';
+        window.location.href = '/dashboard';
       }
     } catch (err: any) {
       setError(err.message || 'Le code de vérification est invalide ou expiré.');

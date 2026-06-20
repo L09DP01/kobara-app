@@ -33,7 +33,7 @@ export function OnboardingClient({ defaultEmail }: { defaultEmail: string }) {
         setLoading(false);
         return;
       }
-      window.location.href = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'https://dashboard.kobara.app';
+      window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Une erreur est survenue');
       setLoading(false);
