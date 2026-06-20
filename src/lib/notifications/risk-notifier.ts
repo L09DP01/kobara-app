@@ -14,18 +14,28 @@ export const riskNotifier = {
 
     if (process.env.COMPLIANCE_EMAIL && process.env.SMTP_HOST) {
       try {
-        const { sendEmail } = require('../server/mail');
-        await sendEmail({
+        const nodemailer = require("nodemailer")
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT) || 587,
+          secure: Number(process.env.SMTP_PORT) === 465,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        })
+
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || '"Kobara Security" <no-reply@kobara.app>',
           to: process.env.COMPLIANCE_EMAIL,
           subject: `🚨 ALERTE CRITIQUE: Marchand ${merchantId.split('-')[0]} à risque (${score}/100)`,
-          text: `Le marchand ${merchantId} a dépassé le seuil de risque avec un score de ${score}.\n\nNombre d'infractions détectées : ${violations.length}\n\nVeuillez vous connecter au tableau de bord d'administration pour investiguer.`,
           html: `<p>Le marchand <strong>${merchantId}</strong> a dépassé le seuil de risque avec un score de <strong>${score}</strong>.</p>
                  <p>Nombre d'infractions détectées : ${violations.length}</p>
                  <p>Veuillez vous connecter au tableau de bord d'administration pour investiguer.</p>`
-        });
-        console.log(`Email SMTP envoyé avec succès à ${process.env.COMPLIANCE_EMAIL}`);
+        })
+        console.log(`Email SMTP envoyé avec succès à ${process.env.COMPLIANCE_EMAIL}`)
       } catch (err) {
-        console.error("Échec de l'envoi de l'email SMTP:", err);
+        console.error("Échec de l'envoi de l'email SMTP:", err)
       }
     }
   },

@@ -106,7 +106,6 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
   if (smtpHost && smtpUser && smtpPass) {
     try {
       const transporter = nodemailer.createTransport({
-        service: smtpHost.includes('gmail.com') ? 'gmail' : undefined,
         host: smtpHost,
         port: parseInt(smtpPort || '587'),
         secure: smtpPort === '465',
@@ -124,13 +123,12 @@ ${text.split('\n').map(line => `│   ${line.padEnd(52)} │`).join('\n')}
         html: generatedHtml
       });
       console.log(`[SMTP] E-mail envoyé avec succès à ${to}`);
-      return { success: true };
     } catch (error) {
       console.error(`[SMTP ERROR] Échec de l'envoi de l'e-mail à ${to} :`, error);
-      return { success: false, error };
     }
   } else {
     console.log(`[SMTP INFO] Aucun serveur SMTP configuré. E-mail simulé avec succès en console.`);
-    return { success: true };
   }
+
+  return { success: true };
 }

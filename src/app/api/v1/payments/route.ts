@@ -80,24 +80,16 @@ export async function POST(request: NextRequest) {
     // 1. Generate a unique Kobara Reference
     const kobaraReference = `KOB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // 2. Call Bazik to create the payment ONLY in live mode
-    let bazikOrderId = null;
-    let paymentUrl = null;
+    // 2. Call Bazik to create the payment
+    const bazikResponse = await BazikService.createMoncashPayment({
+      amount: amount,
+      reference: kobaraReference,
+      description: description || "Paiement Kobara API",
+      environment: environment as "test" | "live"
+    });
 
-    if (environment === 'test') {
-      bazikOrderId = `TEST-ORD-${Date.now()}`;
-      paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://kobara.app'}/test-payment?ref=${kobaraReference}`;
-    } else {
-      const bazikResponse = await BazikService.createMoncashPayment({
-        amount: amount,
-        reference: kobaraReference,
-        description: description || "Paiement Kobara API",
-        environment: "live"
-      });
-      bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
-      const bazikData = bazikResponse.data || bazikResponse;
-      paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
-    }
+    // Bazik response typically gives a payment URL or an order ID.
+    const bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
 
     // 2.5 Resolve Customer
     let customerId = null;
@@ -195,6 +187,9 @@ export async function POST(request: NextRequest) {
         await notifyPaymentCreated(merchantId, mData.email, amount, currency, payment.id);
       }
     } catch(e) { console.error("Notification failed", e); }
+
+    const bazikData = bazikResponse.data || bazikResponse;
+    const paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
 
     // 4. Return response to merchant
     const responsePayload = {
