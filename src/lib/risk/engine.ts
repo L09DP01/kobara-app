@@ -7,7 +7,7 @@ export const riskEngine = {
     // Implémentation des 10 règles système codées en dur
     // login abuse, payment abuse, API abuse, webhook failure, volume spike, 
     // structuring AML, suspicious withdrawal, IP/device anomaly, KYC failure patterns, multi-account
-    const violations = []
+    const violations: { rule: string; severity: string; details: string }[] = []
     
     // Simulation pour le scaffold
     return violations
