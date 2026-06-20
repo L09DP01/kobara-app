@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('KOBARA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('KOBARA_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('KOBARA_API_BASE_URL', 'https://kobara.app/api/v1');
+define('KOBARA_API_BASE_URL', 'https://api.kobara.app/v1');
 
 // Initialize the plugin when WooCommerce is loaded
 add_action('plugins_loaded', 'kobara_init_gateway_class');
@@ -31,11 +31,17 @@ function kobara_init_gateway_class() {
     require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-settings.php';
     require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-webhook.php';
     require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-woocommerce-gateway.php';
+    require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-updater.php';
 
     // Register Gateway
     add_filter('woocommerce_payment_gateways', 'kobara_add_gateway_class');
     function kobara_add_gateway_class($methods) {
         $methods[] = 'WC_Gateway_Kobara';
         return $methods;
+    }
+
+    // Initialize Custom Updater
+    if (is_admin()) {
+        new Kobara_Plugin_Updater(__FILE__, 'https://kobara.app/downloads/plugin-info.json');
     }
 }
