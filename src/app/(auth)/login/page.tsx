@@ -82,13 +82,13 @@ function LoginContent() {
       </div>
 
       {/* Success Notification Banner */}
-      {registered && (
+      {(registered || searchParams.get('success')) && (
         <div className="mb-8 p-5 bg-[#27C93F]/10 border border-[#27C93F]/20 rounded-2xl flex items-start gap-4 text-white text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-300 shadow-[0_0_20px_rgba(39,201,63,0.1)]">
           <CheckCircle2 className="w-5 h-5 text-[#27C93F] shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-[#27C93F] mb-1">{t("auth.successTitle")}</p>
+            <p className="font-bold text-[#27C93F] mb-1">{searchParams.get('success') ? "Vérification réussie" : t("auth.successTitle")}</p>
             <p className="text-[#AAB3C2] leading-relaxed text-[13px]">
-              {t("auth.successDesc")}
+              {searchParams.get('success') || t("auth.successDesc")}
             </p>
           </div>
         </div>
