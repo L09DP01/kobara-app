@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getMerchantCurrentPlan } from "@/lib/server/plans";
@@ -7,7 +7,7 @@ import { getMonthlyPaymentCount, getDailyWithdrawalTotal, getApiKeysCount } from
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

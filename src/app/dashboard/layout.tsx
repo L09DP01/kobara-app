@@ -3,7 +3,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { EnvironmentProvider } from "@/context/EnvironmentContext";
 
@@ -16,7 +16,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   // Determine the current path to check if it's a public dashboard page
   const headersList = await headers();

@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/auth-options";
+import { auth } from "@/auth";
 import { DocsClient } from "../docs-client";
 import fs from "fs";
 import path from "path";
@@ -35,7 +34,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 }
 
 export default async function DocsDocPage(props: { params: Promise<{ slug: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const isAuthenticated = !!session?.user;
   const resolvedParams = await props.params;
   const { slug } = resolvedParams;

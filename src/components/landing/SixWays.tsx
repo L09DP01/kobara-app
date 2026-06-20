@@ -41,8 +41,8 @@ export function SixWays() {
   ];
 
   return (
-    <section className="py-24 bg-[#020B14] relative">
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+    <section className="py-16 md:py-24 bg-[#020B14] relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-sm font-bold text-[#FF4A1C] tracking-widest uppercase mb-4">
@@ -62,7 +62,7 @@ export function SixWays() {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "0px" }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
               whileHover={{ y: -5 }}
               className="group relative p-8 bg-[#07111F] rounded-2xl border border-[#1E2A38] hover:border-[#FF4A1C]/50 transition-all overflow-hidden cursor-pointer"

@@ -6,15 +6,15 @@ import Link from "next/link";
 
 export function PayButton() {
   return (
-    <section className="py-24 bg-[#020B14] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section className="py-16 md:py-24 bg-[#020B14] overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           
           {/* Left Column - Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "0px" }}
             transition={{ duration: 0.8 }}
             className="max-w-lg"
           >
@@ -52,7 +52,7 @@ export function PayButton() {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "0px" }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
@@ -75,8 +75,8 @@ export function PayButton() {
                 <div className="w-32 h-32 rounded-xl bg-white border border-[#1E2A38] flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
-                    src="https://www.audiosanctuary.co.uk/images/detailed/16/audiosanctuary-denon-ah-gc30-white.jpg" 
-                    alt="Premium Wireless Headphones" 
+                    src="/images/product_icon.jpg" 
+                    alt="Premium Product" 
                     className="w-full h-full object-cover mix-blend-multiply"
                   />
                 </div>

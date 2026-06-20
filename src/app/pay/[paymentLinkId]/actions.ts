@@ -24,7 +24,7 @@ export async function processPayment(formData: FormData) {
   // 1. Fetch Payment Link to check settings
   const { data: linkInfo } = await supabaseAdmin
     .from('payment_links')
-    .select('amount, metadata')
+    .select('amount, metadata, environment')
     .eq('id', paymentLinkId)
     .single();
 
@@ -82,7 +82,8 @@ export async function processPayment(formData: FormData) {
         merchant_id: merchantId,
         name: customerName,
         phone: customerPhone,
-        wallet: customerPhone
+        wallet: customerPhone,
+        environment: linkInfo.environment
       })
       .select('id')
       .single();
@@ -113,6 +114,7 @@ export async function processPayment(formData: FormData) {
       status: 'pending',
       provider: 'moncash',
       payment_method: 'moncash',
+      environment: linkInfo.environment,
       metadata: customerAddress ? { address: customerAddress } : {}
     })
     .select('id')
@@ -139,7 +141,8 @@ export async function processPayment(formData: FormData) {
     const bazikResponse = await BazikService.createMoncashPayment({
       amount: grossAmount,
       reference: txRef,
-      description: `Paiement pour ${customerName}`
+      description: `Paiement pour ${customerName}`,
+      environment: linkInfo.environment as "test" | "live"
     });
 
     // Cherche l'URL dans la réponse de Bazik

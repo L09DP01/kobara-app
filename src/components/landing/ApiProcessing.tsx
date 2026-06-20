@@ -8,14 +8,14 @@ export function ApiProcessing() {
   const { t } = useTranslation();
 
   return (
-    <section className="py-24 bg-[#020B14] relative overflow-hidden">
+    <section className="py-16 md:py-24 bg-[#020B14] relative overflow-hidden">
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(30,42,56,0.3)_1px,transparent_1px),linear-gradient(90deg,rgba(30,42,56,0.3)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
       
       {/* Large Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#FF4A1C]/5 blur-[120px] rounded-[100%] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="text-center max-w-3xl mx-auto mb-20">
           <p className="text-sm font-bold text-[#FF4A1C] tracking-widest uppercase mb-4">
@@ -35,7 +35,7 @@ export function ApiProcessing() {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "0px" }}
             className="bg-[#07111F] rounded-2xl border border-[#1E2A38] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col"
           >
             {/* IDE Header */}
@@ -184,7 +184,7 @@ export function ApiProcessing() {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "0px" }}
             transition={{ delay: 0.4 }}
             className="flex flex-col gap-4"
           >

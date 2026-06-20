@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { decideKycStatus, KycSignals } from "@/lib/server/kyc/decision-engine";
 import { activateFreePlanAfterKyc } from "@/lib/server/plans";
@@ -8,7 +8,7 @@ import { createNotification } from "@/lib/server/notifications";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions) as any;
+    const session = await auth() as any;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

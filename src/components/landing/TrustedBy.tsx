@@ -18,7 +18,7 @@ export function TrustedBy() {
 
   return (
     <section className="py-12 border-y border-[#1E2A38] bg-[#020B14] overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-center text-sm text-[#AAB3C2] font-medium mb-8 uppercase">
           {t("home.trustedBy")}
         </p>

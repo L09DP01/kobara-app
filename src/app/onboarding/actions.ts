@@ -2,7 +2,7 @@
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import { ApiKeySecurity } from "@/lib/server/security/api-keys";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 
 export async function completeOnboarding(formData: {
@@ -13,7 +13,7 @@ export async function completeOnboarding(formData: {
   phone: string;
   address: string;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as any;
 
   if (!user) {

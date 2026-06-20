@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/auth-options";
+import { auth } from "@/auth";
 
 export async function authenticateHandoffToken(request: NextRequest) {
   const authHeader = request.headers.get("Authorization");
@@ -45,7 +44,7 @@ export async function authenticateHandoffToken(request: NextRequest) {
 // Helper to check standard NextAuth session OR Handoff Token
 export async function getKycMerchantId(request: NextRequest) {
   // 1. Try NextAuth Session
-  const session = await getServerSession(authOptions) as any;
+  const session = await auth() as any;
   if (session?.user?.id) {
     const supabase = createAdminClient();
     const { data: merchant } = await supabase.from('merchants').select('id').eq('user_id', session.user.id).single();

@@ -1,6 +1,6 @@
 'use server'
 
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -147,7 +147,7 @@ export async function removeTeamMember(memberId: string) {
 }
 
 export async function updatePassword(password: string) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as any;
   if (!user) {
     throw new Error("Non autorisé");

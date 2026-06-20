@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "./admin";
 import { createClient } from "./server";
@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function getCurrentUserAndMerchant() {
-  const session = await getServerSession(authOptions) as any;
+  const session = await auth() as any;
   const user = session?.user;
 
   if (!user) {

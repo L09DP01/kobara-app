@@ -1,11 +1,11 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import { OnboardingClient } from "./onboarding-client";
 
 export default async function OnboardingPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as any;
 
   if (!user) {

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
+import { getToken } from 'next-auth/jwt'
 
 export async function proxy(request: NextRequest) {
   const url = request.nextUrl;
@@ -24,6 +25,8 @@ export async function proxy(request: NextRequest) {
     
     return NextResponse.rewrite(url);
   }
+
+  // ---------------------------------------------------------
 
   // Regular application routing
   return await updateSession(request)

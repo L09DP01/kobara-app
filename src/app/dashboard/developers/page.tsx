@@ -1,10 +1,10 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { DevelopersClient } from "./developers-client";
 
 export default async function DevelopersPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as any;
 
   // ── Guest (not logged in) ── show generic sandbox data, no real keys

@@ -8,11 +8,11 @@ import { useTranslation } from "@/context/LanguageContext";
 export function CTA() {
   const { t } = useTranslation();
   return (
-    <section className="py-24 relative overflow-hidden bg-[#020B14]">
+    <section className="py-16 md:py-24 relative overflow-hidden bg-[#020B14]">
       {/* Background Effects */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#FF4A1C]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#FF4A1C]/5 rounded-full blur-[80px] md:blur-[100px] pointer-events-none" />
       
-      <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -24,7 +24,7 @@ export function CTA() {
             {t("home.devBadge")}
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
             {t("home.ctaTitle")}
           </h2>
           

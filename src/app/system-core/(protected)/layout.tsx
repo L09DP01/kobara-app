@@ -26,6 +26,8 @@ export default function SystemCoreLayout({ children }: { children: React.ReactNo
     { name: "WITHDRAWALS", href: "/system-core/withdrawals", icon: Banknote },
     { name: "SUPPORT", href: "/system-core/support", icon: LifeBuoy },
     { name: "AUDIT LOGS", href: "/system-core/audit", icon: SearchCode },
+    { name: "RISK MONITORING", href: "/system-core/risk-monitoring", icon: ShieldAlert },
+    { name: "LEGAL & CGU (IA)", href: "/system-core/legal/cgu-rules", icon: Terminal },
   ];
 
   return (

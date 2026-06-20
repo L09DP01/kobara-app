@@ -56,7 +56,19 @@ export const BazikService = {
     amount: number;
     reference: string;
     description?: string;
+    environment?: "test" | "live";
   }) {
+    // Ne jamais appeler l'API fournisseur en mode test
+    if (params.environment === "test") {
+      console.log(`[BAZIK MOCK] Test payment initialized for ${params.reference}`);
+      return {
+        id: `mock_order_${Date.now()}`,
+        order_id: `mock_order_${Date.now()}`,
+        paymentUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/mock-payment?reference=${params.reference}&amount=${params.amount}`,
+        status: "pending"
+      };
+    }
+
     const token = await this.getAccessToken();
 
     const controller = new AbortController();
@@ -102,6 +114,10 @@ export const BazikService = {
    * Vérifie le statut d'un paiement existant
    */
   async verifyMoncashPayment(transactionId: string) {
+    if (transactionId.startsWith('mock_order_')) {
+      return { status: "successful", transaction_id: transactionId };
+    }
+
     const token = await this.getAccessToken();
 
     const response = await fetch(`${BAZIK_API_URL}/payments/${transactionId}`, {
@@ -127,7 +143,13 @@ export const BazikService = {
     receiver: string; // Numéro de téléphone
     reference: string;
     description?: string;
+    environment?: "test" | "live";
   }) {
+    if (params.environment === "test") {
+      console.log(`[BAZIK MOCK] Test withdrawal initialized for ${params.reference}`);
+      return { status: "successful", reference: params.reference, amount: params.amount };
+    }
+
     const token = await this.getAccessToken();
 
     const response = await fetch(`${BAZIK_API_URL}/moncash/withdraw`, {

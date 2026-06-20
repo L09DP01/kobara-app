@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
       amount: amount,
       reference: kobaraReference,
       description: description || "Paiement Kobara API",
+      environment: environment as "test" | "live"
     });
 
     // Bazik response typically gives a payment URL or an order ID.

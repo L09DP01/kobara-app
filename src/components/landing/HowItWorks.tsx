@@ -17,8 +17,8 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="py-24 bg-[#07111F] relative overflow-hidden border-y border-[#1E2A38]">
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+    <section className="py-16 md:py-24 bg-[#07111F] relative overflow-hidden border-y border-[#1E2A38]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="text-center max-w-3xl mx-auto mb-20">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -59,9 +59,9 @@ export function HowItWorks() {
               key={step.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: true, margin: "0px" }}
               transition={{ delay: index * 0.15, duration: 0.5 }}
-              className="flex flex-col items-center text-center max-w-[150px] relative"
+              className="flex flex-col items-center text-center max-w-[200px] lg:max-w-[150px] relative bg-[#07111F] p-4 rounded-xl lg:p-0 lg:bg-transparent"
             >
               <div className="w-16 h-16 rounded-2xl bg-[#020B14] border-2 border-[#1E2A38] flex items-center justify-center mb-6 relative group">
                 <motion.div 

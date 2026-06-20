@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { ApiKeySecurity } from "@/lib/server/security/api-keys";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { createAdminClient } from "@/utils/supabase/admin";
 
@@ -55,7 +55,7 @@ export async function authenticateApiRequest(request: NextRequest) {
   }
 
   // Fallback to NextAuth session (for internal dashboard use)
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const user = session?.user as any;
 
   if (user) {

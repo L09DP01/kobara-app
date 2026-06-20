@@ -10,69 +10,69 @@ export function Hero() {
   const { t } = useTranslation();
 
   return (
-    <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-[#020B14]">
+    <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-[#020B14]">
       {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#FF4A1C]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[800px] bg-[#FF4A1C]/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-center">
           
           {/* Left Column - Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-xl"
+            className="max-w-xl mx-auto lg:mx-0 text-center lg:text-left mt-8 md:mt-0"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#07111F] border border-[#1E2A38] text-sm text-[#AAB3C2] mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#07111F] border border-[#1E2A38] text-xs md:text-sm text-[#AAB3C2] mb-6 md:mb-8">
               <span className="w-2 h-2 rounded-full bg-[#FF4A1C] animate-pulse" />
-              {t("home.heroBadge")}
+              {t("home.heroBadge") || "Version 1.0"}
             </div>
 
-            <h1 className="text-5xl lg:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight">
-              {t("home.heroTitle1")} <br />
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-[1.1] mb-4 md:mb-6 tracking-tight">
+              {t("home.heroTitle1") || "Simplifiez vos" } <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF4A1C] to-[#FF2E14]">
-                {t("home.heroTitle2")}
-              </span><br />
-              {t("home.heroTitle3")}
+                {t("home.heroTitle2") || "Paiements"}
+              </span><br className="hidden sm:block" />
+              {t("home.heroTitle3") || "en Haïti"}
             </h1>
 
-            <p className="text-lg text-[#AAB3C2] mb-10 leading-relaxed max-w-lg">
-              {t("home.heroDesc")}
+            <p className="text-base md:text-lg text-[#AAB3C2] mb-8 md:mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0">
+              {t("home.heroDesc") || "Acceptez MonCash facilement."}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10 md:mb-12">
               <Link
                 href="/register"
-                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-semibold transition-all shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] flex items-center justify-center gap-2 group"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#FF4A1C] hover:bg-[#FF2E14] text-white font-semibold transition-all shadow-[0_0_20px_rgba(255,74,28,0.3)] hover:shadow-[0_0_30px_rgba(255,74,28,0.5)] flex items-center justify-center gap-2 group min-h-[44px]"
               >
-                {t("home.getStarted")}
+                {t("home.getStarted") || "Commencer"}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/docs"
-                className="w-full sm:w-auto px-8 py-4 rounded-full bg-transparent border border-[#1E2A38] hover:border-[#AAB3C2] text-white font-semibold transition-colors flex items-center justify-center"
+                className="w-full sm:w-auto px-8 py-4 rounded-full bg-transparent border border-[#1E2A38] hover:border-[#AAB3C2] text-white font-semibold transition-colors flex items-center justify-center min-h-[44px]"
               >
-                {t("home.viewDocs")}
+                {t("home.viewDocs") || "Documentation"}
               </Link>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 text-[#AAB3C2] text-sm font-medium">
+            <div className="flex flex-wrap gap-2 md:gap-6 text-[#AAB3C2] text-xs md:text-sm font-medium items-center justify-center lg:justify-start">
               {['No setup fee', 'No monthly fee', 'Secure & Reliable'].map((benefit, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-[#FF4A1C]" />
+                <div key={i} className="flex items-center gap-1.5 whitespace-nowrap">
+                  <CheckCircle2 className="w-3.5 h-3.5 md:w-5 md:h-5 text-[#FF4A1C]" />
                   {benefit}
                 </div>
               ))}
             </div>
           </motion.div>
 
-          {/* Right Column - Isometric Visual */}
+          {/* Right Column - Isometric Visual (HIDDEN ON MOBILE, VISIBLE ON LG) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            className="relative lg:h-[600px] flex items-center justify-center perspective-[1200px]"
+            className="hidden lg:flex relative h-[600px] items-center justify-center perspective-[1200px]"
           >
             {/* 3D Container */}
             <div className="relative w-[320px] h-[640px] transform-gpu rotate-x-[20deg] rotate-y-[-25deg] rotate-z-[5deg] hover:rotate-x-[15deg] hover:rotate-y-[-15deg] transition-transform duration-700 ease-out preserve-3d">

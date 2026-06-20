@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { getKycMerchantId } from "@/lib/server/auth/handoff-auth";
 import crypto from 'crypto';
 
