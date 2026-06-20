@@ -47,7 +47,7 @@ export default function ChallengeTotpPage() {
         if (!active) {
           // If no active factors exist, but they reached here, bypass or redirect
           console.warn("No active TOTP factors found. Redirecting to dashboard.");
-        window.location.href = '/dashboard';
+          window.location.href = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'https://dashboard.kobara.app';
           return;
         }
 
@@ -88,7 +88,7 @@ export default function ChallengeTotpPage() {
       
       // 3. Refresh session and redirect to dashboard
       await supabase.auth.refreshSession();
-      window.location.href = '/dashboard';
+      window.location.href = process.env.NEXT_PUBLIC_DASHBOARD_URL || 'https://dashboard.kobara.app';
     } catch (err: any) {
       setError(err.message || 'Le code de vérification est invalide. Veuillez réessayer.');
       setLoading(false);

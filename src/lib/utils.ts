@@ -6,5 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getDashboardUrl(path: string = "") {
-  return `/dashboard${path}`;
+  const dashboardUrl = process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://dashboard.kobara.app";
+  return `${dashboardUrl}${path}`;
 }
