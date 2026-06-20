@@ -28,7 +28,7 @@ export function AIRulesValidator() {
   }
 
   return (
-    <div className="bg-[#0A1628] border border-white/10 rounded-xl p-5 shadow-lg h-full flex flex-col">
+    <div className="bg-[#0A1628] border border-white/10 rounded-xl p-5 shadow-lg min-h-[400px] flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-semibold text-white">Validation des Règles IA</h2>
         <span className="bg-blue-500/10 text-blue-400 text-xs font-bold px-2 py-1 rounded-full border border-blue-500/20">
