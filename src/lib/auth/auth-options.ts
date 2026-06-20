@@ -29,7 +29,7 @@ export const authOptions: any = {
         otp: { label: "OTP Code", type: "text" }
       },
       async authorize(credentials) {
-        const lang = credentials?.language || "fr";
+        const lang = (credentials?.language as string) || "fr";
 
         if (!credentials?.email) {
           throw new Error(lang === "en" ? "Please enter your email." : "Veuillez saisir votre e-mail.");
@@ -41,7 +41,7 @@ export const authOptions: any = {
         const { data: user, error } = await supabase
           .from("users")
           .select("*")
-          .eq("email", credentials.email.toLowerCase().trim())
+          .eq("email", (credentials.email as string).toLowerCase().trim())
           .maybeSingle();
 
         if (error || !user) {
@@ -65,7 +65,7 @@ export const authOptions: any = {
           if (!expectedChallenge) throw new Error("Challenge invalide ou expiré.");
 
           const passkeys = security.passkeys || [];
-          const responseBody = JSON.parse(credentials.passkey_response);
+          const responseBody = JSON.parse(credentials.passkey_response as string);
           
           const passkey = passkeys.find((pk: any) => pk.id === responseBody.id);
           if (!passkey) throw new Error("Clé biométrique introuvable.");
@@ -104,7 +104,7 @@ export const authOptions: any = {
           throw new Error(lang === "en" ? "Password required." : "Mot de passe requis.");
         }
 
-        const passwordMatches = await bcrypt.compare(credentials.password, user.password_hash);
+        const passwordMatches = await bcrypt.compare(credentials.password as string, user.password_hash);
         if (!passwordMatches) {
           throw new Error(lang === "en" ? "Incorrect password." : "Mot de passe incorrect.");
         }
@@ -133,7 +133,7 @@ export const authOptions: any = {
               const { Redis } = await import('@upstash/redis');
               const redis = Redis.fromEnv();
               const storedOtp = await redis.get(`otp:${user.email}`);
-              if (!storedOtp || String(storedOtp) !== credentials.otp) {
+              if (!storedOtp || String(storedOtp) !== (credentials.otp as string)) {
                  throw new Error("Code de sécurité incorrect ou expiré.");
               }
               await redis.del(`otp:${user.email}`);
