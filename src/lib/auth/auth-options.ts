@@ -96,7 +96,7 @@ export const authOptions: any = {
             security_json: { ...security, passkeys, auth_challenge: null }
           }).eq('merchant_id', merchant.id);
 
-          return { id: user.id, email: user.email, email_verified: user.email_verified };
+          return { id: user.id, email: user.email, email_verified: user.email_verified, role: "merchant" };
         }
 
         // PASSWORD AUTHENTICATION
@@ -157,7 +157,8 @@ export const authOptions: any = {
         return {
           id: user.id,
           email: user.email,
-          email_verified: user.email_verified
+          email_verified: user.email_verified,
+          role: "merchant"
         };
       }
     })
