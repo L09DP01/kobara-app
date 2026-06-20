@@ -6,7 +6,9 @@
  * Version: 1.0.0
  * Author: Kobara Team
  * Author URI: https://kobara.app
- * Text Domain: kobara-payments
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: kobara-payments-for-woocommerce
  * WC requires at least: 5.0
  * WC tested up to: 8.0
  */
@@ -31,17 +33,11 @@ function kobara_init_gateway_class() {
     require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-settings.php';
     require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-webhook.php';
     require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-woocommerce-gateway.php';
-    require_once KOBARA_PLUGIN_DIR . 'includes/class-kobara-updater.php';
 
     // Register Gateway
     add_filter('woocommerce_payment_gateways', 'kobara_add_gateway_class');
     function kobara_add_gateway_class($methods) {
         $methods[] = 'WC_Gateway_Kobara';
         return $methods;
-    }
-
-    // Initialize Custom Updater
-    if (is_admin()) {
-        new Kobara_Plugin_Updater(__FILE__, 'https://kobara.app/downloads/plugin-info.json');
     }
 }
