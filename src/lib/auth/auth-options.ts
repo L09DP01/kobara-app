@@ -1,11 +1,11 @@
-import { AuthOptions } from "next-auth";
+// import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { createAdminClient } from "@/utils/supabase/admin";
 import bcrypt from "bcryptjs";
 import { signSupabaseToken } from "@/lib/server/auth/supabase-jwt";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 
-export const authOptions: AuthOptions = {
+export const authOptions: any = {
   cookies: {
     sessionToken: {
       name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
