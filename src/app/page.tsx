@@ -10,7 +10,13 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function Home() {
   return (
-    <main className="relative min-h-[100dvh] bg-[#020B14] selection:bg-[#FF4A1C] selection:text-white font-sans text-white">
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        html, body {
+          background-color: #020B14 !important;
+        }
+      `}} />
+      <main className="relative min-h-[100dvh] bg-[#020B14] selection:bg-[#FF4A1C] selection:text-white font-sans text-white">
       <Navbar />
       <Hero />
       <TrustedBy />
@@ -21,5 +27,6 @@ export default function Home() {
       <CTA />
       <Footer />
     </main>
+    </>
   );
 }
