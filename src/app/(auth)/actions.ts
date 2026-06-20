@@ -145,15 +145,23 @@ export async function signup(formData: FormData) {
 
 export async function logout() {
   const cookieStore = await cookies();
+  const domain = process.env.NODE_ENV === 'production' ? '.kobara.app' : 'localhost';
   
-  // Clear all NextAuth related cookies
-  cookieStore.delete('next-auth.session-token');
-  cookieStore.delete('next-auth.csrf-token');
-  cookieStore.delete('next-auth.callback-url');
-  cookieStore.delete('__Secure-next-auth.session-token');
-  cookieStore.delete('__Secure-next-auth.callback-url');
-  cookieStore.delete('__Secure-next-auth.csrf-token');
-  cookieStore.delete('kbr_2fa_email_ok');
+  // Clear all NextAuth related cookies safely on the correct domain
+  const cookiesToDelete = [
+    'next-auth.session-token',
+    'next-auth.csrf-token',
+    'next-auth.callback-url',
+    '__Secure-next-auth.session-token',
+    '__Secure-next-auth.callback-url',
+    '__Secure-next-auth.csrf-token',
+    'kbr_2fa_email_ok'
+  ];
+
+  for (const name of cookiesToDelete) {
+    cookieStore.delete(name);
+    cookieStore.set(name, '', { domain, maxAge: 0, path: '/' });
+  }
   
   redirect('/login');
 }
