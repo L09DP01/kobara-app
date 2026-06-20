@@ -48,31 +48,31 @@ export function PayButton() {
             </Link>
           </motion.div>
 
-          {/* Right Column - Visual Mockup (HIDDEN ON MOBILE) */}
+          {/* Right Column - Visual Mockup (Visible & Responsive) */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "0px" }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="hidden lg:block relative"
+            className="block relative w-full max-w-full min-w-0"
           >
             {/* Main Mockup Card */}
-            <div className="bg-[#07111F] rounded-2xl border border-[#1E2A38] shadow-2xl p-0 relative z-20 overflow-hidden flex flex-col">
+            <div className="bg-[#07111F] rounded-2xl border border-[#1E2A38] shadow-2xl p-0 relative z-20 overflow-hidden flex flex-col w-full">
               
               {/* Header */}
               <div className="px-6 py-4 border-b border-[#1E2A38] bg-[#020B14] flex justify-between items-center">
-                <span className="font-medium text-white">Checkout</span>
-                <span className="text-[#AAB3C2] text-sm flex items-center gap-1">
+                <span className="font-medium text-white truncate">Checkout</span>
+                <span className="text-[#AAB3C2] text-sm flex items-center gap-1 shrink-0">
                   <ShieldCheck className="w-4 h-4 text-green-500" />
                   Secure
                 </span>
               </div>
 
               {/* Product Layout */}
-              <div className="p-6 md:p-8 flex flex-col sm:flex-row gap-6">
+              <div className="p-5 md:p-8 flex flex-col sm:flex-row gap-5 md:gap-6">
                 
                 {/* Realistic Image Placeholder */}
-                <div className="w-32 h-32 mx-auto sm:mx-0 rounded-xl bg-white border border-[#1E2A38] flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto sm:mx-0 rounded-xl bg-white border border-[#1E2A38] flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src="/images/product_icon.jpg" 
@@ -81,10 +81,10 @@ export function PayButton() {
                   />
                 </div>
                 
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-1">Premium Wireless Headphones</h3>
-                    <p className="text-[#AAB3C2] text-sm mb-4">Noise-cancelling, over-ear</p>
+                    <h3 className="text-lg md:text-xl font-bold text-white mb-1 truncate sm:whitespace-normal break-words">Premium Wireless Headphones</h3>
+                    <p className="text-[#AAB3C2] text-sm mb-4 truncate sm:whitespace-normal">Noise-cancelling, over-ear</p>
                     
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between text-[#AAB3C2]">
@@ -104,12 +104,12 @@ export function PayButton() {
                   </div>
                   
                   {/* Pay Button Target */}
-                  <button className="mt-6 w-full px-6 py-4 rounded-xl bg-[#020B14] border border-[#1E2A38] hover:border-[#FF4A1C] text-white font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-[0_0_15px_rgba(255,74,28,0.2)] transition-all group relative overflow-hidden">
+                  <button className="mt-6 w-full px-4 md:px-6 py-3 md:py-4 rounded-xl bg-[#020B14] border border-[#1E2A38] hover:border-[#FF4A1C] text-white font-bold flex items-center justify-center gap-2 md:gap-3 shadow-lg hover:shadow-[0_0_15px_rgba(255,74,28,0.2)] transition-all group relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#FF4A1C]/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                     {/* Kobara Logo */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/Icone.png" alt="Kobara" className="w-6 h-6 object-contain relative z-10" />
-                    <span className="relative z-10">Pay with Kobara</span>
+                    <img src="/Icone.png" alt="Kobara" className="w-5 h-5 md:w-6 md:h-6 object-contain relative z-10" />
+                    <span className="relative z-10 text-sm md:text-base">Pay with Kobara</span>
                   </button>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export function PayButton() {
               initial={{ y: 20 }}
               animate={{ y: 0 }}
               transition={{ delay: 0.5 }}
-              className="relative z-30 -mt-8 mx-auto w-[90%] md:w-[85%] bg-[#020B14] rounded-xl border border-[#1E2A38] p-5 shadow-2xl backdrop-blur-xl"
+              className="relative z-30 -mt-6 md:-mt-8 mx-auto w-[95%] md:w-[85%] bg-[#020B14] rounded-xl border border-[#1E2A38] p-4 md:p-5 shadow-2xl backdrop-blur-xl max-w-full overflow-hidden"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex gap-1.5 items-center">
@@ -129,7 +129,7 @@ export function PayButton() {
                 </div>
                 <Copy className="w-4 h-4 text-[#AAB3C2] hover:text-white cursor-pointer" />
               </div>
-              <pre className="text-[13px] leading-relaxed font-mono text-gray-300 overflow-x-auto pb-2">
+              <pre className="text-[11px] md:text-[13px] leading-relaxed font-mono text-gray-300 overflow-x-auto pb-2 w-full">
 <span className="text-blue-400">&lt;script</span> <span className="text-yellow-300">src=</span><span className="text-green-400">"https://js.kobara.app/v1"</span><span className="text-blue-400">&gt;&lt;/script&gt;</span>
 <br />
 <span className="text-blue-400">&lt;kobara-pay</span>
