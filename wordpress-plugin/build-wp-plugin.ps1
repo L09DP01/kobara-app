@@ -7,8 +7,8 @@ if (Test-Path $Destination) {
     Remove-Item $Destination
 }
 
-# Compress the plugin directory properly
+# Compress the plugin directory properly using tar to avoid Windows backslash issues
 Write-Host "Creating $Destination..."
-Compress-Archive -Path "kobara-wordpress-plugin" -DestinationPath $Destination
+tar.exe -a -c -f $Destination kobara-wordpress-plugin
 
 Write-Host "Done! You can now upload $Destination to WordPress."

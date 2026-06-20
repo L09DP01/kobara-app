@@ -1,18 +1,20 @@
 <?php
-/*
- * Plugin Name:       Kobara Payments for WooCommerce
- * Plugin URI:        https://kobara.app/docs/wordpress-plugin
- * Description:       Accept MonCash payments in WooCommerce through Kobara.
- * Version:           1.0.0
+/**
+ * Plugin Name: Kobara Payments for WooCommerce
+ * Plugin URI: https://kobara.app/docs/wordpress-plugin
+ * Description: Accept MonCash payments in WooCommerce through Kobara.
+ * Version: 1.0.0
  * Requires at least: 6.0
- * Requires PHP:      7.4
- * Author:            Kobara
- * Author URI:        https://kobara.app
- * License:           GPL v2 or later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       kobara-payments-for-woocommerce
+ * Requires PHP: 7.4
+ * Author: Kobara
+ * Author URI: https://kobara.app
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: kobara-payments-for-woocommerce
+ * Domain Path: /languages
+ * Requires Plugins: woocommerce
  * WC requires at least: 7.0
- * WC tested up to:   9.0
+ * WC tested up to: 9.0
  */
 
 if (!defined('ABSPATH')) {
