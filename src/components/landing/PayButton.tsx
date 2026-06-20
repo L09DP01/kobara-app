@@ -72,7 +72,7 @@ export function PayButton() {
               <div className="p-6 md:p-8 flex flex-col sm:flex-row gap-6">
                 
                 {/* Realistic Image Placeholder */}
-                <div className="w-32 h-32 rounded-xl bg-white border border-[#1E2A38] flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative">
+                <div className="w-32 h-32 mx-auto sm:mx-0 rounded-xl bg-white border border-[#1E2A38] flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src="/images/product_icon.jpg" 
