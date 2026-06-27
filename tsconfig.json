@@ -34,6 +34,8 @@
     "node_modules",
     "kobara-node",
     "kobara-python",
-    "kobara-php-sdk"
+    "kobara-php-sdk",
+    "kobara-mobile",
+    "kobara-js"
   ]
 }
