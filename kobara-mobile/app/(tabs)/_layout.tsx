@@ -1,15 +1,19 @@
 import { Tabs } from 'expo-router';
-import { Home, CreditCard, Wallet, Users, Search } from 'lucide-react-native';
+import { Home, CreditCard, Wallet, Users, MoreHorizontal } from 'lucide-react-native';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 
 export default function TabLayout() {
+  // Request permissions and register for push notifications globally for the logged-in user
+  usePushNotifications();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#FF6B35',
+        tabBarActiveTintColor: '#F97316',
         tabBarInactiveTintColor: '#6B7280',
         tabBarStyle: {
-          backgroundColor: '#0A0E1A',
+          backgroundColor: '#0A0F1C',
           borderTopColor: '#1F2937',
           borderTopWidth: 1,
           height: 88,
@@ -18,7 +22,7 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '500',
+          fontWeight: 'bold',
         },
       }}>
       <Tabs.Screen
@@ -52,8 +56,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Recherche',
-          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
+          title: 'Plus',
+          tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size} />,
         }}
       />
     </Tabs>
