@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     // 2. Fetch Merchant Profile
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from("merchants")
-      .select("id, user_id, business_name, logo_url, available_balance, pending_balance, current_environment")
+      .select("id, user_id, business_name, logo_url, available_balance, pending_balance")
       .eq("user_id", userId)
       .single();
 
@@ -31,14 +31,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const environment = merchant.current_environment || 'test';
-
     // 3. Fetch Recent Payments (Limit 10)
     const { data: recentPayments } = await supabaseAdmin
       .from('payments')
       .select('id, amount, net_amount, currency, status, provider, created_at, kobara_reference, customers(name)')
       .eq('merchant_id', merchant.id)
-      .eq('environment', environment)
       .order('created_at', { ascending: false })
       .limit(10);
 
@@ -51,7 +48,7 @@ export async function GET(req: NextRequest) {
       .from('payments')
       .select('amount, net_amount, status, created_at')
       .eq('merchant_id', merchant.id)
-      .eq('environment', environment)
+
       .gte('created_at', monthStart);
 
     let totalEncaisse = 0;
@@ -87,7 +84,7 @@ export async function GET(req: NextRequest) {
       .from('payments')
       .select('amount, net_amount, status, created_at')
       .eq('merchant_id', merchant.id)
-      .eq('environment', environment)
+
       .gte('created_at', lastMonthStart)
       .lte('created_at', lastMonthEnd);
 

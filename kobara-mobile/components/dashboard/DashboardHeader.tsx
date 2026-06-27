@@ -9,14 +9,21 @@ interface DashboardHeaderProps {
   onNotificationPress: () => void;
 }
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 export const DashboardHeader = ({ merchant, unreadCount = 0, onNotificationPress }: DashboardHeaderProps) => {
+  const insets = useSafeAreaInsets();
+  
   const getInitials = (name?: string) => {
     if (!name) return 'K';
     return name.substring(0, 2).toUpperCase();
   };
 
   return (
-    <View className="flex-row items-center justify-between px-6 pt-12 pb-4">
+    <View 
+      className="flex-row items-center justify-between px-6 pb-4"
+      style={{ paddingTop: Math.max(insets.top + 16, 48) }}
+    >
       {/* Avatar */}
       <View className="w-10 h-10 rounded-full bg-[#1A233A] border border-white/10 items-center justify-center overflow-hidden">
         {merchant?.logo_url ? (
