@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { updateSession } from '@/utils/supabase/middleware';
 
 // Initialize Redis only if the URL is provided (prevents crashing if env is missing)
 const redis = process.env.UPSTASH_REDIS_REST_URL 
@@ -21,18 +22,39 @@ const ratelimit = redis
   : null;
 
 export async function middleware(request: NextRequest) {
-  // Only apply rate limiting to /api/* routes
-  if (request.nextUrl.pathname.startsWith('/api')) {
+  const url = request.nextUrl;
+  const hostname = request.headers.get("host");
+
+  // 1. API Subdomain Routing
+  if (hostname === "api.kobara.app" || hostname?.startsWith("api.localhost") || hostname === "api.kobara.local") {
+    // Root endpoint for the API subdomain
+    if (url.pathname === "/") {
+      return NextResponse.json({
+        name: "Kobara API",
+        version: "v1",
+        docs: "https://kobara.app/docs",
+        status: "active"
+      });
+    }
+
+    // Automatically prefix with /api if not present so /v1/payments maps to /api/v1/payments
+    if (!url.pathname.startsWith("/api/")) {
+      url.pathname = `/api${url.pathname}`;
+    }
     
-    // Check if ratelimiter is available
+    // Pass through rate limiter before rewriting? The old proxy.ts rewrote immediately.
+    // Let's rewrite first, then we can let the rate limit apply. Wait, if we rewrite, does it continue middleware? No, rewrite returns a response.
+    // So we should do rate limit check first if it's an API request.
+  }
+
+  // 2. Rate Limiting (Applies to all /api paths, including rewritten ones from api subdomain)
+  if (url.pathname.startsWith('/api') || hostname === "api.kobara.app" || hostname?.startsWith("api.localhost") || hostname === "api.kobara.local") {
     if (ratelimit) {
-      // Use IP address as the identifier, fallback to 'anonymous'
       const ip = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous';
       
       try {
         const { success, pending, limit, reset, remaining } = await ratelimit.limit(ip);
         
-        // Return 404 instead of 429/401 for security obscurity as recommended in the audit
         if (!success) {
           return new NextResponse(
             JSON.stringify({ error: "Not Found" }),
@@ -47,22 +69,35 @@ export async function middleware(request: NextRequest) {
             }
           );
         }
+        
+        // Rate limit OK.
+        // If it was the API subdomain, we need to rewrite now.
+        if (hostname === "api.kobara.app" || hostname?.startsWith("api.localhost") || hostname === "api.kobara.local") {
+          const rewriteResponse = NextResponse.rewrite(url);
+          rewriteResponse.headers.set('X-RateLimit-Limit', limit.toString());
+          rewriteResponse.headers.set('X-RateLimit-Remaining', remaining.toString());
+          rewriteResponse.headers.set('X-RateLimit-Reset', reset.toString());
+          return rewriteResponse;
+        }
 
-        // Add rate limit headers to successful requests
-        const response = NextResponse.next();
-        response.headers.set('X-RateLimit-Limit', limit.toString());
-        response.headers.set('X-RateLimit-Remaining', remaining.toString());
-        response.headers.set('X-RateLimit-Reset', reset.toString());
-        return response;
+        // Regular /api request, proceed with headers
+        const nextResponse = NextResponse.next();
+        nextResponse.headers.set('X-RateLimit-Limit', limit.toString());
+        nextResponse.headers.set('X-RateLimit-Remaining', remaining.toString());
+        nextResponse.headers.set('X-RateLimit-Reset', reset.toString());
+        return nextResponse;
         
       } catch (error) {
-        // If Redis fails, fail open to avoid blocking legitimate traffic
         console.error("Rate limiting error:", error);
       }
+    } else if (hostname === "api.kobara.app" || hostname?.startsWith("api.localhost") || hostname === "api.kobara.local") {
+      // If ratelimit fails but we are on API subdomain, still rewrite
+      return NextResponse.rewrite(url);
     }
   }
 
-  return NextResponse.next();
+  // 3. Regular application routing (Supabase Auth Middleware & NextAuth)
+  return await updateSession(request);
 }
 
 export const config = {
@@ -72,7 +107,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
