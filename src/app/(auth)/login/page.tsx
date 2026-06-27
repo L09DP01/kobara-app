@@ -22,7 +22,11 @@ function LoginContent() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(errorParam || '');
+  const [error, setError] = useState(
+    errorParam === 'session_expired' 
+      ? (language === 'fr' ? 'Votre session a expiré après 2 heures d\'inactivité. Veuillez vous reconnecter.' : 'Your session expired after 2 hours of inactivity. Please log in again.')
+      : (errorParam || '')
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
