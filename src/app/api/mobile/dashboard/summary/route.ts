@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
     // 2. Fetch Merchant Profile
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from("merchants")
-      .select("id, user_id, business_name, logo_url, available_balance, pending_balance")
+      .select("id, user_id, business_name, logo_url, available_balance, pending_balance, current_environment")
       .eq("user_id", userId)
       .single();
 
