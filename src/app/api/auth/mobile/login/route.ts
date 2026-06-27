@@ -47,11 +47,12 @@ export async function POST(req: NextRequest) {
     // Vérifier l'utilisateur (même logique que NextAuth authorize)
     const { data: user, error: userError } = await supabaseAdmin
       .from("users")
-      .select("id, email, full_name, role, is_active, password_hash, email_verified")
+      .select("id, email, role, is_active, password_hash, email_verified")
       .eq("email", email.toLowerCase().trim())
       .single();
 
     if (userError || !user) {
+      console.error("Supabase user search error:", userError);
       return NextResponse.json(
         { error: "Identifiants incorrects.", code: "INVALID_CREDENTIALS" },
         { status: 401 }
