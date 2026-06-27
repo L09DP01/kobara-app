@@ -85,21 +85,21 @@ export const KPIGrid = ({ stats }: KPIGridProps) => {
           {stats ? stats.failed_rate.toFixed(1).replace('.', ',') : '0,0'}%
         </Text>
         <View className="flex-row items-center gap-1">
-          {(stats?.failed_rate_growth || 0) >= 0 ? (
-            <ArrowDown size={12} color="#EF4444" /> // If failed rate increases, it's bad (red up) - Wait, arrow down means decrease which is good.
-          ) : (
-            <ArrowDown size={12} color="#EF4444" /> // I'll logic this. If failed_rate_growth < 0, it's a decrease (red down in design).
-          )}
-          {/* Design shows red down arrow for -0.8% */}
           {(() => {
             const growth = stats?.failed_rate_growth || 0;
-            const isNegative = growth < 0;
-            // The screenshot shows a red down arrow for Échecs -0.8%. Wait, red is bad, but less failures is good. 
-            // The design shows Red color for -0.8% on "Échecs" which is a bit strange, but I'll replicate it.
+            const isIncrease = growth > 0;
+            const isDecrease = growth < 0;
+            
+            // Si le taux d'échec augmente, c'est négatif (Rouge Haut)
+            // S'il diminue, c'est positif (Vert Bas)
+            const color = isIncrease ? '#EF4444' : isDecrease ? '#22C55E' : '#94A3B8';
+            
             return (
               <>
-                {isNegative ? <ArrowDown size={12} color="#EF4444" /> : <ArrowUp size={12} color="#EF4444" />}
-                <Text className="text-xs font-bold text-[#EF4444]">
+                {isIncrease && <ArrowUp size={12} color={color} />}
+                {isDecrease && <ArrowDown size={12} color={color} />}
+                {!isIncrease && !isDecrease && <ArrowDown size={12} color={color} />}
+                <Text className="text-xs font-bold" style={{ color }}>
                   {Math.abs(growth).toFixed(1).replace('.', ',')}%
                 </Text>
               </>

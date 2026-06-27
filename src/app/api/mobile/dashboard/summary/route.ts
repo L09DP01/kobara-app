@@ -31,35 +31,49 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const environment = merchant.current_environment || 'live';
+
     // 3. Fetch Recent Payments (Limit 10)
     const { data: recentPayments } = await supabaseAdmin
       .from('payments')
       .select('id, amount, net_amount, currency, status, provider, created_at, kobara_reference, customers(name)')
       .eq('merchant_id', merchant.id)
+      .eq('environment', environment)
       .order('created_at', { ascending: false })
       .limit(10);
 
-    // 4. Aggregate Monthly Stats
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    
-    // Get all payments for current month to calculate stats
-    const { data: monthlyPayments } = await supabaseAdmin
+    // 4. Aggregate Stats (All time for total collected & rates, like Web App)
+    const { data: allPayments } = await supabaseAdmin
       .from('payments')
       .select('amount, net_amount, status, created_at')
       .eq('merchant_id', merchant.id)
+      .eq('environment', environment);
 
-      .gte('created_at', monthStart);
-
-    let totalEncaisse = 0;
-    let pendingAmount = 0;
+    let totalEncaisse = 0; // All time
     let successCount = 0;
     let failedCount = 0;
     let pendingCount = 0;
+    let pendingAmount = 0;
 
-    if (monthlyPayments) {
-      monthlyPayments.forEach(p => {
+    // Monthly data for growth
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+    
+    let currentMonthEncaisse = 0;
+    
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999).getTime();
+    
+    let lastMonthEncaisse = 0;
+    let lastMonthSuccessCount = 0;
+    let lastMonthFailedCount = 0;
+
+    if (allPayments) {
+      allPayments.forEach(p => {
         const amt = Number(p.net_amount || p.amount || 0);
+        const pTime = new Date(p.created_at).getTime();
+
+        // ALL TIME STATS
         if (p.status === 'succeeded') {
           totalEncaisse += amt;
           successCount++;
@@ -69,6 +83,23 @@ export async function GET(req: NextRequest) {
         } else if (p.status === 'failed') {
           failedCount++;
         }
+
+        // CURRENT MONTH STATS
+        if (pTime >= monthStart) {
+          if (p.status === 'succeeded') {
+            currentMonthEncaisse += amt;
+          }
+        }
+        
+        // LAST MONTH STATS
+        if (pTime >= lastMonthStart && pTime <= lastMonthEnd) {
+          if (p.status === 'succeeded') {
+            lastMonthEncaisse += amt;
+            lastMonthSuccessCount++;
+          } else if (p.status === 'failed') {
+            lastMonthFailedCount++;
+          }
+        }
       });
     }
 
@@ -76,39 +107,17 @@ export async function GET(req: NextRequest) {
     const successRate = totalCount > 0 ? (successCount / totalCount) * 100 : 0;
     const failedRate = totalCount > 0 ? (failedCount / totalCount) * 100 : 0;
 
-    // Get all payments for previous month to calculate growth
-    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999).toISOString();
-
-    const { data: lastMonthPayments } = await supabaseAdmin
-      .from('payments')
-      .select('amount, net_amount, status, created_at')
-      .eq('merchant_id', merchant.id)
-
-      .gte('created_at', lastMonthStart)
-      .lte('created_at', lastMonthEnd);
-
-    let lastMonthEncaisse = 0;
-    let lastMonthSuccessCount = 0;
-    let lastMonthFailedCount = 0;
-
-    if (lastMonthPayments) {
-      lastMonthPayments.forEach(p => {
-        const amt = Number(p.net_amount || p.amount || 0);
-        if (p.status === 'succeeded') {
-          lastMonthEncaisse += amt;
-          lastMonthSuccessCount++;
-        } else if (p.status === 'failed') {
-          lastMonthFailedCount++;
-        }
-      });
-    }
-
     const lastMonthTotalCount = lastMonthSuccessCount + lastMonthFailedCount;
     const lastMonthSuccessRate = lastMonthTotalCount > 0 ? (lastMonthSuccessCount / lastMonthTotalCount) * 100 : 0;
     const lastMonthFailedRate = lastMonthTotalCount > 0 ? (lastMonthFailedCount / lastMonthTotalCount) * 100 : 0;
 
-    const monthlyGrowth = lastMonthEncaisse > 0 ? ((totalEncaisse - lastMonthEncaisse) / lastMonthEncaisse) * 100 : 0;
+    let monthlyGrowth = 0;
+    if (lastMonthEncaisse > 0) {
+      monthlyGrowth = ((currentMonthEncaisse - lastMonthEncaisse) / lastMonthEncaisse) * 100;
+    } else if (currentMonthEncaisse > 0) {
+      monthlyGrowth = 100;
+    }
+    
     const successRateGrowth = successRate - lastMonthSuccessRate;
     const failedRateGrowth = failedRate - lastMonthFailedRate;
 

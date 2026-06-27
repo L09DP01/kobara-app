@@ -20,9 +20,9 @@ export const RevenueCard = ({ stats }: RevenueCardProps) => {
   return (
     <View className="bg-[#131A2B] rounded-3xl p-6 border border-white/5 mx-6 mb-4 mt-2">
       <View className="flex-row justify-between items-start">
-        <View>
-          <Text className="text-slate-400 text-sm font-medium mb-3">Total encaissé ce mois</Text>
-          <View className="flex-row items-baseline gap-1">
+        <View className="mb-4">
+        <Text className="text-white/60 text-sm font-medium mb-1">Total Encaissé</Text>
+        <View className="flex-row items-baseline gap-1">
             <Text className="text-slate-300 font-bold text-lg">{stats?.currency || 'HTG'}</Text>
             <Text className="text-white text-4xl font-bold tracking-tight">
               {stats ? formatCurrency(stats.total_collected) : '0,00'}
