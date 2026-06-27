@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
   // 2. Rate Limiting (Applies to all /api paths, including rewritten ones from api subdomain)
   if (url.pathname.startsWith('/api') || hostname === "api.kobara.app" || hostname?.startsWith("api.localhost") || hostname === "api.kobara.local") {
     if (ratelimit) {
-      const ip = request.headers.get('x-forwarded-for') ?? request.ip ?? 'anonymous';
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? request.headers.get('x-real-ip') ?? 'anonymous';
       
       try {
         const { success, pending, limit, reset, remaining } = await ratelimit.limit(ip);
