@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const environment = merchant.current_environment || 'live';
+    const environment = merchant.current_environment || 'test';
 
     // 3. Fetch Recent Payments (Limit 10)
     const { data: recentPayments } = await supabaseAdmin
