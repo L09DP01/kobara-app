@@ -108,9 +108,11 @@ export async function POST(request: NextRequest) {
         const { data: merchantData } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
         const businessName = merchantData?.business_name || 'KBR';
         const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let randomPart = '';
-        for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const digits = '0123456789';
+        const getRandom = (charset: string) => charset.charAt(Math.floor(Math.random() * charset.length));
+        
+        const randomPart = getRandom(digits) + getRandom(letters) + getRandom(letters) + getRandom(digits) + getRandom(digits);
         natcashReferenceCode = prefix + randomPart;
       } else if (provider === 'kobara') {
         // 2. Unified Checkout: Do nothing here, we will redirect the user to the generic checkout page
