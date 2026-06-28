@@ -63,17 +63,17 @@ export default async function AdminSmsGatewayPage() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Passerelle SMS NatCash</h1>
-          <p className="text-slate-500">Supervision et Rapprochement Manuel</p>
+          <h1 className="text-2xl font-bold text-slate-100">Passerelle SMS NatCash</h1>
+          <p className="text-slate-400">Supervision et Rapprochement Manuel</p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-[#151E32] rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-slate-900/50 rounded-xl shadow-sm border border-slate-800 overflow-hidden backdrop-blur-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-                <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Heure</th>
+              <tr className="bg-slate-800/50 border-b border-slate-800">
+                <th className="py-3 px-4 text-xs font-semibold text-slate-400 uppercase">Heure</th>
                 <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Statut</th>
                 <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Expéditeur</th>
                 <th className="py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Montant</th>
@@ -86,38 +86,38 @@ export default async function AdminSmsGatewayPage() {
                 smsList.map((sms: any) => {
                   const parsed = sms.parsed_json || {};
                   return (
-                    <tr key={sms.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
-                      <td className="py-3 px-4 text-sm whitespace-nowrap">
+                    <tr key={sms.id} className="hover:bg-slate-800/50 border-b border-slate-800/50">
+                      <td className="py-3 px-4 text-sm whitespace-nowrap text-slate-300">
                         {format(new Date(sms.created_at), "dd/MM/yyyy HH:mm")}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        {sms.status === 'processed' && <span className="px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400 text-xs">Validé</span>}
-                        {sms.status === 'pending' && <span className="px-2 py-1 rounded bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 text-xs">En attente</span>}
-                        {sms.status === 'failed' && <span className="px-2 py-1 rounded bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 text-xs">Échec</span>}
-                        {sms.status === 'ignored' && <span className="px-2 py-1 rounded bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-400 text-xs">Ignoré</span>}
+                        {sms.status === 'processed' && <span className="px-2 py-1 rounded bg-green-500/20 text-green-400 text-xs border border-green-500/30">Validé</span>}
+                        {sms.status === 'pending' && <span className="px-2 py-1 rounded bg-orange-500/20 text-orange-400 text-xs border border-orange-500/30">En attente</span>}
+                        {sms.status === 'failed' && <span className="px-2 py-1 rounded bg-red-500/20 text-red-400 text-xs border border-red-500/30">Échec</span>}
+                        {sms.status === 'ignored' && <span className="px-2 py-1 rounded bg-slate-500/20 text-slate-400 text-xs border border-slate-500/30">Ignoré</span>}
                       </td>
-                      <td className="py-3 px-4 text-sm">
+                      <td className="py-3 px-4 text-sm text-slate-200">
                         {parsed.senderName || 'Inconnu'}<br/>
-                        <span className="text-xs text-slate-500">{parsed.senderPhone || '-'}</span>
+                        <span className="text-xs text-slate-400">{parsed.senderPhone || '-'}</span>
                       </td>
-                      <td className="py-3 px-4 text-sm font-bold">
+                      <td className="py-3 px-4 text-sm font-bold text-slate-200">
                         {parsed.amount ? `${parsed.amount.toLocaleString('fr-FR')} HTG` : '-'}
                       </td>
-                      <td className="py-3 px-4 text-sm">
+                      <td className="py-3 px-4 text-sm text-slate-200">
                         {parsed.referenceCode ? (
-                          <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">{parsed.referenceCode}</span>
+                          <span className="font-mono bg-slate-800 px-1 py-0.5 rounded text-slate-300">{parsed.referenceCode}</span>
                         ) : '-'}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-xs text-slate-500 mb-2 whitespace-pre-wrap">
+                        <div className="text-xs text-slate-400 mb-2 whitespace-pre-wrap">
                           {sms.raw_message}
                         </div>
                         {sms.error_reason && (
-                          <div className="text-xs text-red-500 mb-2">{sms.error_reason}</div>
+                          <div className="text-xs text-red-400 mb-2">{sms.error_reason}</div>
                         )}
                         
                         {(sms.status === 'failed' || sms.status === 'pending') && (
-                          <div className="flex flex-col gap-2 p-2 bg-slate-50 dark:bg-slate-800/30 rounded border border-slate-200 dark:border-slate-700">
+                          <div className="flex flex-col gap-2 p-3 bg-slate-800/30 rounded border border-slate-700">
                             <form action={manualValidateSMS} className="flex gap-2 items-center">
                               <input type="hidden" name="smsId" value={sms.id} />
                               <input 
@@ -125,7 +125,7 @@ export default async function AdminSmsGatewayPage() {
                                 name="paymentId" 
                                 placeholder="ID Paiement (UUID)" 
                                 required
-                                className="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-[#0F1626] w-48"
+                                className="text-xs px-3 py-1.5 rounded border border-slate-600 bg-slate-900 w-48 text-slate-200 focus:outline-none focus:border-blue-500"
                               />
                               <button type="submit" className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded">
                                 Lier & Valider
