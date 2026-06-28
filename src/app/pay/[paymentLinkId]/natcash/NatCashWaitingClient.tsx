@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Copy, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { refreshNatCashCode } from './actions';
 
 export function NatCashWaitingClient({ 
   paymentId, 
@@ -28,17 +29,20 @@ export function NatCashWaitingClient({
   const [transCode, setTransCode] = useState('');
   const [claimError, setClaimError] = useState('');
   const [claiming, setClaiming] = useState(false);
+  const [currentReferenceCode, setCurrentReferenceCode] = useState(referenceCode);
+  const [currentExpiresAt, setCurrentExpiresAt] = useState<string | undefined>(expiresAt);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(referenceCode);
+    navigator.clipboard.writeText(currentReferenceCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   useEffect(() => {
     // Timer
-    const end = expiresAt ? new Date(expiresAt).getTime() : Date.now() + 10 * 60 * 1000;
+    const end = currentExpiresAt ? new Date(currentExpiresAt).getTime() : Date.now() + 10 * 60 * 1000;
     
     const timer = setInterval(() => {
       const now = Date.now();
@@ -53,7 +57,7 @@ export function NatCashWaitingClient({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [expiresAt]);
+  }, [currentExpiresAt]);
 
   useEffect(() => {
     if (status !== 'pending') return;
@@ -87,6 +91,24 @@ export function NatCashWaitingClient({
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const handleRefreshCode = async () => {
+    try {
+      setRefreshing(true);
+      const res = await refreshNatCashCode(paymentId);
+      if (res.success) {
+        setCurrentReferenceCode(res.referenceCode);
+        setCurrentExpiresAt(res.expiresAt);
+        setTimeLeft(10 * 60);
+        setStatus('pending');
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erreur lors de la génération du nouveau code. Veuillez réessayer.");
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const handleClaimPayment = async () => {
@@ -142,7 +164,7 @@ export function NatCashWaitingClient({
                 <span className="text-slate-400 text-sm block mb-2">Contenu (Code de référence) :</span>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-[#0F1626] border border-orange-500/30 rounded-lg p-3 text-center">
-                    <span className="text-orange-400 font-mono font-bold text-xl tracking-widest">{referenceCode}</span>
+                    <span className="text-orange-400 font-mono font-bold text-xl tracking-widest">{currentReferenceCode}</span>
                   </div>
                   <button 
                     onClick={handleCopy}
@@ -216,9 +238,11 @@ export function NatCashWaitingClient({
             ) : (
               <div className="flex flex-col gap-3 mt-6">
                 <button 
-                  onClick={() => router.push(window.location.pathname.replace('/natcash', ''))}
-                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors"
+                  onClick={handleRefreshCode}
+                  disabled={refreshing}
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
+                  {refreshing && <Loader2 size={16} className="animate-spin" />}
                   Générer un nouveau code
                 </button>
                 <button 
