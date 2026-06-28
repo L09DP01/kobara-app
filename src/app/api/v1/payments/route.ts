@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation Error", details: validationResult.error.issues }, { status: 400 });
     }
 
-    const { amount, currency, description, success_url, cancel_url, metadata, customer } = validationResult.data;
+    const { amount, currency, provider, description, success_url, cancel_url, metadata, customer } = validationResult.data;
 
     // Idempotency check
     const idempotencyKey = request.headers.get('idempotency-key');
@@ -80,16 +80,34 @@ export async function POST(request: NextRequest) {
     // 1. Generate a unique Kobara Reference
     const kobaraReference = `KOB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // 2. Call Bazik to create the payment
-    const bazikResponse = await BazikService.createMoncashPayment({
-      amount: amount,
-      reference: kobaraReference,
-      description: description || "Paiement Kobara API",
-      environment: environment as "test" | "live"
-    });
+    let bazikOrderId = null;
+    let natcashReferenceCode = null;
+    let paymentUrl = null;
 
-    // Bazik response typically gives a payment URL or an order ID.
-    const bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
+    if (provider === 'moncash') {
+      // 2. Call Bazik to create the payment
+      const bazikResponse = await BazikService.createMoncashPayment({
+        amount: amount,
+        reference: kobaraReference,
+        description: description || "Paiement Kobara API",
+        environment: environment as "test" | "live"
+      });
+
+      // Bazik response typically gives a payment URL or an order ID.
+      bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
+      
+      const bazikData = bazikResponse.data || bazikResponse;
+      paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
+    } else if (provider === 'natcash') {
+      // 2. Generate a reference code for NatCash SMS
+      const { data: merchantData } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
+      const businessName = merchantData?.business_name || 'KBR';
+      const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let randomPart = '';
+      for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
+      natcashReferenceCode = prefix + randomPart;
+    }
 
     // 2.5 Resolve Customer
     let customerId = null;
@@ -158,17 +176,23 @@ export async function POST(request: NextRequest) {
     const feeAmount = parseFloat((amount * feePercent).toFixed(2));
     const netAmount = parseFloat((amount - feeAmount).toFixed(2));
 
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
     const { data: payment, error: dbError } = await supabase.from('payments').insert({
       merchant_id: merchantId,
       environment: environment,
       customer_id: customerId,
       kobara_reference: kobaraReference,
+      reference_code: natcashReferenceCode,
       bazik_order_id: bazikOrderId,
       amount: amount,
       fee_amount: feeAmount,
       net_amount: netAmount,
       currency: currency,
       status: 'pending',
+      provider: provider,
+      payment_method: provider,
+      expires_at: expiresAt,
       success_url: success_url,
       error_url: cancel_url,
       metadata: metadata,
@@ -188,8 +212,16 @@ export async function POST(request: NextRequest) {
       }
     } catch(e) { console.error("Notification failed", e); }
 
-    const bazikData = bazikResponse.data || bazikResponse;
-    const paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
+    // Generate URL for NatCash if applicable
+    if (provider === 'natcash') {
+      const { headers } = await import("next/headers");
+      const headersList = await headers();
+      const host = headersList.get("host") || "";
+      const isPaySubdomain = host === "pay.kobara.app" || host.startsWith("pay.");
+      const basePath = isPaySubdomain ? "" : "/pay";
+      // The API payment doesn't have a payment_link_id, so we use a generic checkout page
+      paymentUrl = `https://${host}${basePath}/checkout/${payment.id}/natcash`;
+    }
 
     // 4. Return response to merchant
     const responsePayload = {
