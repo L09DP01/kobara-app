@@ -6,8 +6,13 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Authenticate the Webhook
     const authHeader = request.headers.get('Authorization');
-    const expectedSecret = process.env.SMS_GATEWAY_SECRET || 'natcash-kobara-secret-2026';
+    const expectedSecret = process.env.SMS_GATEWAY_SECRET;
     
+    if (!expectedSecret) {
+      console.error("ERREUR CRITIQUE: SMS_GATEWAY_SECRET n'est pas configuré dans les variables d'environnement.");
+      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+    }
+
     if (authHeader !== `Bearer ${expectedSecret}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
