@@ -105,7 +105,7 @@ export async function processPayment(formData: FormData) {
   const externalRef = crypto.randomUUID();
   const txRef = 'TX_' + Math.floor(Date.now() / 1000) + '_' + Math.floor(Math.random() * 1000);
   
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 minutes expiration
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes expiration
 
   const { data: payment, error: paymentError } = await supabaseAdmin
     .from('payments')

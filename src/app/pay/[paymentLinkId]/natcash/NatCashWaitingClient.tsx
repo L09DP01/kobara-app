@@ -22,7 +22,7 @@ export function NatCashWaitingClient({
   expiresAt?: string
 }) {
   const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(5 * 60);
+  const [timeLeft, setTimeLeft] = useState(10 * 60);
   const [status, setStatus] = useState<'pending' | 'succeeded' | 'expired' | 'failed'>('pending');
   const router = useRouter();
 
@@ -34,7 +34,7 @@ export function NatCashWaitingClient({
 
   useEffect(() => {
     // Timer
-    const end = expiresAt ? new Date(expiresAt).getTime() : Date.now() + 5 * 60 * 1000;
+    const end = expiresAt ? new Date(expiresAt).getTime() : Date.now() + 10 * 60 * 1000;
     
     const timer = setInterval(() => {
       const now = Date.now();
@@ -134,6 +134,15 @@ export function NatCashWaitingClient({
                 <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
                 <span className="text-orange-400 font-mono text-sm">Expire dans {formatTime(timeLeft)}</span>
               </div>
+              
+              <div className="mt-6">
+                <button 
+                  onClick={() => router.push(window.location.pathname.replace('/natcash', ''))}
+                  className="text-slate-400 hover:text-white text-xs transition-colors underline opacity-80 hover:opacity-100"
+                >
+                  Générer un nouveau code (déjà payé avec l'ancien ?)
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -154,7 +163,7 @@ export function NatCashWaitingClient({
               <AlertCircle size={32} className="text-red-500" />
             </div>
             <h3 className="text-xl font-bold text-white">Code Expiré</h3>
-            <p className="text-slate-400 text-sm">Le temps imparti (5 min) est écoulé. Si vous avez déjà payé, contactez le marchand avec votre TransCode.</p>
+            <p className="text-slate-400 text-sm">Le temps imparti (10 min) est écoulé. Si vous avez déjà payé, contactez le marchand avec votre TransCode.</p>
             <button 
               onClick={() => window.location.reload()}
               className="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors"
