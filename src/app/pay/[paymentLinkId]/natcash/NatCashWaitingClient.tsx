@@ -24,6 +24,10 @@ export function NatCashWaitingClient({
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState(10 * 60);
   const [status, setStatus] = useState<'pending' | 'succeeded' | 'expired' | 'failed'>('pending');
+  const [showTranscodeInput, setShowTranscodeInput] = useState(false);
+  const [transCode, setTransCode] = useState('');
+  const [claimError, setClaimError] = useState('');
+  const [claiming, setClaiming] = useState(false);
   const router = useRouter();
 
   const handleCopy = () => {
@@ -83,6 +87,32 @@ export function NatCashWaitingClient({
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const handleClaimPayment = async () => {
+    if (!transCode.trim()) return;
+    setClaiming(true);
+    setClaimError('');
+    try {
+      const res = await fetch(`/api/payments/${paymentId}/claim-transcode`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transCode: transCode.trim() })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatus('succeeded');
+        setTimeout(() => {
+          router.push(successUrl);
+        }, 1500);
+      } else {
+        setClaimError(data.error || "Paiement introuvable.");
+      }
+    } catch (e) {
+      setClaimError("Erreur de connexion au serveur.");
+    } finally {
+      setClaiming(false);
+    }
   };
 
   return (
@@ -154,13 +184,51 @@ export function NatCashWaitingClient({
               <AlertCircle size={32} className="text-red-500" />
             </div>
             <h3 className="text-xl font-bold text-white">Code Expiré</h3>
-            <p className="text-slate-400 text-sm">Le temps imparti (10 min) est écoulé. Si vous avez déjà payé, contactez le marchand avec votre TransCode.</p>
-            <button 
-              onClick={() => router.push(window.location.pathname.replace('/natcash', ''))}
-              className="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors"
-            >
-              Générer un nouveau code (déjà payé avec l'ancien ?)
-            </button>
+            <p className="text-slate-400 text-sm">Le temps imparti (10 min) est écoulé. Si vous avez déjà payé, utilisez votre TransCode ci-dessous.</p>
+            
+            {showTranscodeInput ? (
+              <div className="mt-6 space-y-3 bg-white/5 p-4 rounded-xl border border-white/10 text-left">
+                <label className="text-slate-300 text-xs font-medium uppercase tracking-wider block">Numéro de Transaction (TransCode)</label>
+                <input 
+                  type="text" 
+                  value={transCode}
+                  onChange={(e) => setTransCode(e.target.value)}
+                  placeholder="Ex: 26062687621075"
+                  className="w-full bg-[#0F1626] border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-orange-500"
+                />
+                {claimError && <p className="text-red-400 text-xs">{claimError}</p>}
+                <div className="flex gap-2 pt-2">
+                  <button 
+                    onClick={() => setShowTranscodeInput(false)}
+                    className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors text-sm"
+                  >
+                    Annuler
+                  </button>
+                  <button 
+                    onClick={handleClaimPayment}
+                    disabled={claiming}
+                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg text-white font-medium transition-colors text-sm disabled:opacity-50 flex items-center justify-center"
+                  >
+                    {claiming ? <Loader2 size={16} className="animate-spin" /> : "Vérifier"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 mt-6">
+                <button 
+                  onClick={() => router.push(window.location.pathname.replace('/natcash', ''))}
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors"
+                >
+                  Générer un nouveau code
+                </button>
+                <button 
+                  onClick={() => setShowTranscodeInput(true)}
+                  className="px-6 py-3 bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500/20 rounded-lg text-orange-400 font-medium transition-colors"
+                >
+                  Déjà payé avec l'ancien code ?
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
