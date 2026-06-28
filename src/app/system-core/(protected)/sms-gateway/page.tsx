@@ -109,7 +109,7 @@ export default async function AdminSmsGatewayPage() {
                         ) : '-'}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-xs text-slate-500 mb-2 truncate max-w-xs" title={sms.raw_message}>
+                        <div className="text-xs text-slate-500 mb-2 whitespace-pre-wrap">
                           {sms.raw_message}
                         </div>
                         {sms.error_reason && (
