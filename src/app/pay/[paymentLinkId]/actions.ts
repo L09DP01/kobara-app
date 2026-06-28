@@ -143,10 +143,17 @@ export async function processPayment(formData: FormData) {
     }
   } catch(e) { console.error("Notification failed", e); }
 
+  // Determine basePath for redirects based on domain
+  const { headers } = await import("next/headers");
+  const headersList = await headers();
+  const host = headersList.get("host") || "";
+  const isPaySubdomain = host === "pay.kobara.app" || host.startsWith("pay.");
+  const basePath = isPaySubdomain ? "" : "/pay";
+
   // 3. Handle Provider specific logic
   if (provider === 'natcash') {
     // Redirect to NatCash Waiting Screen
-    redirect(`/pay/${linkInfo.slug || paymentLinkId}/natcash?payment_id=${payment.id}`);
+    redirect(`${basePath}/${linkInfo.slug || paymentLinkId}/natcash?payment_id=${payment.id}`);
   }
 
   // --- MONCASH / BAZIK LOGIC ---
@@ -166,7 +173,7 @@ export async function processPayment(formData: FormData) {
     if (!paymentUrl) {
       if (bazikResponse.status === 'success' || bazikResponse.success) {
         await supabaseAdmin.from('payments').update({ status: 'succeeded' }).eq('id', payment.id);
-        paymentUrl = `/pay/${linkInfo.slug || paymentLinkId}?status=success`;
+        paymentUrl = `${basePath}/${linkInfo.slug || paymentLinkId}?status=success`;
       } else {
         throw new Error("L'API de paiement n'a pas retourné de lien.");
       }
