@@ -480,6 +480,36 @@ export function WithdrawalsClient({
           </div>
         </div>
       </div>
+      {/* QR Code Modal */}
+      {isQrModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#131B2C] border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 text-center">
+            <h2 className="text-xl font-bold text-white mb-2">Votre QR Code B2B</h2>
+            <p className="text-slate-400 text-sm mb-6">
+              Faites scanner ce code par un autre marchand dans l'application mobile pour recevoir un transfert instantané.
+            </p>
+            <div className="bg-white p-4 rounded-xl inline-block mx-auto mb-6">
+              <QRCodeSVG 
+                value={`kobara://transfer?email=${userEmail}`}
+                size={200}
+                bgColor={"#ffffff"}
+                fgColor={"#000000"}
+                level={"H"}
+                includeMargin={false}
+              />
+            </div>
+            <div className="text-sm text-slate-300 font-medium bg-white/5 p-3 rounded-xl border border-white/10 mb-6 break-all">
+              {userEmail}
+            </div>
+            <button 
+              onClick={() => setIsQrModalOpen(false)}
+              className="w-full bg-white/10 text-white px-4 py-3 rounded-xl font-bold hover:bg-white/20 transition-colors"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
