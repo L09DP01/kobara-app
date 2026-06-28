@@ -113,6 +113,7 @@ Kobara retournera la même transaction si la requête a déjà été traitée.
     "internal_order_id": "ORD-89457",
     "plan_tier": "premium"
   },
+  "provider": "kobara",
   "success_url": "https://monsite.com/success",
   "error_url": "https://monsite.com/error",
   "webhook_url": "https://monsite.com/webhooks/kobara"
@@ -209,6 +210,21 @@ Stocké dans :
 
 ```txt
 payments.metadata
+```
+
+---
+
+## `provider` (Nouveau)
+
+Spécifie l'expérience de paiement que vous souhaitez offrir à votre client.
+
+Valeurs acceptées :
+* `"moncash"` (Défaut) : Redirige directement le client vers la page de paiement Bazik/MonCash.
+* `"natcash"` : Redirige le client vers la page d'instructions de transfert NatCash générée par Kobara.
+* `"kobara"` : **Recommandé**. Utilise le *Kobara Checkout*. Le client est redirigé vers une page unifiée hébergée par Kobara où il peut choisir lui-même entre MonCash et NatCash.
+
+```json
+"provider": "kobara"
 ```
 
 ---
@@ -324,6 +340,7 @@ const payment = await kobara.payments.create({
   metadata: {
     internal_order_id: "ORD-89457"
   },
+  provider: "kobara",
   success_url: "https://monsite.com/success",
   error_url: "https://monsite.com/error",
   webhook_url: "https://monsite.com/webhooks/kobara"
@@ -352,6 +369,7 @@ curl https://api.kobara.app/api/v1/payments \
     "metadata": {
       "internal_order_id": "ORD-89457"
     },
+    "provider": "kobara",
     "success_url": "https://monsite.com/success",
     "error_url": "https://monsite.com/error",
     "webhook_url": "https://monsite.com/webhooks/kobara"
