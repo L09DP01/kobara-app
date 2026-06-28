@@ -54,11 +54,25 @@ export function WithdrawalsClient({
 
     try {
       setLoading(true);
-      // For email OTP, trigger the email
-      if (twoFactorMethod === 'email' || twoFactorMethod === 'none') {
-        await sendEmailOtpAction();
+      // Skip OTP for test environment
+      if (isTest) {
+        const res = await requestWithdrawal(Number(amount), method, receiver, undefined, undefined, saveNumber);
+        if (res?.error) throw new Error(res.error);
+        
+        setIsModalOpen(false);
+        setStep('details');
+        setAmount('');
+        setReceiver('');
+        setCode2fa('');
+        setSuccessMsg("Simulation de retrait réussie !");
+        setTimeout(() => setSuccessMsg(''), 5000);
+      } else {
+        // For email OTP, trigger the email
+        if (twoFactorMethod === 'email' || twoFactorMethod === 'none') {
+          await sendEmailOtpAction();
+        }
+        setStep('otp');
       }
-      setStep('otp');
     } catch (err: any) {
       setErrorMsg("Impossible d'envoyer le code de vérification.");
     } finally {
@@ -70,7 +84,7 @@ export function WithdrawalsClient({
     e.preventDefault();
     setErrorMsg('');
     
-    if (!code2fa) {
+    if (!code2fa && !isTest) {
       setErrorMsg("Veuillez saisir le code de sécurité.");
       return;
     }
