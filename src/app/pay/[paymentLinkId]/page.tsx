@@ -2,6 +2,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { notFound, redirect } from "next/navigation";
 import { processPayment } from "./actions";
 import { getMerchantCurrentPlan } from "@/lib/server/plans";
+import { CheckCircle2 } from "lucide-react";
 
 export default async function PublicPaymentPage({ params, searchParams }: { params: Promise<{ paymentLinkId: string }>, searchParams: Promise<{ status?: string }> }) {
   const supabaseAdmin = createAdminClient();
@@ -146,6 +147,27 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
               />
             </div>
 
+            <div className="space-y-1.5">
+              <label className="block text-body-sm font-medium text-white mb-2">Méthode de paiement *</label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all group">
+                  <input type="radio" name="provider" value="moncash" className="sr-only" defaultChecked />
+                  <div className="absolute top-2 right-2 opacity-100 transition-opacity">
+                    <CheckCircle2 size={16} className="text-orange-500" />
+                  </div>
+                  <span className="font-bold text-white mt-1">MonCash</span>
+                </label>
+                
+                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
+                  <input type="radio" name="provider" value="natcash" className="sr-only" />
+                  <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
+                    <CheckCircle2 size={16} className="text-orange-500" />
+                  </div>
+                  <span className="font-bold text-white mt-1">NatCash</span>
+                </label>
+              </div>
+            </div>
+
             {link.metadata?.collect_address && (
               <div className="space-y-1.5">
                 <label htmlFor="customerAddress" className="block text-body-sm font-medium text-white">Adresse de livraison *</label>
@@ -165,7 +187,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
               className="w-full bg-orange-500 text-white py-3 rounded-lg font-body-base font-medium hover:opacity-90 transition-opacity shadow-md flex justify-center items-center gap-2 mt-4"
             >
               <span className="material-symbols-outlined text-[20px]">lock</span>
-              Payer {link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : ''}
+              Continuer vers le paiement {link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : ''}
             </button>
             
             <div className="flex items-center justify-center gap-2 mt-4 text-slate-400 text-xs">

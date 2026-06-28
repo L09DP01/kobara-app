@@ -128,6 +128,18 @@ export async function GET(req: NextRequest) {
       .eq('merchant_id', merchant.id)
       .eq('read', false);
 
+    // --- DEBUG LOGS ---
+    console.log("[Mobile Dashboard] Merchant ID:", merchant.id);
+    console.log("[Mobile Dashboard] Environment:", environment);
+    console.log("[Mobile Dashboard] Stats:", {
+      total_collected: totalEncaisse,
+      success_rate: successRate,
+      failed_rate: failedRate,
+      pending_amount: pendingAmount
+    });
+    console.log(`[Mobile Dashboard] Found ${recentPayments?.length || 0} recent payments`);
+    // ------------------
+
     // 6. Format Response
     return NextResponse.json({
       success: true,

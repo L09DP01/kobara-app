@@ -17,6 +17,8 @@ export async function processPayment(formData: FormData) {
   const customerPhone = formData.get('customerPhone') as string;
   const customerAddress = formData.get('customerAddress') as string;
 
+  const provider = formData.get('provider') as string || 'moncash'; // 'moncash' or 'natcash'
+
   if (!paymentLinkId || !merchantId || !amountStr || !customerName || !customerPhone) {
     throw new Error("Informations manquantes");
   }
@@ -24,7 +26,7 @@ export async function processPayment(formData: FormData) {
   // 1. Fetch Payment Link to check settings
   const { data: linkInfo } = await supabaseAdmin
     .from('payment_links')
-    .select('amount, metadata, environment')
+    .select('amount, metadata, environment, slug')
     .eq('id', paymentLinkId)
     .single();
 
@@ -49,14 +51,10 @@ export async function processPayment(formData: FormData) {
   let netAmount = 0;
 
   if (passFeesToCustomer) {
-    // Customer pays the fee.
-    // If base is 100, and fee is 4%, to get 100 net, gross must be 100 / 0.96 = 104.17
-    // Alternatively: gross = 100 + (100 * 0.04) = 104. Let's use standard Stripe calculation:
     grossAmount = parseFloat((baseAmount / (1 - feePercent)).toFixed(2));
     feeAmount = parseFloat((grossAmount - baseAmount).toFixed(2));
     netAmount = baseAmount;
   } else {
-    // Merchant pays the fee
     feeAmount = parseFloat((baseAmount * feePercent).toFixed(2));
     netAmount = parseFloat((baseAmount - feeAmount).toFixed(2));
     grossAmount = baseAmount;
@@ -73,7 +71,6 @@ export async function processPayment(formData: FormData) {
 
   if (existingCustomer) {
     customerId = existingCustomer.id;
-    // Update name if different
     await supabaseAdmin.from('customers').update({ name: customerName }).eq('id', customerId);
   } else {
     const { data: newCustomer, error: createError } = await supabaseAdmin
@@ -95,9 +92,20 @@ export async function processPayment(formData: FormData) {
     }
   }
 
+  // 1.5 Fetch Merchant name for reference code prefix
+  const { data: merchantData } = await supabaseAdmin.from('merchants').select('business_name').eq('id', merchantId).single();
+  const businessName = merchantData?.business_name || 'KBR';
+  const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randomPart = '';
+  for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
+  const referenceCode = prefix + randomPart;
+
   // 2. Create Payment Record (Pending)
   const externalRef = crypto.randomUUID();
   const txRef = 'TX_' + Math.floor(Date.now() / 1000) + '_' + Math.floor(Math.random() * 1000);
+  
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 minutes expiration
 
   const { data: payment, error: paymentError } = await supabaseAdmin
     .from('payments')
@@ -106,15 +114,17 @@ export async function processPayment(formData: FormData) {
       customer_id: customerId,
       payment_link_id: paymentLinkId,
       kobara_reference: txRef,
+      reference_code: referenceCode, // Short code for SMS Gateway
       bazik_transaction_id: externalRef,
       amount: grossAmount,
       fee_amount: feeAmount,
       net_amount: netAmount,
       currency: 'HTG',
       status: 'pending',
-      provider: 'moncash',
-      payment_method: 'moncash',
+      provider: provider, // 'moncash' or 'natcash'
+      payment_method: provider,
       environment: linkInfo.environment,
+      expires_at: expiresAt,
       metadata: customerAddress ? { address: customerAddress } : {}
     })
     .select('id')
@@ -122,7 +132,6 @@ export async function processPayment(formData: FormData) {
 
   if (paymentError) {
     console.error("Erreur de création de paiement:", paymentError);
-    // On simule une erreur
     throw new Error("Erreur lors de l'initialisation du paiement");
   }
 
@@ -134,7 +143,13 @@ export async function processPayment(formData: FormData) {
     }
   } catch(e) { console.error("Notification failed", e); }
 
-  // 3. Appel à Bazik pour initialiser le paiement MonCash
+  // 3. Handle Provider specific logic
+  if (provider === 'natcash') {
+    // Redirect to NatCash Waiting Screen
+    redirect(`/pay/${linkInfo.slug || paymentLinkId}/natcash?payment_id=${payment.id}`);
+  }
+
+  // --- MONCASH / BAZIK LOGIC ---
   let paymentUrl = '';
   
   try {
@@ -145,31 +160,24 @@ export async function processPayment(formData: FormData) {
       environment: linkInfo.environment as "test" | "live"
     });
 
-    // Cherche l'URL dans la réponse de Bazik
     const bazikData = bazikResponse.data || bazikResponse;
     paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
     
     if (!paymentUrl) {
-      console.error("Réponse Bazik invalide (sans URL):", bazikResponse);
-      // Fallback test au cas où Bazik renverrait un succès sans URL en mode dev
       if (bazikResponse.status === 'success' || bazikResponse.success) {
         await supabaseAdmin.from('payments').update({ status: 'succeeded' }).eq('id', payment.id);
-        const { data: linkInfo } = await supabaseAdmin.from('payment_links').select('slug, id').eq('id', paymentLinkId).single();
-        paymentUrl = `/pay/${linkInfo?.slug || paymentLinkId}?status=success`;
+        paymentUrl = `/pay/${linkInfo.slug || paymentLinkId}?status=success`;
       } else {
         throw new Error("L'API de paiement n'a pas retourné de lien.");
       }
     }
   } catch (error) {
     console.error("Erreur d'initialisation Bazik:", error);
-    // Supprimer le paiement pending car il a échoué à l'initialisation
     await supabaseAdmin.from('payments').delete().eq('id', payment.id);
-    
-    // On extrait le message d'erreur exact pour l'afficher à l'utilisateur
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(`Erreur avec le fournisseur Bazik : ${errorMessage}`);
   }
 
-  // Redirection vers la page de paiement MonCash (ou fallback succès)
+  // Redirection vers la page de paiement MonCash
   redirect(paymentUrl);
 }

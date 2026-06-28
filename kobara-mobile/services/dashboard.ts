@@ -1,5 +1,4 @@
-import { apiCall } from "./auth"; // Assuming apiCall uses the authenticated client
-
+// Dashboard Mobile Service
 export interface DashboardPayment {
   id: string;
   amount: number;
@@ -40,12 +39,33 @@ export interface DashboardSummaryResponse {
   code?: string;
 }
 
+import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+
+const getBaseUrl = () => {
+  return Constants?.expoConfig?.extra?.apiUrl ?? process.env.EXPO_PUBLIC_API_URL ?? 'https://kobara.app';
+};
+
 export async function getDashboardSummary(): Promise<DashboardSummaryResponse> {
-  // Use the existing apiCall utility which automatically attaches the JWT Bearer token
-  const data = await apiCall('/api/mobile/dashboard/summary', 'GET');
+  const token = await SecureStore.getItemAsync('kobara_access_token');
   
-  if (data.error) {
-    throw new Error(data.error);
+  if (!token) {
+    throw new Error('Non autorisé. Veuillez vous reconnecter.');
+  }
+
+  const response = await fetch(`${getBaseUrl()}/api/mobile/dashboard/summary`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'X-Client': 'kobara-mobile',
+      'Content-Type': 'application/json',
+    }
+  });
+
+  const data = await response.json();
+  
+  if (!response.ok || data.error) {
+    throw new Error(data.error || data.message || 'Erreur lors de la récupération des données.');
   }
   
   return data as DashboardSummaryResponse;

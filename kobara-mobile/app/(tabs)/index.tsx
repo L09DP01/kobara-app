@@ -11,7 +11,7 @@ import { RecentPayments } from '../../components/dashboard/RecentPayments';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { data, isLoading, isError, refetch } = useDashboardSummary();
+  const { data, isLoading, isError, error, refetch } = useDashboardSummary();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -42,16 +42,31 @@ export default function HomeScreen() {
   }
 
   if (isError && !data) {
+    const errorMessage = error instanceof Error ? error.message : "Erreur de connexion";
     return (
       <View className="flex-1 bg-[#0A0F1C] justify-center items-center px-6">
         <Text className="text-white font-bold text-lg mb-2">Oups, une erreur est survenue.</Text>
         <Text className="text-slate-400 text-center mb-6">Nous n'avons pas pu charger vos données. Veuillez vérifier votre connexion.</Text>
-        <TouchableOpacity 
-          onPress={() => refetch()}
-          className="bg-[#F97316] px-6 py-3 rounded-xl"
-        >
-          <Text className="text-white font-bold">Réessayer</Text>
-        </TouchableOpacity>
+        <Text className="text-red-400 text-center mb-6 font-mono text-xs">{String(errorMessage)}</Text>
+        <View className="flex-row gap-4">
+          <TouchableOpacity 
+            onPress={() => refetch()}
+            className="bg-[#F97316] px-6 py-3 rounded-xl"
+          >
+            <Text className="text-white font-bold">Réessayer</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => {
+              // Quick way to clear session
+              import('../../store/useAuthStore').then(({ useAuthStore }) => {
+                useAuthStore.getState().logout();
+              });
+            }}
+            className="bg-white/10 px-6 py-3 rounded-xl"
+          >
+            <Text className="text-white font-bold">Déconnexion</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
