@@ -87,8 +87,11 @@ export async function POST(request: NextRequest) {
       if (pendingPayments && pendingPayments.length > 0) {
         const p = pendingPayments[0]; // Take the first match
         
-        if (p.amount !== parsed.amount) {
-          // Amount mismatch, but reference matches
+        // Allow a small tolerance (1 HTG) for rounding issues or slight overpayments
+        const amountDiff = Math.abs(p.amount - parsed.amount);
+        
+        if (amountDiff > 1) {
+          // Amount mismatch (difference > 1 HTG)
           errorReason = `Montant incorrect: Attendu ${p.amount}, Reçu ${parsed.amount}`;
           status = 'failed';
         } else {
