@@ -17,7 +17,7 @@ export interface ParsedNatcashSMS {
 export async function parseNatcashSMS(rawMessage: string): Promise<ParsedNatcashSMS | null> {
   try {
     const { object } = await generateObject({
-      model: google('gemini-2.5-pro'),
+      model: google('gemini-1.5-pro'),
       schema: z.object({
         amount: z.number().nullable().describe("Le montant transféré, sans la devise ni les virgules"),
         currency: z.string().nullable().describe("La devise, ex: HTG"),
