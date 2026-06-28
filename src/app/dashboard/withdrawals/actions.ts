@@ -93,18 +93,23 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   const reference = `WTH-${Date.now()}`;
   let bazikResponse: any = null;
   
-  // 2. Appel de l'API Bazik (AVANT de déduire l'argent)
+  // 2. Appel de l'API (AVANT de déduire l'argent)
   if (method === 'MonCash') {
-    try {
-      bazikResponse = await BazikService.createWithdrawal({
-        amount: netAmount,
-        receiver: receiver!,
-        reference: reference,
-        description: "Retrait Kobara",
-      });
-    } catch (error: any) {
-      console.error("Bazik withdrawal error:", error);
-      return { error: `Échec du transfert MonCash: ${error.message || "Erreur interne"}` };
+    if (isTest) {
+      // Simulation pour l'environnement de test
+      bazikResponse = { transaction_id: `TEST-WTH-${Date.now()}` };
+    } else {
+      try {
+        bazikResponse = await BazikService.createWithdrawal({
+          amount: netAmount,
+          receiver: receiver!,
+          reference: reference,
+          description: "Retrait Kobara",
+        });
+      } catch (error: any) {
+        console.error("Bazik withdrawal error:", error);
+        return { error: `Échec du transfert MonCash: ${error.message || "Erreur interne"}` };
+      }
     }
   }
 
@@ -144,7 +149,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       fees: fees,
       total: total,
       wallet: receiver || merchant.phone, // fallback to merchant phone
-      status: method === 'MonCash' ? 'pending' : 'completed',
+      status: isTest ? 'completed' : (method === 'MonCash' ? 'pending' : 'completed'),
       provider: method.toLowerCase()
     });
 
