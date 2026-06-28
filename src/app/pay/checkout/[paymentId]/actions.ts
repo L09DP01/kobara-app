@@ -91,3 +91,40 @@ export async function processUnifiedCheckout(formData: FormData) {
 
   throw new Error("Fournisseur inconnu");
 }
+
+export async function simulateTestPayment(formData: FormData) {
+  const supabaseAdmin = createAdminClient();
+  const paymentId = formData.get('paymentId') as string;
+
+  if (!paymentId) throw new Error("Informations manquantes");
+
+  const { data: payment } = await supabaseAdmin
+    .from('payments')
+    .select('*')
+    .eq('id', paymentId)
+    .single();
+
+  if (!payment || payment.status !== 'pending' || payment.environment !== 'test') {
+    throw new Error("Paiement test invalide");
+  }
+
+  // Marquer le paiement comme réussi
+  await supabaseAdmin.from('payments').update({
+    status: 'succeeded',
+    paid_at: new Date().toISOString()
+  }).eq('id', paymentId);
+
+  // Déclencher le webhook si configuré
+  try {
+    const { sendWebhook } = await import('@/lib/server/webhooks');
+    await sendWebhook(payment.merchant_id, 'payment.succeeded', payment);
+  } catch (e) {
+    console.error("Test webhook simulation failed", e);
+  }
+
+  if (payment.success_url) {
+    redirect(payment.success_url);
+  } else {
+    redirect(`/pay/checkout/${paymentId}`);
+  }
+}

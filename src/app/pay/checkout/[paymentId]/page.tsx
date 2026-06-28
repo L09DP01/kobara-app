@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 import { notFound, redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import { processUnifiedCheckout } from "./actions";
+import { processUnifiedCheckout, simulateTestPayment } from "./actions";
 
 export default async function UnifiedCheckoutPage({ params }: { params: Promise<{ paymentId: string }> }) {
   const supabaseAdmin = createAdminClient();
@@ -63,43 +63,63 @@ export default async function UnifiedCheckoutPage({ params }: { params: Promise<
              <div className="text-3xl font-bold text-white">{Number(payment.amount).toLocaleString('fr-FR')} HTG</div>
           </div>
 
-          <form action={processUnifiedCheckout} className="space-y-5">
-            <input type="hidden" name="paymentId" value={payment.id} />
-            
-            <div className="space-y-1.5">
-              <label className="block text-body-sm font-medium text-white mb-2">Choisissez votre méthode de paiement</label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
-                  <input type="radio" name="provider" value="moncash" className="sr-only" defaultChecked />
-                  <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
-                    <CheckCircle2 size={16} className="text-orange-500" />
-                  </div>
-                  <span className="font-bold text-white mt-1">MonCash</span>
-                </label>
-                
-                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
-                  <input type="radio" name="provider" value="natcash" className="sr-only" />
-                  <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
-                    <CheckCircle2 size={16} className="text-orange-500" />
-                  </div>
-                  <span className="font-bold text-white mt-1">NatCash</span>
-                </label>
+          {payment.environment === 'test' ? (
+            <form action={simulateTestPayment} className="space-y-5">
+              <input type="hidden" name="paymentId" value={payment.id} />
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
+                <span className="material-symbols-outlined text-blue-400 text-3xl mb-2">science</span>
+                <h3 className="text-blue-400 font-bold mb-1">Mode Test Activé</h3>
+                <p className="text-slate-400 text-sm mb-4">
+                  Aucun appel API réel ne sera effectué. Vous pouvez simuler le succès de ce paiement.
+                </p>
+                <button 
+                  type="submit"
+                  className="w-full bg-blue-500 text-white py-3 rounded-lg font-body-base font-bold hover:bg-blue-600 transition-colors shadow-md flex justify-center items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  Valider le paiement test
+                </button>
               </div>
-            </div>
+            </form>
+          ) : (
+            <form action={processUnifiedCheckout} className="space-y-5">
+              <input type="hidden" name="paymentId" value={payment.id} />
+              
+              <div className="space-y-1.5">
+                <label className="block text-body-sm font-medium text-white mb-2">Choisissez votre méthode de paiement</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
+                    <input type="radio" name="provider" value="moncash" className="sr-only" defaultChecked />
+                    <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
+                      <CheckCircle2 size={16} className="text-orange-500" />
+                    </div>
+                    <span className="font-bold text-white mt-1">MonCash</span>
+                  </label>
+                  
+                  <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
+                    <input type="radio" name="provider" value="natcash" className="sr-only" />
+                    <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
+                      <CheckCircle2 size={16} className="text-orange-500" />
+                    </div>
+                    <span className="font-bold text-white mt-1">NatCash</span>
+                  </label>
+                </div>
+              </div>
 
-            <button 
-              type="submit"
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-body-base font-medium hover:opacity-90 transition-opacity shadow-md flex justify-center items-center gap-2 mt-4"
-            >
-              <span className="material-symbols-outlined text-[20px]">lock</span>
-              Confirmer
-            </button>
-            
-            <div className="flex items-center justify-center gap-2 mt-4 text-slate-400 text-xs">
-              <span className="material-symbols-outlined text-[14px]">verified_user</span>
-              <span>Paiement sécurisé par Kobara</span>
-            </div>
-          </form>
+              <button 
+                type="submit"
+                className="w-full bg-orange-500 text-white py-3 rounded-lg font-body-base font-medium hover:opacity-90 transition-opacity shadow-md flex justify-center items-center gap-2 mt-4"
+              >
+                <span className="material-symbols-outlined text-[20px]">lock</span>
+                Confirmer
+              </button>
+              
+              <div className="flex items-center justify-center gap-2 mt-4 text-slate-400 text-xs">
+                <span className="material-symbols-outlined text-[14px]">verified_user</span>
+                <span>Paiement sécurisé par Kobara</span>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

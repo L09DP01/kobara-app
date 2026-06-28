@@ -84,32 +84,38 @@ export async function POST(request: NextRequest) {
     let natcashReferenceCode = null;
     let paymentUrl = null;
 
-    if (provider === 'moncash') {
-      // 2. Call Bazik to create the payment
-      const bazikResponse = await BazikService.createMoncashPayment({
-        amount: amount,
-        reference: kobaraReference,
-        description: description || "Paiement Kobara API",
-        environment: environment as "test" | "live"
-      });
+    if (environment === 'test') {
+      // Pour les paiements de test, aucun appel API réel n'est effectué.
+      // Le paiement utilisera toujours la page de checkout hébergée (Kobara Checkout)
+      // pour permettre au développeur de simuler le succès.
+    } else {
+      if (provider === 'moncash') {
+        // 2. Call Bazik to create the payment
+        const bazikResponse = await BazikService.createMoncashPayment({
+          amount: amount,
+          reference: kobaraReference,
+          description: description || "Paiement Kobara API",
+          environment: environment as "test" | "live"
+        });
 
-      // Bazik response typically gives a payment URL or an order ID.
-      bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
-      
-      const bazikData = bazikResponse.data || bazikResponse;
-      paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
-    } else if (provider === 'natcash') {
-      // 2. Generate a reference code for NatCash SMS
-      const { data: merchantData } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
-      const businessName = merchantData?.business_name || 'KBR';
-      const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let randomPart = '';
-      for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
-      natcashReferenceCode = prefix + randomPart;
-    } else if (provider === 'kobara') {
-      // 2. Unified Checkout: Do nothing here, we will redirect the user to the generic checkout page
-      // where they will choose MonCash or NatCash themselves.
+        // Bazik response typically gives a payment URL or an order ID.
+        bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
+        
+        const bazikData = bazikResponse.data || bazikResponse;
+        paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
+      } else if (provider === 'natcash') {
+        // 2. Generate a reference code for NatCash SMS
+        const { data: merchantData } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
+        const businessName = merchantData?.business_name || 'KBR';
+        const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let randomPart = '';
+        for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
+        natcashReferenceCode = prefix + randomPart;
+      } else if (provider === 'kobara') {
+        // 2. Unified Checkout: Do nothing here, we will redirect the user to the generic checkout page
+        // where they will choose MonCash or NatCash themselves.
+      }
     }
 
     // 2.5 Resolve Customer
@@ -215,8 +221,8 @@ export async function POST(request: NextRequest) {
       }
     } catch(e) { console.error("Notification failed", e); }
 
-    // Generate URL for NatCash or Kobara Unified Checkout if applicable
-    if (provider === 'natcash' || provider === 'kobara') {
+    // Generate URL for NatCash, Kobara Unified Checkout, or Test Mode
+    if (environment === 'test' || provider === 'natcash' || provider === 'kobara') {
       const { headers } = await import("next/headers");
       const headersList = await headers();
       const host = headersList.get("host") || "";
