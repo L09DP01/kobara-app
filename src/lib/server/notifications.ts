@@ -33,11 +33,22 @@ export async function createNotification(
 
   // Send Email if dest is provided
   if (emailDest) {
-    await sendEmail({
-      to: emailDest,
-      subject: title,
-      text: message
-    });
+    // Vérifier l'environnement du marchand pour ne pas envoyer d'emails en mode test
+    const { data: merchantData } = await supabase
+      .from('merchants')
+      .select('current_environment')
+      .eq('id', merchantId)
+      .maybeSingle();
+
+    if (merchantData?.current_environment !== 'test') {
+      await sendEmail({
+        to: emailDest,
+        subject: title,
+        text: message
+      });
+    } else {
+      console.log(`[Mode Test] Email ignoré pour: ${emailDest} - ${title}`);
+    }
   }
 }
 
