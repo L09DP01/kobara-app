@@ -31,10 +31,11 @@ const ENDPOINTS = [
   { method: 'POST' as HttpMethod, path: '/v1/payments', label: 'Créer un paiement', body: JSON.stringify({
     amount: 1000,
     currency: "HTG",
+    provider: "kobara",
     description: "Commande #1001",
     customer: { name: "Jean Exemple", phone: "50900000000" },
-    successUrl: "https://site.com/success",
-    errorUrl: "https://site.com/error"
+    success_url: "https://site.com/success",
+    cancel_url: "https://site.com/error"
   }, null, 2) },
   { method: 'GET' as HttpMethod, path: '/v1/payments', label: 'Lister les paiements', body: '' },
   { method: 'POST' as HttpMethod, path: '/v1/payment-links', label: 'Créer un lien de paiement', body: JSON.stringify({

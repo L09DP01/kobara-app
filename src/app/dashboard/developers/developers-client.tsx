@@ -145,6 +145,11 @@ Implement:
 * Withdrawals
 * Error Handling
 
+For API Payments, use the "provider" field to specify the checkout flow:
+- "moncash": Direct MonCash flow (default)
+- "natcash": Direct NatCash flow
+- "kobara": Unified Hosted Checkout (Stripe-like)
+
 Follow the official Kobara documentation.
 
 ---

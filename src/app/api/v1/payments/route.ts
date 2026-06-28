@@ -107,6 +107,9 @@ export async function POST(request: NextRequest) {
       let randomPart = '';
       for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
       natcashReferenceCode = prefix + randomPart;
+    } else if (provider === 'kobara') {
+      // 2. Unified Checkout: Do nothing here, we will redirect the user to the generic checkout page
+      // where they will choose MonCash or NatCash themselves.
     }
 
     // 2.5 Resolve Customer
@@ -212,15 +215,19 @@ export async function POST(request: NextRequest) {
       }
     } catch(e) { console.error("Notification failed", e); }
 
-    // Generate URL for NatCash if applicable
-    if (provider === 'natcash') {
+    // Generate URL for NatCash or Kobara Unified Checkout if applicable
+    if (provider === 'natcash' || provider === 'kobara') {
       const { headers } = await import("next/headers");
       const headersList = await headers();
       const host = headersList.get("host") || "";
       const isPaySubdomain = host === "pay.kobara.app" || host.startsWith("pay.");
       const basePath = isPaySubdomain ? "" : "/pay";
-      // The API payment doesn't have a payment_link_id, so we use a generic checkout page
-      paymentUrl = `https://${host}${basePath}/checkout/${payment.id}/natcash`;
+      
+      if (provider === 'natcash') {
+        paymentUrl = `https://${host}${basePath}/checkout/${payment.id}/natcash`;
+      } else {
+        paymentUrl = `https://${host}${basePath}/checkout/${payment.id}`;
+      }
     }
 
     // 4. Return response to merchant
