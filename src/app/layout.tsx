@@ -84,7 +84,7 @@ export default async function RootLayout({
   return (
     <html
       lang={lang}
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jakarta.variable} bg-background-main antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jakarta.variable} antialiased`}
     >
       <head>
         {/* Google Analytics */}
