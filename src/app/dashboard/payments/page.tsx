@@ -56,7 +56,7 @@ export default async function PaymentsPage({
   if (allPaymentsForStats) {
     allPaymentsForStats.forEach(p => {
       const pDate = new Date(p.created_at);
-      if (p.status === 'succeeded') {
+      if (p.status === 'succeeded' || p.status === 'completed') {
         if (pDate >= today) {
           totalToday += Number(p.net_amount || p.amount);
         }

@@ -39,7 +39,7 @@ export default async function AnalyticsPage() {
 
   if (payments) {
     payments.forEach(p => {
-      if (p.status === 'succeeded') {
+      if (p.status === 'succeeded' || p.status === 'completed') {
         totalGross += Number(p.amount);
         successCount++;
         
