@@ -16,6 +16,28 @@ export interface ParsedNatcashSMS {
 
 export async function parseNatcashSMS(rawMessage: string): Promise<ParsedNatcashSMS | null> {
   try {
+    // 1. Fast Path: Regular Expression based on standard NatCash format
+    // Ex: "Vous avez re??u 103 HTG de CHOMSCKY NORD 41586811 a 18:21 28/06/2026, contenu: TYPE4ZLM. Votre solde: 29,721.28 HTG. TransCode: 26062891687375. Merci"
+    const regex = /Vous avez (?:reçu|re\?\?u|re\S+u) ([\d,.\s]+)\s*([A-Z]+) de (.*?)\s*(\d{8}) (?:a|à) (\d{2}:\d{2}) (\d{2}\/\d{2}\/\d{4}), contenu:\s*(.*?)\. Votre solde:\s*([\d,.\s]+)\s*[A-Z]+\. TransCode:\s*(\d+)/i;
+    
+    const match = rawMessage.match(regex);
+    if (match) {
+      const parseNum = (str: string) => parseFloat(str.replace(/,/g, '').replace(/\s/g, ''));
+      
+      return {
+        amount: parseNum(match[1]),
+        currency: match[2].trim(),
+        senderName: match[3].trim(),
+        senderPhone: match[4].trim(),
+        time: match[5].trim(),
+        date: match[6].trim(),
+        referenceCode: match[7].trim() === 'aucun' ? null : match[7].trim(),
+        balance: parseNum(match[8]),
+        transCode: match[9].trim()
+      };
+    }
+
+    // 2. Fallback to AI (if format changed or didn't match perfectly)
     const { object } = await generateObject({
       model: google('gemini-1.5-pro'),
       schema: z.object({
