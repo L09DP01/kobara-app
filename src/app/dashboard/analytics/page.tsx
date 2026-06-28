@@ -19,6 +19,7 @@ export default async function AnalyticsPage() {
       customers (name, phone)
     `)
     .eq('merchant_id', merchantId)
+    .eq('environment', merchant.current_environment || 'test')
     .gte('created_at', thirtyDaysAgo.toISOString())
     .order('created_at', { ascending: true });
 
