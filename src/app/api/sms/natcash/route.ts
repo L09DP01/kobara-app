@@ -77,15 +77,25 @@ export async function POST(request: NextRequest) {
       errorReason = parsed.referenceCode ? 'Format de code invalide' : 'Aucun code extrait';
       status = 'ignored'; // Auto ignore
     } else {
-      // Search for pending payment with this reference code
+      // Search for pending payments created in the last 30 minutes to do fuzzy matching
+      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
       const { data: pendingPayments } = await supabase
         .from('payments')
-        .select('id, amount, status, expires_at, merchant_id')
-        .eq('reference_code', parsed.referenceCode.toUpperCase())
-        .eq('status', 'pending');
+        .select('id, amount, status, expires_at, merchant_id, reference_code')
+        .eq('status', 'pending')
+        .gte('created_at', thirtyMinsAgo);
+
+      let matchedPaymentDetails = null;
 
       if (pendingPayments && pendingPayments.length > 0) {
-        const p = pendingPayments[0]; // Take the first match
+        const normalize = (s: string) => (s || '').toUpperCase().replace(/[O0]/g, '0').replace(/[I1L]/g, '1');
+        const normalizedParsedRef = normalize(parsed.referenceCode);
+        
+        matchedPaymentDetails = pendingPayments.find(p => normalize(p.reference_code) === normalizedParsedRef);
+      }
+
+      if (matchedPaymentDetails) {
+        const p = matchedPaymentDetails;
         
         if (parsed.amount === null) {
           errorReason = 'Montant introuvable dans le SMS tronqué';

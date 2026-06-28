@@ -96,7 +96,7 @@ export async function processPayment(formData: FormData) {
   const { data: merchantData } = await supabaseAdmin.from('merchants').select('business_name').eq('id', merchantId).single();
   const businessName = merchantData?.business_name || 'KBR';
   const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let randomPart = '';
   for (let i = 0; i < 5; i++) { randomPart += chars.charAt(Math.floor(Math.random() * chars.length)); }
   const referenceCode = prefix + randomPart;
