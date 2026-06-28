@@ -220,13 +220,16 @@ export async function POST(request: NextRequest) {
       const { headers } = await import("next/headers");
       const headersList = await headers();
       const host = headersList.get("host") || "";
-      const isPaySubdomain = host === "pay.kobara.app" || host.startsWith("pay.");
-      const basePath = isPaySubdomain ? "" : "/pay";
+      
+      let baseUrl = "https://pay.kobara.app"; // Default to production checkout domain
+      if (host.includes("localhost") || host.includes("127.0.0.1")) {
+        baseUrl = `http://${host}/pay`;
+      }
       
       if (provider === 'natcash') {
-        paymentUrl = `https://${host}${basePath}/checkout/${payment.id}/natcash`;
+        paymentUrl = `${baseUrl}/checkout/${payment.id}/natcash`;
       } else {
-        paymentUrl = `https://${host}${basePath}/checkout/${payment.id}`;
+        paymentUrl = `${baseUrl}/checkout/${payment.id}`;
       }
     }
 
