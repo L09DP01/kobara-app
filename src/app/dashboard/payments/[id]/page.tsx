@@ -99,6 +99,7 @@ export default async function PaymentDetailsPage(props: { params: Params }) {
                 <span className="text-slate-400 text-sm">Référence Kobara</span>
                 <span className="font-mono text-white text-sm">{payment.transaction_reference || payment.kobara_reference || 'N/A'}</span>
               </div>
+            </div>
           </div>
         </div>
 
