@@ -75,6 +75,7 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
   const [headers, setHeaders] = useState<{ key: string; value: string; enabled: boolean }[]>([
     { key: 'Authorization', value: `Bearer ${isTestMode ? 'kbr_sk_test_YOUR_KEY' : 'kbr_sk_live_YOUR_KEY'}`, enabled: true },
     { key: 'Content-Type', value: 'application/json', enabled: true },
+    { key: 'Idempotency-Key', value: crypto.randomUUID(), enabled: true },
   ]);
 
   const [requestTab, setRequestTab] = useState<RequestTab>('body');
@@ -108,6 +109,11 @@ export function ApiPlayground({ isTestMode, activeKey }: { isTestMode: boolean; 
     setResponse(null);
     setRequestState('idle');
     setLogs([]);
+    setHeaders(prev => prev.map(h => 
+      h.key === 'Idempotency-Key' 
+        ? { ...h, value: crypto.randomUUID() } 
+        : h
+    ));
   };
 
   // Header helpers
