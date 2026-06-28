@@ -134,15 +134,6 @@ export function NatCashWaitingClient({
                 <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
                 <span className="text-orange-400 font-mono text-sm">Expire dans {formatTime(timeLeft)}</span>
               </div>
-              
-              <div className="mt-6">
-                <button 
-                  onClick={() => router.push(window.location.pathname.replace('/natcash', ''))}
-                  className="text-slate-400 hover:text-white text-xs transition-colors underline opacity-80 hover:opacity-100"
-                >
-                  Générer un nouveau code (déjà payé avec l'ancien ?)
-                </button>
-              </div>
             </div>
           </>
         )}
@@ -165,10 +156,10 @@ export function NatCashWaitingClient({
             <h3 className="text-xl font-bold text-white">Code Expiré</h3>
             <p className="text-slate-400 text-sm">Le temps imparti (10 min) est écoulé. Si vous avez déjà payé, contactez le marchand avec votre TransCode.</p>
             <button 
-              onClick={() => window.location.reload()}
+              onClick={() => router.push(window.location.pathname.replace('/natcash', ''))}
               className="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white font-medium transition-colors"
             >
-              Générer un nouveau code
+              Générer un nouveau code (déjà payé avec l'ancien ?)
             </button>
           </div>
         )}
