@@ -39,7 +39,7 @@ export default async function PaymentsPage({
   // Stats
   const { data: allPaymentsForStats } = await supabase
     .from('payments')
-    .select('amount, net_amount, gross_amount, fee_amount, status, created_at')
+    .select('amount, net_amount, fee_amount, status, created_at')
     .eq('merchant_id', merchant.id)
     .eq('environment', merchant.current_environment || 'test');
 
