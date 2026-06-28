@@ -46,23 +46,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if TransCode already exists (prevent double processing)
-    const { data: existingPayment } = await supabase
-      .from('payments')
-      .select('id')
-      .eq('trans_code', parsed.transCode)
-      .maybeSingle();
+    if (parsed.transCode) {
+      const { data: existingPayment } = await supabase
+        .from('payments')
+        .select('id')
+        .eq('trans_code', parsed.transCode)
+        .maybeSingle();
 
-    if (existingPayment) {
-      // Already processed
-      await supabase.from('sms_inbox').insert({
-        raw_message,
-        parsed_json: parsed,
-        source: 'natcash',
-        status: 'ignored',
-        error_reason: 'TransCode already used',
-        payment_id: existingPayment.id
-      });
-      return NextResponse.json({ success: true, ignored: true, reason: "Already processed" }, { status: 200 });
+      if (existingPayment) {
+        // Already processed
+        await supabase.from('sms_inbox').insert({
+          raw_message,
+          parsed_json: parsed,
+          source: 'natcash',
+          status: 'ignored',
+          error_reason: 'TransCode already used',
+          payment_id: existingPayment.id
+        });
+        return NextResponse.json({ success: true, ignored: true, reason: "Already processed" }, { status: 200 });
+      }
     }
 
     // 3. Find matching payment
@@ -87,25 +89,30 @@ export async function POST(request: NextRequest) {
       if (pendingPayments && pendingPayments.length > 0) {
         const p = pendingPayments[0]; // Take the first match
         
-        // Allow a small tolerance (1 HTG) for rounding issues or slight overpayments
-        const amountDiff = Math.abs(p.amount - parsed.amount);
-        
-        if (amountDiff > 1) {
-          // Amount mismatch (difference > 1 HTG)
-          errorReason = `Montant incorrect: Attendu ${p.amount}, Reçu ${parsed.amount}`;
+        if (parsed.amount === null) {
+          errorReason = 'Montant introuvable dans le SMS tronqué';
           status = 'failed';
         } else {
-          // Check expiration
-          const now = new Date();
-          const expiresAt = new Date(p.expires_at);
-          if (now > expiresAt) {
-            errorReason = 'Paiement expiré avant réception du SMS';
+          // Allow a small tolerance (1 HTG) for rounding issues or slight overpayments
+          const amountDiff = Math.abs(p.amount - parsed.amount);
+          
+          if (amountDiff > 1) {
+            // Amount mismatch (difference > 1 HTG)
+            errorReason = `Montant incorrect: Attendu ${p.amount}, Reçu ${parsed.amount}`;
             status = 'failed';
-            await supabase.from('payments').update({ status: 'expired' }).eq('id', p.id);
           } else {
-            // MATCH!
-            matchedPayment = p;
-            status = 'processed';
+            // Check expiration
+            const now = new Date();
+            const expiresAt = new Date(p.expires_at);
+            if (now > expiresAt) {
+              errorReason = 'Paiement expiré avant réception du SMS';
+              status = 'failed';
+              await supabase.from('payments').update({ status: 'expired' }).eq('id', p.id);
+            } else {
+              // MATCH!
+              matchedPayment = p;
+              status = 'processed';
+            }
           }
         }
         
@@ -124,7 +131,7 @@ export async function POST(request: NextRequest) {
           await supabase.from('payments').update({
             status: 'succeeded',
             paid_at: new Date().toISOString(),
-            trans_code: parsed.transCode
+            trans_code: parsed.transCode || `TRX-${Date.now()}`
           }).eq('id', matchedPayment.id);
           
           return NextResponse.json({ success: true, processed: true, payment_id: matchedPayment.id }, { status: 200 });
