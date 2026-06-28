@@ -46,25 +46,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if TransCode already exists (prevent double processing)
-    if (parsed.transCode) {
-      const { data: existingPayment } = await supabase
-        .from('payments')
-        .select('id')
-        .eq('trans_code', parsed.transCode)
-        .maybeSingle();
+    const { data: existingPayment } = await supabase
+      .from('payments')
+      .select('id')
+      .eq('trans_code', parsed.transCode)
+      .maybeSingle();
 
-      if (existingPayment) {
-        // Already processed
-        await supabase.from('sms_inbox').insert({
-          raw_message,
-          parsed_json: parsed,
-          source: 'natcash',
-          status: 'ignored',
-          error_reason: 'TransCode already used',
-          payment_id: existingPayment.id
-        });
-        return NextResponse.json({ success: true, ignored: true, reason: "Already processed" }, { status: 200 });
-      }
+    if (existingPayment) {
+      // Already processed
+      await supabase.from('sms_inbox').insert({
+        raw_message,
+        parsed_json: parsed,
+        source: 'natcash',
+        status: 'ignored',
+        error_reason: 'TransCode already used',
+        payment_id: existingPayment.id
+      });
+      return NextResponse.json({ success: true, ignored: true, reason: "Already processed" }, { status: 200 });
     }
 
     // 3. Find matching payment
@@ -131,7 +129,7 @@ export async function POST(request: NextRequest) {
           await supabase.from('payments').update({
             status: 'succeeded',
             paid_at: new Date().toISOString(),
-            trans_code: parsed.transCode || `TRX-${Date.now()}`
+            trans_code: parsed.transCode
           }).eq('id', matchedPayment.id);
           
           return NextResponse.json({ success: true, processed: true, payment_id: matchedPayment.id }, { status: 200 });
