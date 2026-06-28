@@ -42,7 +42,7 @@ async function analyzeDB() {
       if (p.status === 'succeeded') stats[key].succeeded++;
       if (p.status === 'failed') stats[key].failed++;
       if (p.status === 'pending') stats[key].pending++;
-      if (p.customers?.name) stats[key].customers.add(p.customers.name);
+      if ((p.customers as any)?.name) stats[key].customers.add((p.customers as any).name);
     });
     
     for (const [key, stat] of Object.entries(stats)) {
