@@ -43,6 +43,15 @@ export default async function AdminSmsGatewayPage() {
       error_reason: null
     }).eq('id', smsId);
 
+    // 5. Send success notification
+    try {
+      const { notifyPaymentSucceeded } = await import('@/lib/server/notifications');
+      const { data: merchantData } = await supabaseAdmin.from('merchants').select('email').eq('id', payment.merchant_id).single();
+      if (merchantData?.email) {
+        await notifyPaymentSucceeded(payment.merchant_id, merchantData.email, payment.amount, 'HTG', payment.id);
+      }
+    } catch(e) { console.error("Notification failed", e); }
+
     revalidatePath('/system-core/sms-gateway');
   }
 

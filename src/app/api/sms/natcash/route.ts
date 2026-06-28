@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       // Search for pending payment with this reference code
       const { data: pendingPayments } = await supabase
         .from('payments')
-        .select('id, amount, status, expires_at')
+        .select('id, amount, status, expires_at, merchant_id')
         .eq('reference_code', parsed.referenceCode.toUpperCase())
         .eq('status', 'pending');
 
@@ -131,6 +131,15 @@ export async function POST(request: NextRequest) {
             paid_at: new Date().toISOString(),
             trans_code: parsed.transCode
           }).eq('id', matchedPayment.id);
+          
+          // Send success notification
+          try {
+            const { notifyPaymentSucceeded } = await import('@/lib/server/notifications');
+            const { data: merchantData } = await supabase.from('merchants').select('email').eq('id', matchedPayment.merchant_id).single();
+            if (merchantData?.email) {
+              await notifyPaymentSucceeded(matchedPayment.merchant_id, merchantData.email, matchedPayment.amount, 'HTG', matchedPayment.id);
+            }
+          } catch(e) { console.error("Notification failed", e); }
           
           return NextResponse.json({ success: true, processed: true, payment_id: matchedPayment.id }, { status: 200 });
         } else {
