@@ -41,50 +41,52 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     return { error: "Numéro de réception requis pour MonCash." };
   }
 
-  // 2FA Verification
-  const { data: settings } = await supabase
-    .from('settings')
-    .select('security_json')
-    .eq('merchant_id', merchant.id)
-    .maybeSingle();
-  
-  const security = settings?.security_json || {};
-  const twoFactorMethod = security.two_factor_method || 'none';
+  // 2FA Verification (Uniquement en mode Live)
+  if (!isTest) {
+    const { data: settings } = await supabase
+      .from('settings')
+      .select('security_json')
+      .eq('merchant_id', merchant.id)
+      .maybeSingle();
+    
+    const security = settings?.security_json || {};
+    const twoFactorMethod = security.two_factor_method || 'none';
 
-  if (code2fa) {
-    // If they provided a code, verify it (either TOTP, or Email OTP)
-    if (twoFactorMethod === 'totp') {
-      const verified = speakeasy.totp.verify({
-        secret: security.totp_secret,
-        encoding: 'base32',
-        token: code2fa,
-        window: 1
-      });
-      if (!verified) {
-        return { error: "Le code de l'application (TOTP) est invalide." };
+    if (code2fa) {
+      // If they provided a code, verify it (either TOTP, or Email OTP)
+      if (twoFactorMethod === 'totp') {
+        const verified = speakeasy.totp.verify({
+          secret: security.totp_secret,
+          encoding: 'base32',
+          token: code2fa,
+          window: 1
+        });
+        if (!verified) {
+          return { error: "Le code de l'application (TOTP) est invalide." };
+        }
+      } else {
+        // Standard Email
+        const emailOtp = security.email_otp || {};
+        if (!emailOtp.code || emailOtp.code !== code2fa) {
+          return { error: "Le code de vérification email est incorrect." };
+        }
+        const expiresAt = new Date(emailOtp.expires_at).getTime();
+        if (Date.now() > expiresAt) {
+          return { error: "Le code de vérification email a expiré." };
+        }
+        // Consume the code
+        const adminClientForOTP = createAdminClient();
+        await adminClientForOTP.from('settings').update({
+          security_json: { ...security, email_otp: null }
+        }).eq('merchant_id', merchant.id);
       }
-    } else {
-      // Standard Email
-      const emailOtp = security.email_otp || {};
-      if (!emailOtp.code || emailOtp.code !== code2fa) {
-        return { error: "Le code de vérification email est incorrect." };
-      }
-      const expiresAt = new Date(emailOtp.expires_at).getTime();
-      if (Date.now() > expiresAt) {
-        return { error: "Le code de vérification email a expiré." };
-      }
-      // Consume the code
-      const adminClientForOTP = createAdminClient();
-      await adminClientForOTP.from('settings').update({
-        security_json: { ...security, email_otp: null }
-      }).eq('merchant_id', merchant.id);
+    } else if (twoFactorMethod !== 'none') {
+      return { 
+        error: "Une validation de sécurité (Code) est requise.",
+        code: "validation_required",
+        twoFactorMethod
+      };
     }
-  } else if (twoFactorMethod !== 'none') {
-    return { 
-      error: "Une validation de sécurité (Code) est requise.",
-      code: "validation_required",
-      twoFactorMethod
-    };
   }
 
   const fees = amount * 0.05; // 5% Kobara fee
