@@ -24,8 +24,24 @@ export default async function UnifiedCheckoutPage({ params }: { params: Promise<
   // Check if active
   const isExpired = payment.expires_at && new Date(payment.expires_at) < new Date();
   if (payment.status !== 'pending' || isExpired) {
-    if (payment.status === 'succeeded' && payment.success_url) {
-      redirect(payment.success_url);
+    if (payment.status === 'succeeded') {
+      if (payment.success_url) {
+        redirect(payment.success_url);
+      } else {
+        return (
+          <div className="min-h-[100dvh] bg-[#0F1626] flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl p-8 text-center shadow-lg ambient-shadow">
+              <div className="w-16 h-16 bg-green-500/10 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="material-symbols-outlined text-3xl">check_circle</span>
+              </div>
+              <h1 className="text-headline-md font-headline-md text-white mb-2">Paiement réussi</h1>
+              <p className="text-slate-400 font-body-base">
+                Merci pour votre paiement. La transaction a été complétée avec succès. Vous pouvez fermer cette page.
+              </p>
+            </div>
+          </div>
+        );
+      }
     }
     return (
       <div className="min-h-[100dvh] bg-[#0F1626] flex items-center justify-center p-4">

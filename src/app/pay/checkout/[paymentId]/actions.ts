@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { BazikService } from "@/lib/server/bazik/bazik.service";
 
 export async function processUnifiedCheckout(formData: FormData) {
@@ -56,6 +57,11 @@ export async function processUnifiedCheckout(formData: FormData) {
         reference_code: natcashReferenceCode
       }).eq('id', paymentId);
     }
+
+    const headersList = await headers();
+    const host = headersList.get('host') || '';
+    const isPaySubdomain = host.startsWith('pay.');
+    const basePath = isPaySubdomain ? '' : '/pay';
 
     redirect(`${basePath}/checkout/${paymentId}/natcash`);
   }
@@ -123,6 +129,11 @@ export async function simulateTestPayment(formData: FormData) {
   if (payment.success_url) {
     redirect(payment.success_url);
   } else {
-    redirect(`/pay/checkout/${paymentId}`);
+    const headersList = await headers();
+    const host = headersList.get('host') || '';
+    const isPaySubdomain = host.startsWith('pay.');
+    const basePath = isPaySubdomain ? '' : '/pay';
+    
+    redirect(`${basePath}/checkout/${paymentId}`);
   }
 }
