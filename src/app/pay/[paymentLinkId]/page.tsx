@@ -150,9 +150,9 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
             <div className="space-y-1.5">
               <label className="block text-body-sm font-medium text-white mb-2">Méthode de paiement *</label>
               <div className="grid grid-cols-2 gap-3">
-                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-orange-500 bg-orange-500/10 hover:bg-orange-500/20 transition-all group">
+                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
                   <input type="radio" name="provider" value="moncash" className="sr-only" defaultChecked />
-                  <div className="absolute top-2 right-2 opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
                     <CheckCircle2 size={16} className="text-orange-500" />
                   </div>
                   <span className="font-bold text-white mt-1">MonCash</span>
