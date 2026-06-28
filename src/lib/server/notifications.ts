@@ -198,3 +198,16 @@ export async function notifyWithdrawalCreated(merchantId: string, email: string,
     withdrawalId
   );
 }
+
+// B2B Transfers
+export async function notifyB2BTransferSent(senderId: string, email: string, amount: number, receiverEmail: string) {
+  const title = "Transfert B2B Envoyé";
+  const message = `Vous avez envoyé avec succès un transfert B2B de ${amount.toLocaleString('fr-FR')} HTG à ${receiverEmail}.`;
+  await createNotification(senderId, 'b2b.sent', title, message, email);
+}
+
+export async function notifyB2BTransferReceived(receiverId: string, email: string, amount: number, senderName: string) {
+  const title = "Transfert B2B Reçu";
+  const message = `Vous avez reçu un transfert B2B de ${amount.toLocaleString('fr-FR')} HTG de la part de ${senderName}.`;
+  await createNotification(receiverId, 'b2b.received', title, message, email);
+}

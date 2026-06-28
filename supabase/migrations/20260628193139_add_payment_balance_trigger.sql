@@ -4,11 +4,19 @@ RETURNS TRIGGER AS $$
 BEGIN
   -- Si le statut passe à 'succeeded'
   IF OLD.status != 'succeeded' AND NEW.status = 'succeeded' THEN
-    UPDATE public.merchants
-    SET 
-      available_balance = available_balance + NEW.net_amount,
-      updated_at = NOW()
-    WHERE id = NEW.merchant_id;
+    IF NEW.environment = 'test' THEN
+      UPDATE public.merchants
+      SET 
+        available_balance_test = available_balance_test + NEW.net_amount,
+        updated_at = NOW()
+      WHERE id = NEW.merchant_id;
+    ELSE
+      UPDATE public.merchants
+      SET 
+        available_balance = available_balance + NEW.net_amount,
+        updated_at = NOW()
+      WHERE id = NEW.merchant_id;
+    END IF;
   END IF;
 
   RETURN NEW;

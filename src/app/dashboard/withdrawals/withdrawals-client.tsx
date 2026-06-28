@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { requestWithdrawal } from './actions';
+import { executeB2BTransfer } from './b2b-actions';
 import { sendEmailOtpAction } from '../settings/actions';
 import { useEnvironment } from '@/context/EnvironmentContext';
+import { QRCodeSVG } from 'qrcode.react';
 
 export function WithdrawalsClient({ 
   withdrawals, 
@@ -20,6 +22,7 @@ export function WithdrawalsClient({
 }) {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [step, setStep] = useState<'details' | 'otp'>('details');
   const [amount, setAmount] = useState<number | ''>('');
   const [method, setMethod] = useState('MonCash');
@@ -39,12 +42,17 @@ export function WithdrawalsClient({
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    if (!amount || Number(amount) < 100) {
-      setErrorMsg("Le montant minimum est de 100 HTG");
+    const minAmount = method === 'B2B' ? 1 : 100;
+    if (!amount || Number(amount) < minAmount) {
+      setErrorMsg(`Le montant minimum est de ${minAmount} HTG`);
       return;
     }
     if (method === 'MonCash' && !receiver) {
       setErrorMsg("Le numéro de réception est requis pour MonCash.");
+      return;
+    }
+    if (method === 'B2B' && !receiver) {
+      setErrorMsg("L'email du destinataire est requis pour le transfert B2B.");
       return;
     }
     if (Number(amount) > activeBalance) {
@@ -56,7 +64,13 @@ export function WithdrawalsClient({
       setLoading(true);
       // Skip OTP for test environment
       if (isTest) {
-        const res = await requestWithdrawal(Number(amount), method, receiver, undefined, undefined, saveNumber);
+        let res;
+        if (method === 'B2B') {
+          res = await executeB2BTransfer(Number(amount), receiver, undefined);
+        } else {
+          res = await requestWithdrawal(Number(amount), method, receiver, undefined, undefined, saveNumber);
+        }
+        
         if (res?.error) throw new Error(res.error);
         
         setIsModalOpen(false);
@@ -91,7 +105,12 @@ export function WithdrawalsClient({
 
     try {
       setLoading(true);
-      const res = await requestWithdrawal(Number(amount), method, receiver, code2fa, undefined, saveNumber);
+      let res;
+      if (method === 'B2B') {
+        res = await executeB2BTransfer(Number(amount), receiver, code2fa);
+      } else {
+        res = await requestWithdrawal(Number(amount), method, receiver, code2fa, undefined, saveNumber);
+      }
       
       if (res?.error) {
         throw new Error(res.error);
@@ -142,13 +161,22 @@ export function WithdrawalsClient({
           <h1 className="text-2xl font-bold text-white tracking-tight">Retraits & Solde</h1>
           <p className="text-sm text-slate-400 mt-1">Gérez vos retraits et suivez votre solde en temps réel.</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-orange-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors shadow-sm flex items-center gap-2"
-        >
-          <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
-          Initier un Retrait
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsQrModalOpen(true)}
+            className="bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-white/20 transition-colors shadow-sm flex items-center gap-2 border border-white/10"
+          >
+            <span className="material-symbols-outlined text-[20px]">qr_code</span>
+            Mon QR Code
+          </button>
+          <button 
+            onClick={() => { setMethod('MonCash'); setIsModalOpen(true); }}
+            className="bg-orange-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors shadow-sm flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+            Initier un Retrait
+          </button>
+        </div>
       </div>
 
       {/* Success Message */}
@@ -171,9 +199,13 @@ export function WithdrawalsClient({
             {activeBalance.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} <span className="text-lg text-white/60">HTG</span>
           </h2>
           <div className="mt-6 flex gap-4">
-            <button onClick={() => setIsModalOpen(true)} className="bg-white text-[#1a1a2e] px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors flex items-center gap-2">
+            <button onClick={() => { setMethod('MonCash'); setIsModalOpen(true); }} className="bg-white text-[#1a1a2e] px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">send</span>
-              Retrait Rapide
+              Retrait
+            </button>
+            <button onClick={() => { setMethod('B2B'); setIsModalOpen(true); }} className="bg-orange-500/20 text-orange-400 border border-orange-500/30 px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-orange-500/30 transition-colors flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">currency_exchange</span>
+              Transfert B2B
             </button>
           </div>
         </div>
@@ -239,7 +271,7 @@ export function WithdrawalsClient({
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-lg font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                       required
                     />
-                    {amount && Number(amount) >= 100 && (
+                    {amount && Number(amount) > 0 && method !== 'B2B' && (
                       <div className="mt-3 p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
                         <div className="flex justify-between text-sm text-slate-400">
                           <span>Montant demandé</span>
@@ -255,6 +287,18 @@ export function WithdrawalsClient({
                         </div>
                       </div>
                     )}
+                    {amount && Number(amount) > 0 && method === 'B2B' && (
+                      <div className="mt-3 p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
+                        <div className="flex justify-between text-sm text-slate-400">
+                          <span>Montant envoyé</span>
+                          <span>{Number(amount).toLocaleString('fr-FR')} HTG</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-green-400">
+                          <span>Frais B2B appliqués (0%)</span>
+                          <span>Gratuit</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-slate-400 font-bold mb-1.5">Méthode de réception</label>
@@ -264,11 +308,26 @@ export function WithdrawalsClient({
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all [&>option]:bg-[#131B2C]"
                     >
                       <option value="MonCash">MonCash</option>
+                      <option value="B2B">Transfert B2B (Gratuit)</option>
                       <option value="Sogebank" disabled>Sogebank (Bientôt)</option>
                       <option value="Unibank" disabled>Unibank (Bientôt)</option>
                     </select>
                   </div>
                   
+                  {method === 'B2B' && (
+                    <div>
+                      <label className="block text-xs text-slate-400 font-bold mb-1.5">Email du marchand destinataire</label>
+                      <input 
+                        type="email" 
+                        value={receiver}
+                        onChange={(e) => setReceiver(e.target.value)}
+                        placeholder="marchand@exemple.com"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all mb-3"
+                        required
+                      />
+                    </div>
+                  )}
+
                   {method === 'MonCash' && (
                     <div>
                       <label className="block text-xs text-slate-400 font-bold mb-1.5">Numéro de téléphone (MonCash)</label>
