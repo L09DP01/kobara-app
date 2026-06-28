@@ -59,6 +59,16 @@ const nextConfig = {
         destination: '/dashboard/:path*',
       },
       {
+        source: '/api/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'pay.kobara.app',
+          },
+        ],
+        destination: '/api/:path*',
+      },
+      {
         source: '/:path*',
         has: [
           {
