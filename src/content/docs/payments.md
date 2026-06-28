@@ -103,6 +103,7 @@ Kobara retournera la même transaction si la requête a déjà été traitée.
 {
   "amount": 2500,
   "currency": "HTG",
+  "provider": "kobara",
   "description": "Abonnement Premium (1 mois)",
   "customer": {
     "name": "Jean Exemple",
@@ -113,7 +114,6 @@ Kobara retournera la même transaction si la requête a déjà été traitée.
     "internal_order_id": "ORD-89457",
     "plan_tier": "premium"
   },
-  "provider": "kobara",
   "success_url": "https://monsite.com/success",
   "error_url": "https://monsite.com/error",
   "webhook_url": "https://monsite.com/webhooks/kobara"
@@ -214,7 +214,7 @@ payments.metadata
 
 ---
 
-## `provider` (Nouveau)
+## `provider`
 
 Spécifie l'expérience de paiement que vous souhaitez offrir à votre client.
 
