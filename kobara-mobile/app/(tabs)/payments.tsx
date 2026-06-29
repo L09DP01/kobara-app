@@ -86,6 +86,15 @@ export default function PaymentsScreen() {
   const activeQuery = getActiveQuery();
   const isRefreshing = activeQuery.isRefetching && !activeQuery.isLoading;
 
+  useEffect(() => {
+    if (activeQuery.isError) {
+      console.log(`[Query Error ${activeTab}]:`, activeQuery.error);
+    }
+    if (activeQuery.data) {
+      console.log(`[Query Data ${activeTab}]:`, activeQuery.data);
+    }
+  }, [activeQuery.isError, activeQuery.error, activeQuery.data, activeTab]);
+
   const handleNotificationPress = () => {
     router.push('/notifications');
   };

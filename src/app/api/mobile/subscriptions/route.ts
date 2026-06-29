@@ -31,9 +31,8 @@ export async function GET(req: NextRequest) {
 
     let query = supabaseAdmin
       .from('subscriptions')
-      .select('id, amount, currency, status, billing_interval, next_billing_date, created_at, customers(name, email), plans(name)', { count: 'exact' })
+      .select('id, amount:amount_htg, status, billing_interval:billing_cycle, next_billing_date:current_period_end, created_at, plans(name)', { count: 'exact' })
       .eq('merchant_id', merchant.id)
-      .eq('environment', environment)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -42,26 +41,29 @@ export async function GET(req: NextRequest) {
     }
 
     if (search) {
-      // Pour les abonnements, on pourrait chercher par nom de client.
-      // Supabase ne supporte pas ilike sur une table jointe dans la requête simple, 
-      // donc on devrait l'implémenter autrement si c'est vraiment nécessaire.
-      // Pour ce prototype, on ignore la recherche si elle demande une jointure complexe sans vue.
+      // Pas de recherche par défaut pour les plans.
     }
 
     const { data: subscriptions, count, error: subscriptionsError } = await query;
 
     if (subscriptionsError) {
-      // If table 'subscriptions' doesn't exist yet, just return empty gracefully
       if (subscriptionsError.code === '42P01') {
         return NextResponse.json({ success: true, subscriptions: [], pagination: { total: 0, page, limit, totalPages: 0 } });
       }
       console.error("Error fetching mobile subscriptions:", subscriptionsError);
       return NextResponse.json({ error: "Erreur lors de la récupération des abonnements." }, { status: 500 });
     }
+    
+    // Add default currency HTG and map customers to merchant business name for display
+    const formattedSubscriptions = (subscriptions || []).map(sub => ({
+      ...sub,
+      currency: 'HTG',
+      customers: { name: merchant.business_name }
+    }));
 
     return NextResponse.json({
       success: true,
-      subscriptions: subscriptions || [],
+      subscriptions: formattedSubscriptions,
       pagination: {
         total: count || 0,
         page,

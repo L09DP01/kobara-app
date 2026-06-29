@@ -4,7 +4,8 @@ import { authService } from '@/services/auth';
 import { useAuthStore } from '@/store/useAuthStore';
 
 // Uses local environment variable or defaults to production
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.kobara.app/v1';
+const ENV_URL = process.env.EXPO_PUBLIC_API_URL || 'https://kobara.app';
+const API_BASE_URL = ENV_URL.endsWith('/api') ? ENV_URL : `${ENV_URL}/api`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
