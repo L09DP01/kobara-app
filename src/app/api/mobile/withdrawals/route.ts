@@ -18,6 +18,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Données de retrait invalides." }, { status: 400 });
     }
 
+    if (method.toLowerCase() === 'zelle' && Number(amount) < 3000) {
+      return NextResponse.json({ error: "Le montant minimum pour Zelle est de 3000 HTG (20 $)." }, { status: 400 });
+    } else if (method.toLowerCase() !== 'zelle' && Number(amount) < 150) {
+      return NextResponse.json({ error: "Le montant minimum est de 150 HTG." }, { status: 400 });
+    }
+
     // 1. Get merchant ID, balance, and environment
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')

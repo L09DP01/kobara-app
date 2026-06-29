@@ -42,9 +42,12 @@ export function WithdrawalsClient({
   const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    const minAmount = method === 'B2B' ? 1 : 100;
+    let minAmount = 150;
+    if (method === 'B2B') minAmount = 1;
+    if (method === 'Zelle') minAmount = 3000;
+    
     if (!amount || Number(amount) < minAmount) {
-      setErrorMsg(`Le montant minimum est de ${minAmount} HTG`);
+      setErrorMsg(method === 'Zelle' ? `Le montant minimum pour Zelle est de 3000 HTG (20 $).` : `Le montant minimum est de ${minAmount} HTG`);
       return;
     }
     if (method === 'MonCash' && !receiver) {

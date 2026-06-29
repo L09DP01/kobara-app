@@ -33,8 +33,10 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     return { error: "Solde insuffisant pour ce retrait." };
   }
 
-  if (amount < 100) {
-    return { error: "Le montant minimum est de 100 HTG." };
+  if (method === 'Zelle' && amount < 3000) {
+    return { error: "Le montant minimum pour Zelle est de 3000 HTG (20 $)." };
+  } else if (method !== 'Zelle' && amount < 150) {
+    return { error: "Le montant minimum est de 150 HTG." };
   }
 
   if (method === 'MonCash' && !receiver) {
