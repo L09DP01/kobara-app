@@ -1,25 +1,38 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Send } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { balanceService } from '../../services/balance';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function TransferScreen() {
   const { recipientId } = useLocalSearchParams<{ recipientId: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleTransfer = () => {
+  const handleTransfer = async () => {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) return;
     
     setIsLoading(true);
-    // Simulate transfer API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // For MVP, just go back
-      router.back();
-    }, 1500);
+    setError(null);
+    
+    const result = await balanceService.sendB2BTransfer(recipientId, Number(amount));
+    
+    setIsLoading(false);
+    
+    if (result.success) {
+      // Invalidate balance query so it refreshes immediately on return
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
+      Alert.alert("Succès", "Transfert effectué avec succès.", [
+        { text: "OK", onPress: () => router.back() }
+      ]);
+    } else {
+      setError(result.error || "Une erreur s'est produite");
+    }
   };
 
   return (
@@ -38,6 +51,11 @@ export default function TransferScreen() {
       >
         <View style={styles.content}>
           <View style={styles.card}>
+            {error && (
+              <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 1, padding: 12, borderRadius: 12, marginBottom: 16 }}>
+                <Text style={{ color: '#F87171', fontSize: 14, textAlign: 'center' }}>{error}</Text>
+              </View>
+            )}
             <Text style={styles.label}>Destinataire (ID)</Text>
             <View style={styles.recipientBox}>
               <Text style={styles.recipientText} numberOfLines={1} ellipsizeMode="middle">
