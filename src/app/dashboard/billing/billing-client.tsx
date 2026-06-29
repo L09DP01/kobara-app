@@ -328,7 +328,7 @@ export function BillingClient() {
             <p className="text-slate-400 text-sm mb-6">Pour finaliser votre abonnement, veuillez effectuer le transfert NatCash depuis votre téléphone :</p>
             
             <div className="bg-black/40 border border-white/5 rounded-2xl p-6 mb-8">
-              <p className="text-slate-300 text-sm mb-4">Utilisez votre application NatCash ou faites <span className="font-bold text-white">*202#</span> pour faire le transfert du montant.</p>
+              <p className="text-slate-300 text-sm mb-4">Utilisez votre application NatCash ou faites <span className="font-bold text-white">*202#</span> pour transférer le montant au numéro <span className="font-bold text-white">40 03 56 64</span>.</p>
               <p className="text-slate-500 text-sm mb-2">Code de référence à inclure :</p>
               <div className="text-2xl sm:text-3xl font-black text-orange-400 tracking-wider break-words selection:bg-orange-500/30">
                 {natcashData.referenceCode}

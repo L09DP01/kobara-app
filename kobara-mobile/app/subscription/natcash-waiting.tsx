@@ -34,7 +34,7 @@ export default function NatCashWaitingScreen() {
           
           <View style={styles.instructionBox}>
             <Text style={styles.instructionText}>
-              Utilisez votre application NatCash ou faites <Text style={styles.instructionBold}>*202#</Text> pour faire le transfert.
+              Utilisez votre application NatCash ou faites <Text style={styles.instructionBold}>*202#</Text> pour transférer le montant au numéro <Text style={styles.instructionBold}>40 03 56 64</Text>.
             </Text>
             <Text style={styles.refLabel}>Code de référence à inclure :</Text>
             <Text style={styles.refCode} selectable={true}>
