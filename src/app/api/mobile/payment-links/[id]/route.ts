@@ -29,10 +29,10 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
         *,
         payments(
           id,
-          gross_amount,
+          amount,
           status,
           created_at,
-          transaction_reference,
+          kobara_reference,
           customers(name, email, phone)
         )
       `)

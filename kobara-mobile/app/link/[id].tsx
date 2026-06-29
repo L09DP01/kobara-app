@@ -288,7 +288,7 @@ export default function LinkDetailsScreen() {
                     </View>
                     <View className="items-end">
                       <Text className="text-white font-bold mb-1">
-                        + {Number(payment.gross_amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {link.currency}
+                        + {Number(payment.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {link.currency}
                       </Text>
                       <StatusBadge status={payment.status} />
                     </View>
