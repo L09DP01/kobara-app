@@ -35,19 +35,23 @@ export async function GET(req: NextRequest) {
       email: email,
     });
 
-    if (error || !data?.properties?.action_link) {
+    if (error || !data?.properties?.hashed_token) {
       console.error("Error generating magic link:", error);
       return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent("Impossible de générer le lien de connexion.")}`, req.url));
     }
 
-    // 3. Redirect the user to the Supabase verification URL
-    // We add the custom redirect_to so Supabase redirects back to our requested page
-    const actionLink = new URL(data.properties.action_link);
+    // 3. Redirect the user to our OWN callback route using the hashed_token
+    // This avoids hitting the Supabase hosted URL which redirects to localhost
+    const tokenHash = data.properties.hashed_token;
+    const type = data.properties.verification_type || "magiclink";
     
-    // Supabase action_link usually has a redirect_to param. We replace it.
-    actionLink.searchParams.set("redirect_to", new URL(next, req.url).toString());
+    // Construct the callback URL
+    const callbackUrl = new URL("/api/auth/callback", req.url);
+    callbackUrl.searchParams.set("token_hash", tokenHash);
+    callbackUrl.searchParams.set("type", type);
+    callbackUrl.searchParams.set("next", next);
 
-    return NextResponse.redirect(actionLink.toString());
+    return NextResponse.redirect(callbackUrl.toString());
   } catch (error) {
     console.error("SSO Verification error:", error);
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent("Jeton d'authentification invalide ou expiré.")}`, req.url));
