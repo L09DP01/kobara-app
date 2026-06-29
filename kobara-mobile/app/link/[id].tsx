@@ -59,7 +59,7 @@ export default function LinkDetailsScreen() {
     qrRef.current.toDataURL((data: string) => {
       const filename = FileSystem.cacheDirectory + 'kobara-qr.png';
       FileSystem.writeAsStringAsync(filename, data, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       }).then(() => {
         Sharing.shareAsync(filename, {
           mimeType: 'image/png',

@@ -53,7 +53,7 @@ export function MyQRSheet({ visible, onClose, merchant }: MyQRSheetProps) {
     qrRef.current.toDataURL((data: string) => {
       const filename = FileSystem.cacheDirectory + 'mon-qr-kobara.png';
       FileSystem.writeAsStringAsync(filename, data, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       }).then(() => {
         Sharing.shareAsync(filename, {
           mimeType: 'image/png',
