@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
           status: 'pending',
           provider: 'natcash',
           payment_method: 'natcash',
-          reference_code: referenceCode,
+          kobara_reference: referenceCode,
           expires_at: expiresAt,
           metadata: {
             is_subscription_upgrade: true,

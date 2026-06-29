@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
       const { data: pendingPayments } = await supabase
         .from('payments')
-        .select('id, amount, status, expires_at, merchant_id, reference_code, metadata')
+        .select('id, amount, status, expires_at, merchant_id, kobara_reference, metadata')
         .eq('status', 'pending')
         .gte('created_at', thirtyMinsAgo);
 
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         const normalize = (s: string) => (s || '').toUpperCase().replace(/[O0]/g, '0').replace(/[I1L]/g, '1');
         const normalizedParsedRef = normalize(parsed.referenceCode);
         
-        matchedPaymentDetails = pendingPayments.find(p => normalize(p.reference_code) === normalizedParsedRef);
+        matchedPaymentDetails = pendingPayments.find(p => normalize(p.kobara_reference) === normalizedParsedRef);
       }
 
       if (matchedPaymentDetails) {
