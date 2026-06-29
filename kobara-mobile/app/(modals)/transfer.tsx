@@ -27,7 +27,7 @@ export default function TransferScreen() {
         if (result.success && result.merchant) {
           setVerifiedMerchant(result.merchant);
         } else {
-          setError("Ce code QR ne correspond à aucun marchand valide.");
+          setError(result.error || "Ce code QR ne correspond à aucun marchand valide.");
         }
       };
       fetchMerchant();
