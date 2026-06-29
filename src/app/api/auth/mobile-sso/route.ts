@@ -11,7 +11,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent("Jeton d'authentification manquant.")}`, req.url));
   }
 
-  const MOBILE_TOKEN_SECRET = process.env.MOBILE_TOKEN_SECRET || "fallback_secret_for_development";
+  const MOBILE_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || process.env.SUPABASE_JWT_SECRET;
+  
+  if (!MOBILE_TOKEN_SECRET) {
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent("Erreur de configuration serveur.")}`, req.url));
+  }
+
   const secret = new TextEncoder().encode(MOBILE_TOKEN_SECRET);
 
   try {
