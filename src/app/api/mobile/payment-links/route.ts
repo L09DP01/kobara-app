@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     let query = supabaseAdmin
       .from('payment_links')
-      .select('id, title, description, amount, currency, status, created_at, expires_at', { count: 'exact' })
+      .select('id, title, description, amount, currency, status, slug, created_at, expires_at', { count: 'exact' })
       .eq('merchant_id', merchant.id)
       .eq('environment', environment)
       .order('created_at', { ascending: false })

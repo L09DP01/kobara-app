@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Animated, Dimensions, StyleSheet, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
-import { X, Link } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, Modal, Animated, Dimensions, StyleSheet, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard, Share } from 'react-native';
+import { X, Link, CheckCircle, Share2, Copy } from 'lucide-react-native';
 import { apiClient } from '@/api/client';
-import { useAuthStore } from '@/store/useAuthStore';
+import * as Clipboard from 'expo-clipboard';
 
 interface CreatePaymentLinkSheetProps {
   visible: boolean;
@@ -21,6 +21,9 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // State for the created link
+  const [createdLink, setCreatedLink] = useState<{ id: string, slug: string, title: string } | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -41,6 +44,7 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
         setDescription('');
         setIsLoading(false);
         setError(null);
+        setCreatedLink(null);
       });
     }
   }, [visible, slideAnim, fadeAnim]);
@@ -68,8 +72,8 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
       });
 
       if (response.data && response.data.success) {
+        setCreatedLink(response.data.link);
         onSuccess?.();
-        onClose();
       } else {
         setError(response.data?.error || "Une erreur est survenue");
       }
@@ -78,6 +82,29 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getFullUrl = () => {
+    // Determine base URL, you might want to use EXPO_PUBLIC_APP_URL
+    const baseUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://kobara.app';
+    return `${baseUrl}/pay/${createdLink?.slug}`;
+  };
+
+  const handleShare = async () => {
+    if (!createdLink) return;
+    try {
+      await Share.share({
+        message: `Payer pour "${createdLink.title}" sur Kobara : ${getFullUrl()}`,
+        url: getFullUrl(), // iOS only
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!createdLink) return;
+    await Clipboard.setStringAsync(getFullUrl());
   };
 
   if (!visible && fadeAnim._value === 0) return null;
@@ -95,73 +122,113 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
           
           <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-white text-xl font-bold">Créer un lien</Text>
+              <Text className="text-white text-xl font-bold">
+                {createdLink ? 'Lien créé !' : 'Créer un lien'}
+              </Text>
               <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-white/5">
                 <X size={20} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
-            {error && (
-              <View className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl mb-4">
-                <Text className="text-red-400 text-sm text-center">{error}</Text>
+            {createdLink ? (
+              // Success / Share View
+              <View className="items-center py-4">
+                <View className="w-16 h-16 rounded-full bg-green-500/10 items-center justify-center mb-6">
+                  <CheckCircle size={32} color="#22C55E" />
+                </View>
+                <Text className="text-white font-bold text-xl mb-2 text-center">
+                  Votre lien de paiement est prêt
+                </Text>
+                <Text className="text-slate-400 text-center mb-8 px-4">
+                  Vous pouvez maintenant partager ce lien avec votre client pour recevoir le paiement de {amount} HTG.
+                </Text>
+
+                <View className="w-full flex-row gap-4">
+                  <TouchableOpacity 
+                    onPress={handleCopy}
+                    className="flex-1 bg-white/10 p-4 rounded-xl items-center flex-row justify-center"
+                  >
+                    <Copy size={20} color="#FFF" style={{ marginRight: 8 }} />
+                    <Text className="text-white font-semibold">Copier</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    onPress={handleShare}
+                    className="flex-1 bg-orange-500 p-4 rounded-xl items-center flex-row justify-center"
+                  >
+                    <Share2 size={20} color="#FFF" style={{ marginRight: 8 }} />
+                    <Text className="text-white font-semibold">Partager</Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <TouchableOpacity 
+                  onPress={onClose}
+                  className="mt-6 w-full p-4 items-center"
+                >
+                  <Text className="text-slate-400 font-medium">Fermer</Text>
+                </TouchableOpacity>
               </View>
+            ) : (
+              // Form View
+              <>
+                {error && (
+                  <View className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl mb-4">
+                    <Text className="text-red-400 text-sm text-center">{error}</Text>
+                  </View>
+                )}
+
+                <Text className="text-slate-400 text-sm font-medium mb-2">Titre de l'article ou service</Text>
+                <TextInput
+                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
+                  placeholder="Ex: T-shirt noir, Consultation..."
+                  placeholderTextColor="#475569"
+                  value={title}
+                  onChangeText={setTitle}
+                  editable={!isLoading}
+                />
+
+                <Text className="text-slate-400 text-sm font-medium mb-2">Montant (HTG)</Text>
+                <TextInput
+                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
+                  placeholder="0.00"
+                  placeholderTextColor="#475569"
+                  keyboardType="numeric"
+                  value={amount}
+                  onChangeText={setAmount}
+                  editable={!isLoading}
+                />
+
+                <Text className="text-slate-400 text-sm font-medium mb-2">Description (Optionnelle)</Text>
+                <TextInput
+                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-6 text-base"
+                  placeholder="Détails supplémentaires..."
+                  placeholderTextColor="#475569"
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  value={description}
+                  onChangeText={setDescription}
+                  editable={!isLoading}
+                />
+
+                <TouchableOpacity 
+                  onPress={handleCreate}
+                  disabled={isLoading || !title || !amount}
+                  className={`bg-orange-500 p-4 rounded-xl flex-row justify-center items-center ${
+                    (isLoading || !title || !amount) ? 'opacity-50' : ''
+                  }`}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Link size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                      <Text className="text-white font-bold text-lg">Générer le lien</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </>
             )}
-
-            <View className="mb-4">
-              <Text className="text-white text-sm font-medium mb-2">Titre de l'article ou service</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ex: T-shirt noir, Consultation..."
-                placeholderTextColor="#6B7280"
-                value={title}
-                onChangeText={setTitle}
-                editable={!isLoading}
-              />
-            </View>
-
-            <View className="mb-4">
-              <Text className="text-white text-sm font-medium mb-2">Montant (HTG)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="0.00"
-                placeholderTextColor="#6B7280"
-                keyboardType="numeric"
-                value={amount}
-                onChangeText={setAmount}
-                editable={!isLoading}
-              />
-            </View>
-
-            <View className="mb-6">
-              <Text className="text-[#9CA3AF] text-sm font-medium mb-2">Description (Optionnelle)</Text>
-              <TextInput
-                style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
-                placeholder="Détails du produit..."
-                placeholderTextColor="#6B7280"
-                multiline
-                value={description}
-                onChangeText={setDescription}
-                editable={!isLoading}
-              />
-            </View>
-
-            <TouchableOpacity
-              onPress={handleCreate}
-              disabled={isLoading}
-              className={`flex-row items-center justify-center p-4 rounded-xl ${
-                isLoading ? 'bg-[#FF7A00]/50' : 'bg-[#FF7A00]'
-              }`}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <>
-                  <Link size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                  <Text className="text-white font-bold text-base">Générer le lien</Text>
-                </>
-              )}
-            </TouchableOpacity>
-            
           </Animated.View>
         </View>
       </KeyboardAvoidingView>
@@ -171,23 +238,13 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-  sheet: {
-    backgroundColor: '#050B18',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
+  sheet: { 
+    backgroundColor: '#121A2F', 
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24, 
+    padding: 24, 
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24, 
+    maxHeight: height * 0.9 
   },
-  input: {
-    backgroundColor: '#101827',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 12,
-    color: '#FFFFFF',
-    padding: 14,
-    fontSize: 16,
-  }
 });
