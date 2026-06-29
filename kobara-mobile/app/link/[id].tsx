@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Share } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Link as LinkIcon, Share2, Trash2, Power, PowerOff, QrCode } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
