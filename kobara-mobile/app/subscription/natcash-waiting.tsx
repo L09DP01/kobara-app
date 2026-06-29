@@ -26,7 +26,7 @@ export default function NatCashWaitingScreen() {
       Alert.alert(
         "Succès", 
         res.data?.message || "Paiement validé avec succès !",
-        [{ text: "OK", onPress: () => router.replace('/(tabs)/profile') }]
+        [{ text: "OK", onPress: () => router.back() }]
       );
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || "Erreur de vérification. Veuillez réessayer.";
@@ -104,7 +104,7 @@ export default function NatCashWaitingScreen() {
               
               <View style={styles.transCodeActions}>
                 <TouchableOpacity 
-                  onPress={() => router.replace('/(tabs)/profile')}
+                  onPress={() => router.back()}
                   style={[styles.closeButton, { flex: 1, marginRight: 8, paddingVertical: 12 }]}
                 >
                   <Text style={styles.closeButtonText}>Fermer</Text>
