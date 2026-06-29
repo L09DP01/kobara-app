@@ -83,8 +83,8 @@ export default function SubscriptionDetailsScreen() {
         const baseUrl = ENV.WEB_URL || 'https://kobara.app';
         let url = `${baseUrl}/pricing`;
 
-        if (accessToken && refreshToken) {
-          url = `${baseUrl}/auth/mobile-sso?next=/pricing#access_token=${accessToken}&refresh_token=${refreshToken}`;
+        if (accessToken) {
+          url = `${baseUrl}/api/auth/mobile-sso?next=/pricing&access_token=${accessToken}`;
         }
 
         await WebBrowser.openBrowserAsync(url, {
