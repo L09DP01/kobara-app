@@ -9,6 +9,7 @@ import { useBalance } from '@/hooks/useBalance';
 import { QRBottomSheet } from '@/components/balance/QRBottomSheet';
 import { MobileActivityItem } from '@/services/balance';
 import { useDashboardSummary } from '@/hooks/useDashboardSummary';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function BalanceScreen() {
   const router = useRouter();
@@ -176,37 +177,12 @@ export default function BalanceScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.avatarContainer}>
-          {merchant?.logo_url ? (
-            <Image source={{ uri: merchant.logo_url }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarText}>
-                {merchant?.business_name?.substring(0, 2).toUpperCase() || 'KB'}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        
-        <View style={styles.headerCenter}>
-          <Text style={styles.logoText}>KOBARA</Text>
-        </View>
-        
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => setIsQrModalVisible(true)}>
-            <Scan size={24} color="#FF7A00" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => router.push('/(modals)/notifications')}>
-            <Bell size={24} color="#9CA3AF" />
-            {unreadCount > 0 && (
-              <View style={styles.badgeCount}>
-                <Text style={styles.badgeCountText}>{unreadCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
+      <DashboardHeader 
+        merchant={merchant as any} 
+        unreadCount={unreadCount} 
+        onNotificationPress={() => router.push('/(modals)/notifications')}
+        onScanPress={() => setIsQrModalVisible(true)}
+      />
 
       {/* FlashList Area */}
       <View style={{ flex: 1 }}>
