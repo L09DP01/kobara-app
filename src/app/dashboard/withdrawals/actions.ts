@@ -142,6 +142,11 @@ export async function requestWithdrawal(amount: number, method: string, receiver
 
   // 4. Enregistrement en base de données
   const total = amount;
+  const bazikFinalStatus = bazikResponse?.status?.toLowerCase();
+  const initialStatus = (bazikFinalStatus === 'success' || bazikFinalStatus === 'successful' || bazikFinalStatus === 'completed') 
+    ? 'completed' 
+    : (isTest ? 'completed' : (method === 'MonCash' ? 'pending' : 'completed'));
+
   const { error: insertError } = await adminClient
     .from('withdrawals')
     .insert({
@@ -153,7 +158,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       fees: fees,
       total: total,
       wallet: receiver || merchant.phone, // fallback to merchant phone
-      status: isTest ? 'completed' : (method === 'MonCash' ? 'pending' : 'completed'),
+      status: initialStatus,
       provider: method.toLowerCase()
     });
 

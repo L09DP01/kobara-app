@@ -166,6 +166,7 @@ export const BazikService = {
         wallet: params.receiver,
         referenceId: params.reference,
         description: params.description || "Retrait Kobara",
+        callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/bazik`
       }),
     });
 

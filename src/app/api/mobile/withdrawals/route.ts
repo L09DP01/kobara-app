@@ -91,6 +91,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la déduction du solde." }, { status: 500 });
     }
 
+    const bazikFinalStatus = bazikResponse?.status?.toLowerCase();
+    const initialStatus = (bazikFinalStatus === 'success' || bazikFinalStatus === 'successful' || bazikFinalStatus === 'completed') 
+      ? 'completed' 
+      : (method.toLowerCase() === 'moncash' ? 'processing' : 'pending');
+
     // 4. Create pending withdrawal record
     const { data: withdrawal, error: insertError } = await supabaseAdmin
       .from('withdrawals')
@@ -104,7 +109,7 @@ export async function POST(req: NextRequest) {
         total: Number(amount),
         wallet: reference,
         provider: method.toLowerCase(),
-        status: method.toLowerCase() === 'moncash' ? 'processing' : 'pending',
+        status: initialStatus,
       })
       .select()
       .single();
