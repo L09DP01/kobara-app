@@ -15,10 +15,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Check } from 'lucide-react-native';
-import { useAuthStore, getSavedEmail, saveEmail, clearSavedEmail } from '@/store/useAuthStore';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Check, ScanFace } from 'lucide-react-native';
+import { useAuthStore, getSavedEmail, saveEmail, clearSavedEmail, getSavedPassword } from '@/store/useAuthStore';
 import LoginIllustration from '@/components/illustrations/LoginIllustration';
 import ENV from '@/config/env';
+import * as SecureStore from 'expo-secure-store';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -35,6 +37,10 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailTouched, setEmailTouched] = useState(false);
+  
+  // Biometrics
+  const [canUseBiometrics, setCanUseBiometrics] = useState(false);
+  const [savedPassword, setSavedPassword] = useState<string | null>(null);
 
   // Refs
   const passwordRef = useRef<TextInput>(null);
@@ -68,14 +74,26 @@ export default function LoginScreen() {
       Animated.timing(footerFade, { toValue: 1, duration: 400, useNativeDriver: true }),
     ]).start();
 
-    loadSavedEmail();
+    loadSavedCredentials();
   }, []);
 
-  const loadSavedEmail = async () => {
+  const loadSavedCredentials = async () => {
     const saved = await getSavedEmail();
     if (saved) {
       setEmail(saved);
       setRememberMe(true);
+    }
+    
+    const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
+    const pwd = await getSavedPassword();
+    if (bioEnabled === 'true' && saved && pwd) {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if (hasHardware && isEnrolled) {
+        setCanUseBiometrics(true);
+        setSavedPassword(pwd);
+        // On pourrait auto-lancer handleBiometricLogin ici, mais c'est mieux de laisser l'utilisateur cliquer
+      }
     }
   };
 
@@ -96,6 +114,31 @@ export default function LoginScreen() {
     errorFade.setValue(0);
     Animated.timing(errorFade, { toValue: 1, duration: 300, useNativeDriver: true }).start();
     triggerShake();
+  };
+
+  const handleBiometricLogin = async () => {
+    if (!savedPassword || !email) return;
+    
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Connectez-vous à Kobara',
+        fallbackLabel: 'Utiliser le mot de passe',
+      });
+      
+      if (result.success) {
+        setIsLoading(true);
+        try {
+          await loginWithCredentials(email, savedPassword);
+          // Navigation gérée par le _layout.tsx
+        } catch (err: any) {
+          const message = err?.message || 'Une erreur est survenue. Veuillez réessayer.';
+          showError(message);
+          setIsLoading(false);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleLogin = async () => {
@@ -274,6 +317,20 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
           </Animated.View>
+
+          {/* Biometric Login Button */}
+          {canUseBiometrics && (
+            <TouchableOpacity
+              onPress={handleBiometricLogin}
+              disabled={isLoading}
+              style={[styles.bioButton, isLoading && styles.loginButtonDisabled]}
+              accessibilityRole="button"
+              accessibilityLabel="Se connecter avec la biométrie"
+            >
+              <ScanFace size={20} color="#F97316" />
+              <Text style={styles.bioButtonText}>Se connecter avec Face ID / Touch ID</Text>
+            </TouchableOpacity>
+          )}
         </Animated.View>
 
         {/* ========== FOOTER (spacer + create account) ========== */}
@@ -463,9 +520,26 @@ const styles = StyleSheet.create({
   },
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
     fontWeight: '600',
+    fontSize: 16,
     marginRight: 8,
+  },
+  bioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(249, 115, 22, 0.3)',
+  },
+  bioButtonText: {
+    color: '#F97316',
+    fontWeight: '600',
+    fontSize: 15,
+    marginLeft: 10,
   },
 
   // Footer

@@ -52,6 +52,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, response.refreshToken);
     await SecureStore.setItemAsync(KEYS.USER_DATA, JSON.stringify(response.user));
     
+    // Save password for biometric login
+    await savePassword(password);
+    
     if (response.merchant) {
       await SecureStore.setItemAsync(KEYS.MERCHANT_DATA, JSON.stringify(response.merchant));
     }
@@ -70,6 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await SecureStore.deleteItemAsync(KEYS.REFRESH_TOKEN);
       await SecureStore.deleteItemAsync(KEYS.USER_DATA);
       await SecureStore.deleteItemAsync(KEYS.MERCHANT_DATA);
+      await clearSavedPassword();
     } catch (error) {
       console.error('Failed to clear session:', error);
     }
@@ -196,6 +200,30 @@ export async function saveEmail(email: string): Promise<void> {
 export async function clearSavedEmail(): Promise<void> {
   try {
     await SecureStore.deleteItemAsync(KEYS.REMEMBER_EMAIL);
+  } catch {
+    // Silencieux
+  }
+}
+
+export async function getSavedPassword(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync('kobara_remember_password');
+  } catch {
+    return null;
+  }
+}
+
+export async function savePassword(password: string): Promise<void> {
+  try {
+    await SecureStore.setItemAsync('kobara_remember_password', password);
+  } catch {
+    // Silencieux
+  }
+}
+
+export async function clearSavedPassword(): Promise<void> {
+  try {
+    await SecureStore.deleteItemAsync('kobara_remember_password');
   } catch {
     // Silencieux
   }
