@@ -78,6 +78,11 @@ class PaymentsService {
     const response = await apiClient.get<SubscriptionsResponse>('/mobile/subscriptions', { params });
     return response.data;
   }
+
+  async getPaymentDetails(id: string): Promise<{ payment: any }> {
+    const response = await apiClient.get<{ payment: any }>(`/mobile/payments/${id}`);
+    return response.data;
+  }
 }
 
 export const paymentsService = new PaymentsService();
