@@ -109,6 +109,7 @@ export async function POST(req: NextRequest) {
     }
 
     const environment = merchant.current_environment || 'test';
+    const randomSlug = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 
     const { data: link, error: insertError } = await supabaseAdmin
       .from('payment_links')
@@ -119,7 +120,8 @@ export async function POST(req: NextRequest) {
         amount: Number(amount),
         currency: currency || 'HTG',
         status: 'active',
-        environment: environment
+        environment: environment,
+        slug: randomSlug
       })
       .select()
       .single();
