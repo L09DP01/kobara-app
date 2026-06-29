@@ -127,6 +127,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la création du retrait." }, { status: 500 });
     }
 
+    // Create notifications
+    const { notifyWithdrawalCreated, notifyAdminWithdrawalCreated, notifyWithdrawalSuccess } = await import('@/lib/server/notifications');
+    try {
+      const { data: mData } = await supabaseAdmin.from('merchants').select('email').eq('id', merchant.id).single();
+      if (mData) {
+        if (initialStatus === 'completed') {
+          // Send success immediately
+          await notifyWithdrawalSuccess(merchant.id, mData.email, Number(amount));
+        } else {
+          // Send pending request
+          await notifyWithdrawalCreated(merchant.id, mData.email, Number(amount));
+        }
+      }
+      // If pending, notify admin
+      if (initialStatus === 'pending' || initialStatus === 'processing') {
+        await notifyAdminWithdrawalCreated(merchant.id, Number(amount), method);
+      }
+    } catch(e) { console.error("Notification failed", e); }
+
     // Success
     return NextResponse.json({ 
       success: true, 

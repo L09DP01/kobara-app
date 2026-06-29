@@ -33,7 +33,6 @@ export async function createNotification(
 
   // Send Email if dest is provided
   if (emailDest) {
-    // Vérifier l'environnement du marchand pour ne pas envoyer d'emails en mode test
     const { data: merchantData } = await supabase
       .from('merchants')
       .select('current_environment')
@@ -50,6 +49,39 @@ export async function createNotification(
       console.log(`[Mode Test] Email ignoré pour: ${emailDest} - ${title}`);
     }
   }
+
+  // Send Push Notification
+  try {
+    const { data: devices } = await supabase
+      .from('merchant_devices')
+      .select('push_token, preferences')
+      .eq('merchant_id', merchantId);
+
+    if (devices && devices.length > 0) {
+      const { sendPushNotification } = await import('@/lib/notifications/expo-push');
+      for (const device of devices) {
+        // Send push notification if they haven't disabled the relevant preference
+        if (device.push_token) {
+          await sendPushNotification(device.push_token, title, message, { type, resourceId });
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Failed to send push notifications:", err);
+  }
+}
+
+export async function notifyAdminWithdrawalCreated(merchantId: string, amount: number, method: string, withdrawalId?: string) {
+  const adminEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@kobara.app';
+  const supabase = createAdminClient();
+  const { data: merchant } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
+  const businessName = merchant?.business_name || 'Un marchand';
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `Nouveau retrait en attente - ${amount} HTG`,
+    text: `Le marchand ${businessName} a demandé un retrait de ${amount} HTG via ${method}. Connectez-vous au panneau d'administration pour traiter cette demande.`,
+  });
 }
 
 // 1. Nouvelle Paiement (succeeded)
@@ -169,7 +201,7 @@ export async function notifyWithdrawalSuccess(merchantId: string, email: string,
     merchantId,
     'withdrawal_completed',
     '💸 Retrait complété',
-    `Votre retrait de ${amount} HTG a été envoyé avec succès à votre compte MonCash.`,
+    `Votre retrait de ${amount} HTG a été effectué avec succès.`,
     email,
     withdrawalId
   );

@@ -167,12 +167,22 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     return { error: "Erreur lors de l'enregistrement du retrait" };
   }
 
-  // Create notification
-  const { notifyWithdrawalCreated } = await import('@/lib/server/notifications');
+  // Create notifications
+  const { notifyWithdrawalCreated, notifyAdminWithdrawalCreated, notifyWithdrawalSuccess } = await import('@/lib/server/notifications');
   try {
     const { data: mData } = await supabase.from('merchants').select('email').eq('id', merchant.id).single();
     if (mData) {
-      await notifyWithdrawalCreated(merchant.id, mData.email, amount);
+      if (initialStatus === 'completed') {
+        // Send success immediately
+        await notifyWithdrawalSuccess(merchant.id, mData.email, amount);
+      } else {
+        // Send pending request
+        await notifyWithdrawalCreated(merchant.id, mData.email, amount);
+      }
+    }
+    // If pending (Zelle, Natcash, or delayed Moncash), notify admin
+    if (initialStatus === 'pending' || initialStatus === 'processing') {
+      await notifyAdminWithdrawalCreated(merchant.id, amount, method);
     }
   } catch(e) { console.error("Notification failed", e); }
 
