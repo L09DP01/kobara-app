@@ -9,12 +9,14 @@ import { RevenueCard } from '../../components/dashboard/RevenueCard';
 import { KPIGrid } from '../../components/dashboard/KPIGrid';
 import { RecentPayments } from '../../components/dashboard/RecentPayments';
 import { QRBottomSheet } from '@/components/balance/QRBottomSheet';
+import { CreatePaymentLinkSheet } from '@/components/payments/CreatePaymentLinkSheet';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error, refetch } = useDashboardSummary();
   const [refreshing, setRefreshing] = useState(false);
   const [isQrModalVisible, setIsQrModalVisible] = useState(false);
+  const [isCreateLinkModalVisible, setIsCreateLinkModalVisible] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -106,7 +108,19 @@ export default function HomeScreen() {
         visible={isQrModalVisible} 
         onClose={() => setIsQrModalVisible(false)}
         onMyQrPress={() => { setIsQrModalVisible(false); /* navigate or show QR */ }}
-        onScanQrPress={() => { setIsQrModalVisible(false); /* open camera */ }}
+        onScanQrPress={() => { 
+          setIsQrModalVisible(false); 
+          router.push('/(modals)/scanner');
+        }}
+      />
+
+      <CreatePaymentLinkSheet 
+        visible={isCreateLinkModalVisible}
+        onClose={() => setIsCreateLinkModalVisible(false)}
+        onSuccess={() => {
+          // You could show a toast or refresh
+          refetch();
+        }}
       />
 
       {/* Floating Action Button */}
@@ -119,10 +133,7 @@ export default function HomeScreen() {
           shadowRadius: 8,
           elevation: 5
         }}
-        onPress={() => {
-          // Open quick actions (bottom sheet or new link screen)
-          console.log('Open create link');
-        }}
+        onPress={() => setIsCreateLinkModalVisible(true)}
       >
         <Plus size={28} color="#FFFFFF" strokeWidth={3} />
       </TouchableOpacity>
