@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Sha
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft, Link as LinkIcon, Share2, Trash2, Power, PowerOff } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import QRCode from 'react-native-qrcode-svg';
 import { apiClient } from '../../api/client';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 
@@ -155,8 +156,13 @@ export default function LinkDetailsScreen() {
       <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
         {/* Main Info */}
         <View className="items-center mb-8 mt-4">
-          <View className="w-16 h-16 rounded-full bg-blue-500/10 items-center justify-center mb-4 border border-blue-500/20">
-            <LinkIcon size={32} color="#3B82F6" />
+          <View className="bg-white p-3 rounded-2xl mb-4 border border-white/10">
+            <QRCode
+              value={`${process.env.EXPO_PUBLIC_APP_URL || 'https://kobara.app'}/pay/${link.slug}`}
+              size={120}
+              color="#000"
+              backgroundColor="#fff"
+            />
           </View>
           <Text className="text-white text-2xl font-bold mb-2 text-center">
             {link.title}

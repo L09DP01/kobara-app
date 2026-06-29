@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, Animated, Dimensions, StyleSheet, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Keyboard, Share } from 'react-native';
 import { X, Link, CheckCircle, Share2, Copy } from 'lucide-react-native';
+import QRCode from 'react-native-qrcode-svg';
 import { apiClient } from '@/api/client';
 import * as Clipboard from 'expo-clipboard';
 
@@ -133,8 +134,13 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
             {createdLink ? (
               // Success / Share View
               <View className="items-center py-4">
-                <View className="w-16 h-16 rounded-full bg-green-500/10 items-center justify-center mb-6">
-                  <CheckCircle size={32} color="#22C55E" />
+                <View className="bg-white p-3 rounded-2xl mb-6 border border-white/10">
+                  <QRCode
+                    value={getFullUrl()}
+                    size={150}
+                    color="#000"
+                    backgroundColor="#fff"
+                  />
                 </View>
                 <Text className="text-white font-bold text-xl mb-2 text-center">
                   Votre lien de paiement est prêt
