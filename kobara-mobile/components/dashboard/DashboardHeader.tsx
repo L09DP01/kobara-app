@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Bell, Scan } from 'lucide-react-native';
 import { DashboardMerchant } from '../../services/dashboard';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 interface DashboardHeaderProps {
   merchant?: DashboardMerchant;
@@ -10,10 +12,9 @@ interface DashboardHeaderProps {
   onScanPress?: () => void;
 }
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 export const DashboardHeader = ({ merchant, unreadCount = 0, onNotificationPress, onScanPress }: DashboardHeaderProps) => {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   
   const getInitials = (name?: string) => {
     if (!name) return 'K';
@@ -26,7 +27,7 @@ export const DashboardHeader = ({ merchant, unreadCount = 0, onNotificationPress
       style={{ paddingTop: Math.max(insets.top + 16, 48) }}
     >
       {/* Avatar */}
-      <View className="w-10 h-10 rounded-full bg-[#1A233A] border border-white/10 items-center justify-center overflow-hidden">
+      <TouchableOpacity onPress={() => router.push('/(modals)/profile')} className="w-10 h-10 rounded-full bg-[#1A233A] border border-white/10 items-center justify-center overflow-hidden">
         {merchant?.logo_url ? (
           <Image source={{ uri: merchant.logo_url }} className="w-full h-full" />
         ) : (
@@ -34,7 +35,7 @@ export const DashboardHeader = ({ merchant, unreadCount = 0, onNotificationPress
             {getInitials(merchant?.business_name)}
           </Text>
         )}
-      </View>
+      </TouchableOpacity>
 
       {/* Logo */}
       <View className="flex-1 items-center">
