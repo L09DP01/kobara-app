@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMobileToken } from "@/lib/auth/mobile-verify";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { canCreateWithdrawal } from "@/lib/server/access";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,6 +26,15 @@ export async function POST(req: NextRequest) {
 
     if (merchantError || !merchant) {
       return NextResponse.json({ error: "Marchand introuvable" }, { status: 404 });
+    }
+
+    // Check withdrawal limits based on plan
+    const accessCheck = await canCreateWithdrawal(merchant.id, Number(amount));
+    if (!accessCheck.allowed) {
+      const reason = accessCheck.reason === 'kyc_required' 
+        ? "Votre compte doit être vérifié (KYC) pour effectuer des retraits."
+        : "Vous avez atteint la limite de retrait de votre forfait actuel.";
+      return NextResponse.json({ error: reason }, { status: 403 });
     }
 
     if (Number(merchant.available_balance) < Number(amount)) {

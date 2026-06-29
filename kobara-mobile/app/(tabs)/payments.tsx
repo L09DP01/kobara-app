@@ -11,7 +11,8 @@ import { LinksList } from '../../components/payments/LinksList';
 import { SubscriptionsList } from '../../components/payments/SubscriptionsList';
 import { PaymentFilterSheet, PaymentFilterSheetRef } from '../../components/payments/PaymentFilterSheet';
 import { QuickActionSheet, QuickActionSheetRef } from '../../components/payments/QuickActionSheet';
-import { CreatePaymentLinkSheet } from '@/components/payments/CreatePaymentLinkSheet';
+import { CreatePaymentLinkSheet } from '../../components/payments/CreatePaymentLinkSheet';
+import { BillingPlansSheet, BillingPlansSheetRef } from '../../components/billing/BillingPlansSheet';
 
 type Tab = 'paiements' | 'liens' | 'abonnements';
 
@@ -48,6 +49,7 @@ export default function PaymentsScreen() {
 
   const filterSheetRef = useRef<PaymentFilterSheetRef>(null);
   const actionSheetRef = useRef<QuickActionSheetRef>(null);
+  const billingPlansSheetRef = useRef<BillingPlansSheetRef>(null);
 
   // Debounce search
   useEffect(() => {
@@ -267,6 +269,8 @@ export default function PaymentsScreen() {
           onActionSelect={(action) => {
             if (action === 'link') {
               setIsCreateLinkModalVisible(true);
+            } else if (action === 'upgrade_plan') {
+              billingPlansSheetRef.current?.expand();
             } else {
               console.log("Action selected:", action);
             }
@@ -279,6 +283,10 @@ export default function PaymentsScreen() {
           onSuccess={() => {
             linksQuery.refetch();
           }}
+        />
+
+        <BillingPlansSheet 
+          ref={billingPlansSheetRef}
         />
       </View>
     </KeyboardAvoidingView>

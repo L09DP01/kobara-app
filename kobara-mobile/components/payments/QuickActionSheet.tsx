@@ -48,7 +48,7 @@ export const QuickActionSheet = forwardRef<QuickActionSheetRef, QuickActionSheet
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => handlePress('subscription')}
+                  onPress={() => handlePress('upgrade_plan')}
                   className="flex-row items-center p-4 rounded-2xl bg-white/5 active:bg-white/10"
                 >
                   <View className="w-12 h-12 rounded-full bg-purple-500/10 items-center justify-center mr-4">
@@ -56,7 +56,7 @@ export const QuickActionSheet = forwardRef<QuickActionSheetRef, QuickActionSheet
                   </View>
                   <View>
                     <Text className="text-white font-semibold text-base mb-1">Plan d'abonnement</Text>
-                    <Text className="text-slate-400 text-xs">Créer un paiement récurrent</Text>
+                    <Text className="text-slate-400 text-xs">Gérer mon forfait Kobara</Text>
                   </View>
                 </TouchableOpacity>
               </View>
