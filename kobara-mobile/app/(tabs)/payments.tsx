@@ -252,8 +252,11 @@ export default function PaymentsScreen() {
         <QuickActionSheet 
           ref={actionSheetRef}
           onActionSelect={(action) => {
-            console.log("Action selected:", action);
-            // Will navigate to correct page
+            if (action === 'link') {
+              setIsCreateLinkModalVisible(true);
+            } else {
+              console.log("Action selected:", action);
+            }
           }}
         />
 
