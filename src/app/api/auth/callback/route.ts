@@ -21,6 +21,8 @@ export async function GET(request: Request) {
     
     if (!error) {
       return NextResponse.redirect(new URL(next, request.url))
+    } else {
+      console.error("verifyOtp error:", error);
     }
   } else if (code) {
     const cookieStore = await cookies()

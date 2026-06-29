@@ -50,6 +50,49 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
+    Credentials({
+      id: "mobile-sso",
+      name: "Mobile SSO",
+      credentials: {
+        token: { label: "Token", type: "text" },
+      },
+      authorize: async (credentials) => {
+        if (!credentials?.token) return null;
+        
+        const tokenStr = credentials.token as string;
+        const MOBILE_TOKEN_SECRET = process.env.NEXTAUTH_SECRET || process.env.SUPABASE_JWT_SECRET;
+        
+        if (!MOBILE_TOKEN_SECRET) {
+          console.error("MOBILE_TOKEN_SECRET not found");
+          return null;
+        }
+        
+        try {
+          const secret = new TextEncoder().encode(MOBILE_TOKEN_SECRET);
+          const { jwtVerify } = await import("jose");
+          const { payload } = await jwtVerify(tokenStr, secret);
+          
+          if (!payload.email) return null;
+          
+          const { data: user } = await supabaseAdmin
+            .from("users")
+            .select("id, email, role, is_active")
+            .eq("email", payload.email)
+            .single();
+            
+          if (!user || user.is_active === false) return null;
+          
+          return { 
+            id: user.id, 
+            email: user.email, 
+            role: user.role 
+          };
+        } catch (e) {
+          console.error("SSO token verification failed:", e);
+          return null;
+        }
+      }
+    }),
   ],
   callbacks: {
     jwt({ token, user }) {

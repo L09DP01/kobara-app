@@ -57,6 +57,9 @@ export const BazikService = {
     reference: string;
     description?: string;
     environment?: "test" | "live";
+    successUrl?: string;
+    cancelUrl?: string;
+    errorUrl?: string;
   }) {
     // Ne jamais appeler l'API fournisseur en mode test
     if (params.environment === "test") {
@@ -86,9 +89,9 @@ export const BazikService = {
           userID: BAZIK_USER_ID,
           referenceId: params.reference,
           description: params.description || "Paiement Kobara",
-          successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/success?reference=${params.reference}&amount=${params.amount}`,
-          cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
-          errorUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
+          successUrl: params.successUrl || `${process.env.NEXT_PUBLIC_APP_URL}/pay/success?reference=${params.reference}&amount=${params.amount}`,
+          cancelUrl: params.cancelUrl || `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
+          errorUrl: params.errorUrl || `${process.env.NEXT_PUBLIC_APP_URL}/pay/error?reference=${params.reference}`,
         }),
         signal: controller.signal
       });

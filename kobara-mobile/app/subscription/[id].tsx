@@ -42,62 +42,73 @@ export default function SubscriptionDetailsScreen() {
     fetchData();
   }, [id]);
 
+  const handlePayWithBalance = async () => {
+    try {
+      setIsRenewing(true);
+      const res = await apiClient.post(`/mobile/subscriptions/${id}/renew-balance`);
+      if (res.data.success) {
+        Alert.alert("Succès", "Votre abonnement a été renouvelé avec succès !");
+        fetchData();
+      } else {
+        Alert.alert("Erreur", res.data.error || "Une erreur est survenue.");
+      }
+    } catch (e: any) {
+      Alert.alert("Erreur", e.response?.data?.error || "Une erreur est survenue.");
+    } finally {
+      setIsRenewing(false);
+    }
+  };
+
+  const handlePayWithMonCash = async () => {
+    try {
+      setIsRenewing(true);
+      // Return to this app screen when MonCash is done
+      const returnUrl = "kobara://payments/success"; 
+      
+      const res = await apiClient.post(`/mobile/subscriptions/${id}/renew-moncash`, {
+        returnUrl
+      });
+      
+      if (res.data.success && res.data.paymentUrl) {
+        await WebBrowser.openBrowserAsync(res.data.paymentUrl, {
+          presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET
+        });
+        // Refresh data when returning from browser
+        fetchData();
+      } else {
+        Alert.alert("Erreur", res.data.error || "Impossible d'initier le paiement.");
+      }
+    } catch (e: any) {
+      console.error("Error opening MonCash:", e);
+      Alert.alert("Erreur", e.response?.data?.error || "Une erreur est survenue lors de l'initialisation du paiement.");
+    } finally {
+      setIsRenewing(false);
+    }
+  };
+
   const handleRenew = async () => {
     if (!subscription) return;
 
     if (balance !== null && balance >= subscription.amount) {
-      // Prompt to pay with balance
+      // Demander à l'utilisateur de choisir
       Alert.alert(
-        "Renouvellement",
-        `Voulez-vous utiliser votre solde de ${balance.toLocaleString('fr-FR')} HTG pour payer cet abonnement de ${subscription.amount.toLocaleString('fr-FR')} HTG ?`,
+        "Moyen de paiement",
+        `Veuillez choisir votre méthode de paiement pour ce renouvellement (${subscription.amount.toLocaleString('fr-FR')} HTG).`,
         [
-          { text: "Annuler", style: "cancel" },
           { 
-            text: "Oui, utiliser mon solde", 
-            onPress: async () => {
-              try {
-                setIsRenewing(true);
-                const res = await apiClient.post(`/mobile/subscriptions/${id}/renew-balance`);
-                if (res.data.success) {
-                  Alert.alert("Succès", "Votre abonnement a été renouvelé avec succès !");
-                  fetchData();
-                } else {
-                  Alert.alert("Erreur", res.data.error || "Une erreur est survenue.");
-                }
-              } catch (e: any) {
-                Alert.alert("Erreur", e.response?.data?.error || "Une erreur est survenue.");
-              } finally {
-                setIsRenewing(false);
-              }
-            }
-          }
+            text: `Solde Kobara (${balance.toLocaleString('fr-FR')} HTG)`, 
+            onPress: handlePayWithBalance 
+          },
+          { 
+            text: "MonCash", 
+            onPress: handlePayWithMonCash 
+          },
+          { text: "Annuler", style: "cancel" }
         ]
       );
     } else {
-      // Pay via web
-      try {
-        setIsRenewing(true);
-        const accessToken = await SecureStore.getItemAsync('kobara_access_token');
-        const refreshToken = await SecureStore.getItemAsync('kobara_refresh_token');
-        
-        const baseUrl = ENV.WEB_URL || 'https://kobara.app';
-        let url = `${baseUrl}/dashboard/billing`;
-
-        if (accessToken) {
-          url = `${baseUrl}/api/auth/mobile-sso?next=/dashboard/billing&access_token=${accessToken}`;
-        }
-
-        await WebBrowser.openBrowserAsync(url, {
-          presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET
-        });
-        
-        // Refresh data when returning from browser
-        fetchData();
-      } catch (e) {
-        console.error("Error opening browser:", e);
-      } finally {
-        setIsRenewing(false);
-      }
+      // Pas assez de solde, forcer MonCash
+      handlePayWithMonCash();
     }
   };
 
