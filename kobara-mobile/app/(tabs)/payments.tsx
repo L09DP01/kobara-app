@@ -250,7 +250,7 @@ export default function PaymentsScreen() {
               isLoading={subscriptionsQuery.isLoading}
               isRefreshing={isRefreshing}
               onRefresh={() => subscriptionsQuery.refetch()}
-              onSubscriptionPress={(s) => console.log('Press sub', s)}
+              onSubscriptionPress={(s) => router.push(`/subscription/${s.id}`)}
             />
           </View>
         )}

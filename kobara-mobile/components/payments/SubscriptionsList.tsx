@@ -50,17 +50,17 @@ export function SubscriptionsList({ subscriptions, isLoading, onRefresh, isRefre
             onPress={() => onSubscriptionPress(item)}
             className="flex-row items-center justify-between p-4 mb-2 bg-[#121A2F] rounded-2xl mx-4 active:bg-white/5"
           >
-            <View className="flex-row items-center gap-3">
+            <View className="flex-row items-center gap-3 flex-1 mr-2">
               <View className="w-12 h-12 rounded-full bg-purple-500/10 items-center justify-center">
                 <Text className="text-purple-500 font-bold">{initial}</Text>
               </View>
-              <View>
-                <Text className="text-white font-semibold text-base mb-0.5">{item.customers?.name || 'Client Inconnu'}</Text>
-                <Text className="text-slate-400 text-xs mb-1">{item.plans?.name || 'Plan standard'}</Text>
-                <Text className="text-slate-500 text-xs">Prochain prélèvement: {formattedNextBilling}</Text>
+              <View className="flex-1">
+                <Text className="text-white font-semibold text-base mb-0.5" numberOfLines={1}>{item.customers?.name || 'Client Inconnu'}</Text>
+                <Text className="text-slate-400 text-xs mb-1" numberOfLines={1}>{item.plans?.name || 'Plan standard'}</Text>
+                <Text className="text-slate-500 text-xs" numberOfLines={1}>Prochain prélèvement: {formattedNextBilling}</Text>
               </View>
             </View>
-            <View className="items-end gap-2">
+            <View className="items-end gap-1 shrink-0 max-w-[120px]">
               <Text className="font-bold text-white">
                 {item.currency} {Number(item.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
                 <Text className="text-slate-400 text-xs font-normal"> / {item.billing_interval}</Text>
