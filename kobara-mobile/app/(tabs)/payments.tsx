@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, StyleSheet, Share } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Search, Filter, Plus } from 'lucide-react-native';
 
@@ -224,8 +224,23 @@ export default function PaymentsScreen() {
               isLoading={linksQuery.isLoading}
               isRefreshing={isRefreshing}
               onRefresh={() => linksQuery.refetch()}
-              onLinkPress={(l) => console.log('Press link', l)}
-              onSharePress={(l) => console.log('Share link', l)}
+              onLinkPress={(l) => {
+                // Not yet implemented: router.push(`/link/${l.id}`);
+                // Temporary log:
+                console.log('Navigate to link:', l.id);
+              }}
+              onSharePress={async (l) => {
+                try {
+                  const baseUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://kobara.app';
+                  const shareUrl = `${baseUrl}/pay/${l.slug}`;
+                  await Share.share({
+                    message: `Payer pour "${l.title}" sur Kobara : ${shareUrl}`,
+                    url: shareUrl,
+                  });
+                } catch (e) {
+                  console.error("Error sharing", e);
+                }
+              }}
             />
           </View>
         )}
