@@ -30,7 +30,7 @@ export default function SubscriptionDetailsScreen() {
         balanceService.getBalance()
       ]);
       setSubscription(subRes.subscription);
-      setBalance(balRes.success ? balRes.balance.available_balance : 0);
+      setBalance(balRes.success ? balRes.balance : 0);
     } catch (err) {
       console.error("Error fetching subscription details:", err);
       Alert.alert("Erreur", "Impossible de charger l'abonnement.");

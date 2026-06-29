@@ -32,9 +32,12 @@ export default function NatCashWaitingScreen() {
           </Text>
           
           <View className="bg-black/40 border border-white/5 rounded-2xl p-6 mb-8 w-full">
-            <Text className="text-slate-500 text-sm mb-2 text-center">Composez ce code exact :</Text>
-            <Text className="text-2xl sm:text-3xl font-black text-white tracking-wider text-center selection:bg-orange-500/30">
-              *202*40035664*{amount}*{referenceCode}#
+            <Text className="text-slate-300 text-sm mb-4 text-center">
+              Utilisez votre application NatCash ou faites <Text className="font-bold text-white">*202#</Text> pour faire le transfert du montant.
+            </Text>
+            <Text className="text-slate-500 text-sm mb-2 text-center">Code de référence à inclure :</Text>
+            <Text className="text-2xl sm:text-3xl font-black text-orange-400 tracking-wider text-center selection:bg-orange-500/30">
+              {referenceCode}
             </Text>
             <Text className="text-slate-500 text-xs mt-4 text-center">
               Le transfert sera détecté automatiquement. Ne quittez pas cet écran.

@@ -211,3 +211,47 @@ export async function notifyB2BTransferReceived(receiverId: string, email: strin
   const message = `Vous avez reçu un transfert B2B de ${amount.toLocaleString('fr-FR')} HTG de la part de ${senderName}.`;
   await createNotification(receiverId, 'b2b.received', title, message, email);
 }
+
+// ---------------------------------------------------------------------------
+// SUBSCRIPTIONS & CRON
+// ---------------------------------------------------------------------------
+
+export async function notifySubscriptionWarning(merchantId: string, email: string, daysLeft: number) {
+  await createNotification(
+    merchantId,
+    'subscription_warning',
+    'Action requise : Renouvellement imminent',
+    `Votre abonnement expire dans ${daysLeft} jours. Votre solde est insuffisant pour un renouvellement automatique. Veuillez recharger votre solde ou renouveler manuellement avec NatCash/MonCash.`,
+    email
+  );
+}
+
+export async function notifySubscriptionRenewed(merchantId: string, email: string, planName: string, amount: number) {
+  await createNotification(
+    merchantId,
+    'subscription_renewed',
+    'Renouvellement automatique réussi',
+    `Votre abonnement au plan ${planName} a été renouvelé avec succès (${amount} HTG ont été déduits de votre solde).`,
+    email
+  );
+}
+
+export async function notifySubscriptionGracePeriod(merchantId: string, email: string, daysGrace: number) {
+  await createNotification(
+    merchantId,
+    'subscription_grace_period',
+    'Abonnement expiré',
+    `Votre abonnement a expiré. Vous disposez d'une période de grâce de ${daysGrace} jours avant d'être rétrogradé au plan Free. Renouvelez vite via MonCash ou NatCash.`,
+    email
+  );
+}
+
+export async function notifySubscriptionDowngraded(merchantId: string, email: string) {
+  await createNotification(
+    merchantId,
+    'subscription_downgraded',
+    'Fin de la période de grâce',
+    `Votre période de grâce a pris fin. Vous avez été rétrogradé au plan Free.`,
+    email
+  );
+}
