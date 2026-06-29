@@ -1,0 +1,70 @@
+import React from 'react';
+import { View, Text, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
+import { ChevronRight, CalendarClock } from 'lucide-react-native';
+import { MobileSubscription } from '@/services/payments';
+import { StatusBadge } from '../ui/StatusBadge';
+import { EmptyState } from '../ui/EmptyState';
+import { TransactionSkeleton } from '../ui/SkeletonLoader';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+interface SubscriptionsListProps {
+  subscriptions: MobileSubscription[];
+  isLoading: boolean;
+  onRefresh: () => void;
+  isRefreshing: boolean;
+  onSubscriptionPress: (sub: MobileSubscription) => void;
+}
+
+export function SubscriptionsList({ subscriptions, isLoading, onRefresh, isRefreshing, onSubscriptionPress }: SubscriptionsListProps) {
+  if (isLoading && !isRefreshing) {
+    return (
+      <View className="flex-1 mt-4">
+        {[1, 2, 3].map(i => <TransactionSkeleton key={i} />)}
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={subscriptions}
+      keyExtractor={item => item.id}
+      className="flex-1"
+      contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} tintColor="#F97316" colors={['#F97316']} />
+      }
+      ListEmptyComponent={<EmptyState message="Aucun abonnement actif." icon={<CalendarClock size={32} color="#64748B" />} />}
+      renderItem={({ item }) => {
+        const initial = item.customers?.name ? item.customers.name.substring(0, 2).toUpperCase() : '??';
+        const formattedNextBilling = item.next_billing_date ? format(new Date(item.next_billing_date), 'dd/MM/yyyy', { locale: fr }) : 'Non défini';
+        
+        return (
+          <TouchableOpacity 
+            onPress={() => onSubscriptionPress(item)}
+            className="flex-row items-center justify-between p-4 mb-2 bg-[#121A2F] rounded-2xl mx-4 active:bg-white/5"
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="w-12 h-12 rounded-full bg-purple-500/10 items-center justify-center">
+                <Text className="text-purple-500 font-bold">{initial}</Text>
+              </View>
+              <View>
+                <Text className="text-white font-semibold text-base mb-0.5">{item.customers?.name || 'Client Inconnu'}</Text>
+                <Text className="text-slate-400 text-xs mb-1">{item.plans?.name || 'Plan standard'}</Text>
+                <Text className="text-slate-500 text-xs">Prochain prélèvement: {formattedNextBilling}</Text>
+              </View>
+            </View>
+            <View className="items-end gap-2">
+              <Text className="font-bold text-white">
+                {item.currency} {Number(item.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}
+                <Text className="text-slate-400 text-xs font-normal"> / {item.billing_interval}</Text>
+              </Text>
+              <StatusBadge status={item.status} />
+            </View>
+            <ChevronRight size={20} color="#64748B" className="ml-2" />
+          </TouchableOpacity>
+        );
+      }}
+    />
+  );
+}
