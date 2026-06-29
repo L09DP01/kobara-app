@@ -4,9 +4,10 @@ import { verifyMobileToken } from "@/lib/auth/mobile-verify";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // 1. Vérification auth mobile
     const authResult = await verifyMobileToken(req);
     if (authResult.errorResponse) return authResult.errorResponse;
@@ -21,7 +22,7 @@ export async function POST(
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*, plans(*)')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('merchant_id', merchantId)
       .single();
 
