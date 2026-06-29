@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     // 3. Query Payments
     let query = supabaseAdmin
       .from('payments')
-      .select('id, amount, net_amount, currency, status, provider, payment_method, created_at, reference_code, external_reference, customers(name, email)', { count: 'exact' })
+      .select('id, amount, net_amount, currency, status, provider, payment_method, created_at, kobara_reference, bazik_transaction_id, customers(name, email)', { count: 'exact' })
       .eq('merchant_id', merchant.id)
       .eq('environment', environment)
       .order('created_at', { ascending: false })
@@ -56,8 +56,8 @@ export async function GET(req: NextRequest) {
 
     if (search) {
       // Pour la recherche, Supabase ne permet pas de chercher dans un objet joint facilement avec ilike
-      // Donc on cherche dans reference_code ou external_reference
-      query = query.or(`reference_code.ilike.%${search}%,external_reference.ilike.%${search}%`);
+      // Donc on cherche dans kobara_reference ou bazik_transaction_id
+      query = query.or(`kobara_reference.ilike.%${search}%,bazik_transaction_id.ilike.%${search}%`);
     }
 
     const { data: payments, count, error: paymentsError } = await query;

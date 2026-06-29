@@ -2,7 +2,6 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Search, Filter, Plus } from 'lucide-react-native';
-import BottomSheet from '@gorhom/bottom-sheet';
 
 import { usePayments, usePaymentLinks, useSubscriptions } from '../../hooks/usePayments';
 import { useDashboardSummary } from '../../hooks/useDashboardSummary';
@@ -10,8 +9,8 @@ import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
 import { PaymentsList } from '../../components/payments/PaymentsList';
 import { LinksList } from '../../components/payments/LinksList';
 import { SubscriptionsList } from '../../components/payments/SubscriptionsList';
-import { PaymentFilterSheet } from '../../components/payments/PaymentFilterSheet';
-import { QuickActionSheet } from '../../components/payments/QuickActionSheet';
+import { PaymentFilterSheet, PaymentFilterSheetRef } from '../../components/payments/PaymentFilterSheet';
+import { QuickActionSheet, QuickActionSheetRef } from '../../components/payments/QuickActionSheet';
 
 type Tab = 'paiements' | 'liens' | 'abonnements';
 
@@ -45,8 +44,8 @@ export default function PaymentsScreen() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentFilter, setCurrentFilter] = useState('all');
 
-  const filterSheetRef = useRef<BottomSheet>(null);
-  const actionSheetRef = useRef<BottomSheet>(null);
+  const filterSheetRef = useRef<PaymentFilterSheetRef>(null);
+  const actionSheetRef = useRef<QuickActionSheetRef>(null);
 
   // Debounce search
   useEffect(() => {

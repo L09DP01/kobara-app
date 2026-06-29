@@ -1,39 +1,33 @@
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  withSequence,
-  interpolateColor,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { View, Animated } from 'react-native';
 
 export function SkeletonLoader({ className = '' }: { className?: string }) {
-  const progress = useSharedValue(0);
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    progress.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 1000 }),
-        withTiming(0, { duration: 1000 })
-      ),
-      -1,
-      true
-    );
-  }, []);
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, [animatedValue]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
-      progress.value,
-      [0, 1],
-      ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.1)']
-    );
-    return { backgroundColor };
+  const backgroundColor = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0.1)'],
   });
 
   return (
-    <Animated.View className={`rounded-xl ${className}`} style={[animatedStyle]} />
+    <Animated.View className={`rounded-xl ${className}`} style={{ backgroundColor }} />
   );
 }
 

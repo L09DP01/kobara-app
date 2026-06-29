@@ -9,8 +9,8 @@ export interface MobilePayment {
   provider: string;
   payment_method: string;
   created_at: string;
-  reference_code: string;
-  external_reference: string;
+  kobara_reference: string;
+  bazik_transaction_id: string;
   customers: { name: string; email: string } | null;
 }
 
