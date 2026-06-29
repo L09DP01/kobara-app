@@ -36,6 +36,32 @@ export default function WithdrawalScreen() {
     setIsLoading(true);
     setError(null);
     
+    // Check biometrics
+    try {
+      const SecureStore = await import('expo-secure-store');
+      const LocalAuthentication = await import('expo-local-authentication');
+      
+      const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
+      if (bioEnabled === 'true') {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        
+        if (hasHardware && isEnrolled) {
+          const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: 'Confirmez votre identité pour valider ce retrait',
+            fallbackLabel: 'Utiliser le code',
+          });
+          
+          if (!result.success) {
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    
     const result = await balanceService.requestWithdrawal(method, Number(amount), reference);
     
     setIsLoading(false);

@@ -75,6 +75,28 @@ export default function MoreScreen() {
 
   const toggleBiometrics = async () => {
     const newValue = !biometricsEnabled;
+    
+    // Si on veut activer, on doit vérifier l'identité d'abord
+    if (newValue) {
+      const { authenticateAsync, hasHardwareAsync, isEnrolledAsync } = await import('expo-local-authentication');
+      const hasHardware = await hasHardwareAsync();
+      const isEnrolled = await isEnrolledAsync();
+      
+      if (!hasHardware || !isEnrolled) {
+        Alert.alert("Erreur", "Votre appareil ne supporte pas la biométrie ou elle n'est pas configurée.");
+        return;
+      }
+      
+      const result = await authenticateAsync({
+        promptMessage: 'Confirmez votre identité pour activer la biométrie',
+        fallbackLabel: 'Utiliser le code',
+      });
+      
+      if (!result.success) {
+        return; // Annulé ou échec
+      }
+    }
+    
     setBiometricsEnabled(newValue);
     await SecureStore.setItemAsync('kobara_biometrics_enabled', newValue.toString());
   };
