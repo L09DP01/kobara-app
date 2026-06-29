@@ -89,27 +89,30 @@ export default function SubscriptionDetailsScreen() {
   const handleRenew = async () => {
     if (!subscription) return;
 
-    if (balance !== null && balance >= subscription.amount) {
-      // Demander à l'utilisateur de choisir
-      Alert.alert(
-        "Moyen de paiement",
-        `Veuillez choisir votre méthode de paiement pour ce renouvellement (${subscription.amount.toLocaleString('fr-FR')} HTG).`,
-        [
-          { 
-            text: `Solde Kobara (${balance.toLocaleString('fr-FR')} HTG)`, 
-            onPress: handlePayWithBalance 
-          },
-          { 
-            text: "MonCash", 
-            onPress: handlePayWithMonCash 
-          },
-          { text: "Annuler", style: "cancel" }
-        ]
-      );
-    } else {
-      // Pas assez de solde, forcer MonCash
-      handlePayWithMonCash();
-    }
+    // Toujours demander à l'utilisateur de choisir
+    const balanceText = balance !== null ? `Solde Kobara (${balance.toLocaleString('fr-FR')} HTG)` : "Solde Kobara";
+    
+    Alert.alert(
+      "Moyen de paiement",
+      `Veuillez choisir votre méthode de paiement pour ce renouvellement (${subscription.amount.toLocaleString('fr-FR')} HTG).`,
+      [
+        { 
+          text: balanceText, 
+          onPress: () => {
+            if (balance !== null && balance >= subscription.amount) {
+              handlePayWithBalance();
+            } else {
+              Alert.alert("Solde insuffisant", "Votre solde actuel n'est pas suffisant pour couvrir le montant de cet abonnement.");
+            }
+          }
+        },
+        { 
+          text: "MonCash", 
+          onPress: handlePayWithMonCash 
+        },
+        { text: "Annuler", style: "cancel" }
+      ]
+    );
   };
 
   if (isLoading) {
