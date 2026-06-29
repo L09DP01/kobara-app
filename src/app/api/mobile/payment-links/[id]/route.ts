@@ -32,6 +32,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
           amount,
           status,
           created_at,
+          payment_method,
           kobara_reference,
           customers(name, email, phone)
         )
@@ -40,7 +41,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       .eq('merchant_id', merchant.id)
       .single();
 
-    if (linkError || !link) {
+    if (linkError) {
+      console.error("Link error:", linkError);
+      return NextResponse.json({ error: `Erreur BD: ${linkError.message}` }, { status: 404 });
+    }
+    if (!link) {
       return NextResponse.json({ error: "Lien introuvable." }, { status: 404 });
     }
 

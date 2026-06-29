@@ -227,6 +227,41 @@ export default function LinkDetailsScreen() {
           )}
         </View>
 
+        {/* Payments List */}
+        {payments.length > 0 && (
+          <>
+            <Text className="text-slate-400 font-medium mb-3 ml-2 uppercase text-xs tracking-wider">Paiements Récents</Text>
+            <View className="bg-[#121A2F] rounded-2xl border border-white/5 overflow-hidden mb-6">
+              {payments.map((payment, index) => {
+                const customerName = payment.customers?.name || 'Client Anonyme';
+                
+                // Determine payment method label
+                let paymentMethodLabel = payment.payment_method || 'Moyen de paiement inconnu';
+                if (paymentMethodLabel.toLowerCase() === 'moncash') paymentMethodLabel = 'MonCash';
+                if (paymentMethodLabel.toLowerCase() === 'card') paymentMethodLabel = 'Carte Bancaire';
+                
+                return (
+                  <View 
+                    key={payment.id} 
+                    className={`p-4 flex-row items-center justify-between ${index !== payments.length - 1 ? 'border-b border-white/5' : ''}`}
+                  >
+                    <View className="flex-1 mr-4">
+                      <Text className="text-white font-medium text-base mb-1" numberOfLines={1}>{customerName}</Text>
+                      <Text className="text-slate-400 text-xs">{new Date(payment.created_at).toLocaleDateString('fr-FR')} • {paymentMethodLabel}</Text>
+                    </View>
+                    <View className="items-end">
+                      <Text className="text-white font-bold mb-1">
+                        + {Number(payment.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {link.currency}
+                      </Text>
+                      <StatusBadge status={payment.status} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </>
+        )}
+
         {/* Actions */}
         <Text className="text-slate-400 font-medium mb-3 ml-2 uppercase text-xs tracking-wider">Actions</Text>
         <View className="bg-[#121A2F] rounded-2xl border border-white/5 overflow-hidden mb-8">
@@ -268,36 +303,6 @@ export default function LinkDetailsScreen() {
           </TouchableOpacity>
 
         </View>
-
-        {/* Payments List */}
-        {payments.length > 0 && (
-          <>
-            <Text className="text-slate-400 font-medium mb-3 ml-2 uppercase text-xs tracking-wider">Paiements Récents</Text>
-            <View className="bg-[#121A2F] rounded-2xl border border-white/5 overflow-hidden mb-8">
-              {payments.map((payment, index) => {
-                const customerName = payment.customers?.name || 'Client Anonyme';
-                const customerEmail = payment.customers?.email || 'N/A';
-                return (
-                  <View 
-                    key={payment.id} 
-                    className={`p-4 flex-row items-center justify-between ${index !== payments.length - 1 ? 'border-b border-white/5' : ''}`}
-                  >
-                    <View className="flex-1 mr-4">
-                      <Text className="text-white font-medium text-base mb-1" numberOfLines={1}>{customerName}</Text>
-                      <Text className="text-slate-400 text-xs">{new Date(payment.created_at).toLocaleDateString('fr-FR')} • {customerEmail}</Text>
-                    </View>
-                    <View className="items-end">
-                      <Text className="text-white font-bold mb-1">
-                        + {Number(payment.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {link.currency}
-                      </Text>
-                      <StatusBadge status={payment.status} />
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </>
-        )}
         <View className="h-8" />
       </ScrollView>
     </SafeAreaView>
