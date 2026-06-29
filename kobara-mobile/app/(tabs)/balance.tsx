@@ -175,7 +175,7 @@ export default function BalanceScreen() {
   const unreadCount = dashboardData?.unreadNotifications || 0;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       {/* Top Header */}
       <DashboardHeader 
         merchant={merchant as any} 
@@ -211,7 +211,7 @@ export default function BalanceScreen() {
         onMyQrPress={() => { setIsQrModalVisible(false); /* navigate or show QR */ }}
         onScanQrPress={() => { setIsQrModalVisible(false); /* open camera */ }}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
