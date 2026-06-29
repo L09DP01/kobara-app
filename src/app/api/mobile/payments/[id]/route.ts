@@ -4,9 +4,10 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { payload, errorResponse } = await verifyMobileToken(req);
     if (errorResponse) return errorResponse;
     if (!payload || !payload.sub) return NextResponse.json({ error: "Token invalide." }, { status: 401 });
@@ -42,7 +43,7 @@ export async function GET(
         )
       `)
       .eq('merchant_id', merchant.id)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (paymentError || !payment) {
