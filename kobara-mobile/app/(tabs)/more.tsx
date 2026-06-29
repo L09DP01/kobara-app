@@ -7,9 +7,10 @@ import {
   ScanFace, EyeOff, HeadphonesIcon, Star, MessageSquare, Users, 
   ShieldCheck, Info, LogOut, ChevronRight
 } from 'lucide-react-native';
-import { useAuthStore } from '../../store/authStore';
-import { apiClient } from '../../services/api';
+import { useAuthStore } from '@/store/useAuthStore';
+import { apiClient } from '@/api/client';
 import * as SecureStore from 'expo-secure-store';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function MoreScreen() {
   const router = useRouter();
@@ -26,8 +27,8 @@ export default function MoreScreen() {
   const fetchMerchant = async () => {
     try {
       const res = await apiClient.get('/mobile/dashboard/summary');
-      if (res.data.success && res.data.data.merchant) {
-        setMerchant(res.data.data.merchant);
+      if (res.data.success && res.data.merchant) {
+        setMerchant(res.data.merchant);
       }
       
       // Fetch settings locally
@@ -113,35 +114,13 @@ export default function MoreScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0A0F1C]">
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-6 py-4">
-        <View className="w-10 h-10 rounded-full bg-slate-800 overflow-hidden">
-          {merchant?.logo_url ? (
-            <Image source={{ uri: merchant.logo_url }} className="w-full h-full" />
-          ) : (
-            <View className="w-full h-full items-center justify-center bg-orange-500/20">
-              <Text className="text-orange-500 font-bold">
-                {merchant?.business_name?.substring(0, 2).toUpperCase() || 'K'}
-              </Text>
-            </View>
-          )}
-        </View>
-        <Text className="text-white font-bold tracking-widest text-lg">KOBARA</Text>
-        <View className="flex-row gap-4">
-          <TouchableOpacity onPress={() => {/* open QR sheet */}}>
-            <QrCode size={24} color="#F97316" />
-          </TouchableOpacity>
-          <TouchableOpacity className="relative" onPress={() => router.push('/notifications')}>
-            <Bell size={24} color="#6B7280" />
-            {unreadCount > 0 && (
-              <View className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full items-center justify-center border-2 border-[#0A0F1C]">
-                <Text className="text-[8px] text-white font-bold">{unreadCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
+    <View className="flex-1 bg-[#0A0F1C]">
+      <DashboardHeader 
+        merchant={merchant} 
+        unreadCount={unreadCount} 
+        onNotificationPress={() => router.push('/notifications')} 
+        onScanPress={() => {/* handle scan later if needed, QR sheet */}}
+      />
 
       <ScrollView 
         className="flex-1 px-6"
@@ -152,24 +131,33 @@ export default function MoreScreen() {
           <Text className="text-slate-400">Gérez votre compte, vos préférences et plus encore.</Text>
         </View>
 
-        {/* Main Section */}
-        <View className="bg-[#121A2F] rounded-2xl p-4 mb-2">
-          <MenuItem 
-            icon={Store} 
-            title="Compte et paramètres" 
-            onPress={() => router.push('/more/account-settings')} 
-          />
-        </View>
+        {/* Profil Entreprise */}
+        <TouchableOpacity 
+          className="bg-[#121A2F] rounded-2xl p-4 flex-row items-center justify-between mt-2 mb-2"
+          onPress={() => router.push('/more/account-info')}
+        >
+          <View className="flex-row items-center flex-1">
+            <View className="w-14 h-14 rounded-full bg-slate-800 overflow-hidden">
+              {merchant?.logo_url ? (
+                <Image source={{ uri: merchant.logo_url }} className="w-full h-full" />
+              ) : (
+                <View className="w-full h-full items-center justify-center bg-orange-500/20">
+                  <Text className="text-orange-500 font-bold text-xl">
+                    {merchant?.business_name?.substring(0, 2).toUpperCase() || 'K'}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <View className="ml-4 flex-1">
+              <Text className="text-white font-bold text-lg">{merchant?.business_name || 'Mon Entreprise'}</Text>
+              <Text className="text-slate-400 text-sm mt-1">Gérer profil, adresse, mot de passe...</Text>
+            </View>
+          </View>
+          <ChevronRight size={20} color="#6B7280" />
+        </TouchableOpacity>
 
-        {/* Compte */}
-        <SectionHeader title="Compte" />
-        <View className="bg-[#121A2F] rounded-2xl px-4">
-          <MenuItem 
-            icon={User} 
-            title="Informations du compte" 
-            onPress={() => router.push('/more/account-info')} 
-          />
-          <View className="h-[1px] bg-white/5" />
+        {/* État du compte */}
+        <View className="bg-[#121A2F] rounded-2xl px-4 mt-4">
           <MenuItem 
             icon={ArrowUpRight} 
             title="État du compte" 
@@ -221,7 +209,7 @@ export default function MoreScreen() {
               onPress={toggleBiometrics}
               className={`w-12 h-6 rounded-full p-1 ${biometricsEnabled ? 'bg-orange-500' : 'bg-slate-700'}`}
             >
-              <View className={`w-4 h-4 bg-white rounded-full transition-transform ${biometricsEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+              <View className={`w-4 h-4 bg-white rounded-full ${biometricsEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
             </TouchableOpacity>
           </View>
           <View className="h-[1px] bg-white/5" />
@@ -235,7 +223,7 @@ export default function MoreScreen() {
                 onPress={toggleHidePreview}
                 className={`w-12 h-6 rounded-full p-1 ${hidePreviewEnabled ? 'bg-orange-500' : 'bg-slate-700'}`}
               >
-                <View className={`w-4 h-4 bg-white rounded-full transition-transform ${hidePreviewEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                <View className={`w-4 h-4 bg-white rounded-full ${hidePreviewEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
               </TouchableOpacity>
             </View>
             <Text className="text-slate-400 text-xs ml-8">
@@ -318,7 +306,9 @@ export default function MoreScreen() {
             onPress={handleLogout} 
           />
         </View>
+        {/* Bottom Spacing for Tab Bar */}
+        <View className="h-24" />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

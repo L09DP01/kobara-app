@@ -25,12 +25,8 @@ export default function MoreLayout() {
       }}
     >
       <Stack.Screen 
-        name="account-settings" 
-        options={{ title: 'Compte et paramètres' }} 
-      />
-      <Stack.Screen 
         name="account-info" 
-        options={{ title: 'Informations du compte' }} 
+        options={{ title: 'Profil Entreprise' }} 
       />
       <Stack.Screen 
         name="account-status" 

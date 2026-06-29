@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Check, X, CreditCard, CalendarClock } from 'lucide-react-native';
-import { apiClient } from '../../services/api';
+import { apiClient } from '@/api/client';
 import { useRouter } from 'expo-router';
 
 interface BillingPlansSheetProps {

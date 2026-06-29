@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { Shield, Trash2, Users } from 'lucide-react-native';
-import { apiClient } from '../../services/api';
+import { apiClient } from '@/api/client';
 
 export default function DeveloperAccessScreen() {
   const [developers, setDevelopers] = useState<any[]>([]);

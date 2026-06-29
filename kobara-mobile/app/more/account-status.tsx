@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { ShieldCheck, AlertTriangle } from 'lucide-react-native';
-import { apiClient } from '../../services/api';
+import { apiClient } from '@/api/client';
 
 export default function AccountStatusScreen() {
   const [data, setData] = useState<any>(null);

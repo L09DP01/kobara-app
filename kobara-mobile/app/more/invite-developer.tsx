@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { User, Mail, ShieldAlert } from 'lucide-react-native';
-import { apiClient } from '../../services/api';
+import { apiClient } from '@/api/client';
 
 export default function InviteDeveloperScreen() {
   const router = useRouter();
