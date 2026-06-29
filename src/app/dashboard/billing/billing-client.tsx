@@ -13,6 +13,8 @@ export function BillingClient() {
   const [upgrading, setUpgrading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [isYearly, setIsYearly] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -39,7 +41,8 @@ export function BillingClient() {
   }, []);
 
   const handleUpgrade = async (planSlug: string) => {
-    if (!confirm(`Voulez-vous vraiment changer vers le plan ${planSlug} ?`)) return;
+    const billingCycle = isYearly ? 'yearly' : 'monthly';
+    if (!confirm(`Voulez-vous vraiment changer vers le plan ${planSlug} (${isYearly ? 'Annuel' : 'Mensuel'}) ?`)) return;
     
     setUpgrading(true);
     setError(null);
@@ -47,7 +50,7 @@ export function BillingClient() {
       const res = await fetch('/api/dashboard/billing/upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSlug })
+        body: JSON.stringify({ planSlug, billingCycle })
       });
       
       const result = await res.json();
@@ -94,7 +97,7 @@ export function BillingClient() {
     );
   }
 
-  const { merchant, plan, usage } = data;
+  const { merchant, plan, subscription, usage } = data;
   const isKycApproved = merchant.kyc_status === 'approved';
 
   return (
@@ -131,6 +134,7 @@ export function BillingClient() {
             {plan && (
               <span className="text-sm font-medium text-slate-400 mb-1">
                 {plan.price_htg} HTG / mois
+                {subscription?.billing_cycle === 'yearly' && <span className="ml-2 text-xs text-orange-400 bg-orange-400/10 px-2 py-0.5 rounded-full border border-orange-400/20">Annuel</span>}
               </span>
             )}
           </div>
@@ -188,14 +192,44 @@ export function BillingClient() {
 
       {/* Plans List */}
       <div>
-        <h3 className="text-xl font-bold text-white mb-6">Changer de plan</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+          <h3 className="text-xl font-bold text-white">Changer de plan</h3>
+          <div className="flex items-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/10">
+            <span className={`text-sm font-bold px-3 py-1.5 rounded-xl transition-colors ${!isYearly ? "bg-[#1E2A38] text-white shadow-sm" : "text-slate-400 cursor-pointer"}`} onClick={() => setIsYearly(false)}>
+              Mensuel
+            </span>
+            <span className={`text-sm font-bold px-3 py-1.5 rounded-xl transition-colors flex items-center gap-2 ${isYearly ? "bg-[#1E2A38] text-white shadow-sm" : "text-slate-400 cursor-pointer"}`} onClick={() => setIsYearly(true)}>
+              Annuel
+              <span className="text-[10px] uppercase bg-orange-500/20 text-orange-500 px-2 py-0.5 rounded-full border border-orange-500/30">
+                -20%
+              </span>
+            </span>
+          </div>
+        </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {plans.map((p) => {
-            const isCurrent = plan?.slug === p.slug;
+            const currentBillingCycle = subscription?.billing_cycle || 'monthly';
+            const isCurrent = plan?.slug === p.slug && currentBillingCycle !== (isYearly ? 'yearly' : 'monthly');
+            const isExactCurrent = plan?.slug === p.slug && currentBillingCycle === (isYearly ? 'yearly' : 'monthly');
+            
+            let displayPrice = p.price_htg;
+            if (p.price_htg > 0 && isYearly) {
+              displayPrice = p.price_htg * 0.8;
+            }
+
             return (
-              <div key={p.id} className={`bg-white/5 rounded-3xl border-2 flex flex-col p-6 transition-all ${isCurrent ? 'border-orange-500 shadow-sm' : 'border-white/10'}`}>
+              <div key={p.id} className={`bg-white/5 rounded-3xl border-2 flex flex-col p-6 transition-all ${isExactCurrent ? 'border-orange-500 shadow-sm' : 'border-white/10'}`}>
                 <h4 className="font-black text-lg mb-1 text-white">{p.name}</h4>
-                <div className="text-2xl font-black mb-4 text-white">{p.price_htg} <span className="text-sm text-slate-400 font-medium">HTG/mois</span></div>
+                <div className="mb-4">
+                  <div className="text-2xl font-black text-white">
+                    {displayPrice.toLocaleString('fr-FR')} <span className="text-sm text-slate-400 font-medium">HTG/mois</span>
+                  </div>
+                  {p.price_htg > 0 && isYearly && (
+                    <div className="text-xs text-green-400 font-medium mt-1">
+                      Facturé {(displayPrice * 12).toLocaleString('fr-FR')} HTG / an
+                    </div>
+                  )}
+                </div>
                 
                 <ul className="space-y-3 mb-6 flex-1 text-sm text-slate-400 font-medium">
                   <li className="flex items-center gap-2"><Check className="w-4 h-4 text-green-400" /> {p.transaction_fee_percent}% par transaction</li>
@@ -205,15 +239,15 @@ export function BillingClient() {
                 </ul>
 
                 <button
-                  disabled={isCurrent || upgrading || (!isKycApproved && p.slug !== 'free')}
+                  disabled={isExactCurrent || upgrading || (!isKycApproved && p.slug !== 'free')}
                   onClick={() => handleUpgrade(p.slug)}
                   className={`w-full py-2.5 rounded-xl font-bold transition-all shadow-sm
-                    ${isCurrent ? 'bg-white/10 text-slate-500 cursor-not-allowed shadow-none' : 
+                    ${isExactCurrent ? 'bg-white/10 text-slate-500 cursor-not-allowed shadow-none' : 
                       (!isKycApproved && p.slug !== 'free' ? 'bg-white/10 text-slate-500 cursor-not-allowed shadow-none' :
                       'bg-orange-500 text-white hover:bg-orange-600')}
                   `}
                 >
-                  {isCurrent ? 'Plan Actuel' : 'Choisir ce plan'}
+                  {isExactCurrent ? 'Plan Actuel' : 'Choisir ce plan'}
                 </button>
               </div>
             );

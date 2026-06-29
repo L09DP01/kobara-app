@@ -81,10 +81,10 @@ export default function SubscriptionDetailsScreen() {
         const refreshToken = await SecureStore.getItemAsync('kobara_refresh_token');
         
         const baseUrl = ENV.WEB_URL || 'https://kobara.app';
-        let url = `${baseUrl}/pricing`;
+        let url = `${baseUrl}/dashboard/billing`;
 
         if (accessToken) {
-          url = `${baseUrl}/api/auth/mobile-sso?next=/pricing&access_token=${accessToken}`;
+          url = `${baseUrl}/api/auth/mobile-sso?next=/dashboard/billing&access_token=${accessToken}`;
         }
 
         await WebBrowser.openBrowserAsync(url, {

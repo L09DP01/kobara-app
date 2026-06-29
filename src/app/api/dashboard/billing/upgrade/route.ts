@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { planSlug } = await request.json();
+    const { planSlug, billingCycle = 'monthly' } = await request.json();
     if (!planSlug) {
       return NextResponse.json({ error: "planSlug is required" }, { status: 400 });
     }
@@ -42,13 +42,21 @@ export async function POST(request: NextRequest) {
 
     // Si le plan est payant, on génère une session de paiement Bazik
     if (plan.price_htg > 0) {
+      let amount = plan.price_htg;
+      let descriptionSuffix = "Mensuel";
+      
+      if (billingCycle === 'yearly') {
+        amount = (plan.price_htg * 0.8) * 12; // 20% discount, billed yearly
+        descriptionSuffix = "Annuel";
+      }
+
       const { BazikService } = await import("@/lib/server/bazik/bazik.service");
-      const reference = `UPGRADE::${merchant.id}::${planSlug}::${Date.now()}`;
+      const reference = `UPG::${merchant.id}::${planSlug}::${billingCycle}::${Date.now()}`;
       
       const bazikResponse = await BazikService.createMoncashPayment({
-        amount: plan.price_htg,
+        amount: amount,
         reference: reference,
-        description: `Abonnement Kobara - Plan ${plan.name}`
+        description: `Abonnement Kobara - Plan ${plan.name} (${descriptionSuffix})`
       });
 
       const paymentUrl = bazikResponse.redirectUrl || bazikResponse.url || bazikResponse.payment_url || bazikResponse.checkout_url || bazikResponse.redirect_url;
