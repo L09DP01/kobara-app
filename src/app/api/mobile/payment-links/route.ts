@@ -82,3 +82,56 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Erreur serveur interne." }, { status: 500 });
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const { payload, errorResponse } = await verifyMobileToken(req);
+    if (errorResponse) return errorResponse;
+    if (!payload || !payload.sub) return NextResponse.json({ error: "Token invalide." }, { status: 401 });
+
+    const userId = payload.sub;
+
+    const { data: merchant, error: merchantError } = await supabaseAdmin
+      .from("merchants")
+      .select("id, current_environment")
+      .eq("user_id", userId)
+      .single();
+
+    if (merchantError || !merchant) {
+      return NextResponse.json({ error: "Profil marchand introuvable.", code: "MERCHANT_NOT_FOUND" }, { status: 404 });
+    }
+
+    const body = await req.json();
+    const { title, description, amount, currency } = body;
+
+    if (!title || !amount || isNaN(Number(amount))) {
+      return NextResponse.json({ error: "Le titre et le montant sont requis." }, { status: 400 });
+    }
+
+    const environment = merchant.current_environment || 'test';
+
+    const { data: link, error: insertError } = await supabaseAdmin
+      .from('payment_links')
+      .insert({
+        merchant_id: merchant.id,
+        title: title,
+        description: description || null,
+        amount: Number(amount),
+        currency: currency || 'HTG',
+        status: 'active',
+        environment: environment
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error("Error creating mobile payment link:", insertError);
+      return NextResponse.json({ error: "Erreur lors de la création du lien de paiement." }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, link });
+  } catch (error: any) {
+    console.error("API POST /mobile/payment-links error:", error);
+    return NextResponse.json({ error: "Erreur serveur interne." }, { status: 500 });
+  }
+}
