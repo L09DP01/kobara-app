@@ -9,3 +9,13 @@ export const useCustomers = () => {
     retry: 2,
   });
 };
+
+export const useCustomerDetails = (id: string) => {
+  return useQuery({
+    queryKey: ['customer', id],
+    queryFn: () => customersService.getCustomerDetails(id),
+    staleTime: 1000 * 30,
+    retry: 2,
+    enabled: !!id,
+  });
+};

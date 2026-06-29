@@ -23,9 +23,30 @@ export interface CustomersResponse {
   customers: MobileCustomer[];
 }
 
+export interface CustomerDetailsResponse {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  wallet?: string;
+  createdAt: string;
+  stats: {
+    totalSpent: number;
+    totalFees: number;
+    transactionCount: number;
+    totalTransactions: number;
+  };
+  payments: any[];
+}
+
 class CustomersService {
   async getCustomers(): Promise<CustomersResponse> {
     const response = await apiClient.get<CustomersResponse>('/mobile/customers');
+    return response.data;
+  }
+
+  async getCustomerDetails(id: string): Promise<CustomerDetailsResponse> {
+    const response = await apiClient.get<CustomerDetailsResponse>(`/mobile/customers/${id}`);
     return response.data;
   }
 }
