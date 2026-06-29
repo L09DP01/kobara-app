@@ -9,6 +9,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -60,6 +62,13 @@ async function registerForPushNotificationsAsync() {
   }
 
   if (Device.isDevice) {
+    const isExpoGo = Constants.appOwnership === "expo";
+    
+    if (isExpoGo) {
+      console.log('Notifications disabled in Expo Go. Use a development build to test push notifications.');
+      return;
+    }
+
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== 'granted') {
@@ -73,9 +82,12 @@ async function registerForPushNotificationsAsync() {
     try {
       const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+      
       if (!projectId) {
-        console.log('Project ID not found');
+        console.log('Project ID not found. Skipping push token registration.');
+        return;
       }
+      
       token = (
         await Notifications.getExpoPushTokenAsync({
           projectId,
@@ -86,7 +98,7 @@ async function registerForPushNotificationsAsync() {
       // TODO: Send this token to the backend `/api/mobile/notifications/token`
       
     } catch (e) {
-      console.log(e);
+      console.log('Error getting push token:', e);
     }
   } else {
     console.log('Must use physical device for Push Notifications');

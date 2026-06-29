@@ -119,10 +119,8 @@ class AuthService {
           code: 'UNAUTHORIZED',
         } as AuthError;
       }
-      throw {
-        message: 'Erreur réseau.',
-        code: 'NETWORK_ERROR',
-      } as AuthError;
+      // Fallback for network errors
+      throw { message: 'Network or Server Error', code: 'SERVER_ERROR' } as AuthError;
     }
   }
 
