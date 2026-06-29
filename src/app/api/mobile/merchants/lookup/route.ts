@@ -10,20 +10,25 @@ export async function GET(req: NextRequest) {
 
     const searchParams = req.nextUrl.searchParams;
     const email = searchParams.get('email');
+    const id = searchParams.get('id');
 
-    if (!email) {
-      return NextResponse.json({ error: "Email requis." }, { status: 400 });
+    if (!email && !id) {
+      return NextResponse.json({ error: "Email ou ID requis." }, { status: 400 });
     }
 
-    // Lookup merchant by email
-    const { data: merchant, error: merchantError } = await supabaseAdmin
-      .from('merchants')
-      .select('id, business_name, email')
-      .eq('email', email.trim())
-      .single();
+    // Lookup merchant by email or id
+    let query = supabaseAdmin.from('merchants').select('id, business_name, email');
+    
+    if (email) {
+      query = query.eq('email', email.trim());
+    } else if (id) {
+      query = query.eq('id', id.trim());
+    }
+
+    const { data: merchant, error: merchantError } = await query.single();
 
     if (merchantError || !merchant) {
-      return NextResponse.json({ error: "Aucun marchand trouvé avec cet email." }, { status: 404 });
+      return NextResponse.json({ error: "Aucun marchand trouvé avec ces informations." }, { status: 404 });
     }
 
     // Don't allow transferring to self

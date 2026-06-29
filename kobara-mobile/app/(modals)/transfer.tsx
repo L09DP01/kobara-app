@@ -20,11 +20,17 @@ export default function TransferScreen() {
 
   useEffect(() => {
     if (recipientId) {
-      setVerifiedMerchant({
-        id: recipientId,
-        business_name: 'Marchand (Scanné via QR)',
-        email: 'ID: ' + recipientId
-      });
+      const fetchMerchant = async () => {
+        setIsLoading(true);
+        const result = await balanceService.lookupMerchantById(recipientId);
+        setIsLoading(false);
+        if (result.success && result.merchant) {
+          setVerifiedMerchant(result.merchant);
+        } else {
+          setError("Ce code QR ne correspond à aucun marchand valide.");
+        }
+      };
+      fetchMerchant();
     }
   }, [recipientId]);
 

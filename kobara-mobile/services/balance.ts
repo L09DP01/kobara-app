@@ -49,6 +49,15 @@ class BalanceService {
       return { success: false, error: error.response?.data?.error || "Marchand introuvable" };
     }
   }
+
+  async lookupMerchantById(id: string): Promise<{ success: boolean; merchant?: any; error?: string }> {
+    try {
+      const response = await apiClient.get(`/mobile/merchants/lookup?id=${encodeURIComponent(id)}`);
+      return { success: true, merchant: response.data.merchant };
+    } catch (error: any) {
+      return { success: false, error: error.response?.data?.error || "Marchand introuvable" };
+    }
+  }
 }
 
 export const balanceService = new BalanceService();

@@ -43,16 +43,20 @@ export default function ScannerScreen() {
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
     
-    // We expect the QR code to contain a recipient ID or a deep link.
-    // Let's assume it's just the recipient UUID for now, or JSON.
     let recipientId = data;
-    try {
-      // Try to parse if it's JSON
-      const parsed = JSON.parse(data);
-      if (parsed.merchantId) recipientId = parsed.merchantId;
-      else if (parsed.id) recipientId = parsed.id;
-    } catch (e) {
-      // Not JSON, use raw data assuming it's an ID
+    
+    // Check if it's a generic merchant link (e.g., https://kobara.app/m/123-456)
+    const merchantLinkMatch = data.match(/\/m\/([a-zA-Z0-9-]+)\/?$/);
+    if (merchantLinkMatch && merchantLinkMatch[1]) {
+      recipientId = merchantLinkMatch[1];
+    } else {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.merchantId) recipientId = parsed.merchantId;
+        else if (parsed.id) recipientId = parsed.id;
+      } catch (e) {
+        // Not JSON, use raw data assuming it's an ID or unrecognized URL
+      }
     }
 
     // Redirect to transfer screen with recipient ID
