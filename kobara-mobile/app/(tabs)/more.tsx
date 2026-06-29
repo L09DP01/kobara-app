@@ -87,6 +87,7 @@ export default function MoreScreen() {
         return;
       }
       
+      /*
       (global as any).isAuthenticatingBiometrics = true;
       const result = await authenticateAsync({
         promptMessage: 'Confirmez votre identité pour activer la biométrie',
@@ -97,6 +98,7 @@ export default function MoreScreen() {
       if (!result.success) {
         return; // Annulé ou échec
       }
+      */
     }
     
     setBiometricsEnabled(newValue);

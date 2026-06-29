@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kobara.merchantapp"
+      "bundleIdentifier": "com.kobara.merchantapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,6 +33,12 @@
       "expo-router",
       "expo-secure-store",
       "expo-splash-screen"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2846499f-71f7-4291-9b7f-1f9e1d8a0f6a"
+      }
+    }
   }
 }

@@ -90,7 +90,8 @@ export default function LoginScreen() {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
       if (hasHardware && isEnrolled) {
-        setCanUseBiometrics(true);
+        // DÉSACTIVÉ TEMPORAIREMENT
+        setCanUseBiometrics(false);
         setSavedPassword(pwd);
         // On pourrait auto-lancer handleBiometricLogin ici, mais c'est mieux de laisser l'utilisateur cliquer
       }

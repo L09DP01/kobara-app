@@ -50,6 +50,10 @@ export default function RootLayout() {
   }, []);
 
   const checkBiometrics = async () => {
+    // DÉSACTIVÉ TEMPORAIREMENT À LA DEMANDE DE L'UTILISATEUR
+    setIsUnlocked(true);
+    return;
+    
     if ((global as any).isAuthenticatingBiometrics) return;
     
     const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');

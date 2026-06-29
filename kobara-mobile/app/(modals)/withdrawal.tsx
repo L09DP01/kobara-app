@@ -47,6 +47,7 @@ export default function WithdrawalScreen() {
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
         
         if (hasHardware && isEnrolled) {
+          /*
           (global as any).isAuthenticatingBiometrics = true;
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: 'Confirmez votre identité pour valider ce retrait',
@@ -58,6 +59,7 @@ export default function WithdrawalScreen() {
             setIsLoading(false);
             return;
           }
+          */
         }
       }
     } catch (e) {

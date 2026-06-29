@@ -72,6 +72,7 @@ export default function TransferScreen() {
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
         
         if (hasHardware && isEnrolled) {
+          /*
           (global as any).isAuthenticatingBiometrics = true;
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: 'Confirmez votre identité pour valider ce transfert',
@@ -83,6 +84,7 @@ export default function TransferScreen() {
             setIsLoading(false);
             return;
           }
+          */
         }
       }
     } catch (e) {
