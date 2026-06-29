@@ -124,7 +124,12 @@ export function WithdrawalsClient({
       setAmount('');
       setReceiver('');
       setCode2fa('');
-      setSuccessMsg("Demande de retrait initiée !");
+      
+      const successMessage = res?.status === 'completed'
+        ? "Votre retrait a été effectué avec succès."
+        : "Demande de retrait initiée et en cours de traitement.";
+        
+      setSuccessMsg(successMessage);
       setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err: any) {
       console.error(err);

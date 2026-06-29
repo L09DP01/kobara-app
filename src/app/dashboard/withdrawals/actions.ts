@@ -194,5 +194,5 @@ export async function requestWithdrawal(amount: number, method: string, receiver
   }
 
   revalidatePath('/dashboard/withdrawals');
-  return { success: true };
+  return { success: true, status: initialStatus };
 }

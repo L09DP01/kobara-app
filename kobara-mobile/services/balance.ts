@@ -32,7 +32,7 @@ class BalanceService {
     }
   }
 
-  async requestWithdrawal(method: string, amount: number, reference: string): Promise<{ success: boolean; error?: string }> {
+  async requestWithdrawal(method: string, amount: number, reference: string): Promise<{ success: boolean; error?: string; withdrawal?: any }> {
     try {
       const response = await apiClient.post('/mobile/withdrawals', { method, amount, reference });
       return { success: true, ...response.data };

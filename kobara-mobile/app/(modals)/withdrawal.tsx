@@ -42,7 +42,13 @@ export default function WithdrawalScreen() {
     
     if (result.success) {
       queryClient.invalidateQueries({ queryKey: ['balance'] });
-      Alert.alert("Succès", "Votre demande de retrait a été envoyée et est en cours de traitement.", [
+      
+      const isInstantSuccess = result.withdrawal?.status === 'completed';
+      const successMessage = isInstantSuccess 
+        ? "Votre retrait a été effectué avec succès."
+        : "Votre demande de retrait a été envoyée et est en cours de traitement.";
+        
+      Alert.alert("Succès", successMessage, [
         { text: "OK", onPress: () => router.back() }
       ]);
     } else {
