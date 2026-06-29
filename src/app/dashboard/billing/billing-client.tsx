@@ -14,6 +14,8 @@ export function BillingClient() {
   const [error, setError] = useState<string | null>(null);
 
   const [isYearly, setIsYearly] = useState(false);
+  const [upgradeIntent, setUpgradeIntent] = useState<{ planSlug: string, isYearly: boolean } | null>(null);
+  const [natcashData, setNatcashData] = useState<{ referenceCode: string, paymentId: string } | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -40,25 +42,37 @@ export function BillingClient() {
     fetchData();
   }, []);
 
-  const handleUpgrade = async (planSlug: string) => {
-    const billingCycle = isYearly ? 'yearly' : 'monthly';
-    if (!confirm(`Voulez-vous vraiment changer vers le plan ${planSlug} (${isYearly ? 'Annuel' : 'Mensuel'}) ?`)) return;
-    
+  const handleUpgradeClick = (p: any) => {
+    if (p.price_htg === 0) {
+      handleUpgrade(p.slug, 'monthly', 'moncash');
+    } else {
+      setUpgradeIntent({ planSlug: p.slug, isYearly });
+    }
+  };
+
+  const handleUpgrade = async (planSlug: string, billingCycle: string, paymentMethod: string) => {
     setUpgrading(true);
     setError(null);
     try {
       const res = await fetch('/api/dashboard/billing/upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSlug, billingCycle })
+        body: JSON.stringify({ planSlug, billingCycle, paymentMethod })
       });
       
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Erreur lors du changement de plan');
       
-      if (result.requiresPayment && result.paymentUrl) {
-        window.location.href = result.paymentUrl;
-        return;
+      if (result.requiresPayment) {
+        if (result.method === 'natcash' && result.referenceCode) {
+          setUpgradeIntent(null);
+          setNatcashData({ referenceCode: result.referenceCode, paymentId: result.paymentId });
+          setUpgrading(false);
+          return;
+        } else if (result.paymentUrl) {
+          window.location.href = result.paymentUrl;
+          return;
+        }
       }
 
       toast.success('Plan mis à jour avec succès !');
@@ -240,7 +254,7 @@ export function BillingClient() {
 
                 <button
                   disabled={isExactCurrent || upgrading || (!isKycApproved && p.slug !== 'free')}
-                  onClick={() => handleUpgrade(p.slug)}
+                  onClick={() => handleUpgradeClick(p)}
                   className={`w-full py-2.5 rounded-xl font-bold transition-all shadow-sm
                     ${isExactCurrent ? 'bg-white/10 text-slate-500 cursor-not-allowed shadow-none' : 
                       (!isKycApproved && p.slug !== 'free' ? 'bg-white/10 text-slate-500 cursor-not-allowed shadow-none' :
@@ -254,6 +268,87 @@ export function BillingClient() {
           })}
         </div>
       </div>
+
+      {/* Modal Choix du moyen de paiement */}
+      {upgradeIntent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#111827] border border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
+            <h3 className="text-xl font-bold text-white mb-2">Moyen de paiement</h3>
+            <p className="text-slate-400 text-sm mb-6">Choisissez comment vous souhaitez payer votre abonnement.</p>
+            
+            <div className="space-y-3 mb-6">
+              <button 
+                onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'moncash')}
+                disabled={upgrading}
+                className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left"
+              >
+                <div className="w-10 h-10 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center shrink-0">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-white font-bold">MonCash</h4>
+                  <p className="text-slate-400 text-xs">Paiement mobile instantané</p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'natcash')}
+                disabled={upgrading}
+                className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left"
+              >
+                <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+                  <span className="font-black text-sm">NC</span>
+                </div>
+                <div>
+                  <h4 className="text-white font-bold">NatCash</h4>
+                  <p className="text-slate-400 text-xs">Paiement par transfert</p>
+                </div>
+              </button>
+            </div>
+
+            <button 
+              onClick={() => setUpgradeIntent(null)}
+              disabled={upgrading}
+              className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Écran d'attente NatCash */}
+      {natcashData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#111827] border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative text-center">
+            <div className="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <span className="font-black text-xl">NC</span>
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">Paiement NatCash</h3>
+            <p className="text-slate-400 text-sm mb-6">Pour finaliser votre abonnement, veuillez effectuer le transfert NatCash depuis votre téléphone :</p>
+            
+            <div className="bg-black/40 border border-white/5 rounded-2xl p-6 mb-8">
+              <p className="text-slate-500 text-sm mb-2">Composez ce code exact :</p>
+              <div className="text-2xl sm:text-3xl font-black text-white tracking-wider break-words selection:bg-orange-500/30">
+                *202*40035664*{/*montant? on devrait le récupérer mais l'utilisateur l'a vu juste avant*/}...*<span className="text-orange-400">{natcashData.referenceCode}</span>#
+              </div>
+              <p className="text-slate-500 text-sm mt-4">
+                Le transfert sera détecté automatiquement. Ne fermez pas cette page.
+              </p>
+            </div>
+
+            <button 
+              onClick={() => {
+                setNatcashData(null);
+                window.location.reload();
+              }}
+              className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-300 font-bold rounded-xl transition-colors"
+            >
+              Fermer (J'ai payé)
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

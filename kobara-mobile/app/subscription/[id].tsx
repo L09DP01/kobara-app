@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, CalendarClock, CreditCard } from 'lucide-react-native';
@@ -20,6 +20,7 @@ export default function SubscriptionDetailsScreen() {
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRenewing, setIsRenewing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -86,33 +87,30 @@ export default function SubscriptionDetailsScreen() {
     }
   };
 
-  const handleRenew = async () => {
-    if (!subscription) return;
+  const handlePayWithNatCash = async () => {
+    try {
+      setIsRenewing(true);
+      setShowPaymentModal(false);
+      const res = await apiClient.post(`/mobile/subscriptions/${subscription?.id}/renew-natcash`);
+      if (res.data.success && res.data.referenceCode) {
+        router.push({
+          pathname: '/subscription/natcash-waiting',
+          params: { referenceCode: res.data.referenceCode, amount: subscription?.amount }
+        });
+      } else {
+        throw new Error(res.data.error || "Erreur NatCash");
+      }
+    } catch (e: any) {
+      console.error("Error NatCash:", e);
+      Alert.alert("Erreur", e.response?.data?.error || "Une erreur est survenue lors de l'initialisation du paiement.");
+    } finally {
+      setIsRenewing(false);
+    }
+  };
 
-    // Toujours demander à l'utilisateur de choisir
-    const balanceText = balance !== null ? `Solde Kobara (${balance.toLocaleString('fr-FR')} HTG)` : "Solde Kobara";
-    
-    Alert.alert(
-      "Moyen de paiement",
-      `Veuillez choisir votre méthode de paiement pour ce renouvellement (${subscription.amount.toLocaleString('fr-FR')} HTG).`,
-      [
-        { 
-          text: balanceText, 
-          onPress: () => {
-            if (balance !== null && balance >= subscription.amount) {
-              handlePayWithBalance();
-            } else {
-              Alert.alert("Solde insuffisant", "Votre solde actuel n'est pas suffisant pour couvrir le montant de cet abonnement.");
-            }
-          }
-        },
-        { 
-          text: "MonCash", 
-          onPress: handlePayWithMonCash 
-        },
-        { text: "Annuler", style: "cancel" }
-      ]
-    );
+  const handleRenew = () => {
+    if (!subscription) return;
+    setShowPaymentModal(true);
   };
 
   if (isLoading) {
@@ -206,6 +204,87 @@ export default function SubscriptionDetailsScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Modal de sélection de paiement */}
+      <Modal
+        visible={showPaymentModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPaymentModal(false)}
+      >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-[#121A2F] rounded-t-3xl p-6 border-t border-white/10">
+            <View className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+            <Text className="text-white font-bold text-xl mb-2 text-center">Moyen de paiement</Text>
+            <Text className="text-slate-400 text-center mb-6">
+              Sélectionnez comment vous souhaitez payer ({subscription?.amount?.toLocaleString('fr-FR')} HTG)
+            </Text>
+
+            <View className="space-y-3">
+              <TouchableOpacity
+                onPress={() => {
+                  setShowPaymentModal(false);
+                  if (balance !== null && balance >= (subscription?.amount || 0)) {
+                    handlePayWithBalance();
+                  } else {
+                    Alert.alert("Solde insuffisant", "Votre solde actuel n'est pas suffisant.");
+                  }
+                }}
+                className="w-full flex-row items-center p-4 bg-white/5 rounded-2xl border border-white/5 active:bg-white/10"
+              >
+                <View className="w-10 h-10 rounded-full bg-green-500/20 items-center justify-center mr-4">
+                  <CreditCard size={20} color="#22C55E" />
+                </View>
+                <View>
+                  <Text className="text-white font-bold text-base">Solde Kobara</Text>
+                  <Text className="text-slate-400 text-xs">
+                    {balance !== null ? `${balance.toLocaleString('fr-FR')} HTG disponible` : 'Chargement...'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setShowPaymentModal(false);
+                  handlePayWithMonCash();
+                }}
+                className="w-full flex-row items-center p-4 bg-white/5 rounded-2xl border border-white/5 active:bg-white/10"
+              >
+                <View className="w-10 h-10 rounded-full bg-red-500/20 items-center justify-center mr-4">
+                  <Text className="text-red-500 font-black text-xs">MC</Text>
+                </View>
+                <View>
+                  <Text className="text-white font-bold text-base">MonCash</Text>
+                  <Text className="text-slate-400 text-xs">Paiement mobile instantané</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setShowPaymentModal(false);
+                  handlePayWithNatCash();
+                }}
+                className="w-full flex-row items-center p-4 bg-white/5 rounded-2xl border border-white/5 active:bg-white/10"
+              >
+                <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center mr-4">
+                  <Text className="text-blue-500 font-black text-xs">NC</Text>
+                </View>
+                <View>
+                  <Text className="text-white font-bold text-base">NatCash</Text>
+                  <Text className="text-slate-400 text-xs">Paiement par transfert</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity 
+              onPress={() => setShowPaymentModal(false)}
+              className="mt-6 p-4 rounded-2xl bg-white/5 active:bg-white/10 items-center"
+            >
+              <Text className="text-white font-bold">Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }

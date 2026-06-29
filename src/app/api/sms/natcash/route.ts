@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
       const { data: pendingPayments } = await supabase
         .from('payments')
-        .select('id, amount, status, expires_at, merchant_id, reference_code')
+        .select('id, amount, status, expires_at, merchant_id, reference_code, metadata')
         .eq('status', 'pending')
         .gte('created_at', thirtyMinsAgo);
 
@@ -142,14 +142,27 @@ export async function POST(request: NextRequest) {
             trans_code: parsed.transCode
           }).eq('id', matchedPayment.id);
           
-          // Send success notification
-          try {
-            const { notifyPaymentSucceeded } = await import('@/lib/server/notifications');
-            const { data: merchantData } = await supabase.from('merchants').select('email').eq('id', matchedPayment.merchant_id).single();
-            if (merchantData?.email) {
-              await notifyPaymentSucceeded(matchedPayment.merchant_id, merchantData.email, matchedPayment.amount, 'HTG', matchedPayment.id);
+          // Vérifier si c'est un paiement d'abonnement Kobara
+          const metadata = matchedPayment.metadata as any;
+          if (metadata && metadata.is_subscription_upgrade && metadata.plan_slug) {
+            const { upgradeMerchantPlan } = await import("@/lib/server/plans");
+            try {
+              await upgradeMerchantPlan(matchedPayment.merchant_id, metadata.plan_slug);
+              console.log(`Plan upgraded successfully via NatCash Webhook: Merchant ${matchedPayment.merchant_id} to ${metadata.plan_slug}`);
+            } catch (err) {
+              console.error(`Erreur lors de l'upgrade de plan via NatCash Webhook:`, err);
             }
-          } catch(e) { console.error("Notification failed", e); }
+          } else {
+            // C'est un paiement client classique
+            // Send success notification
+            try {
+              const { notifyPaymentSucceeded } = await import('@/lib/server/notifications');
+              const { data: merchantData } = await supabase.from('merchants').select('email').eq('id', matchedPayment.merchant_id).single();
+              if (merchantData?.email) {
+                await notifyPaymentSucceeded(matchedPayment.merchant_id, merchantData.email, matchedPayment.amount, 'HTG', matchedPayment.id);
+              }
+            } catch(e) { console.error("Notification failed", e); }
+          }
           
           return NextResponse.json({ success: true, processed: true, payment_id: matchedPayment.id }, { status: 200 });
         } else {
