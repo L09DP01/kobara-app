@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, ArrowDownCircle, CheckCircle2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,86 +56,88 @@ export default function WithdrawalScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
-        <View style={styles.content}>
-          <View style={styles.card}>
-            {error && (
-              <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 1, padding: 12, borderRadius: 12, marginBottom: 16 }}>
-                <Text style={{ color: '#F87171', fontSize: 14, textAlign: 'center' }}>{error}</Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.content}>
+            <View style={styles.card}>
+              {error && (
+                <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.2)', borderWidth: 1, padding: 12, borderRadius: 12, marginBottom: 16 }}>
+                  <Text style={{ color: '#F87171', fontSize: 14, textAlign: 'center' }}>{error}</Text>
+                </View>
+              )}
+
+              <Text style={styles.label}>Méthode de retrait</Text>
+              <View style={styles.methodsContainer}>
+                {WITHDRAWAL_METHODS.map((m) => (
+                  <TouchableOpacity
+                    key={m.id}
+                    style={[styles.methodCard, method === m.id && styles.methodCardActive]}
+                    onPress={() => setMethod(m.id)}
+                  >
+                    <Text style={styles.methodIcon}>{m.icon}</Text>
+                    <Text style={[styles.methodName, method === m.id && styles.methodNameActive]}>{m.name}</Text>
+                    {method === m.id && (
+                      <View style={styles.checkIcon}>
+                        <CheckCircle2 size={16} color="#FF7A00" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
               </View>
-            )}
 
-            <Text style={styles.label}>Méthode de retrait</Text>
-            <View style={styles.methodsContainer}>
-              {WITHDRAWAL_METHODS.map((m) => (
-                <TouchableOpacity
-                  key={m.id}
-                  style={[styles.methodCard, method === m.id && styles.methodCardActive]}
-                  onPress={() => setMethod(m.id)}
-                >
-                  <Text style={styles.methodIcon}>{m.icon}</Text>
-                  <Text style={[styles.methodName, method === m.id && styles.methodNameActive]}>{m.name}</Text>
-                  {method === m.id && (
-                    <View style={styles.checkIcon}>
-                      <CheckCircle2 size={16} color="#FF7A00" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
+              <Text style={styles.label}>
+                {method === 'zelle' ? 'Email ou Téléphone Zelle' : 'Numéro de téléphone'}
+              </Text>
+              <TextInput
+                style={styles.inputBox}
+                placeholder={method === 'zelle' ? 'email@exemple.com' : 'Ex: 34000000'}
+                placeholderTextColor="#6B7280"
+                value={reference}
+                onChangeText={setReference}
+                editable={!isLoading}
+                keyboardType={method === 'zelle' ? 'email-address' : 'phone-pad'}
+              />
+
+              <Text style={styles.label}>Montant (HTG)</Text>
+              <TextInput
+                style={styles.amountInput}
+                placeholder="0.00"
+                placeholderTextColor="#6B7280"
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={setAmount}
+                editable={!isLoading}
+              />
+
+              <View style={styles.feeNotice}>
+                {method === 'zelle' ? (
+                  <Text style={styles.feeText}>Frais: 0 HTG (Gratuit)</Text>
+                ) : (
+                  <Text style={styles.feeText}>
+                    Frais (5%) : {amount && !isNaN(Number(amount)) ? (Number(amount) * 0.05).toFixed(2) : '0.00'} HTG
+                  </Text>
+                )}
+              </View>
+
+              <TouchableOpacity
+                onPress={handleWithdraw}
+                disabled={isLoading || !amount || !reference}
+                style={[
+                  styles.withdrawButton,
+                  (isLoading || !amount || !reference) ? styles.withdrawButtonDisabled : null
+                ]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <>
+                    <ArrowDownCircle size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                    <Text style={styles.withdrawButtonText}>Confirmer le retrait</Text>
+                  </>
+                )}
+              </TouchableOpacity>
             </View>
-
-            <Text style={styles.label}>
-              {method === 'zelle' ? 'Email ou Téléphone Zelle' : 'Numéro de téléphone'}
-            </Text>
-            <TextInput
-              style={styles.inputBox}
-              placeholder={method === 'zelle' ? 'email@exemple.com' : 'Ex: 34000000'}
-              placeholderTextColor="#6B7280"
-              value={reference}
-              onChangeText={setReference}
-              editable={!isLoading}
-              keyboardType={method === 'zelle' ? 'email-address' : 'phone-pad'}
-            />
-
-            <Text style={styles.label}>Montant (HTG)</Text>
-            <TextInput
-              style={styles.amountInput}
-              placeholder="0.00"
-              placeholderTextColor="#6B7280"
-              keyboardType="numeric"
-              value={amount}
-              onChangeText={setAmount}
-              editable={!isLoading}
-            />
-
-            <View style={styles.feeNotice}>
-              {method === 'zelle' ? (
-                <Text style={styles.feeText}>Frais: 0 HTG (Gratuit)</Text>
-              ) : (
-                <Text style={styles.feeText}>
-                  Frais (5%) : {amount && !isNaN(Number(amount)) ? (Number(amount) * 0.05).toFixed(2) : '0.00'} HTG
-                </Text>
-              )}
-            </View>
-
-            <TouchableOpacity
-              onPress={handleWithdraw}
-              disabled={isLoading || !amount || !reference}
-              style={[
-                styles.withdrawButton,
-                (isLoading || !amount || !reference) ? styles.withdrawButtonDisabled : null
-              ]}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <>
-                  <ArrowDownCircle size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                  <Text style={styles.withdrawButtonText}>Confirmer le retrait</Text>
-                </>
-              )}
-            </TouchableOpacity>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

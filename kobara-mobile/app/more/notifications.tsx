@@ -1,18 +1,111 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Switch } from 'react-native';
-import { Bell, ArrowDownToLine, Send, ShieldAlert, Megaphone } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, Switch, Platform, Alert, ActivityIndicator } from 'react-native';
+import { Bell, ArrowDownToLine, Send, ShieldAlert } from 'lucide-react-native';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import { apiClient } from '@/api/client';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function NotificationsScreen() {
+  const [loading, setLoading] = useState(true);
+  const [expoPushToken, setExpoPushToken] = useState('');
   const [settings, setSettings] = useState({
     payments: true,
     withdrawals: true,
     transfers: true,
     security: true,
-    marketing: false,
   });
 
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(token => {
+      if (token) {
+        setExpoPushToken(token);
+        // Register token with backend
+        apiClient.post('/mobile/notifications/register', {
+          expo_push_token: token,
+          device_info: {
+            os: Platform.OS,
+            model: Device.modelName,
+            osVersion: Device.osVersion
+          }
+        }).catch(err => console.log('Error registering push token', err));
+      }
+    });
+
+    // Fetch preferences
+    apiClient.get('/mobile/notifications/preferences')
+      .then(res => {
+        if (res.data.success && res.data.data) {
+          setSettings(prev => ({ ...prev, ...res.data.data }));
+        }
+      })
+      .catch(err => console.log('Error fetching notification prefs', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function registerForPushNotificationsAsync() {
+    let token;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#F97316',
+      });
+    }
+
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        Alert.alert('Permission requise', 'Vous devez autoriser les notifications pour recevoir les alertes.');
+        return;
+      }
+      try {
+        const projectId =
+          Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+        if (!projectId) {
+          throw new Error('Project ID not found');
+        }
+        token = (
+          await Notifications.getExpoPushTokenAsync({
+            projectId,
+          })
+        ).data;
+      } catch (e) {
+        token = `${e}`;
+      }
+    } else {
+      Alert.alert('Émulateur détecté', 'Les notifications push nécessitent un appareil physique.');
+    }
+
+    return token;
+  }
+
+  const toggleSetting = async (key: keyof typeof settings) => {
+    const newSettings = { ...settings, [key]: !settings[key] };
+    setSettings(newSettings);
+    
+    try {
+      await apiClient.patch('/mobile/notifications/preferences', newSettings);
+    } catch (e) {
+      // Revert if error
+      setSettings(settings);
+      Alert.alert('Erreur', 'Impossible de sauvegarder les préférences.');
+    }
   };
 
   const NotificationToggle = ({ icon: Icon, title, subtitle, settingKey }: any) => (
@@ -41,40 +134,38 @@ export default function NotificationsScreen() {
         Gérez quelles alertes push vous souhaitez recevoir sur cet appareil.
       </Text>
 
-      <View className="bg-[#121A2F] rounded-2xl px-4 mb-10">
-        <NotificationToggle 
-          icon={ArrowDownToLine} 
-          title="Paiements reçus" 
-          subtitle="Être notifié à chaque nouveau paiement client"
-          settingKey="payments" 
-        />
-        <NotificationToggle 
-          icon={Bell} 
-          title="Retraits" 
-          subtitle="Alertes sur le statut de vos demandes de retrait"
-          settingKey="withdrawals" 
-        />
-        <NotificationToggle 
-          icon={Send} 
-          title="Transferts" 
-          subtitle="Notifications lors de transferts vers d'autres marchands"
-          settingKey="transfers" 
-        />
-        <NotificationToggle 
-          icon={ShieldAlert} 
-          title="Sécurité du compte" 
-          subtitle="Alertes de connexion et modifications de sécurité"
-          settingKey="security" 
-        />
-        <View className="border-b-0">
+      {loading ? (
+        <ActivityIndicator size="large" color="#F97316" className="mt-10" />
+      ) : (
+        <View className="bg-[#121A2F] rounded-2xl px-4 mb-10">
           <NotificationToggle 
-            icon={Megaphone} 
-            title="Marketing et nouveautés" 
-            subtitle="Actualités, nouvelles fonctionnalités et offres"
-            settingKey="marketing" 
+            icon={ArrowDownToLine} 
+            title="Paiements reçus" 
+            subtitle="Être notifié à chaque nouveau paiement client"
+            settingKey="payments" 
           />
+          <NotificationToggle 
+            icon={Bell} 
+            title="Retraits" 
+            subtitle="Alertes sur le statut de vos demandes de retrait"
+            settingKey="withdrawals" 
+          />
+          <NotificationToggle 
+            icon={Send} 
+            title="Transferts" 
+            subtitle="Notifications lors de transferts vers d'autres marchands"
+            settingKey="transfers" 
+          />
+          <View className="border-b-0">
+            <NotificationToggle 
+              icon={ShieldAlert} 
+              title="Sécurité du compte" 
+              subtitle="Alertes de connexion et modifications de sécurité"
+              settingKey="security" 
+            />
+          </View>
         </View>
-      </View>
+      )}
     </ScrollView>
   );
 }

@@ -33,10 +33,6 @@ export default function MoreLayout() {
         options={{ title: 'État du compte' }} 
       />
       <Stack.Screen 
-        name="quick-payment" 
-        options={{ title: 'Paiement rapide' }} 
-      />
-      <Stack.Screen 
         name="notifications" 
         options={{ title: 'Notifications' }} 
       />

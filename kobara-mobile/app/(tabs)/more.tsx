@@ -165,16 +165,6 @@ export default function MoreScreen() {
           />
         </View>
 
-        {/* Paiement */}
-        <SectionHeader title="Paramètres de paiement" />
-        <View className="bg-[#121A2F] rounded-2xl px-4">
-          <MenuItem 
-            icon={Zap} 
-            title="Configurer Paiement rapide" 
-            onPress={() => router.push('/more/quick-payment')} 
-          />
-        </View>
-
         {/* Paramètres Globaux */}
         <SectionHeader title="Paramètres globaux" />
         <View className="bg-[#121A2F] rounded-2xl px-4">
