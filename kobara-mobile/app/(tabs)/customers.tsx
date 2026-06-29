@@ -124,8 +124,27 @@ export default function CustomersScreen() {
     return (
       <View style={styles.content}>
         <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>Clients</Text>
-          <Text style={styles.pageSubtitle}>Gérez vos clients et suivez leurs activités</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pageTitle}>Clients</Text>
+              <Text style={styles.pageSubtitle}>Gérez vos clients et suivez leurs activités</Text>
+            </View>
+            
+            <TouchableOpacity 
+              onPress={() => setIsAddModalVisible(true)}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                backgroundColor: 'rgba(255, 122, 0, 0.1)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginLeft: 16,
+              }}
+            >
+              <Plus size={24} color="#FF7A00" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.searchRow}>
@@ -243,14 +262,6 @@ export default function CustomersScreen() {
           }
         />
       </View>
-
-      <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => setIsAddModalVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Plus size={32} color="#FFFFFF" />
-      </TouchableOpacity>
 
       <FilterBottomSheet 
         visible={isFilterModalVisible}
@@ -473,21 +484,5 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 14,
     textAlign: 'center',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 110,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FF7A00',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-    shadowColor: '#FF7A00',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
   }
 });
