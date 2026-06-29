@@ -103,11 +103,6 @@ export default function BalanceScreen() {
           <TouchableOpacity onPress={toggleBalance} style={styles.eyeButton}>
             {showBalance ? <Eye size={20} color="#9CA3AF" /> : <EyeOff size={20} color="#9CA3AF" />}
           </TouchableOpacity>
-          <View style={{ flex: 1 }} />
-          <TouchableOpacity style={styles.detailsButton}>
-            <Text style={styles.detailsButtonText}>Détails du solde</Text>
-            <ChevronRight size={16} color="#FF7A00" />
-          </TouchableOpacity>
         </View>
         <Text style={styles.balanceAmount}>
           {showBalance ? `HTG ${formatAmount(balanceData?.balance || 0)}` : 'HTG ••••••'}
