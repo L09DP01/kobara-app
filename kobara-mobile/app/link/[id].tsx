@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Share } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, Link as LinkIcon, Share2, Trash2, Power, PowerOff } from 'lucide-react-native';
+import { ChevronLeft, Link as LinkIcon, Share2, Trash2, Power, PowerOff, QrCode } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { apiClient } from '../../api/client';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 
@@ -15,6 +16,8 @@ export default function LinkDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const qrRef = useRef<any>(null);
 
   const fetchLinkDetails = async () => {
     try {
@@ -37,7 +40,7 @@ export default function LinkDetailsScreen() {
     fetchLinkDetails();
   }, [id]);
 
-  const handleShare = async () => {
+  const handleShareLink = async () => {
     if (!link) return;
     try {
       const baseUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://kobara.app';
@@ -49,6 +52,23 @@ export default function LinkDetailsScreen() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleShareQR = () => {
+    if (!qrRef.current) return;
+    qrRef.current.toDataURL((data: string) => {
+      const filename = FileSystem.cacheDirectory + 'kobara-qr.png';
+      FileSystem.writeAsStringAsync(filename, data, {
+        encoding: FileSystem.EncodingType.Base64,
+      }).then(() => {
+        Sharing.shareAsync(filename, {
+          mimeType: 'image/png',
+          dialogTitle: 'Partager le QR Code',
+        });
+      }).catch(err => {
+        console.error("Error sharing QR", err);
+      });
+    });
   };
 
   const handleToggleStatus = async () => {
@@ -147,7 +167,7 @@ export default function LinkDetailsScreen() {
         </TouchableOpacity>
         <Text className="text-white text-lg font-bold">Détails du lien</Text>
         <View className="flex-row gap-2">
-          <TouchableOpacity onPress={handleShare} className="w-10 h-10 items-center justify-center rounded-full bg-white/5">
+          <TouchableOpacity onPress={handleShareLink} className="w-10 h-10 items-center justify-center rounded-full bg-white/5">
             <Share2 size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
@@ -156,15 +176,22 @@ export default function LinkDetailsScreen() {
       <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
         {/* Main Info */}
         <View className="items-center mb-8 mt-4">
-          <View className="bg-white p-3 rounded-2xl mb-4 border border-white/10">
+          <View className="bg-white p-3 rounded-2xl mb-4 border border-white/10 relative">
             <QRCode
+              getRef={(c) => (qrRef.current = c)}
               value={`${process.env.EXPO_PUBLIC_APP_URL || 'https://kobara.app'}/pay/${link.slug}`}
               size={120}
               color="#000"
               backgroundColor="#fff"
             />
+            <TouchableOpacity 
+              onPress={handleShareQR}
+              className="absolute -bottom-4 -right-4 w-10 h-10 rounded-full bg-orange-500 items-center justify-center border-2 border-[#0A0F1C]"
+            >
+              <QrCode size={18} color="#FFF" />
+            </TouchableOpacity>
           </View>
-          <Text className="text-white text-2xl font-bold mb-2 text-center">
+          <Text className="text-white text-2xl font-bold mb-2 text-center mt-2">
             {link.title}
           </Text>
           <Text className="text-orange-500 text-3xl font-black mb-4">

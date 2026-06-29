@@ -9,6 +9,7 @@ import { RevenueCard } from '../../components/dashboard/RevenueCard';
 import { KPIGrid } from '../../components/dashboard/KPIGrid';
 import { RecentPayments } from '../../components/dashboard/RecentPayments';
 import { QRBottomSheet } from '@/components/balance/QRBottomSheet';
+import { MyQRSheet } from '@/components/balance/MyQRSheet';
 import { CreatePaymentLinkSheet } from '@/components/payments/CreatePaymentLinkSheet';
 
 export default function HomeScreen() {
@@ -16,6 +17,7 @@ export default function HomeScreen() {
   const { data, isLoading, isError, error, refetch } = useDashboardSummary();
   const [refreshing, setRefreshing] = useState(false);
   const [isQrModalVisible, setIsQrModalVisible] = useState(false);
+  const [isMyQrModalVisible, setIsMyQrModalVisible] = useState(false);
   const [isCreateLinkModalVisible, setIsCreateLinkModalVisible] = useState(false);
 
   const onRefresh = async () => {
@@ -107,11 +109,20 @@ export default function HomeScreen() {
       <QRBottomSheet 
         visible={isQrModalVisible} 
         onClose={() => setIsQrModalVisible(false)}
-        onMyQrPress={() => { setIsQrModalVisible(false); /* navigate or show QR */ }}
+        onMyQrPress={() => { 
+          setIsQrModalVisible(false); 
+          setIsMyQrModalVisible(true);
+        }}
         onScanQrPress={() => { 
           setIsQrModalVisible(false); 
           router.push('/(modals)/scanner');
         }}
+      />
+
+      <MyQRSheet
+        visible={isMyQrModalVisible}
+        onClose={() => setIsMyQrModalVisible(false)}
+        merchant={data?.merchant}
       />
 
       <CreatePaymentLinkSheet 
