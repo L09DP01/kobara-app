@@ -36,6 +36,11 @@ export const DashboardHeader = ({ merchant, unreadCount = 0, onNotificationPress
         )}
       </View>
 
+      {/* Logo */}
+      <View className="flex-1 items-center">
+        <Text className="text-white font-black text-xl tracking-widest">KOBARA</Text>
+      </View>
+
       {/* Right Icons */}
       <View className="flex-row items-center gap-3">
         {onScanPress && (
