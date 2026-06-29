@@ -1,25 +1,23 @@
-import { NextResponse } from "next/server";
-import { getSupabaseRouteHandler } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyMobileToken } from "@/lib/auth/mobile-verify";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function GET(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = getSupabaseRouteHandler();
-    
-    // 1. Get current session
-    const { data: { session }, error: authError } = await supabase.auth.getSession();
-    
-    if (authError || !session) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
+    const { payload, errorResponse } = await verifyMobileToken(req);
+    if (errorResponse) return errorResponse;
+    if (!payload || !payload.sub) return NextResponse.json({ error: "Token invalide." }, { status: 401 });
+
+    const userId = payload.sub;
 
     // 2. Get merchant profile
-    const { data: merchant, error: merchantError } = await supabase
+    const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
       .select('id')
-      .eq('user_id', session.user.id)
+      .eq('user_id', userId)
       .single();
 
     if (merchantError || !merchant) {
@@ -27,7 +25,7 @@ export async function GET(
     }
 
     // 3. Get payment details with customer and payment link info
-    const { data: payment, error: paymentError } = await supabase
+    const { data: payment, error: paymentError } = await supabaseAdmin
       .from('payments')
       .select(`
         *,
