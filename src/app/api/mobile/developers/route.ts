@@ -63,6 +63,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const { payload, errorResponse } = await verifyMobileToken(req);
     if (errorResponse) return errorResponse;
+    if (!payload || !payload.sub) return NextResponse.json({ error: "Token invalide." }, { status: 401 });
     
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
