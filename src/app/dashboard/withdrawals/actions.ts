@@ -181,7 +181,7 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       }
     }
     // If pending (Zelle, Natcash, or delayed Moncash), notify admin
-    if (initialStatus === 'pending' || initialStatus === 'processing') {
+    if (initialStatus === 'pending') {
       await notifyAdminWithdrawalCreated(merchant.id, amount, method);
     }
   } catch(e) { console.error("Notification failed", e); }
