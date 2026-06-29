@@ -88,7 +88,7 @@ export default function PaymentsScreen() {
   const isRefreshing = activeQuery.isRefetching && !activeQuery.isLoading;
 
   const handleNotificationPress = () => {
-    router.push('/notifications' as any);
+    router.push('/notifications');
   };
 
   const getSearchPlaceholder = () => {
@@ -189,7 +189,7 @@ export default function PaymentsScreen() {
             isLoading={paymentsQuery.isLoading}
             isRefreshing={isRefreshing}
             onRefresh={() => paymentsQuery.refetch()}
-            onPaymentPress={(p) => router.push(`/payment/${p.id}` as any)}
+            onPaymentPress={(p) => router.push(`/payment/${p.id}`)}
           />
         )}
         
