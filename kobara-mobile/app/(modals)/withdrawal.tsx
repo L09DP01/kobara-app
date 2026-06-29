@@ -108,9 +108,13 @@ export default function WithdrawalScreen() {
             />
 
             <View style={styles.feeNotice}>
-              <Text style={styles.feeText}>
-                {method === 'zelle' ? 'Frais: 0 HTG (Gratuit)' : 'Des frais peuvent s\'appliquer selon votre plan.'}
-              </Text>
+              {method === 'zelle' ? (
+                <Text style={styles.feeText}>Frais: 0 HTG (Gratuit)</Text>
+              ) : (
+                <Text style={styles.feeText}>
+                  Frais (5%) : {amount && !isNaN(Number(amount)) ? (Number(amount) * 0.05).toFixed(2) : '0.00'} HTG
+                </Text>
+              )}
             </View>
 
             <TouchableOpacity

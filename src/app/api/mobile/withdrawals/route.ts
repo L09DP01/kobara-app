@@ -42,15 +42,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la déduction du solde." }, { status: 500 });
     }
 
+    const fees = method === 'zelle' ? 0 : Number(amount) * 0.05;
+
     // 3. Create pending withdrawal record
     const { data: withdrawal, error: insertError } = await supabaseAdmin
       .from('withdrawals')
       .insert({
         merchant_id: merchant.id,
-        amount: Number(amount),
-        method: method,
-        reference: reference,
-        status: 'pending'
+        amount: Number(amount) - fees, // Net amount they receive
+        fees: fees,
+        total: Number(amount), // Gross amount deducted
+        wallet: reference, // we put reference in wallet as per schema
+        provider: method,
+        status: 'pending',
+        kobara_reference: `WD-${Date.now()}`
       })
       .select()
       .single();

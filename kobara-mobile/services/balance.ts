@@ -40,6 +40,15 @@ class BalanceService {
       return { success: false, error: error.response?.data?.error || "Erreur lors de la demande de retrait" };
     }
   }
+
+  async lookupMerchant(email: string): Promise<{ success: boolean; merchant?: any; error?: string }> {
+    try {
+      const response = await apiClient.get(`/mobile/merchants/lookup?email=${encodeURIComponent(email)}`);
+      return { success: true, merchant: response.data.merchant };
+    } catch (error: any) {
+      return { success: false, error: error.response?.data?.error || "Marchand introuvable" };
+    }
+  }
 }
 
 export const balanceService = new BalanceService();
