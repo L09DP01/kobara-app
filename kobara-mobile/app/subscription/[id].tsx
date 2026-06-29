@@ -95,7 +95,7 @@ export default function SubscriptionDetailsScreen() {
       if (res.data.success && res.data.referenceCode) {
         router.push({
           pathname: '/subscription/natcash-waiting',
-          params: { referenceCode: res.data.referenceCode, amount: subscription?.amount }
+          params: { referenceCode: res.data.referenceCode, amount: subscription?.amount, paymentId: res.data.paymentId }
         });
       } else {
         throw new Error(res.data.error || "Erreur NatCash");
