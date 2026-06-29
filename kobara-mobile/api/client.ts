@@ -1,5 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { authService } from '@/services/auth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // Uses local environment variable or defaults to production
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.kobara.app/v1';
@@ -16,7 +18,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const token = await SecureStore.getItemAsync('kobara_session_token');
+      const token = await SecureStore.getItemAsync('kobara_access_token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -42,18 +44,23 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        // Architecture placeholder for refresh token logic
         const refreshToken = await SecureStore.getItemAsync('kobara_refresh_token');
         if (refreshToken) {
-          // TODO: Call API to refresh token, save new token, and retry request
-          // const newTokens = await refreshSession(refreshToken);
-          // await SecureStore.setItemAsync('kobara_session_token', newTokens.token);
-          // originalRequest.headers.Authorization = `Bearer ${newTokens.token}`;
-          // return apiClient(originalRequest);
+          const newTokens = await authService.refreshToken(refreshToken);
+          await SecureStore.setItemAsync('kobara_access_token', newTokens.accessToken);
+          await SecureStore.setItemAsync('kobara_refresh_token', newTokens.refreshToken);
+          
+          if (originalRequest.headers) {
+             originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+          }
+          return apiClient(originalRequest);
+        } else {
+          useAuthStore.getState().logout();
         }
-      } catch (refreshError) {
-        console.error('Failed to refresh token', refreshError);
-        // Fallback: Logout user or redirect to auth screen
+      } catch (refreshError: any) {
+        if (refreshError.code === 'UNAUTHORIZED') {
+          useAuthStore.getState().logout();
+        }
       }
     }
     

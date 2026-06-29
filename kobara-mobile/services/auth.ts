@@ -105,14 +105,23 @@ class AuthService {
       });
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+           throw { code: 'UNAUTHORIZED' };
+        }
         throw new Error('Token refresh failed');
       }
 
       return await response.json();
-    } catch {
+    } catch (error: any) {
+      if (error.code === 'UNAUTHORIZED') {
+        throw {
+          message: 'Session expirée. Veuillez vous reconnecter.',
+          code: 'UNAUTHORIZED',
+        } as AuthError;
+      }
       throw {
-        message: 'Session expirée. Veuillez vous reconnecter.',
-        code: 'INVALID_CREDENTIALS',
+        message: 'Erreur réseau.',
+        code: 'NETWORK_ERROR',
       } as AuthError;
     }
   }
@@ -130,6 +139,9 @@ class AuthService {
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw { code: 'UNAUTHORIZED' };
+      }
       throw new Error('Failed to fetch profile');
     }
 

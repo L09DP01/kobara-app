@@ -126,9 +126,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           if (profile.merchant) {
             await SecureStore.setItemAsync(KEYS.MERCHANT_DATA, JSON.stringify(profile.merchant));
           }
-        } catch {
-          // Si le profil ne peut pas être récupéré, on garde les données en cache
-          // Le token sera rafraîchi au prochain appel API
+        } catch (err: any) {
+          if (err.code === 'UNAUTHORIZED') {
+            // Le token est expiré, on tente un refresh
+            try {
+              await get().refreshSession();
+              // Si le refresh réussit, le state est déjà mis à jour, et l'API interceptera le nouveau token
+            } catch (refreshErr) {
+              // Si le refresh échoue, l'utilisateur est déconnecté par refreshSession()
+            }
+          }
+          // Si c'est une erreur réseau, on garde simplement les données en cache
         }
       }
     } catch (error) {
@@ -158,9 +166,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const tokens = await authService.refreshToken(refreshToken);
       await SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, tokens.accessToken);
       await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, tokens.refreshToken);
-    } catch {
-      // Token invalide → déconnexion
-      await get().logout();
+    } catch (error: any) {
+      if (error.code === 'UNAUTHORIZED') {
+        // Token invalide → déconnexion
+        await get().logout();
+      }
+      throw error; // Rethrow so caller knows it failed (e.g. network error)
     }
   },
 }));
