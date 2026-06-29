@@ -120,10 +120,12 @@ export default function LoginScreen() {
     if (!savedPassword || !email) return;
     
     try {
+      (global as any).isAuthenticatingBiometrics = true;
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Connectez-vous à Kobara',
         fallbackLabel: 'Utiliser le mot de passe',
       });
+      (global as any).isAuthenticatingBiometrics = false;
       
       if (result.success) {
         setIsLoading(true);

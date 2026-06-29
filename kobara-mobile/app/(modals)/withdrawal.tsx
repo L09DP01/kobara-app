@@ -47,10 +47,12 @@ export default function WithdrawalScreen() {
         const isEnrolled = await LocalAuthentication.isEnrolledAsync();
         
         if (hasHardware && isEnrolled) {
+          (global as any).isAuthenticatingBiometrics = true;
           const result = await LocalAuthentication.authenticateAsync({
             promptMessage: 'Confirmez votre identité pour valider ce retrait',
             fallbackLabel: 'Utiliser le code',
           });
+          (global as any).isAuthenticatingBiometrics = false;
           
           if (!result.success) {
             setIsLoading(false);

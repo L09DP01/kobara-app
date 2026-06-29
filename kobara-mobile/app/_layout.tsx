@@ -37,7 +37,9 @@ export default function RootLayout() {
     // App State logic for biometric locking
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        checkBiometrics();
+        if (!(global as any).isAuthenticatingBiometrics) {
+          checkBiometrics();
+        }
       }
       appState.current = nextAppState;
     });
@@ -48,6 +50,8 @@ export default function RootLayout() {
   }, []);
 
   const checkBiometrics = async () => {
+    if ((global as any).isAuthenticatingBiometrics) return;
+    
     const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
     if (bioEnabled === 'true') {
       setIsUnlocked(false);
@@ -55,10 +59,12 @@ export default function RootLayout() {
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
       
       if (hasHardware && isEnrolled) {
+        (global as any).isAuthenticatingBiometrics = true;
         const result = await LocalAuthentication.authenticateAsync({
           promptMessage: 'Déverrouillez Kobara',
           fallbackLabel: 'Utiliser le code',
         });
+        (global as any).isAuthenticatingBiometrics = false;
         if (result.success) {
           setIsUnlocked(true);
         } else {

@@ -87,10 +87,12 @@ export default function MoreScreen() {
         return;
       }
       
+      (global as any).isAuthenticatingBiometrics = true;
       const result = await authenticateAsync({
         promptMessage: 'Confirmez votre identité pour activer la biométrie',
         fallbackLabel: 'Utiliser le code',
       });
+      (global as any).isAuthenticatingBiometrics = false;
       
       if (!result.success) {
         return; // Annulé ou échec
