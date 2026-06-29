@@ -225,9 +225,7 @@ export default function PaymentsScreen() {
               isRefreshing={isRefreshing}
               onRefresh={() => linksQuery.refetch()}
               onLinkPress={(l) => {
-                // Not yet implemented: router.push(`/link/${l.id}`);
-                // Temporary log:
-                console.log('Navigate to link:', l.id);
+                router.push(`/link/${l.id}`);
               }}
               onSharePress={async (l) => {
                 try {
