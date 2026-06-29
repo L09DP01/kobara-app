@@ -25,7 +25,17 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
 
     const { data: link, error: linkError } = await supabaseAdmin
       .from('payment_links')
-      .select('*, payments(id)')
+      .select(`
+        *,
+        payments(
+          id,
+          gross_amount,
+          status,
+          created_at,
+          transaction_reference,
+          customers(name, email, phone)
+        )
+      `)
       .eq('id', id)
       .eq('merchant_id', merchant.id)
       .single();
@@ -34,11 +44,12 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
       return NextResponse.json({ error: "Lien introuvable." }, { status: 404 });
     }
 
-    // Attach payment count
+    // Attach payment count and the payments list
     const payment_count = link.payments ? link.payments.length : 0;
+    const payments = link.payments || [];
     delete link.payments;
 
-    return NextResponse.json({ success: true, link: { ...link, payment_count } });
+    return NextResponse.json({ success: true, link: { ...link, payment_count }, payments });
   } catch (error: any) {
     console.error("API GET /mobile/payment-links/[id] error:", error);
     return NextResponse.json({ error: "Erreur serveur interne." }, { status: 500 });
