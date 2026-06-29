@@ -54,7 +54,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="more"
         options={{
           title: 'Plus',
           tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size} />,
