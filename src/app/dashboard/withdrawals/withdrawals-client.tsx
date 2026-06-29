@@ -129,7 +129,7 @@ export function WithdrawalsClient({
       setReceiver('');
       setCode2fa('');
       
-      const successMessage = res?.status === 'completed'
+      const successMessage = (res as any)?.status === 'completed'
         ? "Votre retrait a été effectué avec succès."
         : "Demande de retrait initiée et en cours de traitement.";
         
