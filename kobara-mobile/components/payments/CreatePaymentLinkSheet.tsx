@@ -60,11 +60,7 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
     setError(null);
 
     try {
-      // POST to /api/mobile/payment-links
-      // Wait, is there a mobile endpoint for this? Yes, we will hit /api/mobile/payment-links
-      // Let's assume the API exists or we will use the existing web one if needed.
-      // We'll use /api/mobile/payment-links as we have done for other mobile endpoints.
-      const response = await apiClient.post('/payment-links', {
+      const response = await apiClient.post('/mobile/payment-links', {
         title: title.trim(),
         description: description.trim(),
         amount: Number(amount),

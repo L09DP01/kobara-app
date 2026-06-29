@@ -11,6 +11,7 @@ import { LinksList } from '../../components/payments/LinksList';
 import { SubscriptionsList } from '../../components/payments/SubscriptionsList';
 import { PaymentFilterSheet, PaymentFilterSheetRef } from '../../components/payments/PaymentFilterSheet';
 import { QuickActionSheet, QuickActionSheetRef } from '../../components/payments/QuickActionSheet';
+import { CreatePaymentLinkSheet } from '@/components/payments/CreatePaymentLinkSheet';
 
 type Tab = 'paiements' | 'liens' | 'abonnements';
 
@@ -43,6 +44,7 @@ export default function PaymentsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentFilter, setCurrentFilter] = useState('all');
+  const [isCreateLinkModalVisible, setIsCreateLinkModalVisible] = useState(false);
 
   const filterSheetRef = useRef<PaymentFilterSheetRef>(null);
   const actionSheetRef = useRef<QuickActionSheetRef>(null);
@@ -120,7 +122,21 @@ export default function PaymentsScreen() {
         />
         
         <View className="px-6 mb-2">
-          <Text className="text-white font-black text-3xl mb-4">Paiements</Text>
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-white font-black text-3xl">Paiements</Text>
+            <TouchableOpacity 
+              onPress={() => {
+                if (activeTab === 'liens') {
+                  setIsCreateLinkModalVisible(true);
+                } else {
+                  actionSheetRef.current?.expand();
+                }
+              }}
+              className="w-10 h-10 bg-[#1A233A] rounded-full items-center justify-center border border-white/10"
+            >
+              <Plus size={20} color="#F97316" strokeWidth={3} />
+            </TouchableOpacity>
+          </View>
           
           {/* Main Tabs */}
           <View className="flex-row border-b border-white/10 mb-4">
@@ -211,14 +227,6 @@ export default function PaymentsScreen() {
               onLinkPress={(l) => console.log('Press link', l)}
               onSharePress={(l) => console.log('Share link', l)}
             />
-            {/* FAB explicitly requested for Liens */}
-            <TouchableOpacity 
-              onPress={() => actionSheetRef.current?.expand()}
-              className="absolute bottom-6 right-6 w-14 h-14 bg-orange-500 rounded-full items-center justify-center shadow-lg"
-              style={styles.fabShadow}
-            >
-              <Plus size={24} color="#FFF" strokeWidth={3} />
-            </TouchableOpacity>
           </View>
         )}
         
@@ -231,14 +239,6 @@ export default function PaymentsScreen() {
               onRefresh={() => subscriptionsQuery.refetch()}
               onSubscriptionPress={(s) => console.log('Press sub', s)}
             />
-            {/* FAB explicitly requested for Abonnements */}
-            <TouchableOpacity 
-              onPress={() => actionSheetRef.current?.expand()}
-              className="absolute bottom-6 right-6 w-14 h-14 bg-orange-500 rounded-full items-center justify-center shadow-lg"
-              style={styles.fabShadow}
-            >
-              <Plus size={24} color="#FFF" strokeWidth={3} />
-            </TouchableOpacity>
           </View>
         )}
 
@@ -254,6 +254,14 @@ export default function PaymentsScreen() {
           onActionSelect={(action) => {
             console.log("Action selected:", action);
             // Will navigate to correct page
+          }}
+        />
+
+        <CreatePaymentLinkSheet 
+          visible={isCreateLinkModalVisible}
+          onClose={() => setIsCreateLinkModalVisible(false)}
+          onSuccess={() => {
+            linksQuery.refetch();
           }}
         />
       </View>
