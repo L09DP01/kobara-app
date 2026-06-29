@@ -8,11 +8,13 @@ import { DashboardHeader } from '../../components/dashboard/DashboardHeader';
 import { RevenueCard } from '../../components/dashboard/RevenueCard';
 import { KPIGrid } from '../../components/dashboard/KPIGrid';
 import { RecentPayments } from '../../components/dashboard/RecentPayments';
+import { QRBottomSheet } from '@/components/balance/QRBottomSheet';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { data, isLoading, isError, error, refetch } = useDashboardSummary();
   const [refreshing, setRefreshing] = useState(false);
+  const [isQrModalVisible, setIsQrModalVisible] = useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -77,6 +79,7 @@ export default function HomeScreen() {
         merchant={data?.merchant} 
         unreadCount={data?.unreadNotifications} 
         onNotificationPress={handleNotificationPress} 
+        onScanPress={() => setIsQrModalVisible(true)}
       />
       
       <ScrollView
@@ -98,6 +101,13 @@ export default function HomeScreen() {
           onPaymentPress={handlePaymentPress}
         />
       </ScrollView>
+
+      <QRBottomSheet 
+        visible={isQrModalVisible} 
+        onClose={() => setIsQrModalVisible(false)}
+        onMyQrPress={() => { setIsQrModalVisible(false); /* navigate or show QR */ }}
+        onScanQrPress={() => { setIsQrModalVisible(false); /* open camera */ }}
+      />
 
       {/* Floating Action Button */}
       <TouchableOpacity 
