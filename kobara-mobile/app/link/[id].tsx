@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Sha
 import { ChevronLeft, Link as LinkIcon, Share2, Trash2, Power, PowerOff, QrCode } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import QRCode from 'react-native-qrcode-svg';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { apiClient } from '../../api/client';
 import { StatusBadge } from '../../components/ui/StatusBadge';
