@@ -1,6 +1,6 @@
 import '../global.css'; // NativeWind v4 initialization
 import React, { useEffect } from 'react';
-import { Stack, useSegments, useRouter } from 'expo-router';
+import { Stack, useSegments, useRouter, useRootNavigationState } from 'expo-router';
 import { AppProvider } from '@/providers/AppProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -13,6 +13,7 @@ export default function RootLayout() {
   const { hydrate, isLoading, hasSeenOnboarding, isAuthenticated, isMerchantProfileComplete } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+  const navigationState = useRootNavigationState();
 
   useEffect(() => {
     async function prepare() {
@@ -29,6 +30,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (isLoading) return;
+    if (!navigationState?.key) return; // Wait for navigation to be ready
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === '(onboarding)';
@@ -44,7 +46,7 @@ export default function RootLayout() {
       // TODO: Si !isMerchantProfileComplete → Complete Account Wizard
       router.replace('/(tabs)');
     }
-  }, [isLoading, hasSeenOnboarding, isAuthenticated, segments]);
+  }, [isLoading, hasSeenOnboarding, isAuthenticated, segments, navigationState?.key]);
 
   if (isLoading) {
     return null; // Splash screen visible pendant le chargement
