@@ -16,6 +16,10 @@ export function BillingClient() {
   const [isYearly, setIsYearly] = useState(false);
   const [upgradeIntent, setUpgradeIntent] = useState<{ planSlug: string, isYearly: boolean } | null>(null);
   const [natcashData, setNatcashData] = useState<{ referenceCode: string, paymentId: string } | null>(null);
+  
+  const [showTranscodeInput, setShowTranscodeInput] = useState(false);
+  const [transCode, setTransCode] = useState('');
+  const [verifyingTransCode, setVerifyingTransCode] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -80,6 +84,30 @@ export function BillingClient() {
     } catch (err: any) {
       setError(err.message);
       setUpgrading(false);
+    }
+  };
+
+  const handleVerifyTransCode = async () => {
+    if (!transCode.trim() || !natcashData) return;
+    setVerifyingTransCode(true);
+    
+    try {
+      const res = await fetch('/api/payments/verify-natcash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId: natcashData.paymentId, transCode: transCode.trim() })
+      });
+      
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Erreur lors de la vérification');
+      
+      toast.success(result.message || 'Paiement validé avec succès !');
+      setNatcashData(null);
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setVerifyingTransCode(false);
     }
   };
 
@@ -334,19 +362,50 @@ export function BillingClient() {
                 {natcashData.referenceCode}
               </div>
               <p className="text-slate-500 text-sm mt-4">
-                Le transfert sera détecté automatiquement. Ne fermez pas cette page.
+                Votre plan sera automatiquement validé après le paiement. Ne fermez pas cette page.
               </p>
             </div>
 
-            <button 
-              onClick={() => {
-                setNatcashData(null);
-                window.location.reload();
-              }}
-              className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-300 font-bold rounded-xl transition-colors"
-            >
-              Fermer (J'ai payé)
-            </button>
+            {!showTranscodeInput ? (
+              <button 
+                onClick={() => setShowTranscodeInput(true)}
+                className="w-full py-3 bg-white/5 hover:bg-white/10 text-slate-300 font-bold rounded-xl transition-colors"
+              >
+                Fermer (J'ai payé)
+              </button>
+            ) : (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                <div className="text-left">
+                  <label className="text-sm font-bold text-white mb-1 block">TransCode (reçu par SMS)</label>
+                  <input 
+                    type="text" 
+                    value={transCode}
+                    onChange={(e) => setTransCode(e.target.value)}
+                    placeholder="ex: 26062891687375"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
+                  />
+                  <p className="text-xs text-slate-500 mt-2">Vérification manuelle si le SMS tarde à être détecté.</p>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => {
+                      setNatcashData(null);
+                      window.location.reload();
+                    }}
+                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-slate-300 font-bold rounded-xl transition-colors"
+                  >
+                    Fermer
+                  </button>
+                  <button 
+                    onClick={handleVerifyTransCode}
+                    disabled={verifyingTransCode || !transCode.trim()}
+                    className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                  >
+                    {verifyingTransCode ? 'Vérification...' : 'Vérifier'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

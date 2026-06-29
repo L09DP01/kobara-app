@@ -1,12 +1,40 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
+import { apiClient } from '../../api/client';
 
 export default function NatCashWaitingScreen() {
-  const { referenceCode, amount } = useLocalSearchParams<{ referenceCode: string, amount: string }>();
+  const { referenceCode, amount, paymentId } = useLocalSearchParams<{ referenceCode: string, amount: string, paymentId: string }>();
   const router = useRouter();
+
+  const [showTranscodeInput, setShowTranscodeInput] = useState(false);
+  const [transCode, setTransCode] = useState('');
+  const [verifyingTransCode, setVerifyingTransCode] = useState(false);
+
+  const handleVerifyTransCode = async () => {
+    if (!transCode.trim() || !paymentId) return;
+    
+    setVerifyingTransCode(true);
+    try {
+      const res = await apiClient.post('/payments/verify-natcash', {
+        paymentId,
+        transCode: transCode.trim(),
+      });
+      
+      Alert.alert(
+        "Succès", 
+        res.data?.message || "Paiement validé avec succès !",
+        [{ text: "OK", onPress: () => router.replace('/(tabs)/profile') }]
+      );
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || "Erreur de vérification. Veuillez réessayer.";
+      Alert.alert("Erreur", errorMsg);
+    } finally {
+      setVerifyingTransCode(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -41,21 +69,60 @@ export default function NatCashWaitingScreen() {
               {referenceCode}
             </Text>
             <Text style={styles.refFooter}>
-              Le transfert sera détecté automatiquement. Ne quittez pas cet écran.
+              Votre plan sera automatiquement validé après le paiement. Ne quittez pas cet écran.
             </Text>
           </View>
 
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#F97316" style={{ marginRight: 12 }} />
-            <Text style={styles.loadingText}>En attente du transfert SMS...</Text>
-          </View>
+          {!showTranscodeInput ? (
+            <>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#F97316" style={{ marginRight: 12 }} />
+                <Text style={styles.loadingText}>En attente du transfert SMS...</Text>
+              </View>
 
-          <TouchableOpacity 
-            onPress={() => router.replace('/(tabs)/profile')}
-            style={styles.closeButton}
-          >
-            <Text style={styles.closeButtonText}>Fermer (J'ai payé)</Text>
-          </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => setShowTranscodeInput(true)}
+                style={styles.closeButton}
+              >
+                <Text style={styles.closeButtonText}>Fermer (J'ai payé)</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={styles.transCodeContainer}>
+              <Text style={styles.transCodeLabel}>TransCode (reçu par SMS)</Text>
+              <TextInput
+                style={styles.transCodeInput}
+                placeholder="ex: 26062891687375"
+                placeholderTextColor="#64748B"
+                value={transCode}
+                onChangeText={setTransCode}
+                autoCapitalize="none"
+              />
+              <Text style={styles.transCodeHelp}>
+                Vérification manuelle si le SMS tarde à être détecté.
+              </Text>
+              
+              <View style={styles.transCodeActions}>
+                <TouchableOpacity 
+                  onPress={() => router.replace('/(tabs)/profile')}
+                  style={[styles.closeButton, { flex: 1, marginRight: 8, paddingVertical: 12 }]}
+                >
+                  <Text style={styles.closeButtonText}>Fermer</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={handleVerifyTransCode}
+                  disabled={verifyingTransCode || !transCode.trim()}
+                  style={[styles.verifyButton, (verifyingTransCode || !transCode.trim()) && styles.disabledButton]}
+                >
+                  {verifyingTransCode ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <Text style={styles.verifyButtonText}>Vérifier</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -196,5 +263,50 @@ const styles = StyleSheet.create({
     color: '#CBD5E1',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  transCodeContainer: {
+    width: '100%',
+  },
+  transCodeLabel: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  transCodeInput: {
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    color: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+  },
+  transCodeHelp: {
+    color: '#64748B',
+    fontSize: 12,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  transCodeActions: {
+    flexDirection: 'row',
+  },
+  verifyButton: {
+    flex: 1,
+    backgroundColor: '#F97316',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginLeft: 8,
+  },
+  verifyButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
