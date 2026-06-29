@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Zap } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
 
 const { width } = Dimensions.get('window');
 
@@ -40,9 +41,23 @@ export default function ScannerScreen() {
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
     
+    // Check if it's a payment link (e.g., https://kobara.app/pay/xyz)
+    const paymentLinkMatch = data.match(/\/pay\/([a-zA-Z0-9-]+)\/?$/);
+    if (paymentLinkMatch || data.includes('/pay/')) {
+      // Open the payment link in an in-app browser overlay
+      await WebBrowser.openBrowserAsync(data, {
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+        toolbarColor: '#0A0F1C',
+        controlsColor: '#F97316'
+      });
+      // Allow scanning again after closing the browser
+      setScanned(false);
+      return;
+    }
+
     let recipientId = data;
     
     // Check if it's a generic merchant link (e.g., https://kobara.app/m/123-456)
