@@ -70,25 +70,8 @@ export default function AccountStatusScreen() {
             </View>
           </View>
 
-          <Text className="text-slate-500 text-sm font-semibold mb-2 uppercase tracking-wider">Limites du forfait</Text>
+          <Text className="text-slate-500 text-sm font-semibold mb-2 uppercase tracking-wider">Limites du forfait ({data.plan?.name || 'Free'})</Text>
           <View className="bg-[#121A2F] rounded-2xl mb-10">
-            <View className="p-4 border-b border-white/5">
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-white font-medium">Paiements / mois</Text>
-                <Text className="text-slate-400">
-                  {data.usage?.monthly_payments || 0} / {data.plan?.monthly_payment_limit || '∞'}
-                </Text>
-              </View>
-              {data.plan?.monthly_payment_limit && (
-                <View className="h-1.5 w-full bg-[#0A0F1C] rounded-full overflow-hidden">
-                  <View 
-                    className="h-full bg-orange-500" 
-                    style={{ width: `${Math.min(100, ((data.usage?.monthly_payments || 0) / data.plan.monthly_payment_limit) * 100)}%` }} 
-                  />
-                </View>
-              )}
-            </View>
-
             <View className="p-4 border-b border-white/5">
               <View className="flex-row justify-between mb-2">
                 <Text className="text-white font-medium">Retraits journaliers (HTG)</Text>
@@ -105,6 +88,17 @@ export default function AccountStatusScreen() {
                 </View>
               )}
             </View>
+
+            {data.subscription && data.subscription.current_period_end && (
+              <View className="p-4 border-b border-white/5">
+                <View className="flex-row justify-between">
+                  <Text className="text-white font-medium">Prochain renouvellement</Text>
+                  <Text className="text-slate-400">
+                    {new Date(data.subscription.current_period_end).toLocaleDateString('fr-FR')}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         </>
       ) : (
