@@ -44,10 +44,10 @@ export function WithdrawalsClient({
     setErrorMsg('');
     let minAmount = 150;
     if (method === 'B2B') minAmount = 1;
-    if (method === 'Zelle') minAmount = 3000;
+    if (method === 'Zelle') minAmount = 3125;
     
     if (!amount || Number(amount) < minAmount) {
-      setErrorMsg(method === 'Zelle' ? `Le montant minimum pour Zelle est de 3000 HTG (20 $).` : `Le montant minimum est de ${minAmount} HTG`);
+      setErrorMsg(method === 'Zelle' ? `Le montant minimum pour Zelle est de 3125 HTG (20 $).` : `Le montant minimum est de ${minAmount} HTG`);
       return;
     }
     if (method === 'B2B' && !receiver) {
@@ -321,7 +321,7 @@ export function WithdrawalsClient({
                     >
                       <option value="MonCash">MonCash</option>
                       <option value="NatCash">NatCash</option>
-                      <option value="Zelle">Zelle (min 20$ / 3000 HTG)</option>
+                      <option value="Zelle">Zelle (min 20$ / 3125 HTG)</option>
                       <option value="B2B">Transfert B2B (Gratuit)</option>
                       <option value="Sogebank" disabled>Sogebank (Bientôt)</option>
                       <option value="Unibank" disabled>Unibank (Bientôt)</option>

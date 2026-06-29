@@ -25,8 +25,8 @@ export default function WithdrawalScreen() {
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) return;
     if (!reference) return;
     
-    if (method === 'zelle' && Number(amount) < 3000) {
-      setError("Le montant minimum pour Zelle est de 3000 HTG (20 $).");
+    if (method === 'zelle' && Number(amount) < 3125) {
+      setError("Le montant minimum pour Zelle est de 3125 HTG (20 $).");
       return;
     } else if (method !== 'zelle' && Number(amount) < 150) {
       setError("Le montant minimum est de 150 HTG.");
