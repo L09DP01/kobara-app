@@ -12,13 +12,24 @@ export async function POST(
     const authResult = await verifyMobileToken(req);
     if (authResult.errorResponse) return authResult.errorResponse;
     
-    const merchantId = authResult.payload?.merchantId;
+    const userId = authResult.payload?.sub;
+    if (!userId) {
+      return NextResponse.json({ error: "Utilisateur non identifié", code: "UNAUTHORIZED" }, { status: 401 });
+    }
+
+    const supabase = createAdminClient();
+    const { data: merchant } = await supabase
+      .from('merchants')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+      
+    const merchantId = merchant?.id;
     if (!merchantId) {
       return NextResponse.json({ error: "Profil marchand requis", code: "MERCHANT_REQUIRED" }, { status: 403 });
     }
 
     // 2. Vérifier l'abonnement
-    const supabase = createAdminClient();
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*, plans(*)')
