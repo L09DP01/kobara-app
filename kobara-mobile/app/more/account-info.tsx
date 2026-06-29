@@ -15,7 +15,7 @@ export default function AccountInfoScreen() {
   const fetchMerchant = async () => {
     try {
       const res = await apiClient.get('/mobile/merchants/me');
-      if (res.data.success) {
+      if (res?.data?.success) {
         setMerchant(res.data.data);
       }
     } catch (error) {

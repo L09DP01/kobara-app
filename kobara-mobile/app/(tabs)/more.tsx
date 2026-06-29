@@ -27,7 +27,7 @@ export default function MoreScreen() {
   const fetchMerchant = async () => {
     try {
       const res = await apiClient.get('/mobile/dashboard/summary');
-      if (res.data.success && res.data.merchant) {
+      if (res?.data?.success && res?.data?.merchant) {
         setMerchant(res.data.merchant);
       }
       

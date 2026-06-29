@@ -11,7 +11,7 @@ export default function AccountStatusScreen() {
     const fetchData = async () => {
       try {
         const res = await apiClient.get('/mobile/billing');
-        if (res.data.data) {
+        if (res?.data?.data) {
           setData(res.data.data);
         }
       } catch (error) {
