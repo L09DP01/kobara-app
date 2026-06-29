@@ -50,12 +50,16 @@ export function WithdrawalsClient({
       setErrorMsg(method === 'Zelle' ? `Le montant minimum pour Zelle est de 3000 HTG (20 $).` : `Le montant minimum est de ${minAmount} HTG`);
       return;
     }
-    if (method === 'MonCash' && !receiver) {
-      setErrorMsg("Le numéro de réception est requis pour MonCash.");
-      return;
-    }
     if (method === 'B2B' && !receiver) {
       setErrorMsg("L'email du destinataire est requis pour le transfert B2B.");
+      return;
+    }
+    if ((method === 'MonCash' || method === 'NatCash') && !receiver) {
+      setErrorMsg(`Le numéro de réception est requis pour ${method}.`);
+      return;
+    }
+    if (method === 'Zelle' && !receiver) {
+      setErrorMsg("L'email ou le téléphone est requis pour Zelle.");
       return;
     }
     if (Number(amount) > activeBalance) {
@@ -286,12 +290,12 @@ export function WithdrawalsClient({
                           <span>{Number(amount).toLocaleString('fr-FR')} HTG</span>
                         </div>
                         <div className="flex justify-between text-sm text-orange-400">
-                          <span>Frais appliqués (5%)</span>
-                          <span>-{(Number(amount) * 0.05).toLocaleString('fr-FR')} HTG</span>
+                          <span>Frais appliqués ({method === 'Zelle' ? '0%' : '5%'})</span>
+                          <span>-{(Number(amount) * (method === 'Zelle' ? 0 : 0.05)).toLocaleString('fr-FR')} HTG</span>
                         </div>
                         <div className="flex justify-between font-bold text-white mt-2 pt-2 border-t border-white/10">
                           <span>Montant net à recevoir</span>
-                          <span className="text-green-400">{(Number(amount) * 0.95).toLocaleString('fr-FR')} HTG</span>
+                          <span className="text-green-400">{(Number(amount) * (method === 'Zelle' ? 1 : 0.95)).toLocaleString('fr-FR')} HTG</span>
                         </div>
                       </div>
                     )}
@@ -316,6 +320,8 @@ export function WithdrawalsClient({
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all [&>option]:bg-[#131B2C]"
                     >
                       <option value="MonCash">MonCash</option>
+                      <option value="NatCash">NatCash</option>
+                      <option value="Zelle">Zelle (min 20$ / 3000 HTG)</option>
                       <option value="B2B">Transfert B2B (Gratuit)</option>
                       <option value="Sogebank" disabled>Sogebank (Bientôt)</option>
                       <option value="Unibank" disabled>Unibank (Bientôt)</option>
@@ -336,9 +342,23 @@ export function WithdrawalsClient({
                     </div>
                   )}
 
-                  {method === 'MonCash' && (
+                  {method === 'Zelle' && (
                     <div>
-                      <label className="block text-xs text-slate-400 font-bold mb-1.5">Numéro de téléphone (MonCash)</label>
+                      <label className="block text-xs text-slate-400 font-bold mb-1.5">Email ou Téléphone (Zelle)</label>
+                      <input 
+                        type="text" 
+                        value={receiver}
+                        onChange={(e) => setReceiver(e.target.value)}
+                        placeholder="email@exemple.com"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all mb-3"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {(method === 'MonCash' || method === 'NatCash') && (
+                    <div>
+                      <label className="block text-xs text-slate-400 font-bold mb-1.5">Numéro de téléphone ({method})</label>
                       <input 
                         type="tel" 
                         value={receiver}
