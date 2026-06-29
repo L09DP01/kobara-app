@@ -5,8 +5,14 @@ import { MobilePaymentLink } from '@/services/payments';
 import { StatusBadge } from '../ui/StatusBadge';
 import { EmptyState } from '../ui/EmptyState';
 import { TransactionSkeleton } from '../ui/SkeletonLoader';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+
+const formatDate = (dateString: string) => {
+  const d = new Date(dateString);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 interface LinksListProps {
   links: MobilePaymentLink[];
@@ -37,7 +43,7 @@ export function LinksList({ links, isLoading, onRefresh, isRefreshing, onLinkPre
       }
       ListEmptyComponent={<EmptyState message="Aucun lien de paiement créé." icon={<LinkIcon size={32} color="#64748B" />} />}
       renderItem={({ item }) => {
-        const formattedDate = format(new Date(item.created_at), 'dd/MM/yyyy', { locale: fr });
+        const formattedDate = formatDate(item.created_at);
         
         return (
           <TouchableOpacity 

@@ -5,8 +5,14 @@ import { MobileSubscription } from '@/services/payments';
 import { StatusBadge } from '../ui/StatusBadge';
 import { EmptyState } from '../ui/EmptyState';
 import { TransactionSkeleton } from '../ui/SkeletonLoader';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+
+const formatDate = (dateString: string) => {
+  const d = new Date(dateString);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 interface SubscriptionsListProps {
   subscriptions: MobileSubscription[];
@@ -37,7 +43,7 @@ export function SubscriptionsList({ subscriptions, isLoading, onRefresh, isRefre
       ListEmptyComponent={<EmptyState message="Aucun abonnement actif." icon={<CalendarClock size={32} color="#64748B" />} />}
       renderItem={({ item }) => {
         const initial = item.customers?.name ? item.customers.name.substring(0, 2).toUpperCase() : '??';
-        const formattedNextBilling = item.next_billing_date ? format(new Date(item.next_billing_date), 'dd/MM/yyyy', { locale: fr }) : 'Non défini';
+        const formattedNextBilling = item.next_billing_date ? formatDate(item.next_billing_date) : 'Non défini';
         
         return (
           <TouchableOpacity 

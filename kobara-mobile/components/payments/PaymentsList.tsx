@@ -5,8 +5,16 @@ import { MobilePayment } from '@/services/payments';
 import { StatusBadge } from '../ui/StatusBadge';
 import { EmptyState } from '../ui/EmptyState';
 import { TransactionSkeleton } from '../ui/SkeletonLoader';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+
+const formatDate = (dateString: string) => {
+  const d = new Date(dateString);
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${day}/${month}/${year} • ${hours}:${minutes}`;
+};
 
 interface PaymentsListProps {
   payments: MobilePayment[];
@@ -37,7 +45,7 @@ export function PaymentsList({ payments, isLoading, onRefresh, isRefreshing, onP
       ListEmptyComponent={<EmptyState message="Aucun paiement trouvé." />}
       renderItem={({ item }) => {
         const initial = item.customers?.name ? item.customers.name.substring(0, 2).toUpperCase() : '??';
-        const formattedDate = format(new Date(item.created_at), 'dd/MM/yyyy • HH:mm', { locale: fr });
+        const formattedDate = formatDate(item.created_at);
         
         return (
           <TouchableOpacity 
