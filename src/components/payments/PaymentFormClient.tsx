@@ -18,7 +18,7 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
       <input type="hidden" name="merchantId" value={link.merchant_id} />
       
       {/* SECTION: Informations Client */}
-      <div className="space-y-4">
+      <div className="space-y-4 border border-white/10 bg-white/5 rounded-2xl p-5 sm:p-6 shadow-sm">
         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Informations</h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -64,7 +64,7 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
 
       {/* Montant dynamique si non fixé */}
       {!link.amount && (
-        <div className="space-y-4 mt-6">
+        <div className="space-y-4 border border-white/10 bg-white/5 rounded-2xl p-5 sm:p-6 shadow-sm mt-6">
           <div className="space-y-2">
             <label htmlFor="amount" className="block text-sm font-semibold text-slate-300">
               Montant à payer (HTG) *
@@ -88,7 +88,7 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
 
       {/* SECTION: Adresse de Livraison */}
       {link.metadata?.collect_address && (
-        <div className="space-y-4 mt-8 pt-6 border-t border-white/5">
+        <div className="space-y-4 mt-6 border border-white/10 bg-white/5 rounded-2xl p-5 sm:p-6 shadow-sm">
           <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Adresse de livraison</h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -144,7 +144,7 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
       )}
 
       {/* SECTION: Méthode de Paiement */}
-      <div className="space-y-4 mt-8 pt-6 border-t border-white/5">
+      <div className="space-y-4 mt-6 border border-white/10 bg-white/5 rounded-2xl p-5 sm:p-6 shadow-sm">
         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Méthode de paiement</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className={`relative flex items-center p-4 cursor-pointer rounded-xl border transition-all group ${provider === 'moncash' ? 'border-orange-500 bg-orange-500/10' : 'border-white/10 bg-[#0F1626] hover:bg-white/5'}`}>

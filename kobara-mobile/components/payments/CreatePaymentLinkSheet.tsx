@@ -26,6 +26,8 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
   const [imageType, setImageType] = useState<'url' | 'upload'>('url');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [collectAddress, setCollectAddress] = useState(false);
+  const [shippingFee, setShippingFee] = useState('');
+  const [passFeesToCustomer, setPassFeesToCustomer] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -53,6 +55,8 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
         setProductImage('');
         setImageType('url');
         setCollectAddress(false);
+        setShippingFee('');
+        setPassFeesToCustomer(false);
         setIsLoading(false);
         setError(null);
         setCreatedLink(null);
@@ -82,7 +86,9 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
         currency: 'HTG',
         product_name: productName.trim() || undefined,
         product_image: productImage.trim() || undefined,
-        collect_address: collectAddress
+        collect_address: collectAddress,
+        shipping_fee: shippingFee || undefined,
+        pass_fees_to_customer: passFeesToCustomer
       });
 
       if (response.data && response.data.success) {
@@ -329,12 +335,40 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
 
                 <TouchableOpacity 
                   onPress={() => setCollectAddress(!collectAddress)}
-                  className="flex-row items-center gap-3 mb-6 bg-white/5 p-4 rounded-xl border border-white/10"
+                  className="flex-row items-center gap-3 mb-4 bg-white/5 p-4 rounded-xl border border-white/10"
                 >
                   <View className={`w-6 h-6 rounded border flex items-center justify-center ${collectAddress ? 'bg-orange-500 border-orange-500' : 'border-slate-500'}`}>
                     {collectAddress && <CheckCircle size={16} color="#FFF" />}
                   </View>
                   <Text className="text-white font-medium flex-1">Demander l'adresse de livraison au client</Text>
+                </TouchableOpacity>
+
+                {collectAddress && (
+                  <View className="mb-4 pl-4 border-l-2 border-white/10">
+                    <Text className="text-slate-400 text-sm font-medium mb-2">Frais de livraison (HTG)</Text>
+                    <TextInput
+                      className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 text-base"
+                      placeholder="Ex: 250.00"
+                      placeholderTextColor="#475569"
+                      keyboardType="numeric"
+                      value={shippingFee}
+                      onChangeText={setShippingFee}
+                      editable={!isLoading}
+                    />
+                  </View>
+                )}
+
+                <TouchableOpacity 
+                  onPress={() => setPassFeesToCustomer(!passFeesToCustomer)}
+                  className="flex-row items-center gap-3 mb-6 bg-white/5 p-4 rounded-xl border border-white/10"
+                >
+                  <View className={`w-6 h-6 rounded border flex items-center justify-center ${passFeesToCustomer ? 'bg-orange-500 border-orange-500' : 'border-slate-500'}`}>
+                    {passFeesToCustomer && <CheckCircle size={16} color="#FFF" />}
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-white font-medium">Frais à la charge du client</Text>
+                    <Text className="text-slate-400 text-xs mt-1">Le client paiera les frais de transaction (+2.9%)</Text>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity 

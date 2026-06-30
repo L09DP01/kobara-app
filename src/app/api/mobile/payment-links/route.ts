@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, amount, currency, product_name, product_image, collect_address } = body;
+    const { title, description, amount, currency, product_name, product_image, collect_address, shipping_fee, pass_fees_to_customer } = body;
 
     if (!title || !amount || isNaN(Number(amount))) {
       return NextResponse.json({ error: "Le titre et le montant sont requis." }, { status: 400 });
@@ -110,11 +110,15 @@ export async function POST(req: NextRequest) {
 
     const environment = merchant.current_environment || 'test';
     const randomSlug = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    
+    const parsedShippingFee = shipping_fee ? parseFloat(shipping_fee) : 0;
 
     const metadata = {
       ...(product_name && { product_name }),
       ...(product_image && { product_image }),
-      ...(collect_address && { collect_address })
+      ...(collect_address && { collect_address }),
+      ...(collect_address && parsedShippingFee > 0 && { shipping_fee: parsedShippingFee }),
+      ...(pass_fees_to_customer && { pass_fees_to_customer })
     };
 
     const { data: link, error: insertError } = await supabaseAdmin

@@ -73,7 +73,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F1C] flex flex-col md:flex-row font-sans text-white">
+    <div className="min-h-screen bg-[#0A0F1C] flex flex-col-reverse md:flex-row font-sans text-white">
       {/* Colonne de Gauche : Récapitulatif (Sidebar) */}
       <div className="w-full md:w-[400px] lg:w-[450px] bg-[#0F1626] border-b md:border-b-0 md:border-r border-white/5 p-6 md:p-10 flex flex-col relative z-10 shrink-0">
         
@@ -161,7 +161,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
                   Frais de livraison
                   <span className="material-symbols-outlined text-[14px] text-slate-500">info</span>
                 </span>
-                <span className="font-medium">0 HTG</span>
+                <span className="font-medium">{link.metadata?.shipping_fee ? `${Number(link.metadata.shipping_fee).toLocaleString('fr-FR')} HTG` : '0 HTG'}</span>
               </div>
             )}
           </div>
@@ -173,7 +173,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
             <span className="text-white font-bold text-base">Total à payer</span>
             <div className="text-right">
               <span className="text-orange-500 font-black text-2xl tracking-tight">
-                {link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : '---'}
+                {link.amount ? `${(Number(link.amount) + (link.metadata?.shipping_fee ? Number(link.metadata.shipping_fee) : 0)).toLocaleString('fr-FR')} HTG` : '---'}
               </span>
             </div>
           </div>
@@ -243,7 +243,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
               <div>
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Montant à payer</h3>
                 <div className="text-orange-500 font-black text-3xl sm:text-4xl tracking-tight">
-                  {link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : 'Variable'}
+                  {link.amount ? `${(Number(link.amount) + (link.metadata?.shipping_fee ? Number(link.metadata.shipping_fee) : 0)).toLocaleString('fr-FR')} HTG` : 'Variable'}
                 </div>
               </div>
               <div className="text-right flex-1 sm:max-w-[200px]">

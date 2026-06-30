@@ -11,6 +11,7 @@ export function CreatePaymentLinkForm() {
   const [imageType, setImageType] = useState<'url' | 'upload'>('url');
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [collectAddress, setCollectAddress] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -189,9 +190,30 @@ export function CreatePaymentLinkForm() {
             <span className="text-base sm:text-sm font-bold text-white">Demander le numéro de téléphone</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" name="collect_address" value="true" className="w-5 h-5 sm:w-4 sm:h-4 text-orange-500 bg-white/10 border-white/20 rounded focus:ring-orange-500 focus:ring-2" />
+            <input 
+              type="checkbox" 
+              name="collect_address" 
+              value="true" 
+              checked={collectAddress}
+              onChange={(e) => setCollectAddress(e.target.checked)}
+              className="w-5 h-5 sm:w-4 sm:h-4 text-orange-500 bg-white/10 border-white/20 rounded focus:ring-orange-500 focus:ring-2" 
+            />
             <span className="text-base sm:text-sm font-bold text-white">Demander l'adresse de livraison</span>
           </label>
+          {collectAddress && (
+            <div className="pl-8 pt-2">
+              <label htmlFor="shipping_fee" className="block text-sm font-bold text-white mb-2">Frais de livraison (HTG)</label>
+              <input 
+                type="number" 
+                id="shipping_fee" 
+                name="shipping_fee" 
+                step="0.01"
+                min="0"
+                placeholder="Ex: 250.00"
+                className="w-full sm:w-1/2 px-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-base sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm placeholder:text-slate-500"
+              />
+            </div>
+          )}
         </div>
       </div>
 

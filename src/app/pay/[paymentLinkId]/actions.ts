@@ -35,7 +35,9 @@ export async function processPayment(formData: FormData) {
   }
 
   // Determine base amount (if link has a fixed amount, use it to avoid tampering)
-  const baseAmount = linkInfo.amount ? Number(linkInfo.amount) : parseFloat(amountStr);
+  const productAmount = linkInfo.amount ? Number(linkInfo.amount) : parseFloat(amountStr);
+  const shippingFee = (linkInfo.metadata?.collect_address && linkInfo.metadata?.shipping_fee) ? Number(linkInfo.metadata.shipping_fee) : 0;
+  const baseAmount = productAmount + shippingFee;
 
   if (isNaN(baseAmount) || baseAmount < 10) {
     throw new Error("Montant invalide. Le montant minimum est de 10 HTG.");
