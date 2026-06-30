@@ -238,7 +238,7 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
                   </View>
                 )}
 
-                <Text className="text-slate-400 text-sm font-medium mb-2">Titre de l'article ou service</Text>
+                <Text className="text-slate-400 text-sm font-medium mb-2">Nom du produit ou service *</Text>
                 <TextInput
                   className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
                   placeholder="Ex: T-shirt noir, Consultation..."

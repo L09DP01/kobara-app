@@ -74,7 +74,7 @@ export function CreatePaymentLinkForm() {
       )}
       
       <div className="space-y-2">
-        <label htmlFor="title" className="block text-sm font-bold text-white">Titre du paiement *</label>
+        <label htmlFor="title" className="block text-sm font-bold text-white">Nom du produit ou service *</label>
         <input 
           type="text" 
           id="title" 
