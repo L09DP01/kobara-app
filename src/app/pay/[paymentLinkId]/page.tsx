@@ -78,14 +78,8 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
       <div className="w-full md:w-[400px] lg:w-[450px] bg-[#0F1626] border-b md:border-b-0 md:border-r border-white/5 p-6 md:p-10 flex flex-col relative z-10 shrink-0">
         
         {/* En-tête / Logo */}
-        <div className="mb-8 md:mb-12 flex items-center justify-center md:justify-start w-full relative">
-          <div className="absolute left-0 md:hidden">
-             <span className="material-symbols-outlined text-white">menu</span>
-          </div>
+        <div className="mb-8 md:mb-12 flex items-center justify-center md:justify-start w-full">
           <img src="/logo.png" alt="Kobara" className="h-6 md:h-8 object-contain" />
-          <div className="absolute right-0 md:hidden">
-             <span className="material-symbols-outlined text-white">shield</span>
-          </div>
         </div>
 
         {/* Bouton retour (masqué pour le moment selon la consigne, ou on peut l'afficher conditionnellement si un success_url existe) */}
@@ -129,7 +123,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
           )}
 
           {/* Sous-total et Frais */}
-          <div className="space-y-4 mb-8">
+          <div className="space-y-4 mb-8 hidden md:block">
             <div className="flex justify-between items-center text-sm">
               <span className="text-slate-400">Sous-total</span>
               <span className="font-medium">{link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : '---'}</span>
@@ -162,10 +156,10 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
             )}
           </div>
 
-          <div className="h-px w-full bg-white/5 mb-6" />
+          <div className="h-px w-full bg-white/5 mb-6 hidden md:block" />
 
           {/* Total */}
-          <div className="flex justify-between items-end mb-12">
+          <div className="hidden md:flex justify-between items-end mb-12">
             <span className="text-white font-bold text-base">Total à payer</span>
             <div className="text-right">
               <span className="text-orange-500 font-black text-2xl tracking-tight">
@@ -208,7 +202,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
           </div>
         </div>
         
-        <div className="mt-12 text-xs text-slate-500">
+        <div className="mt-12 text-xs text-slate-500 hidden md:block">
           © {new Date().getFullYear()} Kobara. Tous droits réservés.
         </div>
       </div>
@@ -219,7 +213,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none" />
         
         <div className="max-w-4xl mx-auto p-6 md:p-12 lg:p-16">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+          <div className="hidden md:flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Paiement sécurisé</h1>
               <p className="text-slate-400 text-sm">Finalisez votre paiement en toute sécurité via MonCash ou NatCash.</p>
