@@ -73,7 +73,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F1C] flex flex-col-reverse md:flex-row font-sans text-white">
+    <div className="min-h-screen bg-[#0A0F1C] flex flex-col md:flex-row font-sans text-white">
       {/* Colonne de Gauche : Récapitulatif (Sidebar) */}
       <div className="w-full md:w-[400px] lg:w-[450px] bg-[#0F1626] border-b md:border-b-0 md:border-r border-white/5 p-6 md:p-10 flex flex-col relative z-10 shrink-0">
         
@@ -176,7 +176,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
         </div>
 
         {/* Badges de Réassurance */}
-        <div className="space-y-6 mt-auto">
+        <div className="space-y-6 mt-auto hidden md:block">
           <div className="flex gap-4">
             <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/5">
               <ShieldCheck size={20} className="text-orange-500" />

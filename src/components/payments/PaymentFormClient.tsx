@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Lock } from "lucide-react";
+import { CheckCircle2, Lock, ChevronDown } from "lucide-react";
 
 export default function PaymentFormClient({ link, processPaymentAction }: { link: any, processPaymentAction: (formData: FormData) => void }) {
   const [provider, setProvider] = useState<'moncash' | 'natcash'>('moncash');
@@ -89,7 +89,28 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
       {/* SECTION: Adresse de Livraison */}
       {link.metadata?.collect_address && (
         <div className="space-y-4 mt-6 border border-white/10 bg-white/5 rounded-2xl p-5 sm:p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Adresse de livraison</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Adresse de livraison</h3>
+            <ChevronDown size={16} className="text-slate-400" />
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 bg-[#0F1626] border border-white/10 rounded-xl p-4 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-6 bg-orange-500 rounded-full p-1 flex justify-end items-center shrink-0">
+                <div className="w-4 h-4 bg-white rounded-full shadow-sm"></div>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Ajouter une adresse de livraison</p>
+                <p className="text-xs text-slate-400 mt-0.5">Frais de livraison appliqués</p>
+              </div>
+            </div>
+            {link.metadata?.shipping_fee > 0 && (
+              <div className="text-left sm:text-right">
+                <p className="text-[10px] text-slate-400">Frais de livraison</p>
+                <p className="text-sm font-bold text-orange-500">{Number(link.metadata.shipping_fee).toLocaleString('fr-FR')} HTG</p>
+              </div>
+            )}
+          </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -157,19 +178,21 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
               onChange={() => setProvider('moncash')}
             />
             <div className="flex-1 flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md">
+              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md shrink-0">
                 MC
               </div>
               <div>
                 <div className="font-bold text-white text-sm flex items-center gap-2">
                   MonCash 
-                  {provider === 'moncash' && <span className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-0.5 rounded-full">Sélectionné</span>}
+                  {provider === 'moncash' && <span className="bg-orange-500/20 text-orange-400 text-[10px] px-2 py-0.5 rounded-full font-semibold">Recommandé</span>}
                 </div>
-                <div className="text-slate-400 text-xs mt-0.5">Payez avec votre compte MonCash</div>
+                {provider === 'moncash' && (
+                   <div className="text-slate-400 text-xs mt-0.5 hidden sm:block">Payez avec votre compte MonCash</div>
+                )}
               </div>
             </div>
             {provider === 'moncash' ? (
-              <CheckCircle2 size={20} className="text-orange-500 ml-2 shrink-0" />
+              <div className="w-5 h-5 rounded-full border-[5px] border-orange-500 ml-2 shrink-0"></div>
             ) : (
               <div className="w-5 h-5 rounded-full border-2 border-slate-600 ml-2 shrink-0"></div>
             )}
@@ -185,19 +208,21 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
               onChange={() => setProvider('natcash')}
             />
             <div className="flex-1 flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md">
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md shrink-0">
                 NC
               </div>
               <div>
                 <div className="font-bold text-white text-sm flex items-center gap-2">
                   NatCash
-                  {provider === 'natcash' && <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full">Sélectionné</span>}
+                  {provider === 'natcash' && <span className="bg-green-500/20 text-green-400 text-[10px] px-2 py-0.5 rounded-full font-semibold">Recommandé</span>}
                 </div>
-                <div className="text-slate-400 text-xs mt-0.5">Payez avec votre compte NatCash</div>
+                {provider === 'natcash' && (
+                  <div className="text-slate-400 text-xs mt-0.5 hidden sm:block">Payez avec votre compte NatCash</div>
+                )}
               </div>
             </div>
             {provider === 'natcash' ? (
-              <CheckCircle2 size={20} className="text-green-500 ml-2 shrink-0" />
+              <div className="w-5 h-5 rounded-full border-[5px] border-green-500 ml-2 shrink-0"></div>
             ) : (
               <div className="w-5 h-5 rounded-full border-2 border-slate-600 ml-2 shrink-0"></div>
             )}
@@ -208,14 +233,17 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
       <button 
         type="submit"
         disabled={isSubmitting}
-        className="w-full relative group overflow-hidden bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-xl font-bold text-base hover:opacity-90 transition-all shadow-lg flex justify-center items-center gap-2 mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full relative group overflow-hidden bg-[#F95005] text-white py-4 rounded-xl font-bold text-base hover:opacity-90 transition-all shadow-lg flex justify-center items-center gap-2 mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
       >
         <Lock size={18} />
         <span>
           {isSubmitting 
             ? 'Traitement en cours...' 
-            : `Payer ${link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : ''}`}
+            : `Payer ${link.amount ? `${(Number(link.amount) + (link.metadata?.shipping_fee ? Number(link.metadata.shipping_fee) : 0)).toLocaleString('fr-FR')} HTG` : ''}`}
         </span>
+        <div className="absolute right-4 opacity-50 group-hover:opacity-100 transition-opacity">
+          <span className="material-symbols-outlined font-bold text-[20px]">arrow_forward</span>
+        </div>
       </button>
       
       <div className="flex items-center justify-center gap-2 mt-4 text-slate-500 text-xs font-medium">
