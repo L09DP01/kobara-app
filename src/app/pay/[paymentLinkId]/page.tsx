@@ -102,13 +102,9 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
           {/* Carte Produit (Affichée uniquement s'il y a un nom ou une image) */}
           {(link.metadata?.product_name || link.metadata?.product_image || link.title) && (
             <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex gap-4 mb-8">
-              {link.metadata?.product_image ? (
+              {link.metadata?.product_image && (
                 <div className="w-20 h-20 rounded-xl overflow-hidden bg-white/10 shrink-0 border border-white/10">
                   <img src={link.metadata.product_image} alt="Produit" className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-orange-500/20 to-purple-500/20 shrink-0 flex items-center justify-center border border-white/10">
-                  <span className="material-symbols-outlined text-orange-400/50 text-3xl">shopping_bag</span>
                 </div>
               )}
               
@@ -222,7 +218,7 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
         {/* Background Gradients */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none" />
         
-        <div className="max-w-2xl mx-auto p-6 md:p-12 lg:p-16">
+        <div className="max-w-4xl mx-auto p-6 md:p-12 lg:p-16">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Paiement sécurisé</h1>
