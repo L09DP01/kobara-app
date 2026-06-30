@@ -66,6 +66,7 @@ export async function processPayment(formData: FormData) {
     .from('customers')
     .select('id')
     .eq('merchant_id', merchantId)
+    .eq('environment', linkInfo.environment)
     .eq('phone', customerPhone)
     .maybeSingle();
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, RefreshControl, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
@@ -16,6 +16,7 @@ export default function BalanceScreen() {
   const { user, merchant } = useAuthStore();
   const [showBalance, setShowBalance] = useState(true);
   const [isQrModalVisible, setIsQrModalVisible] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<MobileActivityItem | null>(null);
   
   const { data: balanceData, isLoading: isLoadingBalance, refetch: refetchBalance, isRefetching } = useBalance();
   const { data: dashboardData } = useDashboardSummary();
@@ -70,7 +71,11 @@ export default function BalanceScreen() {
     }
 
     return (
-      <View style={styles.activityItem}>
+      <TouchableOpacity 
+        style={styles.activityItem}
+        activeOpacity={0.7}
+        onPress={() => setSelectedActivity(item)}
+      >
         <View style={styles.activityIconContainer}>
           <Icon size={24} color="#FF7A00" />
         </View>
@@ -90,7 +95,7 @@ export default function BalanceScreen() {
           </View>
         </View>
         <ChevronRight size={20} color="#9CA3AF" style={{ marginLeft: 8 }} />
-      </View>
+      </TouchableOpacity>
     );
   }, [formatAmount, formatDate]);
 
@@ -206,6 +211,83 @@ export default function BalanceScreen() {
         onMyQrPress={() => { setIsQrModalVisible(false); /* navigate or show QR */ }}
         onScanQrPress={() => { setIsQrModalVisible(false); /* open camera */ }}
       />
+
+      {/* Activity Detail Modal */}
+      <Modal
+        visible={!!selectedActivity}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setSelectedActivity(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Détails de l'activité</Text>
+              <TouchableOpacity onPress={() => setSelectedActivity(null)} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {selectedActivity && (
+              <View style={styles.modalBody}>
+                <View style={styles.modalRow}>
+                  <Text style={styles.modalLabel}>Type</Text>
+                  <Text style={styles.modalValue}>{selectedActivity.type === 'withdrawal' ? 'Retrait MonCash' : 'Transfert B2B'}</Text>
+                </View>
+                <View style={styles.modalRow}>
+                  <Text style={styles.modalLabel}>Montant net</Text>
+                  <Text style={[styles.modalValue, { color: selectedActivity.amount_type === 'positive' ? '#22C55E' : '#EF4444' }]}>
+                    {formatAmount(selectedActivity.amount)} HTG
+                  </Text>
+                </View>
+                {selectedActivity.fees !== undefined && (
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>Frais appliqués</Text>
+                    <Text style={[styles.modalValue, { color: '#FF7A00' }]}>
+                      {formatAmount(selectedActivity.fees)} HTG
+                    </Text>
+                  </View>
+                )}
+                {selectedActivity.total !== undefined && (
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>Montant brut</Text>
+                    <Text style={styles.modalValue}>
+                      {formatAmount(selectedActivity.total)} HTG
+                    </Text>
+                  </View>
+                )}
+                {selectedActivity.kobara_reference && (
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>Référence</Text>
+                    <Text style={styles.modalValue}>{selectedActivity.kobara_reference}</Text>
+                  </View>
+                )}
+                {selectedActivity.wallet && (
+                  <View style={styles.modalRow}>
+                    <Text style={styles.modalLabel}>Destinataire</Text>
+                    <Text style={styles.modalValue}>{selectedActivity.wallet}</Text>
+                  </View>
+                )}
+                <View style={styles.modalRow}>
+                  <Text style={styles.modalLabel}>Date</Text>
+                  <Text style={styles.modalValue}>{formatDate(selectedActivity.date)}</Text>
+                </View>
+                <View style={styles.modalRow}>
+                  <Text style={styles.modalLabel}>Statut</Text>
+                  <Text style={styles.modalValue}>{selectedActivity.status}</Text>
+                </View>
+              </View>
+            )}
+            
+            <TouchableOpacity 
+              style={styles.modalCloseBtn}
+              onPress={() => setSelectedActivity(null)}
+            >
+              <Text style={styles.modalCloseBtnText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -435,4 +517,73 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 14,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#0F1626',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    minHeight: 300,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    color: '#FFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+  },
+  modalBody: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+  },
+  modalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  modalLabel: {
+    color: '#9CA3AF',
+    fontSize: 14,
+  },
+  modalValue: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  modalCloseBtn: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  modalCloseBtnText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  }
 });

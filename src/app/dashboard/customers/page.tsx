@@ -16,7 +16,8 @@ export default async function CustomersPage() {
         created_at,
         provider,
         payment_method,
-        status
+        status,
+        environment
       )
     `)
     .eq('merchant_id', merchant.id)
@@ -28,7 +29,14 @@ export default async function CustomersPage() {
   // Filter customers based on user rule:
   // A customer is valid ONLY IF they have at least one successful payment
   // OR if they have exactly 0 payments (meaning they were added manually via the dashboard).
+  const currentEnv = merchant.current_environment || 'test';
+  
   const validCustomers = rawCustomers.filter((c: any) => {
+    // Keep only payments that match the current environment
+    if (c.payments) {
+      c.payments = c.payments.filter((p: any) => p.environment === currentEnv || p.environment === null);
+    }
+    
     const hasPayments = c.payments && c.payments.length > 0;
     if (!hasPayments) return true;
     

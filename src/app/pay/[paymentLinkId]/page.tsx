@@ -72,40 +72,61 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#0F1626] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-lg ambient-shadow">
-        <div className="bg-black/20 p-6 border-b border-white/10 text-center">
-          {link.merchants?.logo_url ? (
-            <img src={link.merchants.logo_url} alt={link.merchants.business_name} className="w-16 h-16 object-cover rounded-full mx-auto mb-4 border border-white/10" />
-          ) : (
-            <div className="w-16 h-16 bg-orange-500/10 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 font-headline-md">
-              {link.merchants?.business_name?.substring(0, 1).toUpperCase() || 'K'}
+    <div className="min-h-[100dvh] bg-[#0A0F1C] flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/20 rounded-full blur-[120px] -z-10 mix-blend-screen" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen" />
+
+      <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-2xl">
+        <div className="bg-black/20 p-8 border-b border-white/10 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-50" />
+          
+          <div className="relative z-10">
+            {link.metadata?.product_image && (
+              <img 
+                src={link.metadata.product_image} 
+                alt={link.metadata?.product_name || link.title} 
+                className="w-full h-48 object-cover rounded-2xl mb-6 shadow-lg border border-white/10" 
+              />
+            )}
+
+            <div className="flex items-center justify-center gap-3 mb-4">
+              {link.merchants?.logo_url ? (
+                <img src={link.merchants.logo_url} alt={link.merchants.business_name} className="w-10 h-10 object-cover rounded-full border border-white/10 shadow-sm" />
+              ) : (
+                <div className="w-10 h-10 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center font-bold text-sm shadow-sm border border-orange-500/20">
+                  {link.merchants?.business_name?.substring(0, 1).toUpperCase() || 'K'}
+                </div>
+              )}
+              <span className="text-slate-300 font-semibold text-sm tracking-wide">{link.merchants?.business_name || 'Kobara Merchant'}</span>
             </div>
-          )}
-          <h2 className="text-slate-400 font-body-sm font-medium uppercase tracking-wider">{link.merchants?.business_name || 'Kobara Merchant'}</h2>
-          <h1 className="text-headline-sm font-headline-sm text-white mt-2">{link.title}</h1>
-          {link.description && (
-            <p className="text-slate-400 font-body-sm mt-2">{link.description}</p>
-          )}
+            
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mt-2 leading-tight">
+              {link.metadata?.product_name || link.title}
+            </h1>
+            {link.description && (
+              <p className="text-slate-400 text-sm mt-3 leading-relaxed">{link.description}</p>
+            )}
+          </div>
         </div>
         
-        <div className="p-6">
+        <div className="p-8">
           {link.metadata?.pass_fees_to_customer && (
-            <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-start gap-2">
-              <span className="material-symbols-outlined text-blue-400 text-[18px] mt-0.5">info</span>
+            <div className="mb-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-start gap-3 backdrop-blur-md">
+              <span className="material-symbols-outlined text-orange-400 text-[20px] mt-0.5">info</span>
               <div>
-                <p className="text-xs text-blue-400 font-medium">Frais de transaction applicables</p>
-                <p className="text-xs text-blue-400/80 mt-0.5">Les frais de traitement réseau seront ajoutés au montant de base lors du paiement.</p>
+                <p className="text-sm text-orange-400 font-semibold">Frais de réseau applicables</p>
+                <p className="text-xs text-orange-400/80 mt-1 leading-relaxed">Les frais de traitement (2.9%) seront ajoutés au montant de base lors du paiement.</p>
               </div>
             </div>
           )}
-          <form action={processPayment} className="space-y-5">
+          <form action={processPayment} className="space-y-6">
             <input type="hidden" name="paymentLinkId" value={link.id} />
             <input type="hidden" name="merchantId" value={link.merchant_id} />
             
             {!link.amount && (
-              <div className="space-y-1.5">
-                <label htmlFor="amount" className="block text-body-sm font-medium text-white">Montant (HTG) *</label>
+              <div className="space-y-2">
+                <label htmlFor="amount" className="block text-sm font-semibold text-slate-300">Montant (HTG) *</label>
                 <input 
                   type="number" 
                   id="amount" 
@@ -113,8 +134,8 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
                   required
                   step="0.01"
                   min="10"
-                  placeholder="Saisissez le montant"
-                  className="w-full px-4 py-2.5 bg-[#0F1626] border border-white/10 rounded-lg text-body-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                  placeholder="0.00"
+                  className="w-full px-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all placeholder:text-slate-600 shadow-inner"
                 />
               </div>
             )}
@@ -123,76 +144,77 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
               <input type="hidden" name="amount" value={link.amount} />
             )}
 
-            <div className="space-y-1.5">
-              <label htmlFor="customerName" className="block text-body-sm font-medium text-white">Nom complet *</label>
+            <div className="space-y-2">
+              <label htmlFor="customerName" className="block text-sm font-semibold text-slate-300">Nom complet *</label>
               <input 
                 type="text" 
                 id="customerName" 
                 name="customerName" 
                 required
-                placeholder="Jean Dupont"
-                className="w-full px-4 py-2.5 bg-[#0F1626] border border-white/10 rounded-lg text-body-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                placeholder="Ex: Jean Dupont"
+                className="w-full px-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all placeholder:text-slate-600 shadow-inner"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label htmlFor="customerPhone" className="block text-body-sm font-medium text-white">Téléphone MonCash *</label>
+            <div className="space-y-2">
+              <label htmlFor="customerPhone" className="block text-sm font-semibold text-slate-300">Téléphone MonCash *</label>
               <input 
                 type="tel" 
                 id="customerPhone" 
                 name="customerPhone" 
                 required
-                placeholder="ex: 37000000"
-                className="w-full px-4 py-2.5 bg-[#0F1626] border border-white/10 rounded-lg text-body-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                placeholder="Ex: 37000000"
+                className="w-full px-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all placeholder:text-slate-600 shadow-inner"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-body-sm font-medium text-white mb-2">Méthode de paiement *</label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-slate-300 mb-3">Méthode de paiement *</label>
+              <div className="grid grid-cols-2 gap-4">
+                <label className="relative flex flex-col items-center justify-center p-5 cursor-pointer rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 has-[:checked]:shadow-[0_0_15px_rgba(249,115,22,0.15)]">
                   <input type="radio" name="provider" value="moncash" className="sr-only" defaultChecked />
-                  <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
-                    <CheckCircle2 size={16} className="text-orange-500" />
+                  <div className="absolute top-3 right-3 opacity-0 group-has-[:checked]:opacity-100 transition-opacity transform scale-75 group-has-[:checked]:scale-100 duration-200">
+                    <CheckCircle2 size={18} className="text-orange-500" />
                   </div>
-                  <span className="font-bold text-white mt-1">MonCash</span>
+                  <span className="font-bold text-white mt-1 text-base tracking-wide">MonCash</span>
                 </label>
                 
-                <label className="relative flex flex-col items-center justify-center p-4 cursor-pointer rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10">
+                <label className="relative flex flex-col items-center justify-center p-5 cursor-pointer rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-500/10 has-[:checked]:shadow-[0_0_15px_rgba(249,115,22,0.15)]">
                   <input type="radio" name="provider" value="natcash" className="sr-only" />
-                  <div className="absolute top-2 right-2 opacity-0 group-has-[:checked]:opacity-100 transition-opacity">
-                    <CheckCircle2 size={16} className="text-orange-500" />
+                  <div className="absolute top-3 right-3 opacity-0 group-has-[:checked]:opacity-100 transition-opacity transform scale-75 group-has-[:checked]:scale-100 duration-200">
+                    <CheckCircle2 size={18} className="text-orange-500" />
                   </div>
-                  <span className="font-bold text-white mt-1">NatCash</span>
+                  <span className="font-bold text-white mt-1 text-base tracking-wide">NatCash</span>
                 </label>
               </div>
             </div>
 
             {link.metadata?.collect_address && (
-              <div className="space-y-1.5">
-                <label htmlFor="customerAddress" className="block text-body-sm font-medium text-white">Adresse de livraison *</label>
+              <div className="space-y-2">
+                <label htmlFor="customerAddress" className="block text-sm font-semibold text-slate-300">Adresse de livraison *</label>
                 <textarea 
                   id="customerAddress" 
                   name="customerAddress" 
                   required
-                  rows={2}
-                  placeholder="Votre adresse complète"
-                  className="w-full px-4 py-2.5 bg-[#0F1626] border border-white/10 rounded-lg text-body-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                  rows={3}
+                  placeholder="Votre adresse complète (rue, ville...)"
+                  className="w-full px-5 py-4 bg-black/40 border border-white/10 rounded-2xl text-base text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all placeholder:text-slate-600 shadow-inner resize-none"
                 ></textarea>
               </div>
             )}
 
             <button 
               type="submit"
-              className="w-full bg-orange-500 text-white py-3 rounded-lg font-body-base font-medium hover:opacity-90 transition-opacity shadow-md flex justify-center items-center gap-2 mt-4"
+              className="w-full relative group overflow-hidden bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 rounded-2xl font-bold text-lg hover:opacity-90 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_8px_30px_rgba(249,115,22,0.3)] flex justify-center items-center gap-3 mt-6"
             >
-              <span className="material-symbols-outlined text-[20px]">lock</span>
-              Continuer vers le paiement {link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : ''}
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              <span className="material-symbols-outlined text-[22px] relative z-10">lock</span>
+              <span className="relative z-10">Continuer vers le paiement {link.amount ? `${Number(link.amount).toLocaleString('fr-FR')} HTG` : ''}</span>
             </button>
             
-            <div className="flex items-center justify-center gap-2 mt-4 text-slate-400 text-xs">
-              <span className="material-symbols-outlined text-[14px]">verified_user</span>
-              <span>Paiement sécurisé par MonCash & Kobara</span>
+            <div className="flex items-center justify-center gap-2 mt-6 text-slate-500 text-xs font-medium">
+              <span className="material-symbols-outlined text-[16px]">verified_user</span>
+              <span>Paiement sécurisé de bout en bout</span>
             </div>
           </form>
         </div>

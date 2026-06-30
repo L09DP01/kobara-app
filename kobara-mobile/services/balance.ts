@@ -8,6 +8,11 @@ export interface MobileActivityItem {
   amount_type: 'positive' | 'negative';
   status: 'pending' | 'completed' | 'succeeded' | 'failed';
   date: string;
+  kobara_reference?: string;
+  provider?: string;
+  wallet?: string;
+  total?: number;
+  fees?: number;
 }
 
 export interface BalanceResponse {

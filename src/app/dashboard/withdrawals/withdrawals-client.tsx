@@ -23,6 +23,7 @@ export function WithdrawalsClient({
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
   const [step, setStep] = useState<'details' | 'otp'>('details');
   const [amount, setAmount] = useState<number | ''>('');
   const [method, setMethod] = useState('MonCash');
@@ -470,7 +471,11 @@ export function WithdrawalsClient({
                 {filteredWithdrawals.length > 0 ? filteredWithdrawals.map(w => {
                   const cfg = getStatusConfig(w.status);
                   return (
-                    <tr key={w.id} className={`hover:bg-white/5 transition-colors group border-l-4 ${cfg.border}`}>
+                    <tr 
+                      key={w.id} 
+                      onClick={() => setSelectedWithdrawal(w)}
+                      className={`hover:bg-white/5 transition-colors group border-l-4 cursor-pointer ${cfg.border}`}
+                    >
                       <td className="py-4 px-5">
                         <div className="font-mono text-xs text-white truncate max-w-[160px] font-bold">{w.kobara_reference}</div>
                         <div className="text-xs text-slate-400 mt-0.5">{new Date(w.created_at).toLocaleDateString('fr-FR')}</div>
@@ -535,6 +540,82 @@ export function WithdrawalsClient({
             >
               Fermer
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Withdrawal Detail Modal */}
+      {selectedWithdrawal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
+          <div className="bg-[#131B2C] border border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] p-6 flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-bold text-white">Détails du retrait</h2>
+                <p className="text-white/50 text-sm mt-1">{selectedWithdrawal.kobara_reference}</p>
+              </div>
+              <button onClick={() => setSelectedWithdrawal(null)} className="p-2 -mr-2 -mt-2 text-white/50 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="flex justify-between items-center pb-4 border-b border-white/10">
+                <span className="text-sm text-slate-400">Montant brut (déduit)</span>
+                <span className="font-bold text-white">{Number(selectedWithdrawal.total || selectedWithdrawal.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-white/10">
+                <span className="text-sm text-slate-400">Frais appliqués</span>
+                <span className="font-bold text-orange-400">-{Number(selectedWithdrawal.fees || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</span>
+              </div>
+              <div className="flex justify-between items-center pb-4 border-b border-white/10">
+                <span className="text-sm font-bold text-white">Montant net (reçu)</span>
+                <span className="text-xl font-bold text-green-400">{Number(selectedWithdrawal.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</span>
+              </div>
+              
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 mt-2 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Méthode</span>
+                  <span className="text-sm font-bold text-white capitalize flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-orange-500">smartphone</span>
+                    {selectedWithdrawal.provider || selectedWithdrawal.method}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Destinataire</span>
+                  <span className="text-sm font-bold text-white">{selectedWithdrawal.wallet || 'Non spécifié'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Date</span>
+                  <span className="text-sm font-bold text-white">
+                    {new Date(selectedWithdrawal.created_at).toLocaleString('fr-FR', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Statut</span>
+                  {(() => {
+                    const cfg = getStatusConfig(selectedWithdrawal.status);
+                    return (
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${cfg.bg} ${cfg.text}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}></span>
+                        {cfg.label}
+                      </span>
+                    )
+                  })()}
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 bg-white/5 border-t border-white/10 flex justify-end">
+               <button 
+                 onClick={() => setSelectedWithdrawal(null)}
+                 className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
+               >
+                 Fermer
+               </button>
+            </div>
           </div>
         </div>
       )}

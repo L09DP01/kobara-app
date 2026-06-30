@@ -131,19 +131,21 @@ export async function POST(request: NextRequest) {
           .from('customers')
           .select('id')
           .eq('merchant_id', merchantId)
+          .eq('environment', environment)
           .eq('email', email)
           .maybeSingle();
         if (data) existingCustomer = data;
       }
       
       if (!existingCustomer && phone) {
-        const { data } = await supabase
+        const { data: existingCustomerData } = await supabase
           .from('customers')
           .select('id')
           .eq('merchant_id', merchantId)
+          .eq('environment', environment)
           .eq('phone', phone)
           .maybeSingle();
-        if (data) existingCustomer = data;
+        if (existingCustomerData) existingCustomer = existingCustomerData;
       }
 
       if (existingCustomer) {

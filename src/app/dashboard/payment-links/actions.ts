@@ -22,11 +22,15 @@ export async function createPaymentLink(formData: FormData) {
   const collectPhone = formData.get('collect_phone') === 'true';
   const collectAddress = formData.get('collect_address') === 'true';
   const passFeesToCustomer = formData.get('pass_fees_to_customer') === 'true';
+  const productName = formData.get('product_name') as string;
+  const productImage = formData.get('product_image') as string;
 
   const metadata = {
     collect_phone: collectPhone,
     collect_address: collectAddress,
-    pass_fees_to_customer: passFeesToCustomer
+    pass_fees_to_customer: passFeesToCustomer,
+    ...(productName && { product_name: productName }),
+    ...(productImage && { product_image: productImage })
   };
 
   const adminClient = createAdminClient();

@@ -4,6 +4,7 @@ import { X, Link, CheckCircle, Share2, Copy } from 'lucide-react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { apiClient } from '@/api/client';
 import * as Clipboard from 'expo-clipboard';
+import * as ImagePicker from 'expo-image-picker';
 
 interface CreatePaymentLinkSheetProps {
   visible: boolean;
@@ -20,6 +21,11 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [productName, setProductName] = useState('');
+  const [productImage, setProductImage] = useState('');
+  const [imageType, setImageType] = useState<'url' | 'upload'>('url');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [collectAddress, setCollectAddress] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -43,6 +49,10 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
         setTitle('');
         setAmount('');
         setDescription('');
+        setProductName('');
+        setProductImage('');
+        setImageType('url');
+        setCollectAddress(false);
         setIsLoading(false);
         setError(null);
         setCreatedLink(null);
@@ -69,7 +79,10 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
         title: title.trim(),
         description: description.trim(),
         amount: Number(amount),
-        currency: 'HTG'
+        currency: 'HTG',
+        product_name: productName.trim() || undefined,
+        product_image: productImage.trim() || undefined,
+        collect_address: collectAddress
       });
 
       if (response.data && response.data.success) {
@@ -82,6 +95,48 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
       setError(err.response?.data?.error || "Impossible de se connecter au serveur");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0].uri) {
+        setUploadingImage(true);
+        setError(null);
+        
+        const uri = result.assets[0].uri;
+        const fileType = uri.substring(uri.lastIndexOf(".") + 1);
+        
+        const formData = new FormData();
+        formData.append("file", {
+          uri,
+          name: `photo.${fileType}`,
+          type: `image/${fileType}`,
+        } as any);
+
+        const response = await apiClient.post('/mobile/upload/image', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        
+        if (response.data && response.data.success) {
+          setProductImage(response.data.url);
+        } else {
+          setError("Erreur lors de l'upload de l'image");
+        }
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Erreur lors de l'upload");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -206,7 +261,7 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
 
                 <Text className="text-slate-400 text-sm font-medium mb-2">Description (Optionnelle)</Text>
                 <TextInput
-                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-6 text-base"
+                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
                   placeholder="Détails supplémentaires..."
                   placeholderTextColor="#475569"
                   multiline
@@ -216,6 +271,71 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
                   onChangeText={setDescription}
                   editable={!isLoading}
                 />
+
+                <Text className="text-slate-400 text-sm font-medium mb-2">Nom du produit (Optionnel)</Text>
+                <TextInput
+                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
+                  placeholder="Ex: T-shirt noir XL"
+                  placeholderTextColor="#475569"
+                  value={productName}
+                  onChangeText={setProductName}
+                  editable={!isLoading}
+                />
+
+                <Text className="text-slate-400 text-sm font-medium mb-2">Image du produit</Text>
+                <View className="flex-row gap-2 mb-2">
+                  <TouchableOpacity 
+                    onPress={() => setImageType('url')}
+                    className={`flex-1 py-2 rounded-lg items-center ${imageType === 'url' ? 'bg-orange-500' : 'bg-white/5'}`}
+                  >
+                    <Text className={`text-sm font-medium ${imageType === 'url' ? 'text-white' : 'text-slate-400'}`}>Lien (URL)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => setImageType('upload')}
+                    className={`flex-1 py-2 rounded-lg items-center ${imageType === 'upload' ? 'bg-orange-500' : 'bg-white/5'}`}
+                  >
+                    <Text className={`text-sm font-medium ${imageType === 'upload' ? 'text-white' : 'text-slate-400'}`}>Importer</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {imageType === 'url' ? (
+                  <TextInput
+                    className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
+                    placeholder="Ex: https://site.com/image.jpg"
+                    placeholderTextColor="#475569"
+                    value={productImage}
+                    onChangeText={setProductImage}
+                    editable={!isLoading && !uploadingImage}
+                    keyboardType="url"
+                    autoCapitalize="none"
+                  />
+                ) : (
+                  <View className="mb-4">
+                    <TouchableOpacity 
+                      onPress={pickImage}
+                      disabled={uploadingImage}
+                      className="bg-[#0A0F1C] border border-white/10 rounded-xl p-4 items-center justify-center h-[56px]"
+                    >
+                      {uploadingImage ? (
+                        <ActivityIndicator color="#F97316" />
+                      ) : productImage ? (
+                        <Text className="text-green-400 font-medium">Image prête</Text>
+                      ) : (
+                        <Text className="text-slate-400">Choisir une image...</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                <TouchableOpacity 
+                  onPress={() => setCollectAddress(!collectAddress)}
+                  className="flex-row items-center gap-3 mb-6 bg-white/5 p-4 rounded-xl border border-white/10"
+                >
+                  <View className={`w-6 h-6 rounded border flex items-center justify-center ${collectAddress ? 'bg-orange-500 border-orange-500' : 'border-slate-500'}`}>
+                    {collectAddress && <CheckCircle size={16} color="#FFF" />}
+                  </View>
+                  <Text className="text-white font-medium flex-1">Demander l'adresse de livraison au client</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity 
                   onPress={handleCreate}

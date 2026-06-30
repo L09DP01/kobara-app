@@ -8,6 +8,36 @@ import { toast } from 'sonner';
 export function CreatePaymentLinkForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageType, setImageType] = useState<'url' | 'upload'>('url');
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.error) {
+        toast.error(data.error);
+      } else if (data.url) {
+        setImageUrl(data.url);
+        toast.success('Image téléchargée avec succès');
+      }
+    } catch (err) {
+      toast.error("Erreur lors de l'upload de l'image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,6 +110,73 @@ export function CreatePaymentLinkForm() {
           placeholder="Détails supplémentaires sur le paiement..."
           className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-base sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm placeholder:text-slate-500"
         ></textarea>
+      </div>
+
+      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-4">
+        <h3 className="text-base font-bold text-white">Affichage Produit (Optionnel)</h3>
+        <p className="text-xs text-slate-400">Personnalisez l'apparence du lien de paiement avec les détails du produit.</p>
+        
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2">
+            <label htmlFor="product_name" className="block text-sm font-bold text-white">Nom du produit</label>
+            <input 
+              type="text" 
+              id="product_name" 
+              name="product_name" 
+              placeholder="Ex: T-shirt noir XL"
+              className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-base sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm placeholder:text-slate-500"
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <label className="block text-sm font-bold text-white">Image du produit</label>
+            <div className="flex gap-2">
+              <button 
+                type="button"
+                onClick={() => setImageType('url')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${imageType === 'url' ? 'bg-orange-500 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+              >
+                Lien (URL)
+              </button>
+              <button 
+                type="button"
+                onClick={() => setImageType('upload')}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${imageType === 'upload' ? 'bg-orange-500 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+              >
+                Importer
+              </button>
+            </div>
+
+            {imageType === 'url' ? (
+              <input 
+                type="url" 
+                id="product_image" 
+                name="product_image" 
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="Ex: https://mon-site.com/image.jpg"
+                className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-base sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm placeholder:text-slate-500"
+              />
+            ) : (
+              <div className="space-y-2">
+                <input type="hidden" name="product_image" value={imageUrl} />
+                <input 
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-base sm:text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600 transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                />
+                {uploadingImage && <p className="text-orange-400 text-xs">Upload en cours...</p>}
+                {imageUrl && !uploadingImage && imageType === 'upload' && (
+                  <p className="text-green-400 text-xs flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]">check_circle</span> Image prête
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-4">

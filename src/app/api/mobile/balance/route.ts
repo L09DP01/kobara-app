@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     // 2. Fetch Withdrawals
     const { data: withdrawals } = await supabaseAdmin
       .from("withdrawals")
-      .select("id, amount, status, created_at")
+      .select("id, amount, status, created_at, kobara_reference, provider, wallet, total, fees, method")
       .eq("merchant_id", merchant.id)
       .eq("environment", environment)
       .order("created_at", { ascending: false })
@@ -64,7 +64,12 @@ export async function GET(req: NextRequest) {
           amount: w.amount,
           amount_type: 'negative',
           status: w.status,
-          date: w.created_at
+          date: w.created_at,
+          kobara_reference: w.kobara_reference,
+          provider: w.provider || w.method,
+          wallet: w.wallet,
+          total: w.total,
+          fees: w.fees,
         });
       });
     }

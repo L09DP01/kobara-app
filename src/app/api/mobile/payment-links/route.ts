@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, amount, currency } = body;
+    const { title, description, amount, currency, product_name, product_image, collect_address } = body;
 
     if (!title || !amount || isNaN(Number(amount))) {
       return NextResponse.json({ error: "Le titre et le montant sont requis." }, { status: 400 });
@@ -110,6 +110,12 @@ export async function POST(req: NextRequest) {
 
     const environment = merchant.current_environment || 'test';
     const randomSlug = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+
+    const metadata = {
+      ...(product_name && { product_name }),
+      ...(product_image && { product_image }),
+      ...(collect_address && { collect_address })
+    };
 
     const { data: link, error: insertError } = await supabaseAdmin
       .from('payment_links')
@@ -121,7 +127,8 @@ export async function POST(req: NextRequest) {
         currency: currency || 'HTG',
         status: 'active',
         environment: environment,
-        slug: randomSlug
+        slug: randomSlug,
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined
       })
       .select()
       .single();
