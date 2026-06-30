@@ -118,16 +118,7 @@ export function CreatePaymentLinkForm() {
         <p className="text-xs text-slate-400">Personnalisez l'apparence du lien de paiement avec les détails du produit.</p>
         
         <div className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <label htmlFor="product_name" className="block text-sm font-bold text-white">Nom du produit</label>
-            <input 
-              type="text" 
-              id="product_name" 
-              name="product_name" 
-              placeholder="Ex: T-shirt noir XL"
-              className="w-full px-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-base sm:text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm placeholder:text-slate-500"
-            />
-          </div>
+
           
           <div className="space-y-3">
             <label className="block text-sm font-bold text-white">Image du produit</label>

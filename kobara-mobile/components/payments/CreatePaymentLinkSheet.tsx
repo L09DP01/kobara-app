@@ -278,15 +278,7 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
                   editable={!isLoading}
                 />
 
-                <Text className="text-slate-400 text-sm font-medium mb-2">Nom du produit (Optionnel)</Text>
-                <TextInput
-                  className="bg-[#0A0F1C] border border-white/10 rounded-xl text-white p-4 mb-4 text-base"
-                  placeholder="Ex: T-shirt noir XL"
-                  placeholderTextColor="#475569"
-                  value={productName}
-                  onChangeText={setProductName}
-                  editable={!isLoading}
-                />
+
 
                 <Text className="text-slate-400 text-sm font-medium mb-2">Image du produit</Text>
                 <View className="flex-row gap-2 mb-2">
