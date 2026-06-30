@@ -79,7 +79,10 @@ export default async function PublicPaymentPage({ params, searchParams }: { para
         
         {/* En-tête / Logo */}
         <div className="mb-8 md:mb-12 flex items-center justify-center md:justify-start w-full">
-          <img src="/logo.png" alt="Kobara" className="h-6 md:h-8 object-contain" />
+          <div className="flex items-center gap-2">
+            <img src="/Icone.png" alt="Icone Kobara" className="w-8 h-8 object-contain rounded" />
+            <span className="text-xl font-bold tracking-tight text-white">KOBARA</span>
+          </div>
         </div>
 
         {/* Bouton retour (masqué pour le moment selon la consigne, ou on peut l'afficher conditionnellement si un success_url existe) */}
