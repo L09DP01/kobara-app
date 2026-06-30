@@ -178,8 +178,8 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
               onChange={() => setProvider('moncash')}
             />
             <div className="flex-1 flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md shrink-0">
-                MC
+              <div className="w-12 h-8 flex items-center justify-center shrink-0 bg-white rounded overflow-hidden">
+                <img src="/moncash.png" alt="MonCash" className="w-full h-full object-contain p-1" />
               </div>
               <div>
                 <div className="font-bold text-white text-sm flex items-center gap-2">
@@ -208,8 +208,8 @@ export default function PaymentFormClient({ link, processPaymentAction }: { link
               onChange={() => setProvider('natcash')}
             />
             <div className="flex-1 flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center font-bold text-white shadow-md shrink-0">
-                NC
+              <div className="w-12 h-8 flex items-center justify-center shrink-0 bg-white rounded overflow-hidden">
+                <img src="/natcash.png" alt="NatCash" className="w-full h-full object-contain p-1" />
               </div>
               <div>
                 <div className="font-bold text-white text-sm flex items-center gap-2">
