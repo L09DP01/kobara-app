@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { upgradeMerchantPlan } from "@/lib/server/plans";
-import { notifyPaymentSucceeded } from '@/lib/server/notifications';
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,23 +70,9 @@ export async function POST(request: NextRequest) {
       error_reason: 'Validated manually via UI transCode check'
     }).eq('id', sms.id);
 
-    // 4. Activer le plan
-    const metadata = payment.metadata as any;
-    if (metadata && metadata.is_subscription_upgrade && metadata.plan_slug) {
-      try {
-        await upgradeMerchantPlan(payment.merchant_id, metadata.plan_slug);
-      } catch (err) {
-        console.error(`Erreur upgrade plan via verify-natcash:`, err);
-      }
-    } else {
-      // Notification classique si ce n'est pas un abonnement
-      try {
-        const { data: merchantData } = await supabase.from('merchants').select('email').eq('id', payment.merchant_id).single();
-        if (merchantData?.email) {
-          await notifyPaymentSucceeded(payment.merchant_id, merchantData.email, payment.amount, 'HTG', payment.id);
-        }
-      } catch(e) { console.error("Notification failed", e); }
-    }
+    // 4. Centralized post-success handler (balance, webhooks, notifications, plan upgrade)
+    const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
+    await onPaymentSucceeded(payment.id);
 
     return NextResponse.json({ success: true, message: "Paiement validé avec succès !" });
 

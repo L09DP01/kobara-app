@@ -208,98 +208,10 @@ export async function POST(request: NextRequest) {
       throw updateError;
     }
 
-    // If payment succeeded, update the merchant's available balance and send notification
+    // If payment succeeded, use centralized handler for balance, webhooks, notifications
     if (newStatus === "succeeded" && payment.status !== "succeeded") {
-      // 1. Update Merchant Balance
-      const { data: merchant } = await supabaseAdmin
-        .from('merchants')
-        .select('available_balance, available_balance_test, business_name')
-        .eq('id', payment.merchant_id)
-        .single();
-      
-      // Fetch Customer Name for notification
-      let customerName = "un client";
-      if (payment.customer_id) {
-        const { data: customer } = await supabaseAdmin
-          .from('customers')
-          .select('name')
-          .eq('id', payment.customer_id)
-          .single();
-        if (customer?.name) {
-          customerName = customer.name;
-        }
-      }
-      
-      if (merchant) {
-        const isTest = payment.environment === 'test';
-        const currentBalance = isTest 
-          ? Number(merchant.available_balance_test || 0)
-          : Number(merchant.available_balance || 0);
-        const netAmount = Number(payment.net_amount || 0);
-        
-        const updateData = isTest 
-          ? { available_balance_test: currentBalance + netAmount }
-          : { available_balance: currentBalance + netAmount };
-
-        const { error: balanceError } = await supabaseAdmin
-          .from('merchants')
-          .update(updateData)
-          .eq('id', payment.merchant_id);
-          
-        if (balanceError) {
-          console.error("Balance update error:", balanceError);
-        }
-      }
-
-      // 2. Create Notification for Merchant via service
-      const { data: merchantData } = await supabaseAdmin.from('merchants').select('email').eq('id', payment.merchant_id).single();
-      if (merchantData?.email) {
-        const { notifyPaymentSucceeded } = await import("@/lib/server/notifications");
-        await notifyPaymentSucceeded(payment.merchant_id, merchantData.email, Number(payment.amount), payment.currency || 'HTG');
-      }
-
-      // 3. Send outbound webhooks to merchant endpoints
-      const { data: endpoints } = await supabaseAdmin
-        .from('webhook_endpoints')
-        .select('*')
-        .eq('merchant_id', payment.merchant_id)
-        .eq('status', 'active');
-
-      if (endpoints && endpoints.length > 0) {
-        const eventPayload = {
-          event_type: `payment.${newStatus}`,
-          data: {
-            id: payment.id,
-            reference: payment.kobara_reference,
-            amount: payment.amount,
-            net_amount: payment.net_amount,
-            currency: payment.currency,
-            status: newStatus,
-            paid_at: paidAt,
-            metadata: payment.metadata
-          }
-        };
-
-        for (const endpoint of endpoints) {
-          try {
-            const signature = crypto.createHmac('sha256', endpoint.secret)
-              .update(JSON.stringify(eventPayload))
-              .digest('hex');
-
-            await fetch(endpoint.url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Kobara-Signature': signature,
-                'Kobara-Event': eventPayload.event_type
-              },
-              body: JSON.stringify(eventPayload)
-            });
-          } catch (err) {
-            console.error(`Failed to send webhook to ${endpoint.url}:`, err);
-          }
-        }
-      }
+      const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
+      await onPaymentSucceeded(payment.id);
     } else if (newStatus === "failed" && payment.status !== "failed") {
       const { data: merchantData } = await supabaseAdmin.from('merchants').select('email').eq('id', payment.merchant_id).single();
       if (merchantData?.email) {

@@ -83,6 +83,10 @@ export async function POST(
       payment_id: payment.id
     }).eq('id', sms.id);
 
+    // 6. Centralized post-success handler (balance, webhooks, notifications, plan upgrade)
+    const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
+    await onPaymentSucceeded(payment.id);
+
     return NextResponse.json({ success: true }, { status: 200 });
 
   } catch (error) {
