@@ -10,7 +10,7 @@ export function generateOpenAPI() {
     path: '/api/v1/payments',
     method: 'post',
     summary: 'Create a new payment',
-    description: 'Initialize a MonCash payment transaction',
+    description: 'Initialize a payment transaction. Use provider "moncash" or "natcash" to direct to a specific provider, or "kobara" (default) for the unified checkout page where the customer chooses.',
     tags: ['Payments'],
     request: {
       body: {

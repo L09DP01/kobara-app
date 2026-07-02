@@ -12,7 +12,7 @@ export const CustomerSchema = z.object({
 export const PaymentCreatePayloadSchema = z.object({
   amount: z.number().positive().openapi({ description: "Amount to charge", example: 2500 }),
   currency: z.string().default("HTG").openapi({ description: "Currency of the payment", example: "HTG" }),
-  provider: z.enum(["moncash", "natcash", "kobara"]).optional().default("moncash").openapi({ description: "Payment provider (moncash, natcash, kobara). Defaults to moncash if not provided. Use 'kobara' for unified checkout.", example: "kobara" }),
+  provider: z.enum(["moncash", "natcash", "kobara"]).optional().default("kobara").openapi({ description: "Payment provider (moncash, natcash, kobara). Defaults to 'kobara' (unified checkout page where the customer chooses). Use 'moncash' or 'natcash' to go directly to a specific provider.", example: "kobara" }),
   description: z.string().optional().openapi({ description: "Description of the payment", example: "Order #12345" }),
   customer: CustomerSchema.optional(),
   success_url: z.string().url().optional().openapi({ description: "URL to redirect after successful payment", example: "https://your-site.com/success" }),
