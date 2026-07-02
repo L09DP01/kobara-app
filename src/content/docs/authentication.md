@@ -33,7 +33,7 @@ Les requêtes HTTP non sécurisées sont automatiquement refusées afin de prot�
 * les paiements ;
 * les données clients ;
 * les clés API ;
-* les transactions MonCash ;
+* les transactions MonCash / NatCash ;
 * les webhooks.
 
 ---

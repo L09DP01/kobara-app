@@ -1,6 +1,6 @@
 # Quickstart : Intégration avec Kobara
 
-Bienvenue dans la documentation officielle de **Kobara**, la passerelle de paiement de référence pour accepter MonCash en Haïti. 
+Bienvenue dans la documentation officielle de **Kobara**, la passerelle de paiement de référence pour accepter MonCash et NatCash en Haïti. 
 
 Ce guide rapide vous montrera comment accepter votre premier paiement en moins de 10 minutes.
 
@@ -39,9 +39,11 @@ La méthode la plus directe pour accepter un paiement est d'appeler l'API de cr�
 curl -X POST https://api.kobara.app/v1/payments \
   -H "Authorization: Bearer kbr_sk_test_votre_cle_secrete" \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
   -d '{
     "amount": 2500,
     "currency": "HTG",
+    "provider": "kobara",
     "customer": {
       "name": "Jean Dupont",
       "phone": "37000000"
@@ -54,9 +56,16 @@ curl -X POST https://api.kobara.app/v1/payments \
   }'
 ```
 
+> **💡 Tip : Le champ `provider`**
+> - `"kobara"` **(défaut)** : Page de checkout unifiée — le client choisit MonCash ou NatCash.
+> - `"moncash"` : Redirige directement vers MonCash.
+> - `"natcash"` : Redirige directement vers NatCash.
+>
+> Si vous ne spécifiez pas de `provider`, le défaut est `"kobara"`.
+
 ### Réponse
 
-L'API vous retournera un identifiant de paiement et une URL (`checkout_url`). Vous devez **rediriger votre utilisateur vers cette URL** pour qu'il saisisse son code PIN MonCash de manière sécurisée.
+L'API vous retournera un identifiant de paiement et une URL (`checkout_url`). Vous devez **rediriger votre utilisateur vers cette URL** pour qu'il finalise son paiement (via MonCash ou NatCash selon le provider choisi).
 
 ```json
 {
@@ -75,7 +84,7 @@ L'API vous retournera un identifiant de paiement et une URL (`checkout_url`). Vo
 
 Ne vous fiez pas uniquement à la page de succès (`success_url`) pour valider la commande d'un client. Le client pourrait fermer son navigateur trop tôt.
 
-Vous devez configurer un **Webhook** pour que Kobara notifie votre serveur dès que le paiement est réellement confirmé par MonCash.
+Vous devez configurer un **Webhook** pour que Kobara notifie votre serveur dès que le paiement est réellement confirmé (que ce soit via MonCash ou NatCash).
 
 1. Allez dans **Dashboard > Webhooks**.
 2. Ajoutez l'URL de votre serveur (ex: `https://api.votre-site.com/webhooks/kobara`).

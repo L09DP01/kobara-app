@@ -1,12 +1,12 @@
 # Payments API
 
-L’objet **Payment** représente une transaction de paiement initiée via Kobara.
+L'objet **Payment** représente une transaction de paiement initiée via Kobara.
 
 Cette API permet de :
 
-* créer une session de paiement MonCash ;
+* créer une session de paiement (MonCash, NatCash, ou Kobara Checkout) ;
 * générer une URL checkout hébergée ;
-* suivre le statut d’un paiement ;
+* suivre le statut d'un paiement ;
 * recevoir les confirmations webhook ;
 * synchroniser les transactions avec votre dashboard Kobara.
 
@@ -219,9 +219,11 @@ payments.metadata
 Spécifie l'expérience de paiement que vous souhaitez offrir à votre client.
 
 Valeurs acceptées :
-* `"moncash"` (Défaut) : Redirige directement le client vers la page de paiement Bazik/MonCash.
+* `"kobara"` **(Défaut, Recommandé)** : Utilise le *Kobara Checkout*. Le client est redirigé vers une page unifiée hébergée par Kobara où il peut choisir lui-même entre MonCash et NatCash.
+* `"moncash"` : Redirige directement le client vers la page de paiement MonCash.
 * `"natcash"` : Redirige le client vers la page d'instructions de transfert NatCash générée par Kobara.
-* `"kobara"` : **Recommandé**. Utilise le *Kobara Checkout*. Le client est redirigé vers une page unifiée hébergée par Kobara où il peut choisir lui-même entre MonCash et NatCash.
+
+Si le champ `provider` n'est pas spécifié, la valeur par défaut est `"kobara"`.
 
 ```json
 "provider": "kobara"
@@ -278,8 +280,8 @@ URL webhook utilisée pour recevoir les événements temps réel.
   "net_amount": 2427.50,
   "currency": "HTG",
   "status": "pending",
-  "provider": "moncash",
-  "payment_method": "moncash",
+  "provider": "kobara",
+  "payment_method": "kobara",
   "checkout_url": "https://pay.kobara.app/c/KBR-PAY-20260509-001",
   "success_url": "https://monsite.com/success",
   "error_url": "https://monsite.com/error",
@@ -312,11 +314,11 @@ URL webhook utilisée pour recevoir les événements temps réel.
 ## Workflow complet
 
 ```txt
-1. Votre backend crée le paiement.
+1. Votre backend crée le paiement (avec provider "kobara", "moncash" ou "natcash").
 2. Kobara génère checkout_url.
 3. Le frontend redirige le client.
-4. Le client paie via MonCash.
-5. MonCash confirme le paiement.
+4. Le client choisit MonCash ou NatCash (si provider = "kobara") ou paie directement.
+5. Le provider confirme le paiement.
 6. Kobara met à jour payments.status.
 7. Kobara envoie le webhook.
 8. Votre backend confirme la commande.
