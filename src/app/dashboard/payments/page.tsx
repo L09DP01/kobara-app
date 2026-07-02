@@ -245,7 +245,7 @@ export default async function PaymentsPage({
                         <span className="material-symbols-outlined text-[32px] sm:text-[40px] text-orange-400/60">receipt_long</span>
                       </div>
                       <h3 className="font-bold text-white text-base sm:text-lg mb-2">Aucun paiement pour le moment</h3>
-                      <p className="text-slate-400 text-xs sm:text-sm max-w-xs sm:max-w-sm mb-5 sm:mb-6">Créez votre premier lien de paiement et commencez à recevoir des paiements MonCash en quelques secondes.</p>
+                      <p className="text-slate-400 text-xs sm:text-sm max-w-xs sm:max-w-sm mb-5 sm:mb-6">Créez votre premier lien de paiement et commencez à recevoir des paiements MonCash et NatCash en quelques secondes.</p>
                       <Link href="/payment-links" className="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl text-sm font-bold hover:bg-orange-600 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-sm">
                         <span className="material-symbols-outlined text-[18px]">add_link</span>
                         Créer un lien de paiement

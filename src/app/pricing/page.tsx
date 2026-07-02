@@ -45,7 +45,7 @@ export default async function PricingPage() {
       ],
       cta: language === "fr" ? "Commencer gratuitement" : "Start for free",
       ctaHref: "/register",
-      feeNote: language === "fr" ? "* Inclut les frais Kobara + frais de traitement MonCash" : "* Includes Kobara fees + MonCash processing fees",
+      feeNote: language === "fr" ? "* Inclut les frais Kobara + frais de traitement MonCash/NatCash" : "* Includes Kobara fees + MonCash/NatCash processing fees",
     },
     {
       name: "Pro",
@@ -154,8 +154,8 @@ export default async function PricingPage() {
     {
       q: language === "fr" ? "Que représentent les 4% du plan Free ?" : "What do the 4% of the Free plan represent?",
       a: language === "fr"
-        ? "Les 4% du plan Free incluent les frais de la plateforme Kobara ainsi que les frais d'infrastructure de traitement MonCash. Les plans payants bénéficient d'un taux réduit à 2.9%."
-        : "The 4% fee on the Free plan includes Kobara platform fees as well as MonCash processing infrastructure fees. Paid plans benefit from a reduced transaction rate of 2.9%.",
+        ? "Les 4% du plan Free incluent les frais de la plateforme Kobara ainsi que les frais d'infrastructure de traitement MonCash/NatCash. Les plans payants bénéficient d'un taux réduit à 2.9%."
+        : "The 4% fee on the Free plan includes Kobara platform fees as well as MonCash/NatCash processing infrastructure fees. Paid plans benefit from a reduced transaction rate of 2.9%.",
     },
     {
       q: language === "fr" ? "Quand puis-je recevoir mes fonds ?" : "When can I receive my funds?",
@@ -194,8 +194,8 @@ export default async function PricingPage() {
           </h1>
           <p className="text-lg text-[#AAB3C2] font-medium leading-relaxed max-w-xl mx-auto">
             {language === "fr" 
-              ? "Commencez gratuitement. Scalez quand vous êtes prêt. Aucun frais caché, jamais."
-              : "Get started for free. Scale when you are ready. No hidden fees, ever."}
+              ? "Tous les plans incluent l'accès au dashboard, les notifications et l'intégration MonCash/NatCash. Aucun frais caché, jamais."
+              : "All plans include dashboard access, notifications, and MonCash/NatCash integration. No hidden fees, ever."}
           </p>
         </div>
       </section>
@@ -340,8 +340,8 @@ export default async function PricingPage() {
               </h2>
               <p className="text-xl text-[#AAB3C2] font-medium mb-10 leading-relaxed max-w-2xl mx-auto">
                 {language === "fr" 
-                  ? "Créez votre compte gratuitement et commencez à recevoir des paiements MonCash en quelques minutes."
-                  : "Create your account for free and start receiving MonCash payments in minutes."}
+                  ? "Créez votre compte gratuitement et commencez à recevoir des paiements MonCash et NatCash en quelques minutes."
+                  : "Create your account for free and start receiving MonCash and NatCash payments in minutes."}
               </p>
               <Link
                 href="/register"

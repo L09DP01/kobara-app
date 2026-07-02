@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ONBOARDING_STEPS = [
   {
-    title: "Paiements MonCash Simplifiés",
-    description: "Acceptez les paiements MonCash en quelques clics via nos liens sécurisés ou notre API puissante.",
+    title: "Paiements Simplifiés",
+    description: "Acceptez les paiements MonCash et NatCash en quelques clics via nos liens sécurisés ou notre API puissante.",
     icon: "account_balance_wallet"
   },
   {

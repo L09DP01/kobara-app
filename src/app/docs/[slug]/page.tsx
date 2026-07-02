@@ -28,8 +28,8 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const title = titleMap[resolvedParams.slug] || 'Documentation';
   return {
     title: `${title} | Kobara Docs`,
-    description: `Learn how to integrate ${title} with the Kobara Payment Gateway API for MonCash in Haiti.`,
-    keywords: [`Kobara ${title}`, `MonCash API ${title}`, "Haiti Payment API"]
+    description: `Learn how to integrate ${title} with the Kobara Payment Gateway API for MonCash & NatCash in Haiti.`,
+    keywords: [`Kobara ${title}`, `MonCash API ${title}`, `NatCash API ${title}`, "Haiti Payment API"]
   };
 }
 

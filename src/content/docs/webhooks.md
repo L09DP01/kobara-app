@@ -101,11 +101,14 @@ Kobara-Event: payment.succeeded
       "kobara_reference": "KBR-PAY-20260509-001",
       "amount": 2500,
       "currency": "HTG",
-      "status": "succeeded"
+      "status": "succeeded",
+      "provider": "moncash"
     }
   }
 }
 ```
+
+> **Note :** Le champ `provider` dans le webhook indique le moyen de paiement utilisé par le client (`"moncash"` ou `"natcash"`), même si vous aviez spécifié `"kobara"` lors de la création du paiement.
 
 ---
 
