@@ -155,7 +155,9 @@ export async function logout() {
     '__Secure-next-auth.session-token',
     '__Secure-next-auth.callback-url',
     '__Secure-next-auth.csrf-token',
-    'kbr_2fa_email_ok'
+    'kbr_2fa_email_ok',
+    'kbr_2fa_totp_ok',
+    'kobara_last_activity',
   ];
 
   for (const name of cookiesToDelete) {

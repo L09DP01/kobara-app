@@ -106,15 +106,39 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
+  // If user has a session token but is on an auth page with an error/session message, clear cookies to prevent loop
+  if (userLoggedIn && isAuthPage && hasAuthMessage) {
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    const cookieDomain = hostname.includes('localhost') || hostname.includes('local') ? 'localhost' : '.kobara.app';
+    const cookiesToClear = [
+      'next-auth.session-token',
+      'next-auth.csrf-token',
+      'next-auth.callback-url',
+      '__Secure-next-auth.session-token',
+      '__Secure-next-auth.callback-url',
+      '__Secure-next-auth.csrf-token',
+      'kobara_last_activity',
+      'kbr_2fa_email_ok',
+      'kbr_2fa_totp_ok',
+    ];
+    for (const name of cookiesToClear) {
+      response.cookies.set(name, '', { domain: cookieDomain, maxAge: 0, path: '/' });
+    }
+    return response;
+  }
+
   // Vérifier l'inactivité de la session (2 heures)
   if (userLoggedIn) {
     const lastActivity = request.cookies.get('kobara_last_activity')?.value;
     const now = Date.now();
     const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
-    if (lastActivity) {
-      const elapsed = now - parseInt(lastActivity, 10);
-      if (elapsed > TWO_HOURS_MS) {
+    // If lastActivity is missing but session token exists, treat as expired (inconsistent state)
+    const isExpiredByInactivity = lastActivity 
+      ? (now - parseInt(lastActivity, 10)) > TWO_HOURS_MS
+      : false; // If no lastActivity cookie at all, set it fresh below
+
+    if (lastActivity && isExpiredByInactivity) {
         // Session expirée par inactivité → supprimer tous les cookies
         const response = NextResponse.redirect(
           hostname.includes('localhost') || hostname.includes('local')
@@ -130,12 +154,13 @@ export async function updateSession(request: NextRequest) {
           '__Secure-next-auth.callback-url',
           '__Secure-next-auth.csrf-token',
           'kobara_last_activity',
+          'kbr_2fa_email_ok',
+          'kbr_2fa_totp_ok',
         ];
         for (const name of cookiesToClear) {
           response.cookies.set(name, '', { domain: cookieDomain, maxAge: 0, path: '/' });
         }
         return response;
-      }
     }
 
     // Mettre à jour le timestamp d'activité
