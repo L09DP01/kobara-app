@@ -50,20 +50,26 @@ export async function executeB2BTransfer(amount: number, receiverEmail: string, 
           return { error: "Le code de l'application (TOTP) est invalide." };
         }
       } else {
-        // Standard Email
-        const emailOtp = security.email_otp || {};
-        if (!emailOtp.code || emailOtp.code !== code2fa) {
+        // Standard Email - verify from Redis where sendEmailOtpAction stored it
+        const { safeRedis } = await import("@/lib/server/redis");
+        const { data: userData } = await supabase.auth.getUser();
+        const userEmail = userData?.user?.email;
+        
+        if (!userEmail) {
+          return { error: "Impossible de récupérer l'email de l'utilisateur." };
+        }
+
+        const otpKey = `otp:email:${userEmail}`;
+        const savedCode = await safeRedis(async (r) => await r.get(otpKey), null);
+
+        if (!savedCode) {
+          return { error: "Le code de vérification a expiré ou n'existe pas. Veuillez en demander un nouveau." };
+        }
+        if (savedCode !== code2fa) {
           return { error: "Le code de vérification email est incorrect." };
         }
-        const expiresAt = new Date(emailOtp.expires_at).getTime();
-        if (Date.now() > expiresAt) {
-          return { error: "Le code de vérification email a expiré." };
-        }
-        // Consume the code
-        const adminClientForOTP = createAdminClient();
-        await adminClientForOTP.from('settings').update({
-          security_json: { ...security, email_otp: null }
-        }).eq('merchant_id', merchant.id);
+        // Consume the code from Redis
+        await safeRedis(async (r) => await r.del(otpKey), null);
       }
     } else if (twoFactorMethod !== 'none') {
       return { 
