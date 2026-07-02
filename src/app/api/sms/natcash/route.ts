@@ -77,13 +77,12 @@ export async function POST(request: NextRequest) {
       errorReason = parsed.referenceCode ? 'Format de code invalide' : 'Aucun code extrait';
       status = 'ignored'; // Auto ignore
     } else {
-      // Search for pending payments created in the last 30 minutes to do fuzzy matching
-      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      // Search for pending natcash payments to match by reference_code
       const { data: pendingPayments } = await supabase
         .from('payments')
-        .select('id, amount, status, expires_at, merchant_id, kobara_reference, metadata')
+        .select('id, amount, status, expires_at, merchant_id, reference_code, kobara_reference, metadata')
         .eq('status', 'pending')
-        .gte('created_at', thirtyMinsAgo);
+        .in('provider', ['natcash', 'kobara']);
 
       let matchedPaymentDetails = null;
 
@@ -91,7 +90,8 @@ export async function POST(request: NextRequest) {
         const normalize = (s: string) => (s || '').toUpperCase().replace(/[O0]/g, '0').replace(/[I1L]/g, '1');
         const normalizedParsedRef = normalize(parsed.referenceCode);
         
-        matchedPaymentDetails = pendingPayments.find(p => normalize(p.kobara_reference) === normalizedParsedRef);
+        // Match against reference_code (the short NatCash code like TVP8K3B2)
+        matchedPaymentDetails = pendingPayments.find(p => normalize(p.reference_code) === normalizedParsedRef);
       }
 
       if (matchedPaymentDetails) {
