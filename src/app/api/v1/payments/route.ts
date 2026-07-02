@@ -84,40 +84,32 @@ export async function POST(request: NextRequest) {
     let natcashReferenceCode = null;
     let paymentUrl = null;
 
-    if (environment === 'test') {
-      // Pour les paiements de test, aucun appel API réel n'est effectué.
-      // Le paiement utilisera toujours la page de checkout hébergée (Kobara Checkout)
-      // pour permettre au développeur de simuler le succès.
-    } else {
-      if (provider === 'moncash') {
-        // 2. Call Bazik to create the payment
-        const bazikResponse = await BazikService.createMoncashPayment({
-          amount: amount,
-          reference: kobaraReference,
-          description: description || "Paiement Kobara API",
-          environment: environment as "test" | "live"
-        });
+    // Generate NatCash reference code (needed for both test and live)
+    if (provider === 'natcash' || provider === 'kobara') {
+      const { data: merchantData } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
+      const businessName = merchantData?.business_name || 'KBR';
+      const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const digits = '0123456789';
+      const getRandom = (charset: string) => charset.charAt(Math.floor(Math.random() * charset.length));
+      
+      const randomPart = getRandom(digits) + getRandom(letters) + getRandom(letters) + getRandom(digits) + getRandom(digits);
+      natcashReferenceCode = prefix + randomPart;
+    }
 
-        // Bazik response typically gives a payment URL or an order ID.
-        bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
-        
-        const bazikData = bazikResponse.data || bazikResponse;
-        paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
-      } else if (provider === 'natcash') {
-        // 2. Generate a reference code for NatCash SMS
-        const { data: merchantData } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
-        const businessName = merchantData?.business_name || 'KBR';
-        const prefix = businessName.toUpperCase().replace(/[^A-Z]/g, '').substring(0, 3).padEnd(3, 'X');
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const digits = '0123456789';
-        const getRandom = (charset: string) => charset.charAt(Math.floor(Math.random() * charset.length));
-        
-        const randomPart = getRandom(digits) + getRandom(letters) + getRandom(letters) + getRandom(digits) + getRandom(digits);
-        natcashReferenceCode = prefix + randomPart;
-      } else if (provider === 'kobara') {
-        // 2. Unified Checkout: Do nothing here, we will redirect the user to the generic checkout page
-        // where they will choose MonCash or NatCash themselves.
-      }
+    // Call external payment APIs (live mode only)
+    if (environment === 'live' && provider === 'moncash') {
+      const bazikResponse = await BazikService.createMoncashPayment({
+        amount: amount,
+        reference: kobaraReference,
+        description: description || "Paiement Kobara API",
+        environment: environment as "test" | "live"
+      });
+
+      bazikOrderId = bazikResponse.order_id || bazikResponse.id || null;
+      
+      const bazikData = bazikResponse.data || bazikResponse;
+      paymentUrl = bazikData.paymentUrl || bazikData.payment_url || bazikData.checkout_url || bazikData.checkoutUrl || bazikData.redirectUrl || bazikData.redirect_url || bazikData.url || null;
     }
 
     // 2.5 Resolve Customer
