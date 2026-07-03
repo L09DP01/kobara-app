@@ -13,47 +13,48 @@ export async function getAdminMerchants() {
   return data || [];
 }
 
-export async function sendAdminMessage(formData: FormData) {
-  const merchantId = formData.get('merchantId') as string;
-  const subject = formData.get('subject') as string;
-  const message = formData.get('message') as string;
-
-  if (!merchantId || !subject || !message) {
-    return { error: 'Tous les champs sont requis' };
+export async function sendBulkAdminMessage(merchantIds: string[], subject: string, message: string) {
+  if (!merchantIds.length || !subject || !message) {
+    return { error: 'Sélectionnez au moins un marchand et remplissez tous les champs' };
   }
 
   const supabase = createAdminClient();
 
-  // Get merchant email
-  const { data: merchant } = await supabase
+  const { data: merchants } = await supabase
     .from('merchants')
-    .select('email, business_name')
-    .eq('id', merchantId)
-    .single();
+    .select('id, email, business_name')
+    .in('id', merchantIds);
 
-  if (!merchant?.email) {
-    return { error: 'Marchand introuvable ou email manquant' };
+  if (!merchants?.length) {
+    return { error: 'Aucun marchand trouvé' };
   }
 
-  try {
-    // Send email
-    await sendEmail({
-      to: merchant.email,
-      subject: `Kobara — ${subject}`,
-      text: message,
-    });
+  const results: { email: string; business_name: string; success: boolean; error?: string }[] = [];
 
-    // Log it in notifications
-    await supabase.from('notifications').insert({
-      merchant_id: merchantId,
-      type: 'admin_message',
-      title: subject,
-      message: message,
-      read: false,
-    });
+  for (const merchant of merchants) {
+    try {
+      await sendEmail({
+        to: merchant.email,
+        subject: `Kobara — ${subject}`,
+        text: message,
+      });
 
-    return { success: true, email: merchant.email, business_name: merchant.business_name };
-  } catch (e: any) {
-    return { error: e.message || 'Erreur lors de l\'envoi' };
+      await supabase.from('notifications').insert({
+        merchant_id: merchant.id,
+        type: 'admin_message',
+        title: subject,
+        message: message,
+        read: false,
+      });
+
+      results.push({ email: merchant.email, business_name: merchant.business_name, success: true });
+    } catch (e: any) {
+      results.push({ email: merchant.email, business_name: merchant.business_name, success: false, error: e.message });
+    }
   }
+
+  const sent = results.filter(r => r.success).length;
+  const failed = results.filter(r => !r.success).length;
+
+  return { success: true, results, sent, failed, total: merchants.length };
 }
