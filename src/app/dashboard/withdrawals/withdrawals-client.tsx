@@ -292,8 +292,8 @@ export function WithdrawalsClient({
                         </div>
                         {method === 'Zelle' ? (
                           <div className="flex justify-between text-sm text-blue-400">
-                            <span>Montant en USD (taux: 156.25 HTG/$)</span>
-                            <span>${(Number(amount) / 156.25).toFixed(2)} USD</span>
+                            <span>Montant en USD (taux: 142 HTG/$)</span>
+                            <span>${(Number(amount) / 142).toFixed(2)} USD</span>
                           </div>
                         ) : (
                           <div className="flex justify-between text-sm text-orange-400">
@@ -304,7 +304,7 @@ export function WithdrawalsClient({
                         <div className="flex justify-between font-bold text-white mt-2 pt-2 border-t border-white/10">
                           <span>Montant net à recevoir</span>
                           {method === 'Zelle' ? (
-                            <span className="text-green-400">${(Number(amount) / 156.25).toFixed(2)} USD</span>
+                            <span className="text-green-400">${(Number(amount) / 142).toFixed(2)} USD</span>
                           ) : (
                             <span className="text-green-400">{(Number(amount) * 0.95).toLocaleString('fr-FR')} HTG</span>
                           )}
