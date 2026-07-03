@@ -107,19 +107,20 @@ export async function executeB2BTransfer(amount: number, receiverEmail: string, 
   }
 
   // Notifications
-  const { notifyB2BTransferSent, notifyB2BTransferReceived } = await import('@/lib/server/notifications');
+  const { notifyB2BTransferSent, notifyB2BTransferReceived, notifyAdminWithdrawalCreated } = await import('@/lib/server/notifications');
   try {
-    // Notify Sender
-    const { data: senderData } = await supabase.from('merchants').select('email, business_name').eq('id', merchant.id).single();
+    const { data: senderData } = await adminClient.from('merchants').select('email, business_name').eq('id', merchant.id).single();
     if (senderData) {
       await notifyB2BTransferSent(merchant.id, senderData.email, amount, receiverEmail);
     }
     
-    // Notify Receiver
     const { data: receiverData } = await adminClient.from('merchants').select('email').eq('id', rpcResult.receiver_id).single();
     if (receiverData) {
       await notifyB2BTransferReceived(rpcResult.receiver_id, receiverData.email, amount, senderData?.business_name || 'Un marchand');
     }
+
+    // Notifier l'admin pour tous les transferts B2B
+    await notifyAdminWithdrawalCreated(merchant.id, amount, 'B2B Transfer', undefined, receiverEmail, amount);
   } catch(e) { 
     console.error("Notifications for B2B failed", e); 
   }

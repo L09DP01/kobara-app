@@ -71,17 +71,43 @@ export async function createNotification(
   }
 }
 
-export async function notifyAdminWithdrawalCreated(merchantId: string, amount: number, method: string, withdrawalId?: string) {
+export async function notifyAdminWithdrawalCreated(merchantId: string, amount: number, method: string, withdrawalId?: string, wallet?: string, totalWithFees?: number) {
   const adminEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@kobara.app';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kobara.app';
   const supabase = createAdminClient();
-  const { data: merchant } = await supabase.from('merchants').select('business_name').eq('id', merchantId).single();
+  const { data: merchant } = await supabase.from('merchants').select('business_name, email, phone').eq('id', merchantId).single();
   const businessName = merchant?.business_name || 'Un marchand';
+  const merchantEmail = merchant?.email || '';
+  const isNatcash = method.toLowerCase() === 'natcash';
 
-  await sendEmail({
-    to: adminEmail,
-    subject: `Nouveau retrait en attente - ${amount} HTG`,
-    text: `Le marchand ${businessName} a demandé un retrait de ${amount} HTG via ${method}. Connectez-vous au panneau d'administration pour traiter cette demande.`,
-  });
+  const subject = isNatcash
+    ? `⚠️ APPROBATION REQUISE — Retrait NatCash ${(totalWithFees || amount).toLocaleString('fr-FR')} HTG — ${businessName}`
+    : `💸 Nouveau retrait ${method} — ${(totalWithFees || amount).toLocaleString('fr-FR')} HTG — ${businessName}`;
+
+  const body = `
+Bonjour Admin,
+
+${isNatcash ? '⚠️ Un retrait NatCash est en attente de votre approbation.' : `Un retrait ${method} vient d'être effectué.`}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAILS DU RETRAIT
+━━━━━━━━━━━━━━━━━━━━━━━━
+Marchand   : ${businessName}
+Email      : ${merchantEmail}
+Méthode    : ${method}
+${wallet ? `Portefeuille: ${wallet}` : ''}
+Montant net: ${amount.toLocaleString('fr-FR')} HTG
+${totalWithFees ? `Total débité: ${totalWithFees.toLocaleString('fr-FR')} HTG` : ''}
+Statut     : ${isNatcash ? 'EN ATTENTE D\'APPROBATION' : 'TRAITÉ'}
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+${isNatcash ? `👉 Connectez-vous au panneau admin pour approuver ou rejeter:\n${appUrl}/system-core/withdrawals` : `👉 Voir le panneau admin:\n${appUrl}/system-core/withdrawals`}
+
+Cordialement,
+Kobara System
+  `.trim();
+
+  await sendEmail({ to: adminEmail, subject, text: body });
 }
 
 // 1. Nouvelle Paiement (succeeded)

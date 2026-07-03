@@ -103,16 +103,15 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     }
   }
 
-  const fees = amount * 0.05; // 5% Kobara fee
+  const fees = method === 'Zelle' ? 0 : amount * 0.05; // Zelle: 0%, others: 5%
   const netAmount = amount - fees;
 
   const reference = `WTH-${Date.now()}`;
   let bazikResponse: any = null;
   
-  // 2. Appel de l'API (AVANT de déduire l'argent)
+  // Appel API uniquement pour MonCash (NatCash = approbation manuelle)
   if (method === 'MonCash') {
     if (isTest) {
-      // Simulation pour l'environnement de test
       bazikResponse = { transaction_id: `TEST-WTH-${Date.now()}` };
     } else {
       try {
@@ -129,35 +128,34 @@ export async function requestWithdrawal(amount: number, method: string, receiver
     }
   }
 
-  // 3. Déduction du solde de l'utilisateur (le total demandé)
-  const newBalance = activeBalance - amount;
-
-  if (newBalance < 0) {
-    // Should never happen due to the check at the top, but just in case
-    return { error: "Fonds insuffisants." };
-  }
-
   const adminClient = createAdminClient();
-  const updateData = isTest 
-    ? { available_balance_test: newBalance }
-    : { available_balance: newBalance };
 
-  const { error: updateError } = await adminClient
-    .from('merchants')
-    .update(updateData)
-    .eq('id', merchant.id);
+  // NatCash : on ne déduit PAS le solde maintenant (admin doit approuver)
+  const isNatcash = method === 'NatCash' || method === 'Natcash';
+  
+  if (!isNatcash) {
+    // Déduction immédiate pour MonCash, Zelle
+    const newBalance = activeBalance - amount;
+    if (newBalance < 0) return { error: "Fonds insuffisants." };
 
-  if (updateError) {
-    console.error("Failed to update merchant balance:", updateError);
-    return { error: "Erreur lors de la mise à jour du solde." };
+    const updateData = isTest 
+      ? { available_balance_test: newBalance }
+      : { available_balance: newBalance };
+
+    const { error: updateError } = await adminClient.from('merchants').update(updateData).eq('id', merchant.id);
+    if (updateError) {
+      console.error("Failed to update merchant balance:", updateError);
+      return { error: "Erreur lors de la mise à jour du solde." };
+    }
   }
 
-  // 4. Enregistrement en base de données
-  const total = amount;
+  // Statut selon la méthode
   const bazikFinalStatus = bazikResponse?.status?.toLowerCase();
-  const initialStatus = (bazikFinalStatus === 'success' || bazikFinalStatus === 'successful' || bazikFinalStatus === 'completed') 
-    ? 'completed' 
-    : (isTest ? 'completed' : (method === 'MonCash' ? 'pending' : 'completed'));
+  const initialStatus = isNatcash 
+    ? 'pending_approval'  // NatCash attend l'approbation admin
+    : (bazikFinalStatus === 'success' || bazikFinalStatus === 'successful' || bazikFinalStatus === 'completed') 
+      ? 'completed' 
+      : (isTest ? 'completed' : (method === 'MonCash' ? 'pending' : 'completed'));
 
   const { error: insertError } = await adminClient
     .from('withdrawals')
@@ -165,41 +163,37 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       merchant_id: merchant.id,
       environment: merchant.current_environment || 'test',
       kobara_reference: reference,
-      bazik_transaction_id: bazikResponse?.transaction_id || bazikResponse?.id || null, // from bazik
+      bazik_transaction_id: bazikResponse?.transaction_id || bazikResponse?.id || null,
       amount: netAmount,
       fees: fees,
-      total: total,
-      wallet: receiver || merchant.phone, // fallback to merchant phone
+      total: amount,
+      wallet: receiver || merchant.phone,
       status: initialStatus,
       provider: method.toLowerCase()
     });
 
   if (insertError) {
     console.error("Failed to record withdrawal in DB", insertError);
+    // Si NatCash, le solde n'a pas été déduit donc pas de rollback nécessaire
     return { error: "Erreur lors de l'enregistrement du retrait" };
   }
 
-  // Create notifications
+  // Notifications
   const { notifyWithdrawalCreated, notifyAdminWithdrawalCreated, notifyWithdrawalSuccess } = await import('@/lib/server/notifications');
   try {
-    const { data: mData } = await supabase.from('merchants').select('email').eq('id', merchant.id).single();
+    const { data: mData } = await adminClient.from('merchants').select('email').eq('id', merchant.id).single();
     if (mData) {
       if (initialStatus === 'completed') {
-        // Send success immediately
         await notifyWithdrawalSuccess(merchant.id, mData.email, amount);
       } else {
-        // Send pending request
         await notifyWithdrawalCreated(merchant.id, mData.email, amount);
       }
     }
-    // If pending (Zelle, Natcash, or delayed Moncash), notify admin
-    if (initialStatus === 'pending') {
-      await notifyAdminWithdrawalCreated(merchant.id, amount, method);
-    }
+    // Notifier l'admin pour TOUS les retraits (MonCash, Zelle, NatCash, etc.)
+    await notifyAdminWithdrawalCreated(merchant.id, netAmount, method, undefined, receiver || merchant.phone, amount);
   } catch(e) { console.error("Notification failed", e); }
 
   if (saveNumber && method === 'MonCash' && receiver) {
-    // Fetch current settings to avoid overriding other settings
     const { data: currentSettings } = await supabase
       .from('settings')
       .select('settings_json')
