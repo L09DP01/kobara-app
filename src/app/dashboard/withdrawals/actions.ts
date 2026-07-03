@@ -69,8 +69,8 @@ export async function requestWithdrawal(amount: number, method: string, receiver
       } else {
         // Standard Email - verify from Redis where sendEmailOtpAction stored it
         const { safeRedis } = await import("@/lib/server/redis");
-        const { data: userData } = await supabase.auth.getUser();
-        const userEmail = userData?.user?.email;
+        // user.email vient directement de la session NextAuth (déjà récupéré)
+        const userEmail = user?.email;
         
         if (!userEmail) {
           return { error: "Impossible de récupérer l'email de l'utilisateur." };

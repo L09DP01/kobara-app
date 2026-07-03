@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import speakeasy from 'speakeasy';
 
 export async function executeB2BTransfer(amount: number, receiverEmail: string, code2fa?: string) {
-  const { merchant, userRole, supabase } = await getCurrentUserAndMerchant();
+  const { user, merchant, userRole, supabase } = await getCurrentUserAndMerchant();
 
   if (!merchant) {
     return { error: "Merchant not found" };
@@ -52,8 +52,8 @@ export async function executeB2BTransfer(amount: number, receiverEmail: string, 
       } else {
         // Standard Email - verify from Redis where sendEmailOtpAction stored it
         const { safeRedis } = await import("@/lib/server/redis");
-        const { data: userData } = await supabase.auth.getUser();
-        const userEmail = userData?.user?.email;
+        // user.email vient directement de la session NextAuth (déjà récupéré)
+        const userEmail = user?.email;
         
         if (!userEmail) {
           return { error: "Impossible de récupérer l'email de l'utilisateur." };
