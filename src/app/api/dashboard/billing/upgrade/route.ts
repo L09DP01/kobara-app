@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { planSlug, billingCycle = 'monthly', paymentMethod = 'moncash' } = await request.json();
+    const { planSlug, billingCycle = 'monthly', paymentMethod = 'moncash', promoCode } = await request.json();
     if (!planSlug) {
       return NextResponse.json({ error: "planSlug is required" }, { status: 400 });
     }
@@ -32,12 +32,47 @@ export async function POST(request: NextRequest) {
 
     const { data: plan } = await supabase
       .from('plans')
-      .select('price_htg, name')
+      .select('id, price_htg, name')
       .eq('slug', planSlug)
       .single();
 
     if (!plan) {
       return NextResponse.json({ error: "Plan introuvable" }, { status: 404 });
+    }
+
+    let discountPercentage = 0;
+    let promoCodeId = null;
+
+    if (promoCode) {
+      const { data: promoData } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .eq('code', promoCode)
+        .single();
+      
+      if (!promoData) {
+        return NextResponse.json({ error: "Code promo invalide" }, { status: 400 });
+      }
+      if (!promoData.is_active) {
+        return NextResponse.json({ error: "Code promo inactif" }, { status: 400 });
+      }
+      if (promoData.expires_at && new Date(promoData.expires_at) < new Date()) {
+        return NextResponse.json({ error: "Code promo expiré" }, { status: 400 });
+      }
+      if (promoData.max_uses && promoData.current_uses >= promoData.max_uses) {
+        return NextResponse.json({ error: "Code promo épuisé" }, { status: 400 });
+      }
+      if (promoData.plan_id && promoData.plan_id !== plan.id) {
+        return NextResponse.json({ error: "Code promo non applicable pour ce plan" }, { status: 400 });
+      }
+      if (promoData.merchant_id && promoData.merchant_id !== merchant.id) {
+        return NextResponse.json({ error: "Code promo non applicable pour votre compte" }, { status: 400 });
+      }
+      if (billingCycle === 'yearly' && !promoData.is_cumulable) {
+        return NextResponse.json({ error: "Ce code promo n'est pas cumulable avec l'offre annuelle" }, { status: 400 });
+      }
+      discountPercentage = promoData.discount_percentage;
+      promoCodeId = promoData.id;
     }
 
     // Si le plan est payant
@@ -48,6 +83,11 @@ export async function POST(request: NextRequest) {
       if (billingCycle === 'yearly') {
         amount = (plan.price_htg * 0.8) * 12; // 20% discount, billed yearly
         descriptionSuffix = "Annuel";
+      }
+
+      if (discountPercentage > 0) {
+        amount = amount * (1 - (discountPercentage / 100));
+        amount = Math.round(amount * 100) / 100;
       }
 
       if (paymentMethod === 'natcash') {
@@ -75,7 +115,9 @@ export async function POST(request: NextRequest) {
           metadata: {
             is_subscription_upgrade: true,
             plan_slug: planSlug,
-            billing_cycle: billingCycle
+            billing_cycle: billingCycle,
+            promo_code: promoCode,
+            promo_code_id: promoCodeId
           }
         }).select('id').single();
 

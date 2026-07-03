@@ -21,6 +21,11 @@ export function BillingClient() {
   const [transCode, setTransCode] = useState('');
   const [verifyingTransCode, setVerifyingTransCode] = useState(false);
 
+  const [promoCode, setPromoCode] = useState('');
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [verifyingPromo, setVerifyingPromo] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -58,10 +63,15 @@ export function BillingClient() {
     setUpgrading(true);
     setError(null);
     try {
+      const payload: any = { planSlug, billingCycle, paymentMethod };
+      if (appliedPromo) {
+        payload.promoCode = appliedPromo.code;
+      }
+
       const res = await fetch('/api/dashboard/billing/upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planSlug, billingCycle, paymentMethod })
+        body: JSON.stringify(payload)
       });
       
       const result = await res.json();
@@ -84,6 +94,39 @@ export function BillingClient() {
     } catch (err: any) {
       setError(err.message);
       setUpgrading(false);
+    }
+  };
+
+  const handleVerifyPromo = async () => {
+    if (!promoCode.trim() || !upgradeIntent) return;
+    setVerifyingPromo(true);
+    setPromoError(null);
+    try {
+      const res = await fetch('/api/promo-codes/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          promoCode: promoCode.trim(), 
+          planSlug: upgradeIntent.planSlug,
+          billingCycle: upgradeIntent.isYearly ? 'yearly' : 'monthly'
+        })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Code invalide');
+      
+      setAppliedPromo({
+        code: promoCode.trim(),
+        discount: result.discount_percentage,
+        originalPrice: result.original_price,
+        finalPrice: result.final_price
+      });
+      setPromoError(null);
+      toast.success(`Code promo appliqué ! (-${result.discount_percentage}%)`);
+    } catch (err: any) {
+      setPromoError(err.message);
+      setAppliedPromo(null);
+    } finally {
+      setVerifyingPromo(false);
     }
   };
 
@@ -302,7 +345,53 @@ export function BillingClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-[#111827] border border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative">
             <h3 className="text-xl font-bold text-white mb-2">Moyen de paiement</h3>
-            <p className="text-slate-400 text-sm mb-6">Choisissez comment vous souhaitez payer votre abonnement.</p>
+            <p className="text-slate-400 text-sm mb-4">Choisissez comment vous souhaitez payer votre abonnement.</p>
+
+            {/* Promo Code Section */}
+            <div className="mb-6 bg-white/5 p-4 rounded-xl border border-white/10">
+              <label className="text-xs text-slate-400 font-bold mb-2 block uppercase tracking-wider">
+                Code Promo (Optionnel)
+              </label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                  disabled={!!appliedPromo || verifyingPromo}
+                  placeholder="ENTREZ LE CODE"
+                  className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 disabled:opacity-50"
+                />
+                {appliedPromo ? (
+                  <button 
+                    onClick={() => { setAppliedPromo(null); setPromoCode(''); }}
+                    className="px-3 py-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-sm font-bold rounded-lg transition-colors border border-red-500/20"
+                  >
+                    Retirer
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleVerifyPromo}
+                    disabled={!promoCode.trim() || verifyingPromo}
+                    className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {verifyingPromo ? '...' : 'Appliquer'}
+                  </button>
+                )}
+              </div>
+              {promoError && <p className="text-xs text-red-400 mt-2">{promoError}</p>}
+              
+              {appliedPromo && (
+                <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-green-400 font-bold">Réduction (-{appliedPromo.discount}%)</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-slate-500 line-through text-xs">{appliedPromo.originalPrice.toLocaleString('fr-FR')} HTG</span>
+                    <span className="text-white font-bold">{appliedPromo.finalPrice.toLocaleString('fr-FR')} HTG</span>
+                  </div>
+                </div>
+              )}
+            </div>
             
             <div className="space-y-3 mb-6">
               <button 
@@ -335,9 +424,14 @@ export function BillingClient() {
             </div>
 
             <button 
-              onClick={() => setUpgradeIntent(null)}
+              onClick={() => {
+                setUpgradeIntent(null);
+                setAppliedPromo(null);
+                setPromoCode('');
+                setPromoError(null);
+              }}
               disabled={upgrading}
-              className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-colors"
+              className="w-full mt-3 py-3 rounded-xl border border-slate-700 text-slate-300 font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 text-sm"
             >
               Annuler
             </button>

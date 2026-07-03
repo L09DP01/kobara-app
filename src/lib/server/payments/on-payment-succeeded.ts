@@ -45,6 +45,18 @@ export async function onPaymentSucceeded(paymentId: string) {
     try {
       await upgradeMerchantPlan(merchantId, metadata.plan_slug);
       console.log(`Plan upgraded: Merchant ${merchantId} to ${metadata.plan_slug}`);
+
+      if (metadata.promo_code_id) {
+        // Incrémenter le nombre d'utilisations du code promo
+        const { error: promoError } = await supabase.rpc('increment_promo_code_uses', { p_id: metadata.promo_code_id });
+        if (promoError) {
+           // Fallback si la fonction RPC n'existe pas encore
+           const { data: promo } = await supabase.from('promo_codes').select('current_uses').eq('id', metadata.promo_code_id).single();
+           if (promo) {
+              await supabase.from('promo_codes').update({ current_uses: promo.current_uses + 1 }).eq('id', metadata.promo_code_id);
+           }
+        }
+      }
     } catch (err) {
       console.error(`Plan upgrade failed for ${merchantId}:`, err);
     }
