@@ -12,7 +12,8 @@ import {
   Banknote, 
   LifeBuoy, 
   SearchCode,
-  LogOut
+  LogOut,
+  Mail
 } from "lucide-react";
 
 export default function SystemCoreLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export default function SystemCoreLayout({ children }: { children: React.ReactNo
     { name: "SUPPORT", href: "/system-core/support", icon: LifeBuoy },
     { name: "AUDIT LOGS", href: "/system-core/audit", icon: SearchCode },
     { name: "RISK MONITORING", href: "/system-core/risk-monitoring", icon: ShieldAlert },
+    { name: "MESSAGING", href: "/system-core/messaging", icon: Mail },
     { name: "SMS GATEWAY", href: "/system-core/sms-gateway", icon: Terminal },
     { name: "LEGAL & CGU (IA)", href: "/system-core/legal/cgu-rules", icon: SearchCode },
   ];
