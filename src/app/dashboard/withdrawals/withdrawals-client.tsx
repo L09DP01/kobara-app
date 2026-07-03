@@ -290,13 +290,24 @@ export function WithdrawalsClient({
                           <span>Montant demandé</span>
                           <span>{Number(amount).toLocaleString('fr-FR')} HTG</span>
                         </div>
-                        <div className="flex justify-between text-sm text-orange-400">
-                          <span>Frais appliqués ({method === 'Zelle' ? '0%' : '5%'})</span>
-                          <span>-{(Number(amount) * (method === 'Zelle' ? 0 : 0.05)).toLocaleString('fr-FR')} HTG</span>
-                        </div>
+                        {method === 'Zelle' ? (
+                          <div className="flex justify-between text-sm text-blue-400">
+                            <span>Montant en USD (taux: 156.25 HTG/$)</span>
+                            <span>${(Number(amount) / 156.25).toFixed(2)} USD</span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between text-sm text-orange-400">
+                            <span>Frais appliqués (5%)</span>
+                            <span>-{(Number(amount) * 0.05).toLocaleString('fr-FR')} HTG</span>
+                          </div>
+                        )}
                         <div className="flex justify-between font-bold text-white mt-2 pt-2 border-t border-white/10">
                           <span>Montant net à recevoir</span>
-                          <span className="text-green-400">{(Number(amount) * (method === 'Zelle' ? 1 : 0.95)).toLocaleString('fr-FR')} HTG</span>
+                          {method === 'Zelle' ? (
+                            <span className="text-green-400">${(Number(amount) / 156.25).toFixed(2)} USD</span>
+                          ) : (
+                            <span className="text-green-400">{(Number(amount) * 0.95).toLocaleString('fr-FR')} HTG</span>
+                          )}
                         </div>
                       </div>
                     )}
