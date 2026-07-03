@@ -24,9 +24,13 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
   // Fetch ALL payments for this merchant (test + live)
   const { data: allPayments } = await supabase
     .from('payments')
-    .select('id, kobara_reference, gross_amount, net_amount, fee_amount, status, provider, payment_method, environment, created_at, paid_at, customers(name, email, phone)')
+    .select('id, kobara_reference, gross_amount, net_amount, fee_amount, status, provider, payment_method, environment, created_at, paid_at, customer_id')
     .eq('merchant_id', id)
     .order('created_at', { ascending: false });
+
+  if (!allPayments) {
+    console.error('Payments query failed for merchant:', id);
+  }
 
   const payments = allPayments || [];
 
@@ -253,8 +257,8 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
                     <td className="py-3 px-3 font-mono text-xs text-slate-300">
                       {p.kobara_reference || '—'}
                     </td>
-                    <td className="py-3 px-3 text-slate-300">
-                      {p.customers?.name || p.customers?.email || '—'}
+                    <td className="py-3 px-3 font-mono text-xs text-slate-400">
+                      {p.customer_id ? p.customer_id.substring(0, 8) + '...' : '—'}
                     </td>
                     <td className="py-3 px-3">
                       <span className="text-xs font-bold uppercase text-slate-300">
