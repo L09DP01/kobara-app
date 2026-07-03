@@ -8,7 +8,7 @@ import { canCreateWithdrawal } from "@/lib/server/access";
 import speakeasy from 'speakeasy';
 
 export async function requestWithdrawal(amount: number, method: string, receiver?: string, code2fa?: string, _unused?: any, saveNumber?: boolean) {
-  const { merchant, userRole, supabase } = await getCurrentUserAndMerchant();
+  const { user, merchant, userRole, supabase } = await getCurrentUserAndMerchant();
 
   if (!merchant) {
     return { error: "Merchant not found" };
