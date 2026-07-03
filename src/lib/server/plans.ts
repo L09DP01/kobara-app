@@ -66,7 +66,7 @@ export async function getMerchantCurrentPlan(merchantId: string) {
   // Get merchant info
   const { data: merchant, error: merchantError } = await supabase
     .from('merchants')
-    .select('plan_slug, plan_status, account_access, kyc_status')
+    .select('plan_slug, plan_status, account_access, kyc_status, available_balance')
     .eq('id', merchantId)
     .single();
     
