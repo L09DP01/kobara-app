@@ -22,14 +22,14 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
   }
 
   // Fetch ALL payments for this merchant (test + live)
-  const { data: allPayments } = await supabase
+  const { data: allPayments, error: paymentsError } = await supabase
     .from('payments')
-    .select('id, kobara_reference, gross_amount, net_amount, fee_amount, status, provider, payment_method, environment, created_at, paid_at, customer_id')
+    .select('*')
     .eq('merchant_id', id)
     .order('created_at', { ascending: false });
 
-  if (!allPayments) {
-    console.error('Payments query failed for merchant:', id);
+  if (paymentsError) {
+    console.error('Payments query error:', paymentsError);
   }
 
   const payments = allPayments || [];
@@ -43,9 +43,9 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
   const pendingAll = payments.filter(p => p.status === 'pending');
   const failedAll = payments.filter(p => p.status === 'failed');
 
-  const totalLive = succeededLive.reduce((sum, p) => sum + Number(p.gross_amount || 0), 0);
-  const totalTest = succeededTest.reduce((sum, p) => sum + Number(p.gross_amount || 0), 0);
-  const totalPending = pendingAll.reduce((sum, p) => sum + Number(p.gross_amount || 0), 0);
+  const totalLive = succeededLive.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const totalTest = succeededTest.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const totalPending = pendingAll.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const totalFees = succeededLive.reduce((sum, p) => sum + Number(p.fee_amount || 0), 0);
 
   const statusColor = (status: string) => {
@@ -266,7 +266,7 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right font-mono text-slate-200">
-                      {Number(p.gross_amount || 0).toLocaleString()} HTG
+                      {Number(p.amount || 0).toLocaleString()} HTG
                     </td>
                     <td className="py-3 px-3 text-right font-mono text-[#FF4A1C] text-xs">
                       {Number(p.fee_amount || 0).toLocaleString()}
