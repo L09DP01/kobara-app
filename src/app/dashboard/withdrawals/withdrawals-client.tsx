@@ -7,14 +7,14 @@ import { sendEmailOtpAction } from '../settings/actions';
 import { useEnvironment } from '@/context/EnvironmentContext';
 import { QRCodeSVG } from 'qrcode.react';
 
-export function WithdrawalsClient({ 
-  withdrawals, 
+export function WithdrawalsClient({
+  withdrawals,
   merchant,
   twoFactorMethod = 'none',
   userEmail = '',
   savedMoncashNumber = ''
-}: { 
-  withdrawals: any[], 
+}: {
+  withdrawals: any[],
   merchant: any,
   twoFactorMethod?: 'none' | 'email' | 'totp',
   userEmail?: string,
@@ -36,8 +36,8 @@ export function WithdrawalsClient({
   const { currentEnvironment } = useEnvironment();
 
   const isTest = currentEnvironment === 'test';
-  const activeBalance = isTest 
-    ? Number(merchant.available_balance_test || 0) 
+  const activeBalance = isTest
+    ? Number(merchant.available_balance_test || 0)
     : Number(merchant.available_balance || 0);
 
   const handleInitialSubmit = async (e: React.FormEvent) => {
@@ -45,10 +45,10 @@ export function WithdrawalsClient({
     setErrorMsg('');
     let minAmount = 150;
     if (method === 'B2B') minAmount = 1;
-    if (method === 'Zelle') minAmount = 3125;
-    
+    if (method === 'Zelle') minAmount = 2840;
+
     if (!amount || Number(amount) < minAmount) {
-      setErrorMsg(method === 'Zelle' ? `Le montant minimum pour Zelle est de 3125 HTG (20 $).` : `Le montant minimum est de ${minAmount} HTG`);
+      setErrorMsg(method === 'Zelle' ? `Le montant minimum pour Zelle est de 2840 HTG (20 $).` : `Le montant minimum est de ${minAmount} HTG`);
       return;
     }
     if (method === 'B2B' && !receiver) {
@@ -78,9 +78,9 @@ export function WithdrawalsClient({
         } else {
           res = await requestWithdrawal(Number(amount), method, receiver, undefined, undefined, saveNumber);
         }
-        
+
         if (res?.error) throw new Error(res.error);
-        
+
         setIsModalOpen(false);
         setStep('details');
         setAmount('');
@@ -105,7 +105,7 @@ export function WithdrawalsClient({
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
-    
+
     if (!code2fa && !isTest) {
       setErrorMsg("Veuillez saisir le code de sécurité.");
       return;
@@ -119,7 +119,7 @@ export function WithdrawalsClient({
       } else {
         res = await requestWithdrawal(Number(amount), method, receiver, code2fa, undefined, saveNumber);
       }
-      
+
       if (res?.error) {
         throw new Error(res.error);
       }
@@ -129,11 +129,11 @@ export function WithdrawalsClient({
       setAmount('');
       setReceiver('');
       setCode2fa('');
-      
+
       const successMessage = (res as any)?.status === 'completed'
         ? "Votre retrait a été effectué avec succès."
         : "Demande de retrait initiée et en cours de traitement.";
-        
+
       setSuccessMsg(successMessage);
       setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err: any) {
@@ -152,12 +152,12 @@ export function WithdrawalsClient({
   };
 
   const totalWithdrawn = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0);
-  const filteredWithdrawals = filterStatus === 'all' 
-    ? withdrawals 
+  const filteredWithdrawals = filterStatus === 'all'
+    ? withdrawals
     : withdrawals.filter(w => w.status === filterStatus);
 
   const getStatusConfig = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'completed': return { label: 'Complété', bg: 'bg-green-500/10', text: 'text-green-400', dot: 'bg-green-500', border: 'border-l-green-500' };
       case 'pending': return { label: 'En attente', bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500', border: 'border-l-amber-500' };
       case 'processing': return { label: 'En traitement', bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500', border: 'border-l-blue-500' };
@@ -175,14 +175,14 @@ export function WithdrawalsClient({
           <p className="text-sm text-slate-400 mt-1">Gérez vos retraits et suivez votre solde en temps réel.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => setIsQrModalOpen(true)}
             className="bg-white/10 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-white/20 transition-colors shadow-sm flex items-center gap-2 border border-white/10"
           >
             <span className="material-symbols-outlined text-[20px]">qr_code</span>
             Mon QR Code
           </button>
-          <button 
+          <button
             onClick={() => { setMethod('MonCash'); setIsModalOpen(true); }}
             className="bg-orange-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors shadow-sm flex items-center gap-2"
           >
@@ -255,12 +255,12 @@ export function WithdrawalsClient({
                 {step === 'details' ? 'Initier un Retrait' : 'Vérification de sécurité'}
               </h2>
               <p className="text-white/50 text-xs mt-1">
-                {step === 'details' 
-                  ? 'Les fonds seront envoyés sur votre compte MonCash' 
+                {step === 'details'
+                  ? 'Les fonds seront envoyés sur votre compte MonCash'
                   : 'Veuillez confirmer votre identité pour valider ce retrait'}
               </p>
             </div>
-            
+
             <div className="p-6">
               {errorMsg && (
                 <div className="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-500/20 text-red-400 text-sm flex items-start gap-2">
@@ -268,15 +268,15 @@ export function WithdrawalsClient({
                   <span>{errorMsg}</span>
                 </div>
               )}
-              
+
               {step === 'details' ? (
                 <form onSubmit={handleInitialSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs text-slate-400 font-bold mb-1.5">Montant (HTG) - Max: {activeBalance}</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={amount}
-                      onChange={(e) => setAmount(Number(e.target.value))}
+                      onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
                       placeholder="1000.00"
                       max={Math.max(100, activeBalance)}
                       min={100}
@@ -326,7 +326,7 @@ export function WithdrawalsClient({
                   </div>
                   <div>
                     <label className="block text-xs text-slate-400 font-bold mb-1.5">Méthode de réception</label>
-                    <select 
+                    <select
                       value={method}
                       onChange={(e) => setMethod(e.target.value)}
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all [&>option]:bg-[#131B2C]"
@@ -339,12 +339,12 @@ export function WithdrawalsClient({
                       <option value="Unibank" disabled>Unibank (Bientôt)</option>
                     </select>
                   </div>
-                  
+
                   {method === 'B2B' && (
                     <div>
                       <label className="block text-xs text-slate-400 font-bold mb-1.5">Email du marchand destinataire</label>
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         value={receiver}
                         onChange={(e) => setReceiver(e.target.value)}
                         placeholder="marchand@exemple.com"
@@ -357,8 +357,8 @@ export function WithdrawalsClient({
                   {method === 'Zelle' && (
                     <div>
                       <label className="block text-xs text-slate-400 font-bold mb-1.5">Email ou Téléphone (Zelle)</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={receiver}
                         onChange={(e) => setReceiver(e.target.value)}
                         placeholder="email@exemple.com"
@@ -371,8 +371,8 @@ export function WithdrawalsClient({
                   {(method === 'MonCash' || method === 'NatCash') && (
                     <div>
                       <label className="block text-xs text-slate-400 font-bold mb-1.5">Numéro de téléphone ({method})</label>
-                      <input 
-                        type="tel" 
+                      <input
+                        type="tel"
                         value={receiver}
                         onChange={(e) => setReceiver(e.target.value)}
                         placeholder="3xxxxxxx"
@@ -380,8 +380,8 @@ export function WithdrawalsClient({
                         required
                       />
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={saveNumber}
                           onChange={(e) => setSaveNumber(e.target.checked)}
                           className="rounded border-white/10 text-orange-500 focus:ring-orange-500/30 bg-white/5 w-4 h-4"
@@ -391,15 +391,15 @@ export function WithdrawalsClient({
                     </div>
                   )}
                   <div className="flex justify-end gap-3 pt-3">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={closeModal}
                       className="px-5 py-2.5 text-slate-400 hover:bg-white/5 rounded-xl transition-colors text-sm font-bold"
                     >
                       Annuler
                     </button>
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       disabled={loading}
                       className="px-6 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50 transition-all text-sm font-bold shadow-sm"
                     >
@@ -413,8 +413,8 @@ export function WithdrawalsClient({
                     <label className="block text-xs text-slate-400 font-bold mb-1.5">
                       Code de sécurité ({(twoFactorMethod === 'totp') ? 'App Authenticator' : 'E-mail'})
                     </label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={code2fa}
                       onChange={(e) => setCode2fa(e.target.value.replace(/[^0-9]/g, ''))}
                       placeholder="000000"
@@ -422,22 +422,22 @@ export function WithdrawalsClient({
                       className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-center tracking-widest font-mono font-bold text-2xl"
                       required
                     />
-                    { (twoFactorMethod === 'email' || twoFactorMethod === 'none') && (
-                       <p className="text-xs text-slate-400 mt-3 text-center">
-                          Un code à 6 chiffres a été envoyé à <strong>{userEmail}</strong>.<br/>Veuillez le saisir ci-dessus pour valider la transaction.
-                       </p>
+                    {(twoFactorMethod === 'email' || twoFactorMethod === 'none') && (
+                      <p className="text-xs text-slate-400 mt-3 text-center">
+                        Un code à 6 chiffres a été envoyé à <strong>{userEmail}</strong>.<br />Veuillez le saisir ci-dessus pour valider la transaction.
+                      </p>
                     )}
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setStep('details')}
                       className="px-5 py-2.5 text-slate-400 hover:bg-white/5 rounded-xl transition-colors text-sm font-bold"
                     >
                       Retour
                     </button>
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       disabled={loading}
                       className="px-6 py-2.5 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50 transition-all text-sm font-bold shadow-sm"
                     >
@@ -455,7 +455,7 @@ export function WithdrawalsClient({
       <div>
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-white">Historique des Retraits</h3>
-          <select 
+          <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-sm [&>option]:bg-[#131B2C]"
@@ -482,8 +482,8 @@ export function WithdrawalsClient({
                 {filteredWithdrawals.length > 0 ? filteredWithdrawals.map(w => {
                   const cfg = getStatusConfig(w.status);
                   return (
-                    <tr 
-                      key={w.id} 
+                    <tr
+                      key={w.id}
                       onClick={() => setSelectedWithdrawal(w)}
                       className={`hover:bg-white/5 transition-colors group border-l-4 cursor-pointer ${cfg.border}`}
                     >
@@ -533,7 +533,7 @@ export function WithdrawalsClient({
               Faites scanner ce code par un autre marchand dans l'application mobile pour recevoir un transfert instantané.
             </p>
             <div className="bg-white p-4 rounded-xl inline-block mx-auto mb-6">
-              <QRCodeSVG 
+              <QRCodeSVG
                 value={`kobara://transfer?email=${userEmail}`}
                 size={200}
                 bgColor={"#ffffff"}
@@ -545,7 +545,7 @@ export function WithdrawalsClient({
             <div className="text-sm text-slate-300 font-medium bg-white/5 p-3 rounded-xl border border-white/10 mb-6 break-all">
               {userEmail}
             </div>
-            <button 
+            <button
               onClick={() => setIsQrModalOpen(false)}
               className="w-full bg-white/10 text-white px-4 py-3 rounded-xl font-bold hover:bg-white/20 transition-colors"
             >
@@ -568,7 +568,7 @@ export function WithdrawalsClient({
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            
+
             <div className="p-6 space-y-4">
               <div className="flex justify-between items-center pb-4 border-b border-white/10">
                 <span className="text-sm text-slate-400">Montant brut (déduit)</span>
@@ -582,7 +582,7 @@ export function WithdrawalsClient({
                 <span className="text-sm font-bold text-white">Montant net (reçu)</span>
                 <span className="text-xl font-bold text-green-400">{Number(selectedWithdrawal.amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</span>
               </div>
-              
+
               <div className="bg-white/5 p-4 rounded-xl border border-white/10 mt-2 space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-slate-400">Méthode</span>
@@ -618,14 +618,14 @@ export function WithdrawalsClient({
                 </div>
               </div>
             </div>
-            
+
             <div className="p-4 bg-white/5 border-t border-white/10 flex justify-end">
-               <button 
-                 onClick={() => setSelectedWithdrawal(null)}
-                 className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
-               >
-                 Fermer
-               </button>
+              <button
+                onClick={() => setSelectedWithdrawal(null)}
+                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-bold transition-colors"
+              >
+                Fermer
+              </button>
             </div>
           </div>
         </div>
