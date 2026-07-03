@@ -394,33 +394,75 @@ export function BillingClient() {
             </div>
             
             <div className="space-y-3 mb-6">
-              <button 
-                onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'moncash')}
-                disabled={upgrading}
-                className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left"
-              >
-                <div className="w-10 h-10 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center shrink-0">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold">MonCash</h4>
-                  <p className="text-slate-400 text-xs">Paiement mobile instantané</p>
-                </div>
-              </button>
+              {(() => {
+                const selectedPlan = plans.find(p => p.slug === upgradeIntent.planSlug);
+                const finalPriceToPay = appliedPromo 
+                  ? appliedPromo.finalPrice 
+                  : (upgradeIntent.isYearly ? (selectedPlan?.price_htg || 0) * 0.8 * 12 : (selectedPlan?.price_htg || 0));
+                
+                const balance = data?.merchant?.available_balance || 0;
+                const canPayWithBalance = balance >= finalPriceToPay;
 
-              <button 
-                onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'natcash')}
-                disabled={upgrading}
-                className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left"
-              >
-                <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
-                  <span className="font-black text-sm">NC</span>
-                </div>
-                <div>
-                  <h4 className="text-white font-bold">NatCash</h4>
-                  <p className="text-slate-400 text-xs">Paiement par transfert</p>
-                </div>
-              </button>
+                if (finalPriceToPay === 0) {
+                  return (
+                    <button 
+                      onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'free')}
+                      disabled={upgrading}
+                      className="w-full p-4 flex items-center justify-center gap-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-colors text-center"
+                    >
+                      Activer gratuitement
+                    </button>
+                  );
+                }
+
+                return (
+                  <>
+                    <button 
+                      onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'balance')}
+                      disabled={upgrading || !canPayWithBalance}
+                      className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-10 h-10 bg-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center shrink-0">
+                        <span className="font-black text-lg">HTG</span>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold">Mon Solde ({balance.toLocaleString('fr-FR')} HTG)</h4>
+                        <p className={canPayWithBalance ? "text-emerald-400 text-xs" : "text-red-400 text-xs"}>
+                          {canPayWithBalance ? `Payer ${finalPriceToPay.toLocaleString('fr-FR')} HTG` : "Solde insuffisant"}
+                        </p>
+                      </div>
+                    </button>
+
+                    <button 
+                      onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'moncash')}
+                      disabled={upgrading}
+                      className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left"
+                    >
+                      <div className="w-10 h-10 bg-red-500/20 text-red-500 rounded-xl flex items-center justify-center shrink-0">
+                        <Zap className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold">MonCash</h4>
+                        <p className="text-slate-400 text-xs">Paiement mobile instantané</p>
+                      </div>
+                    </button>
+
+                    <button 
+                      onClick={() => handleUpgrade(upgradeIntent.planSlug, upgradeIntent.isYearly ? 'yearly' : 'monthly', 'natcash')}
+                      disabled={upgrading}
+                      className="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-colors text-left"
+                    >
+                      <div className="w-10 h-10 bg-blue-500/20 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
+                        <span className="font-black text-sm">NC</span>
+                      </div>
+                      <div>
+                        <h4 className="text-white font-bold">NatCash</h4>
+                        <p className="text-slate-400 text-xs">Paiement par transfert</p>
+                      </div>
+                    </button>
+                  </>
+                );
+              })()}
             </div>
 
             <button 

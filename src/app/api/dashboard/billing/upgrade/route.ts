@@ -90,6 +90,71 @@ export async function POST(request: NextRequest) {
         amount = Math.round(amount * 100) / 100;
       }
 
+      if (amount === 0 || paymentMethod === 'free') {
+        // Validation directe
+        await upgradeMerchantPlan(merchant.id, planSlug);
+        
+        // Si promoCode 100%, incrémenter
+        if (promoCodeId) {
+          const { error: promoError } = await supabase.rpc('increment_promo_code_uses', { p_id: promoCodeId });
+          if (promoError) {
+             const { data: promo } = await supabase.from('promo_codes').select('current_uses').eq('id', promoCodeId).single();
+             if (promo) {
+                await supabase.from('promo_codes').update({ current_uses: promo.current_uses + 1 }).eq('id', promoCodeId);
+             }
+          }
+        }
+        return NextResponse.json({ success: true, requiresPayment: false, message: `Plan mis à jour avec succès vers ${planSlug}` });
+      }
+
+      if (paymentMethod === 'balance') {
+        // Fetch current balance to double check
+        const { data: currentMerchant } = await supabase.from('merchants').select('available_balance').eq('id', merchant.id).single();
+        if (!currentMerchant || Number(currentMerchant.available_balance || 0) < amount) {
+          return NextResponse.json({ error: "Solde insuffisant pour effectuer ce paiement." }, { status: 400 });
+        }
+
+        // Deduct balance
+        const newBalance = Number(currentMerchant.available_balance || 0) - amount;
+        await supabase.from('merchants').update({ available_balance: newBalance }).eq('id', merchant.id);
+
+        // Enregistrer la transaction pour historique
+        const referenceCode = `BAL-${Date.now()}`;
+        const { data: paymentIntent, error: insertError } = await supabase.from('payments').insert({
+          merchant_id: merchant.id,
+          amount: amount,
+          net_amount: amount,
+          currency: 'HTG',
+          status: 'succeeded',
+          provider: 'system',
+          payment_method: 'balance',
+          kobara_reference: referenceCode,
+          metadata: {
+            is_subscription_upgrade: true,
+            plan_slug: planSlug,
+            billing_cycle: billingCycle,
+            promo_code: promoCode,
+            promo_code_id: promoCodeId
+          }
+        }).select('id').single();
+
+        // Upgrade the plan
+        await upgradeMerchantPlan(merchant.id, planSlug);
+
+        // Si promoCode, incrémenter
+        if (promoCodeId) {
+          const { error: promoError } = await supabase.rpc('increment_promo_code_uses', { p_id: promoCodeId });
+          if (promoError) {
+             const { data: promo } = await supabase.from('promo_codes').select('current_uses').eq('id', promoCodeId).single();
+             if (promo) {
+                await supabase.from('promo_codes').update({ current_uses: promo.current_uses + 1 }).eq('id', promoCodeId);
+             }
+          }
+        }
+
+        return NextResponse.json({ success: true, requiresPayment: false, message: `Plan mis à jour via le solde` });
+      }
+
       if (paymentMethod === 'natcash') {
         // NatCash Logic
         const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
