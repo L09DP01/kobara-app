@@ -122,9 +122,9 @@ export async function simulateTestPayment(formData: FormData) {
     paid_at: new Date().toISOString()
   }).eq('id', paymentId);
 
-  // Pour les tests, on ne déclenche pas le vrai webhook via sendWebhook car le module 
-  // n'existe pas ou est géré ailleurs. On marque juste le paiement comme réussi.
-  console.log(`Paiement test ${paymentId} simulé avec succès.`);
+  // Centralized handler: credits available_balance_test, sends test webhooks, notifications
+  const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
+  await onPaymentSucceeded(paymentId);
 
   if (payment.success_url) {
     redirect(payment.success_url);

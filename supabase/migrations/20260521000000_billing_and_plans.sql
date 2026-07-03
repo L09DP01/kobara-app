@@ -95,11 +95,11 @@ INSERT INTO public.plans (
     'basic', 'basic', 'community', false, 1
 ),
 (
-    'pro', 'Pro', 1750, null, null, 2.90, 10000, true, 
+    'pro', 'Pro', 1750, null, null, 2.90, 20000, true, 
     'advanced', 'standard', 'priority_email', false, 2
 ),
 (
-    'premium', 'Premium', 5000, null, null, 2.90, 20000, true, 
+    'premium', 'Premium', 5000, null, null, 2.90, 50000, true, 
     'advanced_logs', 'advanced', 'priority_email_chat', false, 3
 ),
 (

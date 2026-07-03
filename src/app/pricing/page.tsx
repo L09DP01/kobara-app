@@ -60,7 +60,7 @@ export default async function PricingPage() {
         "Plugin WordPress inclus",
         "Paiements illimités",
         "2.9% de frais par transaction",
-        "Retrait jusqu'à 10 000 HTG / jour",
+        "Retrait jusqu'à 20 000 HTG / jour",
         "Webhooks avancés",
         "Support par email prioritaire",
       ] : [
@@ -68,7 +68,7 @@ export default async function PricingPage() {
         "WordPress plugin included",
         "Unlimited payments",
         "2.9% fee per transaction",
-        "Withdrawal up to 10,000 HTG / day",
+        "Withdrawal up to 20,000 HTG / day",
         "Advanced webhooks",
         "Priority email support",
       ],
@@ -89,7 +89,7 @@ export default async function PricingPage() {
         "Plugin WordPress inclus",
         "Paiements illimités",
         "2.9% de frais par transaction",
-        "Retrait jusqu'à 20 000 HTG / jour",
+        "Retrait jusqu'à 50 000 HTG / jour",
         "Webhooks + Logs avancés",
         "Analytics & rapports",
         "Support prioritaire (email + chat)",
@@ -98,7 +98,7 @@ export default async function PricingPage() {
         "WordPress plugin included",
         "Unlimited payments",
         "2.9% fee per transaction",
-        "Withdrawal up to 20,000 HTG / day",
+        "Withdrawal up to 50,000 HTG / day",
         "Webhooks & advanced logs",
         "Analytics & reports",
         "Priority support (email + chat)",
@@ -251,8 +251,8 @@ export default async function PricingPage() {
                     label: language === "fr" ? "Retrait journalier" : "Daily withdrawal limit",    
                     values: [
                       "2 500 HTG", 
-                      "10 000 HTG", 
                       "20 000 HTG", 
+                      "50 000 HTG", 
                       language === "fr" ? "Illimité" : "Unlimited"
                     ] 
                   },
