@@ -210,26 +210,34 @@ async function getOrCreateSettings(supabase: any, merchantId: string) {
 
 export async function sendEmailOtpAction() {
   const { user, merchant } = await getAuthUserAndMerchant();
-
-  const { safeRedis } = await import("@/lib/server/redis");
-  
-  // Rate limit check: wait 60s between sends
-  const rlKey = `otp:rate_limit:${user.email}`;
-  const isRateLimited = await safeRedis(async (r) => await r.get(rlKey), null);
-  if (isRateLimited) {
-    throw new Error("Veuillez attendre 60 secondes avant de demander un nouveau code.");
-  }
+  const adminClient = createAdminClient();
 
   // Generate 6-digit code
   const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 min
 
-  // Save to Redis (10 minutes expiration)
-  const otpKey = `otp:email:${user.email}`;
-  await safeRedis(async (r) => {
-    await r.set(otpKey, code, { ex: 600 });
-    await r.set(rlKey, "1", { ex: 60 });
-    return true;
-  }, false);
+  // Get existing settings
+  const { data: currentSettings } = await adminClient
+    .from('settings')
+    .select('security_json')
+    .eq('merchant_id', merchant.id)
+    .maybeSingle();
+
+  const securityJson = currentSettings?.security_json || {};
+  securityJson.email_otp_code = code;
+  securityJson.email_otp_expires_at = expiresAt;
+
+  // Save to DB
+  if (currentSettings) {
+    await adminClient.from('settings').update({ security_json: securityJson }).eq('merchant_id', merchant.id);
+  } else {
+    await adminClient.from('settings').insert({
+      merchant_id: merchant.id,
+      security_json: securityJson,
+      transaction_fee_percent: 2.9,
+      settlement_method: 'manual'
+    });
+  }
 
   // Send email
   const { sendEmail } = await import("@/lib/server/mail");

@@ -67,26 +67,32 @@ export async function requestWithdrawal(amount: number, method: string, receiver
           return { error: "Le code de l'application (TOTP) est invalide." };
         }
       } else {
-        // Standard Email - verify from Redis where sendEmailOtpAction stored it
-        const { safeRedis } = await import("@/lib/server/redis");
-        // user.email vient directement de la session NextAuth (déjà récupéré)
-        const userEmail = user?.email;
-        
-        if (!userEmail) {
-          return { error: "Impossible de récupérer l'email de l'utilisateur." };
-        }
+        // Vérification OTP Email depuis la base de données (settings.security_json)
+        const adminForOtp = createAdminClient();
+        const { data: settingsForOtp } = await adminForOtp
+          .from('settings')
+          .select('security_json')
+          .eq('merchant_id', merchant.id)
+          .maybeSingle();
 
-        const otpKey = `otp:email:${userEmail}`;
-        const savedCode = await safeRedis(async (r) => await r.get(otpKey), null);
+        const savedCode = settingsForOtp?.security_json?.email_otp_code;
+        const expiresAt = settingsForOtp?.security_json?.email_otp_expires_at;
 
         if (!savedCode) {
-          return { error: "Le code de vérification a expiré ou n'existe pas. Veuillez en demander un nouveau." };
+          return { error: "Le code de vérification n'existe pas. Veuillez en demander un nouveau." };
+        }
+        if (expiresAt && new Date(expiresAt) < new Date()) {
+          return { error: "Le code de vérification a expiré. Veuillez en demander un nouveau." };
         }
         if (savedCode !== code2fa) {
           return { error: "Le code de vérification email est incorrect." };
         }
-        // Consume the code from Redis
-        await safeRedis(async (r) => await r.del(otpKey), null);
+
+        // Supprimer le code après utilisation
+        const updatedSecurity = settingsForOtp?.security_json || {};
+        delete updatedSecurity.email_otp_code;
+        delete updatedSecurity.email_otp_expires_at;
+        await adminForOtp.from('settings').update({ security_json: updatedSecurity }).eq('merchant_id', merchant.id);
       }
     } else if (twoFactorMethod !== 'none') {
       return { 
