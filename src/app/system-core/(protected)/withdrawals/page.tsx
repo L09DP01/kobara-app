@@ -12,7 +12,7 @@ export default async function AdminWithdrawalsPage() {
 
   // ---- Server Actions ----
 
-  async function approveNatcash(formData: FormData) {
+  async function approveManualWithdrawal(formData: FormData) {
     'use server';
     const id = formData.get('id') as string;
     const merchantId = formData.get('merchant_id') as string;
@@ -27,26 +27,26 @@ export default async function AdminWithdrawalsPage() {
       await adminClient.from('merchants').update({ available_balance: newBalance }).eq('id', merchantId);
     }
 
-    // 2. Marquer comme approuvé
+    // 2. Marquer comme complété
     await adminClient.from('withdrawals').update({
-      status: 'pending', // now actually goes to processing
+      status: 'completed',
       processed_at: new Date().toISOString()
     }).eq('id', id);
 
-    // 3. Notifier le marchand
+    // 3. Notifier le marchand du succès
     try {
-      const { data: w } = await adminClient.from('withdrawals').select('amount').eq('id', id).single();
-      const { notifyWithdrawalCreated } = await import('@/lib/server/notifications');
-      if (merchant && w) {
+      const { data: w } = await adminClient.from('withdrawals').select('amount, total').eq('id', id).single();
+      const { notifyWithdrawalSuccess } = await import('@/lib/server/notifications');
+      if (w) {
         const { data: mData } = await adminClient.from('merchants').select('email').eq('id', merchantId).single();
-        if (mData) await notifyWithdrawalCreated(merchantId, mData.email, w.amount);
+        if (mData) await notifyWithdrawalSuccess(merchantId, mData.email, w.total || w.amount);
       }
     } catch(e) { console.error("Notify failed", e); }
 
     revalidatePath('/system-core/withdrawals');
   }
 
-  async function rejectNatcash(formData: FormData) {
+  async function rejectManualWithdrawal(formData: FormData) {
     'use server';
     const id = formData.get('id') as string;
     const merchantId = formData.get('merchant_id') as string;
@@ -66,8 +66,8 @@ export default async function AdminWithdrawalsPage() {
       if (mData?.email) {
         await sendEmail({
           to: mData.email,
-          subject: "Votre demande de retrait NatCash a été rejetée",
-          text: `Bonjour,\n\nVotre demande de retrait NatCash a été examinée et rejetée par notre équipe.\n\nVotre solde n'a pas été débité. Si vous avez des questions, contactez notre support.\n\nCordialement,\nL'équipe Kobara`
+          subject: "Votre demande de retrait a été rejetée",
+          text: `Bonjour,\n\nVotre récente demande de retrait a été examinée et rejetée par notre équipe.\n\nVotre solde n'a pas été débité. Si vous avez des questions, contactez notre support.\n\nCordialement,\nL'équipe Kobara`
         });
       }
     } catch(e) { console.error("Notify failed", e); }
@@ -160,10 +160,10 @@ export default async function AdminWithdrawalsPage() {
                 </td>
                 <td className="px-5 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    {/* NatCash en attente d'approbation */}
+                    {/* NatCash / Zelle en attente d'approbation */}
                     {w.status === 'pending_approval' && (
                       <>
-                        <form action={approveNatcash}>
+                        <form action={approveManualWithdrawal}>
                           <input type="hidden" name="id" value={w.id} />
                           <input type="hidden" name="merchant_id" value={w.merchant_id} />
                           <input type="hidden" name="total" value={w.total || w.amount} />
@@ -171,7 +171,7 @@ export default async function AdminWithdrawalsPage() {
                             <CheckCircle2 className="w-3 h-3" /> APPROUVER
                           </button>
                         </form>
-                        <form action={rejectNatcash}>
+                        <form action={rejectManualWithdrawal}>
                           <input type="hidden" name="id" value={w.id} />
                           <input type="hidden" name="merchant_id" value={w.merchant_id} />
                           <button type="submit" className="inline-flex items-center gap-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-600/30 px-3 py-1.5 rounded text-xs font-bold transition-colors">

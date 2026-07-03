@@ -130,11 +130,11 @@ export async function requestWithdrawal(amount: number, method: string, receiver
 
   const adminClient = createAdminClient();
 
-  // NatCash : on ne déduit PAS le solde maintenant (admin doit approuver)
-  const isNatcash = method === 'NatCash' || method === 'Natcash';
+  // NatCash et Zelle : on ne déduit PAS le solde maintenant (admin doit approuver)
+  const requiresManualApproval = method.toLowerCase() === 'natcash' || method.toLowerCase() === 'zelle';
   
-  if (!isNatcash) {
-    // Déduction immédiate pour MonCash, Zelle
+  if (!requiresManualApproval) {
+    // Déduction immédiate pour MonCash
     const newBalance = activeBalance - amount;
     if (newBalance < 0) return { error: "Fonds insuffisants." };
 
@@ -151,8 +151,8 @@ export async function requestWithdrawal(amount: number, method: string, receiver
 
   // Statut selon la méthode
   const bazikFinalStatus = bazikResponse?.status?.toLowerCase();
-  const initialStatus = isNatcash 
-    ? 'pending_approval'  // NatCash attend l'approbation admin
+  const initialStatus = requiresManualApproval 
+    ? 'pending_approval'  // NatCash/Zelle attendent l'approbation admin
     : (bazikFinalStatus === 'success' || bazikFinalStatus === 'successful' || bazikFinalStatus === 'completed') 
       ? 'completed' 
       : (isTest ? 'completed' : (method === 'MonCash' ? 'pending' : 'completed'));
