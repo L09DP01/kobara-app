@@ -43,7 +43,7 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
   const pendingAll = payments.filter(p => p.status === 'pending');
   const failedAll = payments.filter(p => p.status === 'failed');
 
-  const totalLive = succeededLive.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const totalNetLive = succeededLive.reduce((sum, p) => sum + Number(p.net_amount || 0), 0);
   const totalTest = succeededTest.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const totalPending = pendingAll.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const totalFees = succeededLive.reduce((sum, p) => sum + Number(p.fee_amount || 0), 0);
@@ -129,9 +129,9 @@ export default async function AdminMerchantDetailPage(props: { params: Promise<{
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-slate-950/50 rounded-lg border border-slate-800/50">
-                <div className="text-xs text-slate-500 mb-2 flex items-center gap-1"><Zap className="w-3 h-3" /> LIVE VOLUME</div>
-                <div className="text-xl font-bold text-green-400">{totalLive.toLocaleString()} HTG</div>
-                <div className="text-xs text-slate-500 mt-1">{succeededLive.length} txns</div>
+                <div className="text-xs text-slate-500 mb-2 flex items-center gap-1"><Zap className="w-3 h-3" /> NET VOLUME</div>
+                <div className="text-xl font-bold text-green-400">{totalNetLive.toLocaleString()} HTG</div>
+                <div className="text-xs text-slate-500 mt-1">{succeededLive.length} txns (frais déduits)</div>
               </div>
               <div className="p-4 bg-slate-950/50 rounded-lg border border-slate-800/50">
                 <div className="text-xs text-slate-500 mb-2 flex items-center gap-1"><TestTube className="w-3 h-3" /> TEST VOLUME</div>
