@@ -279,6 +279,14 @@ export function ApiKeysClient({
             </tbody>
           </table>
         </div>
+        
+        {/* Security Note Footer */}
+        <div className="bg-white/[0.02] border-t border-white/5 p-4 flex items-start sm:items-center gap-3">
+          <span className="material-symbols-outlined text-orange-400 text-[18px] shrink-0 mt-0.5 sm:mt-0">info</span>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Pour des raisons de sécurité, vous ne pouvez pas revoir ou copier une clé API une fois la page fermée. Si vous l'avez perdue, veuillez la <strong className="text-slate-300 font-semibold">révoquer</strong> et en créer une nouvelle.
+          </p>
+        </div>
       </div>
 
       {/* Usage Stats */}
