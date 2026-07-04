@@ -155,7 +155,7 @@ export default async function CustomerDetailPage(props: { params: Promise<{ id: 
                 <tbody className="text-sm divide-y divide-white/10">
                   {payments.length > 0 ? payments.map((payment: any) => (
                     <tr key={payment.id} className="hover:bg-white/5 transition-colors group">
-                      <td className="py-3 px-6 font-mono text-xs text-white font-bold">{payment.kobara_reference}</td>
+                      <td className="py-3 px-6 font-mono text-xs text-white font-bold">{payment.transaction_reference || payment.id.split('-')[0]}</td>
                       <td className="py-3 px-6">
                         <div className="font-bold text-white">{new Date(payment.created_at).toLocaleDateString('fr-FR')}</div>
                         <div className="text-xs text-slate-400">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute:'2-digit' })}</div>
