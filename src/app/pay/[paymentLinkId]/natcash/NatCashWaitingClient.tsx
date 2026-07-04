@@ -179,7 +179,7 @@ export function NatCashWaitingClient({
 
             <div className="flex flex-col items-center justify-center py-4">
               <Loader2 className="w-8 h-8 text-orange-500 animate-spin mb-4" />
-              <p className="text-white font-medium">En attente du SMS NatCash...</p>
+              <p className="text-white font-medium">En attente du paiement...</p>
               <p className="text-slate-400 text-xs mt-1">Vérification automatique en cours. Ne fermez pas cette page.</p>
               
               <div className="mt-6 flex items-center gap-2 bg-orange-500/10 px-4 py-2 rounded-full border border-orange-500/20">
