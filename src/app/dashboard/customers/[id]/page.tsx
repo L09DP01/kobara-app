@@ -14,13 +14,13 @@ export default async function CustomerDetailPage(props: { params: Promise<{ id: 
   const supabase = createAdminClient();
 
   // Fetch customer and their payments
-  const { data: customer } = await supabase
+  const { data: customer, error } = await supabase
     .from('customers')
     .select(`
       *,
       payments (
         id,
-        kobara_reference,
+        transaction_reference,
         amount,
         net_amount,
         fee_amount,
@@ -29,12 +29,16 @@ export default async function CustomerDetailPage(props: { params: Promise<{ id: 
         provider,
         payment_method,
         created_at,
-        paid_at
+        environment
       )
     `)
     .eq('id', params.id)
     .eq('merchant_id', merchant.id)
     .single();
+
+  if (error) {
+    console.error("CUSTOMER FETCH ERROR:", error);
+  }
 
   if (!customer) {
     return notFound();
