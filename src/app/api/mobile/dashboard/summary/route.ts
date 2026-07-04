@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
     // 3. Fetch Recent Payments (Limit 10)
     const { data: recentPayments } = await supabaseAdmin
       .from('payments')
-      .select('id, amount, net_amount, currency, status, provider, created_at, kobara_reference, customers(name)')
+      .select('id, amount, net_amount, currency, status, provider, created_at, transaction_reference, customers(name)')
       .eq('merchant_id', merchant.id)
       .eq('environment', environment)
       .order('created_at', { ascending: false })

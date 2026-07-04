@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, props: { params: Promise<{ id: strin
           status,
           created_at,
           payment_method,
-          kobara_reference,
+          transaction_reference,
           customers(name, email, phone)
         )
       `)
