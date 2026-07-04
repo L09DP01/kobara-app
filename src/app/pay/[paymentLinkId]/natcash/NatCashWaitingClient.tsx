@@ -148,7 +148,7 @@ export function NatCashWaitingClient({
         {status === 'pending' && (
           <>
             <p className="text-slate-300 text-sm text-center">
-              Pour valider ce paiement, veuillez transférer le montant exact au numéro ci-dessous et insérer le <strong className="text-white">Contenu</strong>.
+              Pour valider ce paiement, veuillez utiliser votre téléphone pour transférer le montant exact au numéro ci-dessous et n'oubliez pas d'insérer le <strong className="text-white">Contenu</strong>.
             </p>
 
             <div className="bg-black/20 rounded-xl p-4 border border-white/5 space-y-4">
