@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { createCustomer } from './actions';
 
 export function CustomersClient({ customers, stats }: { customers: any[], stats?: any }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
   
   // Form State
   const [name, setName] = useState('');
@@ -37,6 +37,7 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
     const successfulPayments = payments.filter((p: any) => p.status === 'succeeded' || p.status === 'completed');
     
     const totalVolume = successfulPayments.reduce((acc: number, p: any) => acc + Number(p.net_amount || p.amount || 0), 0);
+    const totalFees = successfulPayments.reduce((acc: number, p: any) => acc + Number(p.fee_amount || 0), 0);
     
     let lastPaymentDate = null;
     let paymentMode = 'N/A';
@@ -48,7 +49,9 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
 
     return {
       paymentCount: payments.length,
+      successfulCount: successfulPayments.length,
       totalVolume,
+      totalFees,
       lastPaymentDate,
       paymentMode
     };
@@ -69,6 +72,17 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
     } finally {
       setLoading(false);
     }
+  };
+
+  const openCustomerDetail = (customer: any) => {
+    setSelectedCustomer(customer);
+  };
+
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    succeeded: { label: 'Succès', color: 'bg-green-500/20 text-green-400 border-green-500/20' },
+    completed: { label: 'Succès', color: 'bg-green-500/20 text-green-400 border-green-500/20' },
+    failed: { label: 'Échoué', color: 'bg-red-500/20 text-red-400 border-red-500/20' },
+    pending: { label: 'En attente', color: 'bg-orange-500/20 text-orange-400 border-orange-500/20' },
   };
 
   return (
@@ -154,7 +168,7 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
             </thead>
             <tbody className="text-sm text-white divide-y divide-white/10">
               {customers.length > 0 ? customers.map((customer) => {
-                const stats = getCustomerStats(customer);
+                const cStats = getCustomerStats(customer);
                 return (
                   <tr key={customer.id} className="hover:bg-white/5 transition-colors group cursor-pointer border-l-[3px] border-l-transparent hover:border-l-orange-500">
                     <td className="py-3.5 px-5">
@@ -172,24 +186,24 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
                     </td>
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-1.5">
-                        {stats.paymentMode !== 'N/A' && <span className="material-symbols-outlined text-[14px] text-slate-500">smartphone</span>}
-                        <span className="font-bold capitalize">{stats.paymentMode}</span>
+                        {cStats.paymentMode !== 'N/A' && <span className="material-symbols-outlined text-[14px] text-slate-500">smartphone</span>}
+                        <span className="font-bold capitalize">{cStats.paymentMode}</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-5">
-                      <div className="font-bold">{stats.totalVolume.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
+                      <div className="font-bold">{cStats.totalVolume.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} HTG</div>
                     </td>
                     <td className="py-3.5 px-5 text-slate-400 text-sm">
-                      {stats.lastPaymentDate ? stats.lastPaymentDate.toLocaleDateString('fr-FR') : 'Aucun'}
+                      {cStats.lastPaymentDate ? cStats.lastPaymentDate.toLocaleDateString('fr-FR') : 'Aucun'}
                     </td>
                     <td className="py-3.5 px-5 text-right">
-                      <Link 
-                        href={`/customers/${customer.id}`}
+                      <button 
+                        onClick={() => openCustomerDetail(customer)}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-400 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
                       >
                         Détails
                         <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                      </Link>
+                      </button>
                     </td>
                   </tr>
                 );
@@ -217,6 +231,141 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
           </div>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════ */}
+      {/* CUSTOMER DETAIL MODAL */}
+      {/* ═══════════════════════════════════════════════ */}
+      {selectedCustomer && (() => {
+        const cs = getCustomerStats(selectedCustomer);
+        const payments = selectedCustomer.payments || [];
+        const sortedPayments = [...payments].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        return (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setSelectedCustomer(null)}>
+            <div 
+              className="bg-[#0F1729] w-full max-w-3xl max-h-[90vh] rounded-3xl shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getAvatarColor(selectedCustomer.name)} flex items-center justify-center text-white font-bold text-xl shadow-lg`}>
+                    {(selectedCustomer.name || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{selectedCustomer.name || 'Client Inconnu'}</h2>
+                    <p className="text-sm text-slate-400">Client depuis {new Date(selectedCustomer.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedCustomer(null)} 
+                  className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-colors"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              {/* Modal Body - Scrollable */}
+              <div className="overflow-y-auto flex-1 p-6 space-y-6">
+                
+                {/* Contact Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="material-symbols-outlined text-[16px] text-slate-500">mail</span>
+                      <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Email</p>
+                    </div>
+                    <p className="text-sm font-bold text-white">{selectedCustomer.email || 'Non renseigné'}</p>
+                  </div>
+                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="material-symbols-outlined text-[16px] text-slate-500">phone</span>
+                      <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Téléphone</p>
+                    </div>
+                    <p className="text-sm font-bold text-white">{selectedCustomer.phone || 'Non renseigné'}</p>
+                  </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
+                    <p className="text-2xl font-bold text-white">{cs.paymentCount}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Paiements</p>
+                  </div>
+                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
+                    <p className="text-2xl font-bold text-green-400">{cs.successfulCount}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Réussis</p>
+                  </div>
+                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
+                    <p className="text-lg font-bold text-white">{cs.totalVolume.toLocaleString('fr-FR', { minimumFractionDigits: 0 })}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Volume (HTG)</p>
+                  </div>
+                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5 text-center">
+                    <p className="text-lg font-bold text-slate-300">{cs.totalFees.toLocaleString('fr-FR', { minimumFractionDigits: 0 })}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Frais (HTG)</p>
+                  </div>
+                </div>
+
+                {/* Payment History */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-orange-400">receipt_long</span>
+                      Historique des paiements
+                    </h3>
+                    <span className="text-xs text-slate-500 font-bold">{payments.length} transaction(s)</span>
+                  </div>
+                  
+                  {sortedPayments.length > 0 ? (
+                    <div className="bg-white/[0.02] rounded-2xl border border-white/5 overflow-hidden">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="border-b border-white/5 text-[10px] uppercase tracking-wider text-slate-500 font-bold">
+                            <th className="py-2.5 px-4">Date</th>
+                            <th className="py-2.5 px-4">Méthode</th>
+                            <th className="py-2.5 px-4 text-right">Montant</th>
+                            <th className="py-2.5 px-4 text-right">Statut</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-sm divide-y divide-white/5">
+                          {sortedPayments.map((payment: any) => {
+                            const sc = statusConfig[payment.status] || { label: payment.status, color: 'bg-white/10 text-slate-400 border-white/20' };
+                            return (
+                              <tr key={payment.id} className="hover:bg-white/[0.03] transition-colors">
+                                <td className="py-2.5 px-4">
+                                  <div className="font-bold text-white text-xs">{new Date(payment.created_at).toLocaleDateString('fr-FR')}</div>
+                                  <div className="text-[10px] text-slate-500">{new Date(payment.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                </td>
+                                <td className="py-2.5 px-4">
+                                  <span className="capitalize font-bold text-white text-xs">{payment.provider || 'MonCash'}</span>
+                                </td>
+                                <td className="py-2.5 px-4 text-right">
+                                  <span className="font-bold text-white text-xs">{Number(payment.amount || 0).toLocaleString('fr-FR')} {payment.currency || 'HTG'}</span>
+                                </td>
+                                <td className="py-2.5 px-4 text-right">
+                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${sc.color}`}>
+                                    <span className="w-1 h-1 rounded-full bg-current"></span>
+                                    {sc.label}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="bg-white/[0.02] rounded-2xl border border-white/5 py-10 text-center">
+                      <span className="material-symbols-outlined text-3xl text-slate-600 mb-2">receipt_long</span>
+                      <p className="text-sm text-slate-500 font-bold">Aucune transaction</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* New Customer Modal */}
       {isModalOpen && (
