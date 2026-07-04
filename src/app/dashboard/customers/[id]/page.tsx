@@ -57,7 +57,7 @@ export default async function CustomerDetailPage(props: { params: Promise<{ id: 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/customers" className="p-2 -ml-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+          <Link href="/customers" className="p-2 -ml-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
           </Link>
           <div>

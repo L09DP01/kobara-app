@@ -184,7 +184,7 @@ export function CustomersClient({ customers, stats }: { customers: any[], stats?
                     </td>
                     <td className="py-3.5 px-5 text-right">
                       <Link 
-                        href={`/dashboard/customers/${customer.id}`}
+                        href={`/customers/${customer.id}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-400 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
                       >
                         Détails
