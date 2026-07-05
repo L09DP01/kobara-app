@@ -54,6 +54,29 @@ export default function ProfileScreen() {
     return name.charAt(0).toUpperCase();
   };
 
+  let addressData = {
+    address: merchant?.address || 'Non définie',
+    city: '',
+    state: '',
+    country: '',
+    zipcode: ''
+  };
+
+  if (merchant?.address && merchant.address.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(merchant.address);
+      addressData = {
+        address: parsed.address || 'Non définie',
+        city: parsed.city || '',
+        state: parsed.state || '',
+        country: parsed.country || '',
+        zipcode: parsed.zipcode || ''
+      };
+    } catch (e) {
+      // Ignorer si ce n'est pas du JSON valide
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
@@ -115,9 +138,61 @@ export default function ProfileScreen() {
               <MapPin size={20} color="#9CA3AF" style={styles.icon} />
               <View style={styles.infoTextContainer}>
                 <Text style={styles.infoLabel}>Adresse</Text>
-                <Text style={styles.infoValue}>{merchant?.address || 'Non définie'}</Text>
+                <Text style={styles.infoValue}>{addressData.address}</Text>
               </View>
             </View>
+
+            {addressData.city ? (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <View style={{ width: 20, marginRight: 16 }} />
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Ville</Text>
+                    <Text style={styles.infoValue}>{addressData.city}</Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            {addressData.state ? (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <View style={{ width: 20, marginRight: 16 }} />
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>État / Province</Text>
+                    <Text style={styles.infoValue}>{addressData.state}</Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            {addressData.country ? (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <View style={{ width: 20, marginRight: 16 }} />
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Pays</Text>
+                    <Text style={styles.infoValue}>{addressData.country}</Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            {addressData.zipcode ? (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <View style={{ width: 20, marginRight: 16 }} />
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Code Postal</Text>
+                    <Text style={styles.infoValue}>{addressData.zipcode}</Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
           </View>
         </View>
 
