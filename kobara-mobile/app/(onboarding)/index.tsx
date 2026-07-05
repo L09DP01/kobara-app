@@ -63,7 +63,7 @@ export default function OnboardingScreen() {
 
   const handleNext = () => {
     if (currentIndex < ONBOARDING_DATA.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+      flatListRef.current?.scrollToOffset({ offset: (currentIndex + 1) * width, animated: true });
     } else {
       finishOnboarding();
     }
@@ -75,7 +75,7 @@ export default function OnboardingScreen() {
 
   const handleBack = () => {
     if (currentIndex > 0) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex - 1 });
+      flatListRef.current?.scrollToOffset({ offset: (currentIndex - 1) * width, animated: true });
     }
   };
 
