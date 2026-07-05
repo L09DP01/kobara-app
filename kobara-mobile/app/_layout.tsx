@@ -1,6 +1,6 @@
 import '../global.css'; // NativeWind v4 initialization
 import React, { useEffect, useState, useRef } from 'react';
-import { AppState, View, Text, TouchableOpacity } from 'react-native';
+import { AppState, View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Stack, useSegments, useRouter, useRootNavigationState } from 'expo-router';
 import { AppProvider } from '@/providers/AppProvider';
 import * as SplashScreen from 'expo-splash-screen';
@@ -20,6 +20,7 @@ export default function RootLayout() {
   const navigationState = useRootNavigationState();
   
   const [isUnlocked, setIsUnlocked] = useState(true);
+  const [showIosInstall, setShowIosInstall] = useState(false);
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -47,6 +48,18 @@ export default function RootLayout() {
     return () => {
       subscription.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isIos = /iphone|ipad|ipod/.test(userAgent);
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in window.navigator && (window.navigator as any).standalone);
+      
+      if (isIos && !isStandalone) {
+        setShowIosInstall(true);
+      }
+    }
   }, []);
 
   const checkBiometrics = async () => {
@@ -144,6 +157,31 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="+not-found" />
         </Stack>
+
+        {showIosInstall && Platform.OS === 'web' && (
+          <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#1E293B', padding: 24, borderTopLeftRadius: 24, borderTopRightRadius: 24, zIndex: 9999, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.5, shadowRadius: 20 }}>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>Installez l'App Kobara</Text>
+            <Text style={{ color: '#94A3B8', fontSize: 15, marginBottom: 20, lineHeight: 22 }}>
+              Pour utiliser l'application sur votre iPhone, veuillez l'ajouter à votre écran d'accueil.
+            </Text>
+            
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+              <Text style={{ color: 'white', fontSize: 15 }}>1. Appuyez sur le bouton </Text>
+              <Text style={{ color: '#38BDF8', fontWeight: 'bold', fontSize: 15 }}>Partager</Text>
+              <Text style={{ color: 'white', fontSize: 15 }}> en bas.</Text>
+            </View>
+            
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
+              <Text style={{ color: 'white', fontSize: 15 }}>2. Choisissez </Text>
+              <Text style={{ color: '#38BDF8', fontWeight: 'bold', fontSize: 15 }}>"Sur l'écran d'accueil"</Text>
+              <Text style={{ color: 'white', fontSize: 15 }}>.</Text>
+            </View>
+            
+            <TouchableOpacity onPress={() => setShowIosInstall(false)} style={{ backgroundColor: '#334155', padding: 16, borderRadius: 16, alignItems: 'center' }}>
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>J'ai compris</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </AppProvider>
     </GestureHandlerRootView>
   );
