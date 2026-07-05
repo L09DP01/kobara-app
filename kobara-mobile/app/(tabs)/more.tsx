@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Image, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { 
@@ -270,7 +270,9 @@ export default function MoreScreen() {
           <MenuItem 
             icon={HeadphonesIcon} 
             title="Obtenir de l'aide" 
-            onPress={() => {/* open url */}} 
+            onPress={() => {
+              Linking.openURL('mailto:support@kobara.app');
+            }} 
           />
           <View className="h-[1px] bg-white/5" />
           <MenuItem 
@@ -284,7 +286,7 @@ export default function MoreScreen() {
             icon={MessageSquare} 
             title="Comment clôturer votre compte" 
             onPress={() => {
-              Alert.alert("Bientôt disponible", "Cette fonctionnalité sera disponible prochainement.");
+              Linking.openURL('https://kobara.app/account-closure');
             }} 
           />
         </View>
@@ -301,7 +303,9 @@ export default function MoreScreen() {
           <MenuItem 
             icon={ShieldCheck} 
             title="Politique de confidentialité" 
-            onPress={() => {/* open url */}} 
+            onPress={() => {
+              Linking.openURL('https://kobara.app/privacy');
+            }} 
           />
           <View className="h-[1px] bg-white/5" />
           <View className="flex-row items-center justify-between py-4">
