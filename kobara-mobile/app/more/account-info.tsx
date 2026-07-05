@@ -76,8 +76,13 @@ export default function AccountInfoScreen() {
     </TouchableOpacity>
   );
 
-  const formatAddress = (addrStr: string) => {
+  const formatAddress = (addrStr: any) => {
     if (!addrStr) return 'Aucune adresse renseignée';
+    if (typeof addrStr === 'object') {
+      const parts = [addrStr.address, addrStr.city, addrStr.state, addrStr.country, addrStr.zipcode].filter(Boolean);
+      return parts.join(', ') || 'Aucune adresse renseignée';
+    }
+    if (typeof addrStr !== 'string') return 'Aucune adresse renseignée';
     if (!addrStr.startsWith('{')) return addrStr;
     try {
       const parsed = JSON.parse(addrStr);
