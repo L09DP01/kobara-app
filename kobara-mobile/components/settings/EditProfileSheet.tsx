@@ -36,18 +36,29 @@ export function EditProfileSheet({ visible, onClose, merchant, onSuccess }: Edit
         country: '',
         zipcode: ''
       };
-      
-      if (merchant.address && merchant.address.startsWith('{')) {
-        try {
-          const parsed = JSON.parse(merchant.address);
+      if (merchant.address) {
+        if (typeof merchant.address === 'object') {
           parsedAddress = {
-            address: parsed.address || '',
-            city: parsed.city || '',
-            state: parsed.state || '',
-            country: parsed.country || '',
-            zipcode: parsed.zipcode || ''
+            address: merchant.address.address || '',
+            city: merchant.address.city || '',
+            state: merchant.address.state || '',
+            country: merchant.address.country || '',
+            zipcode: merchant.address.zipcode || ''
           };
-        } catch(e) {}
+        } else if (typeof merchant.address === 'string' && merchant.address.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(merchant.address);
+            parsedAddress = {
+              address: parsed.address || '',
+              city: parsed.city || '',
+              state: parsed.state || '',
+              country: parsed.country || '',
+              zipcode: parsed.zipcode || ''
+            };
+          } catch(e) {}
+        } else if (typeof merchant.address === 'string') {
+          parsedAddress.address = merchant.address;
+        }
       }
 
       setForm({
