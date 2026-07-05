@@ -103,16 +103,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (accessToken && userData) {
         const user = JSON.parse(userData) as AuthUser;
         const merchant = merchantData ? JSON.parse(merchantData) as MerchantProfile : null;
-        const profileComplete = merchant ? !!(merchant.phone && merchant.category) : false;
 
-        set({
-          user,
-          merchant,
-          isAuthenticated: true,
-          isMerchantProfileComplete: profileComplete,
-        });
-
-        // Tenter de rafraîchir le profil en arrière-plan (silencieux)
+        // Tenter de rafraîchir le profil en arrière-plan avant d'autoriser l'accès
         try {
           const profile = await authService.getProfile(accessToken);
           const updatedProfileComplete = profile.merchant 
@@ -122,6 +114,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({
             user: profile.user,
             merchant: profile.merchant,
+            isAuthenticated: true,
             isMerchantProfileComplete: updatedProfileComplete,
           });
 
@@ -134,8 +127,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           if (err.code === 'UNAUTHORIZED') {
             // Token expiré, déconnexion immédiate (pas de refresh demandé)
             await get().logout();
+          } else {
+            // Si c'est une erreur réseau, on garde simplement les données en cache
+            const profileComplete = merchant ? !!(merchant.phone && merchant.category) : false;
+            set({
+              user,
+              merchant,
+              isAuthenticated: true,
+              isMerchantProfileComplete: profileComplete,
+            });
           }
-          // Si c'est une erreur réseau, on garde simplement les données en cache
         }
       }
     } catch (error) {

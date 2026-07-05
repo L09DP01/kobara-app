@@ -41,6 +41,7 @@ export interface DashboardSummaryResponse {
 
 import { storage as SecureStore } from '@/utils/storage';
 import Constants from 'expo-constants';
+import { apiClient } from '@/api/client';
 
 const getBaseUrl = () => {
   return Constants?.expoConfig?.extra?.apiUrl ?? process.env.EXPO_PUBLIC_API_URL ?? 'https://kobara.app';
@@ -53,20 +54,11 @@ export async function getDashboardSummary(): Promise<DashboardSummaryResponse> {
     throw new Error('Non autorisé. Veuillez vous reconnecter.');
   }
 
-  const response = await fetch(`${getBaseUrl()}/api/mobile/dashboard/summary`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'X-Client': 'kobara-mobile',
-      'Content-Type': 'application/json',
-    }
-  });
-
-  const data = await response.json();
+  const response = await apiClient.get<DashboardSummaryResponse>('/mobile/dashboard/summary');
   
-  if (!response.ok || data.error) {
-    throw new Error(data.error || data.message || 'Erreur lors de la récupération des données.');
+  if (response.data.error) {
+    throw new Error(response.data.error || 'Erreur lors de la récupération des données.');
   }
   
-  return data as DashboardSummaryResponse;
+  return response.data;
 }
