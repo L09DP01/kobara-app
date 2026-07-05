@@ -7,6 +7,7 @@ import { Scan, Bell, Eye, EyeOff, Send, Download, ChevronRight, ArrowUpRight, Ar
 import { useAuthStore } from '@/store/useAuthStore';
 import { useBalance } from '@/hooks/useBalance';
 import { QRBottomSheet } from '@/components/balance/QRBottomSheet';
+import { MyQRSheet } from '@/components/balance/MyQRSheet';
 import { MobileActivityItem } from '@/services/balance';
 import { useDashboardSummary } from '@/hooks/useDashboardSummary';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -16,6 +17,7 @@ export default function BalanceScreen() {
   const { user, merchant } = useAuthStore();
   const [showBalance, setShowBalance] = useState(true);
   const [isQrModalVisible, setIsQrModalVisible] = useState(false);
+  const [isMyQrSheetVisible, setIsMyQrSheetVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<MobileActivityItem | null>(null);
   
   const { data: balanceData, isLoading: isLoadingBalance, refetch: refetchBalance, isRefetching } = useBalance();
@@ -208,8 +210,20 @@ export default function BalanceScreen() {
       <QRBottomSheet 
         visible={isQrModalVisible} 
         onClose={() => setIsQrModalVisible(false)}
-        onMyQrPress={() => { setIsQrModalVisible(false); /* navigate or show QR */ }}
-        onScanQrPress={() => { setIsQrModalVisible(false); /* open camera */ }}
+        onMyQrPress={() => { 
+          setIsQrModalVisible(false);
+          setIsMyQrSheetVisible(true);
+        }}
+        onScanQrPress={() => { 
+          setIsQrModalVisible(false);
+          router.push('/(modals)/scanner');
+        }}
+      />
+
+      <MyQRSheet 
+        visible={isMyQrSheetVisible} 
+        onClose={() => setIsMyQrSheetVisible(false)} 
+        merchant={merchant} 
       />
 
       {/* Activity Detail Modal */}
