@@ -1,7 +1,7 @@
 import '../global.css'; // NativeWind v4 initialization
 import React, { useEffect, useState, useRef } from 'react';
 import { AppState, View, Text, TouchableOpacity, Platform } from 'react-native';
-import { Stack, useSegments, useRouter, useRootNavigationState } from 'expo-router';
+import { Stack, useSegments, useRouter, useRootNavigationState, Head } from 'expo-router';
 import { AppProvider } from '@/providers/AppProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -150,6 +150,9 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+      </Head>
       <AppProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(onboarding)" />
