@@ -109,7 +109,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
                       <TextInput
                         value={form.password}
                         onChangeText={(t) => setForm({ ...form, password: t })}
-                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium pr-12"
+                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium pr-12 text-base"
                         placeholder="Nouveau mot de passe"
                         placeholderTextColor="#6B7280"
                         secureTextEntry={!showPassword}
@@ -129,7 +129,7 @@ export function ChangePasswordSheet({ visible, onClose }: ChangePasswordSheetPro
                       <TextInput
                         value={form.confirmPassword}
                         onChangeText={(t) => setForm({ ...form, confirmPassword: t })}
-                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium pr-12"
+                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium pr-12 text-base"
                         placeholder="Répétez le mot de passe"
                         placeholderTextColor="#6B7280"
                         secureTextEntry={!showPassword}

@@ -16,17 +16,46 @@ export function EditProfileSheet({ visible, onClose, merchant, onSuccess }: Edit
     business_name: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    addressData: {
+      address: '',
+      city: '',
+      state: '',
+      country: '',
+      zipcode: ''
+    }
   });
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (merchant) {
+      let parsedAddress = {
+        address: merchant.address || '',
+        city: '',
+        state: '',
+        country: '',
+        zipcode: ''
+      };
+      
+      if (merchant.address && merchant.address.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(merchant.address);
+          parsedAddress = {
+            address: parsed.address || '',
+            city: parsed.city || '',
+            state: parsed.state || '',
+            country: parsed.country || '',
+            zipcode: parsed.zipcode || ''
+          };
+        } catch(e) {}
+      }
+
       setForm({
         business_name: merchant.business_name || '',
         email: merchant.email || '',
         phone: merchant.phone || '',
-        address: merchant.address || ''
+        address: merchant.address || '',
+        addressData: parsedAddress
       });
       setError('');
     }
@@ -42,7 +71,14 @@ export function EditProfileSheet({ visible, onClose, merchant, onSuccess }: Edit
     setError('');
 
     try {
-      const res = await apiClient.patch('/mobile/merchants/me', form);
+      const payload = {
+        business_name: form.business_name,
+        email: form.email,
+        phone: form.phone,
+        address: JSON.stringify(form.addressData)
+      };
+
+      const res = await apiClient.patch('/mobile/merchants/me', payload);
       if (res.data.success) {
         onSuccess();
       } else {
@@ -93,7 +129,7 @@ export function EditProfileSheet({ visible, onClose, merchant, onSuccess }: Edit
                     <TextInput
                       value={form.business_name}
                       onChangeText={(t) => setForm({ ...form, business_name: t })}
-                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium text-base"
                       placeholder="Nom de votre entreprise"
                       placeholderTextColor="#6B7280"
                     />
@@ -104,7 +140,7 @@ export function EditProfileSheet({ visible, onClose, merchant, onSuccess }: Edit
                     <TextInput
                       value={form.email}
                       onChangeText={(t) => setForm({ ...form, email: t })}
-                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium text-base"
                       placeholder="email@entreprise.com"
                       placeholderTextColor="#6B7280"
                       keyboardType="email-address"
@@ -117,24 +153,68 @@ export function EditProfileSheet({ visible, onClose, merchant, onSuccess }: Edit
                     <TextInput
                       value={form.phone}
                       onChangeText={(t) => setForm({ ...form, phone: t })}
-                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium text-base"
                       placeholder="+509 XXXX XXXX"
                       placeholderTextColor="#6B7280"
                       keyboardType="phone-pad"
                     />
                   </View>
 
-                  <View className="mb-8">
-                    <Text className="text-slate-400 text-sm mb-2 font-medium">Adresse physique</Text>
+                  <View className="mb-4">
+                    <Text className="text-slate-400 text-sm mb-2 font-medium">Adresse</Text>
                     <TextInput
-                      value={form.address}
-                      onChangeText={(t) => setForm({ ...form, address: t })}
-                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium h-24"
-                      placeholder="Votre adresse complète"
+                      value={form.addressData?.address || ''}
+                      onChangeText={(t) => setForm({ ...form, addressData: { ...form.addressData, address: t } })}
+                      className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium text-base"
+                      placeholder="Adresse (ex: 50, Rue Roberce)"
                       placeholderTextColor="#6B7280"
-                      multiline
-                      textAlignVertical="top"
                     />
+                  </View>
+
+                  <View className="flex-row gap-4 mb-4">
+                    <View className="flex-1">
+                      <Text className="text-slate-400 text-sm mb-2 font-medium">Ville</Text>
+                      <TextInput
+                        value={form.addressData?.city || ''}
+                        onChangeText={(t) => setForm({ ...form, addressData: { ...form.addressData, city: t } })}
+                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                        placeholder="Port-au-Prince"
+                        placeholderTextColor="#6B7280"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-slate-400 text-sm mb-2 font-medium">Code postal</Text>
+                      <TextInput
+                        value={form.addressData?.zipcode || ''}
+                        onChangeText={(t) => setForm({ ...form, addressData: { ...form.addressData, zipcode: t } })}
+                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                        placeholder="HT6110"
+                        placeholderTextColor="#6B7280"
+                      />
+                    </View>
+                  </View>
+
+                  <View className="flex-row gap-4 mb-8">
+                    <View className="flex-1">
+                      <Text className="text-slate-400 text-sm mb-2 font-medium">État / Province</Text>
+                      <TextInput
+                        value={form.addressData?.state || ''}
+                        onChangeText={(t) => setForm({ ...form, addressData: { ...form.addressData, state: t } })}
+                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                        placeholder="Ouest"
+                        placeholderTextColor="#6B7280"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-slate-400 text-sm mb-2 font-medium">Pays</Text>
+                      <TextInput
+                        value={form.addressData?.country || ''}
+                        onChangeText={(t) => setForm({ ...form, addressData: { ...form.addressData, country: t } })}
+                        className="bg-[#0A0F1C] text-white px-4 py-4 rounded-xl border border-slate-700 font-medium"
+                        placeholder="Haïti"
+                        placeholderTextColor="#6B7280"
+                      />
+                    </View>
                   </View>
                 </ScrollView>
 

@@ -76,6 +76,23 @@ export default function AccountInfoScreen() {
     </TouchableOpacity>
   );
 
+  const formatAddress = (addrStr: string) => {
+    if (!addrStr) return 'Aucune adresse renseignée';
+    if (!addrStr.startsWith('{')) return addrStr;
+    try {
+      const parsed = JSON.parse(addrStr);
+      const lines = [];
+      if (parsed.address) lines.push(parsed.address);
+      const cityState = [parsed.city, parsed.state].filter(Boolean).join(', ');
+      if (cityState) lines.push(cityState);
+      const countryZip = [parsed.country, parsed.zipcode].filter(Boolean).join(' ');
+      if (countryZip) lines.push(countryZip);
+      return lines.join('\n') || addrStr;
+    } catch(e) {
+      return addrStr;
+    }
+  };
+
   return (
     <ScrollView 
       className="flex-1 bg-[#0A0F1C] px-6 pt-4"
@@ -100,7 +117,7 @@ export default function AccountInfoScreen() {
             <SettingRow icon={Building2} label="Nom de l'entreprise" value={merchant.business_name || 'Non défini'} />
             <SettingRow icon={Mail} label="Adresse Email" value={merchant.email || 'Non défini'} />
             <SettingRow icon={Phone} label="Téléphone" value={merchant.phone || 'Non défini'} />
-            <SettingRow icon={MapPin} label="Adresse physique" value={merchant.address || 'Aucune adresse renseignée'} />
+            <SettingRow icon={MapPin} label="Adresse physique" value={formatAddress(merchant.address)} />
           </View>
 
           <Text className="text-slate-500 text-sm font-semibold mb-2 uppercase tracking-wider">État du Compte</Text>
