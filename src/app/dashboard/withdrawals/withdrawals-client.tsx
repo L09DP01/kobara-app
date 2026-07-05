@@ -126,9 +126,16 @@ export function WithdrawalsClient({
 
       setIsModalOpen(false);
       setStep('details');
+      setCode2fa('');
+
+      if (method === 'B2B') {
+        // Redirection for B2B transfers
+        window.location.href = `/dashboard/success?amount=${amount}&recipient=${encodeURIComponent(receiver)}&type=transfer`;
+        return;
+      }
+
       setAmount('');
       setReceiver('');
-      setCode2fa('');
 
       const successMessage = (res as any)?.status === 'completed'
         ? "Votre retrait a été effectué avec succès."

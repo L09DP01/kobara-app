@@ -89,6 +89,21 @@ export async function executeB2BTransfer(amount: number, receiverEmail: string, 
 
   const adminClient = createAdminClient();
 
+  // Validate receiver KYC status
+  const { data: receiverData, error: receiverError } = await adminClient
+    .from('merchants')
+    .select('id, status, kyc_status')
+    .eq('email', receiverEmail)
+    .single();
+
+  if (receiverError || !receiverData) {
+    return { error: "Marchand destinataire introuvable." };
+  }
+
+  if (receiverData.status !== 'active' || (receiverData.kyc_status !== 'approved' && receiverData.kyc_status !== 'verified')) {
+    return { error: "Le compte de ce marchand n'est pas vérifié ou est inactif. Le transfert ne peut pas être effectué." };
+  }
+
   // Executing the secure RPC function
   const { data: rpcResult, error: rpcError } = await adminClient.rpc('process_b2b_transfer', {
     p_sender_id: merchant.id,
