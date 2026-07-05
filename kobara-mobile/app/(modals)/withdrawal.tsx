@@ -18,6 +18,7 @@ export default function WithdrawalScreen() {
   const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
   const [method, setMethod] = useState(WITHDRAWAL_METHODS[0].id);
+  const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,106 +109,141 @@ export default function WithdrawalScreen() {
                 </View>
               )}
 
-              <Text style={styles.label}>Méthode de retrait</Text>
-              <View style={styles.methodsContainer}>
-                {WITHDRAWAL_METHODS.map((m) => (
-                  <TouchableOpacity
-                    key={m.id}
-                    style={[styles.methodCard, method === m.id && styles.methodCardActive]}
-                    onPress={() => setMethod(m.id)}
-                  >
-                    <Text style={styles.methodIcon}>{m.icon}</Text>
-                    <Text style={[styles.methodName, method === m.id && styles.methodNameActive]}>{m.name}</Text>
-                    {method === m.id && (
-                      <View style={styles.checkIcon}>
-                        <CheckCircle2 size={16} color="#FF7A00" />
+              {step === 1 ? (
+                // ÉTAPE 1 : Montant
+                <>
+                  <Text style={styles.label}>Montant (HTG)</Text>
+                  <View style={styles.amountInputContainer}>
+                    <Text style={styles.amountInputText}>
+                      {amount || "0.00"}
+                    </Text>
+                  </View>
+
+                  <View style={styles.feeNotice}>
+                    <Text style={styles.feeText}>
+                      Frais standards applicables selon la méthode
+                    </Text>
+                  </View>
+
+                  {/* Custom Numeric Pad */}
+                  <View style={styles.padContainer}>
+                    {[
+                      ['1', '2', '3'],
+                      ['4', '5', '6'],
+                      ['7', '8', '9'],
+                      ['.', '0', '⌫']
+                    ].map((row, rowIndex) => (
+                      <View key={rowIndex} style={styles.padRow}>
+                        {row.map((key) => (
+                          <TouchableOpacity
+                            key={key}
+                            style={styles.padKey}
+                            disabled={isLoading}
+                            onPress={() => {
+                              if (key === '⌫') {
+                                setAmount(prev => prev.slice(0, -1));
+                              } else {
+                                if (key === '.' && amount.includes('.')) return;
+                                setAmount(prev => prev + key);
+                              }
+                            }}
+                          >
+                            <Text style={styles.padKeyText}>{key}</Text>
+                          </TouchableOpacity>
+                        ))}
                       </View>
-                    )}
+                    ))}
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) return;
+                      setStep(2);
+                      setError(null);
+                    }}
+                    disabled={!amount}
+                    style={[
+                      styles.withdrawButton,
+                      !amount ? styles.withdrawButtonDisabled : null
+                    ]}
+                  >
+                    <Text style={styles.withdrawButtonText}>Suivant</Text>
+                    <ChevronLeft size={20} color="#FFFFFF" style={{ marginLeft: 8, transform: [{ rotate: '180deg' }] }} />
                   </TouchableOpacity>
-                ))}
-              </View>
+                </>
+              ) : (
+                // ÉTAPE 2 : Méthode et Référence
+                <>
+                  <TouchableOpacity 
+                    onPress={() => setStep(1)} 
+                    style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}
+                  >
+                    <ChevronLeft size={20} color="#FF7A00" />
+                    <Text style={{ color: '#FF7A00', marginLeft: 4, fontWeight: 'bold' }}>Modifier le montant ({amount} HTG)</Text>
+                  </TouchableOpacity>
 
-              <Text style={styles.label}>
-                {method === 'zelle' ? 'Email ou Téléphone Zelle' : 'Numéro de téléphone'}
-              </Text>
-              <TextInput
-                style={styles.inputBox}
-                placeholder={method === 'zelle' ? 'email@exemple.com' : 'Ex: 34000000'}
-                placeholderTextColor="#6B7280"
-                value={reference}
-                onChangeText={setReference}
-                editable={!isLoading}
-                keyboardType={method === 'zelle' ? 'email-address' : 'phone-pad'}
-              />
-
-              <Text style={styles.label}>Montant (HTG)</Text>
-              <TextInput
-                style={styles.amountInput}
-                placeholder="0.00"
-                placeholderTextColor="#6B7280"
-                value={amount}
-                showSoftInputOnFocus={false}
-                editable={!isLoading}
-                onFocus={() => { Keyboard.dismiss(); }}
-              />
-
-              <View style={styles.feeNotice}>
-                {method === 'zelle' ? (
-                  <Text style={styles.feeText}>Frais: 0 HTG (Gratuit)</Text>
-                ) : (
-                  <Text style={styles.feeText}>
-                    Frais (5%) : {amount && !isNaN(Number(amount)) ? (Number(amount) * 0.05).toFixed(2) : '0.00'} HTG
-                  </Text>
-                )}
-              </View>
-
-              {/* Custom Numeric Pad */}
-              <View style={styles.padContainer}>
-                {[
-                  ['1', '2', '3'],
-                  ['4', '5', '6'],
-                  ['7', '8', '9'],
-                  ['.', '0', '⌫']
-                ].map((row, rowIndex) => (
-                  <View key={rowIndex} style={styles.padRow}>
-                    {row.map((key) => (
+                  <Text style={styles.label}>Méthode de retrait</Text>
+                  <View style={styles.methodsContainer}>
+                    {WITHDRAWAL_METHODS.map((m) => (
                       <TouchableOpacity
-                        key={key}
-                        style={styles.padKey}
-                        disabled={isLoading}
-                        onPress={() => {
-                          if (key === '⌫') {
-                            setAmount(prev => prev.slice(0, -1));
-                          } else {
-                            if (key === '.' && amount.includes('.')) return;
-                            setAmount(prev => prev + key);
-                          }
-                        }}
+                        key={m.id}
+                        style={[styles.methodCard, method === m.id && styles.methodCardActive]}
+                        onPress={() => setMethod(m.id)}
                       >
-                        <Text style={styles.padKeyText}>{key}</Text>
+                        <Text style={styles.methodIcon}>{m.icon}</Text>
+                        <Text style={[styles.methodName, method === m.id && styles.methodNameActive]}>{m.name}</Text>
+                        {method === m.id && (
+                          <View style={styles.checkIcon}>
+                            <CheckCircle2 size={16} color="#FF7A00" />
+                          </View>
+                        )}
                       </TouchableOpacity>
                     ))}
                   </View>
-                ))}
-              </View>
 
-              <TouchableOpacity
-                onPress={handleWithdraw}
-                disabled={isLoading || !amount || !reference}
-                style={[
-                  styles.withdrawButton,
-                  (isLoading || !amount || !reference) ? styles.withdrawButtonDisabled : null
-                ]}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <>
-                    <ArrowDownCircle size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                    <Text style={styles.withdrawButtonText}>Confirmer le retrait</Text>
-                  </>
-                )}
-              </TouchableOpacity>
+                  <Text style={styles.label}>
+                    {method === 'zelle' ? 'Email ou Téléphone Zelle' : 'Numéro de téléphone'}
+                  </Text>
+                  <TextInput
+                    style={styles.inputBox}
+                    placeholder={method === 'zelle' ? 'email@exemple.com' : 'Ex: 34000000'}
+                    placeholderTextColor="#6B7280"
+                    value={reference}
+                    onChangeText={setReference}
+                    editable={!isLoading}
+                    keyboardType={method === 'zelle' ? 'email-address' : 'phone-pad'}
+                    autoFocus={true}
+                  />
+
+                  <View style={styles.feeNotice}>
+                    {method === 'zelle' ? (
+                      <Text style={styles.feeText}>Frais: 0 HTG (Gratuit)</Text>
+                    ) : (
+                      <Text style={styles.feeText}>
+                        Frais (5%) : {amount && !isNaN(Number(amount)) ? (Number(amount) * 0.05).toFixed(2) : '0.00'} HTG
+                      </Text>
+                    )}
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={handleWithdraw}
+                    disabled={isLoading || !reference}
+                    style={[
+                      styles.withdrawButton,
+                      (isLoading || !reference) ? styles.withdrawButtonDisabled : null
+                    ]}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <>
+                        <ArrowDownCircle size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                        <Text style={styles.withdrawButtonText}>Confirmer le retrait</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -232,6 +268,8 @@ const styles = StyleSheet.create({
   methodNameActive: { color: '#FF7A00' },
   checkIcon: { position: 'absolute', top: 4, right: 4 },
   inputBox: { backgroundColor: '#050B18', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, color: '#FFFFFF', padding: 16, fontSize: 16 },
+  amountInputContainer: { backgroundColor: '#050B18', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, padding: 16, alignItems: 'center' },
+  amountInputText: { color: '#FFFFFF', fontSize: 24, fontWeight: 'bold' },
   amountInput: { backgroundColor: '#050B18', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, color: '#FFFFFF', padding: 16, fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
   feeNotice: { marginTop: 12, marginBottom: 24, alignItems: 'center' },
   feeText: { color: '#6B7280', fontSize: 12 },

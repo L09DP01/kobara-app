@@ -181,15 +181,11 @@ export default function TransferScreen() {
                 </View>
 
                 <Text style={styles.label}>Montant (HTG)</Text>
-                <TextInput
-                  style={styles.amountInput}
-                  placeholder="0.00"
-                  placeholderTextColor="#6B7280"
-                  value={amount}
-                  showSoftInputOnFocus={false}
-                  editable={!isLoading}
-                  onFocus={() => { Keyboard.dismiss(); }}
-                />
+                <View style={styles.amountInputContainer}>
+                  <Text style={styles.amountInputText}>
+                    {amount || "0.00"}
+                  </Text>
+                </View>
 
                 {/* Custom Numeric Pad */}
                 <View style={styles.padContainer}>
@@ -264,6 +260,8 @@ const styles = StyleSheet.create({
   verifiedAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255, 122, 0, 0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   verifiedName: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
   verifiedEmail: { color: '#9CA3AF', fontSize: 12, marginTop: 2 },
+  amountInputContainer: { backgroundColor: '#050B18', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, padding: 16, alignItems: 'center' },
+  amountInputText: { color: '#FFFFFF', fontSize: 24, fontWeight: 'bold' },
   amountInput: { backgroundColor: '#050B18', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 12, color: '#FFFFFF', padding: 16, fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
   primaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FF7A00', padding: 16, borderRadius: 12 },
   primaryButtonDisabled: { opacity: 0.5 },
