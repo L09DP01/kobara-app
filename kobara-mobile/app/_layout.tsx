@@ -6,7 +6,7 @@ import { AppProvider } from '@/providers/AppProvider';
 import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as ScreenCapture from 'expo-screen-capture';
 
@@ -26,7 +26,7 @@ export default function RootLayout() {
   useEffect(() => {
     // Screen Capture & App Preview Hiding logic
     const protectScreen = async () => {
-      const hidePreview = await SecureStore.getItemAsync('kobara_hide_preview');
+      const hidePreview = await storage.getItemAsync('kobara_hide_preview');
       if (hidePreview === 'true') {
         await ScreenCapture.preventScreenCaptureAsync();
       } else {
@@ -69,7 +69,7 @@ export default function RootLayout() {
     
     if ((global as any).isAuthenticatingBiometrics) return;
     
-    const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
+    const bioEnabled = await storage.getItemAsync('kobara_biometrics_enabled');
     if (bioEnabled === 'true') {
       setIsUnlocked(false);
       const hasHardware = await LocalAuthentication.hasHardwareAsync();

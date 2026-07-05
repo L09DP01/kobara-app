@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import authService, { AuthUser, MerchantProfile, AuthError } from '@/services/auth';
 
 interface AuthState {
@@ -26,7 +26,7 @@ interface AuthState {
   refreshSession: () => Promise<void>;
 }
 
-// Clés SecureStore
+// Clés storage
 const KEYS = {
   ACCESS_TOKEN: 'kobara_access_token',
   REFRESH_TOKEN: 'kobara_refresh_token',
@@ -48,15 +48,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const response = await authService.login(email, password);
 
     // Stocker les tokens de façon sécurisée
-    await SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, response.accessToken);
-    await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, response.refreshToken);
-    await SecureStore.setItemAsync(KEYS.USER_DATA, JSON.stringify(response.user));
+    await storage.setItemAsync(KEYS.ACCESS_TOKEN, response.accessToken);
+    await storage.setItemAsync(KEYS.REFRESH_TOKEN, response.refreshToken);
+    await storage.setItemAsync(KEYS.USER_DATA, JSON.stringify(response.user));
     
     // Save password for biometric login
     await savePassword(password);
     
     if (response.merchant) {
-      await SecureStore.setItemAsync(KEYS.MERCHANT_DATA, JSON.stringify(response.merchant));
+      await storage.setItemAsync(KEYS.MERCHANT_DATA, JSON.stringify(response.merchant));
     }
 
     set({
@@ -69,10 +69,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await SecureStore.deleteItemAsync(KEYS.ACCESS_TOKEN);
-      await SecureStore.deleteItemAsync(KEYS.REFRESH_TOKEN);
-      await SecureStore.deleteItemAsync(KEYS.USER_DATA);
-      await SecureStore.deleteItemAsync(KEYS.MERCHANT_DATA);
+      await storage.deleteItemAsync(KEYS.ACCESS_TOKEN);
+      await storage.deleteItemAsync(KEYS.REFRESH_TOKEN);
+      await storage.deleteItemAsync(KEYS.USER_DATA);
+      await storage.deleteItemAsync(KEYS.MERCHANT_DATA);
       await clearSavedPassword();
     } catch (error) {
       console.error('Failed to clear session:', error);
@@ -90,15 +90,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       // Vérifier l'onboarding
-      const seenOnboarding = await SecureStore.getItemAsync(KEYS.HAS_SEEN_ONBOARDING);
+      const seenOnboarding = await storage.getItemAsync(KEYS.HAS_SEEN_ONBOARDING);
       if (seenOnboarding === 'true') {
         set({ hasSeenOnboarding: true });
       }
 
       // Vérifier la session existante
-      const accessToken = await SecureStore.getItemAsync(KEYS.ACCESS_TOKEN);
-      const userData = await SecureStore.getItemAsync(KEYS.USER_DATA);
-      const merchantData = await SecureStore.getItemAsync(KEYS.MERCHANT_DATA);
+      const accessToken = await storage.getItemAsync(KEYS.ACCESS_TOKEN);
+      const userData = await storage.getItemAsync(KEYS.USER_DATA);
+      const merchantData = await storage.getItemAsync(KEYS.MERCHANT_DATA);
 
       if (accessToken && userData) {
         const user = JSON.parse(userData) as AuthUser;
@@ -126,9 +126,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
 
           // Mettre à jour le cache local
-          await SecureStore.setItemAsync(KEYS.USER_DATA, JSON.stringify(profile.user));
+          await storage.setItemAsync(KEYS.USER_DATA, JSON.stringify(profile.user));
           if (profile.merchant) {
-            await SecureStore.setItemAsync(KEYS.MERCHANT_DATA, JSON.stringify(profile.merchant));
+            await storage.setItemAsync(KEYS.MERCHANT_DATA, JSON.stringify(profile.merchant));
           }
         } catch (err: any) {
           if (err.code === 'UNAUTHORIZED') {
@@ -152,7 +152,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   completeOnboarding: async () => {
     try {
-      await SecureStore.setItemAsync(KEYS.HAS_SEEN_ONBOARDING, 'true');
+      await storage.setItemAsync(KEYS.HAS_SEEN_ONBOARDING, 'true');
       set({ hasSeenOnboarding: true });
     } catch (error) {
       console.error('Failed to save onboarding state:', error);
@@ -161,15 +161,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   refreshSession: async () => {
     try {
-      const refreshToken = await SecureStore.getItemAsync(KEYS.REFRESH_TOKEN);
+      const refreshToken = await storage.getItemAsync(KEYS.REFRESH_TOKEN);
       if (!refreshToken) {
         await get().logout();
         return;
       }
 
       const tokens = await authService.refreshToken(refreshToken);
-      await SecureStore.setItemAsync(KEYS.ACCESS_TOKEN, tokens.accessToken);
-      await SecureStore.setItemAsync(KEYS.REFRESH_TOKEN, tokens.refreshToken);
+      await storage.setItemAsync(KEYS.ACCESS_TOKEN, tokens.accessToken);
+      await storage.setItemAsync(KEYS.REFRESH_TOKEN, tokens.refreshToken);
     } catch (error: any) {
       if (error.code === 'UNAUTHORIZED') {
         // Token invalide → déconnexion
@@ -183,7 +183,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 // Helper pour récupérer l'email sauvegardé ("Se souvenir de moi")
 export async function getSavedEmail(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(KEYS.REMEMBER_EMAIL);
+    return await storage.getItemAsync(KEYS.REMEMBER_EMAIL);
   } catch {
     return null;
   }
@@ -191,7 +191,7 @@ export async function getSavedEmail(): Promise<string | null> {
 
 export async function saveEmail(email: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync(KEYS.REMEMBER_EMAIL, email);
+    await storage.setItemAsync(KEYS.REMEMBER_EMAIL, email);
   } catch {
     // Silencieux
   }
@@ -199,7 +199,7 @@ export async function saveEmail(email: string): Promise<void> {
 
 export async function clearSavedEmail(): Promise<void> {
   try {
-    await SecureStore.deleteItemAsync(KEYS.REMEMBER_EMAIL);
+    await storage.deleteItemAsync(KEYS.REMEMBER_EMAIL);
   } catch {
     // Silencieux
   }
@@ -207,7 +207,7 @@ export async function clearSavedEmail(): Promise<void> {
 
 export async function getSavedPassword(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync('kobara_remember_password');
+    return await storage.getItemAsync('kobara_remember_password');
   } catch {
     return null;
   }
@@ -215,7 +215,7 @@ export async function getSavedPassword(): Promise<string | null> {
 
 export async function savePassword(password: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync('kobara_remember_password', password);
+    await storage.setItemAsync('kobara_remember_password', password);
   } catch {
     // Silencieux
   }
@@ -223,7 +223,7 @@ export async function savePassword(password: string): Promise<void> {
 
 export async function clearSavedPassword(): Promise<void> {
   try {
-    await SecureStore.deleteItemAsync('kobara_remember_password');
+    await storage.deleteItemAsync('kobara_remember_password');
   } catch {
     // Silencieux
   }
