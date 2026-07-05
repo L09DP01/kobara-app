@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, ArrowDownCircle, CheckCircle2 } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -146,10 +146,10 @@ export default function WithdrawalScreen() {
                 style={styles.amountInput}
                 placeholder="0.00"
                 placeholderTextColor="#6B7280"
-                keyboardType="numeric"
                 value={amount}
-                onChangeText={setAmount}
+                showSoftInputOnFocus={false}
                 editable={!isLoading}
+                onFocus={() => { Keyboard.dismiss(); }}
               />
 
               <View style={styles.feeNotice}>
@@ -160,6 +160,36 @@ export default function WithdrawalScreen() {
                     Frais (5%) : {amount && !isNaN(Number(amount)) ? (Number(amount) * 0.05).toFixed(2) : '0.00'} HTG
                   </Text>
                 )}
+              </View>
+
+              {/* Custom Numeric Pad */}
+              <View style={styles.padContainer}>
+                {[
+                  ['1', '2', '3'],
+                  ['4', '5', '6'],
+                  ['7', '8', '9'],
+                  ['.', '0', '⌫']
+                ].map((row, rowIndex) => (
+                  <View key={rowIndex} style={styles.padRow}>
+                    {row.map((key) => (
+                      <TouchableOpacity
+                        key={key}
+                        style={styles.padKey}
+                        disabled={isLoading}
+                        onPress={() => {
+                          if (key === '⌫') {
+                            setAmount(prev => prev.slice(0, -1));
+                          } else {
+                            if (key === '.' && amount.includes('.')) return;
+                            setAmount(prev => prev + key);
+                          }
+                        }}
+                      >
+                        <Text style={styles.padKeyText}>{key}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ))}
               </View>
 
               <TouchableOpacity
@@ -181,7 +211,7 @@ export default function WithdrawalScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -209,5 +239,9 @@ const styles = StyleSheet.create({
   feeText: { color: '#6B7280', fontSize: 12 },
   withdrawButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FF7A00', padding: 16, borderRadius: 12 },
   withdrawButtonDisabled: { opacity: 0.5 },
-  withdrawButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' }
+  withdrawButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
+  padContainer: { marginTop: 8, marginBottom: 24, gap: 12 },
+  padRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  padKey: { flex: 1, backgroundColor: '#050B18', paddingVertical: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' },
+  padKeyText: { color: '#FFFFFF', fontSize: 24, fontWeight: 'bold' }
 });
