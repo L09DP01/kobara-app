@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, CalendarClock, CreditCard } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
-import * as SecureStore from 'expo-secure-store';
+import { storage as SecureStore } from '@/utils/storage';
 
 import { paymentsService, MobileSubscription } from '../../services/payments';
 import { balanceService } from '../../services/balance';

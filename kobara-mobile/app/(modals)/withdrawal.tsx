@@ -38,7 +38,7 @@ export default function WithdrawalScreen() {
     
     // Check biometrics
     try {
-      const SecureStore = await import('expo-secure-store');
+      const { storage: SecureStore } = await import('@/utils/storage');
       const LocalAuthentication = await import('expo-local-authentication');
       
       const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { apiClient } from '@/api/client';
-import * as SecureStore from 'expo-secure-store';
+import { storage as SecureStore } from '@/utils/storage';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function MoreScreen() {

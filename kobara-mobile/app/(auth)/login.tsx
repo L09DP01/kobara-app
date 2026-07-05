@@ -19,7 +19,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, Check, ScanFace } from 'lucide-rea
 import { useAuthStore, getSavedEmail, saveEmail, clearSavedEmail, getSavedPassword } from '@/store/useAuthStore';
 import LoginIllustration from '@/components/illustrations/LoginIllustration';
 import ENV from '@/config/env';
-import * as SecureStore from 'expo-secure-store';
+import { storage as SecureStore } from '@/utils/storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');

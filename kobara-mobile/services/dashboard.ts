@@ -39,7 +39,7 @@ export interface DashboardSummaryResponse {
   code?: string;
 }
 
-import * as SecureStore from 'expo-secure-store';
+import { storage as SecureStore } from '@/utils/storage';
 import Constants from 'expo-constants';
 
 const getBaseUrl = () => {

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage as SecureStore } from '@/utils/storage';
 import { authService } from '@/services/auth';
 import { useAuthStore } from '@/store/useAuthStore';
 
