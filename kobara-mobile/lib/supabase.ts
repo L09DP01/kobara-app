@@ -9,10 +9,18 @@ import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import ENV from '@/config/env';
 
-// Adaptateur SecureStore pour Supabase Auth
-const SecureStoreAdapter = {
+import { Platform } from 'react-native';
+
+// Adaptateur de stockage multi-plateforme pour Supabase Auth
+const StorageAdapter = {
   getItem: async (key: string): Promise<string | null> => {
     try {
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined') {
+          return window.localStorage.getItem(key);
+        }
+        return null;
+      }
       return await SecureStore.getItemAsync(key);
     } catch {
       return null;
@@ -20,16 +28,28 @@ const SecureStoreAdapter = {
   },
   setItem: async (key: string, value: string): Promise<void> => {
     try {
-      await SecureStore.setItemAsync(key, value);
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, value);
+        }
+      } else {
+        await SecureStore.setItemAsync(key, value);
+      }
     } catch (error) {
-      console.error('SecureStore setItem error:', error);
+      console.error('Storage setItem error:', error);
     }
   },
   removeItem: async (key: string): Promise<void> => {
     try {
-      await SecureStore.deleteItemAsync(key);
+      if (Platform.OS === 'web') {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(key);
+        }
+      } else {
+        await SecureStore.deleteItemAsync(key);
+      }
     } catch (error) {
-      console.error('SecureStore removeItem error:', error);
+      console.error('Storage removeItem error:', error);
     }
   },
 };
@@ -39,7 +59,7 @@ export const supabase = createClient(
   ENV.SUPABASE_ANON_KEY,
   {
     auth: {
-      storage: SecureStoreAdapter,
+      storage: StorageAdapter,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false, // Pas de redirect URL en mobile
