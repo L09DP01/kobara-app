@@ -25,7 +25,12 @@ export default function TransferScreen() {
         const result = await balanceService.lookupMerchantById(recipientId);
         setIsLoading(false);
         if (result.success && result.merchant) {
-          setVerifiedMerchant(result.merchant);
+          if (result.merchant.status !== 'active' || (result.merchant.kyc_status !== 'approved' && result.merchant.kyc_status !== 'verified')) {
+            setError("Le compte de ce marchand n'est pas vérifié ou est inactif. Le transfert ne peut pas être effectué.");
+            setVerifiedMerchant(null);
+          } else {
+            setVerifiedMerchant(result.merchant);
+          }
         } else {
           setError(result.error || "Ce code QR ne correspond à aucun marchand valide.");
         }
@@ -48,7 +53,12 @@ export default function TransferScreen() {
     setIsLoading(false);
     
     if (result.success && result.merchant) {
-      setVerifiedMerchant(result.merchant);
+      if (result.merchant.status !== 'active' || (result.merchant.kyc_status !== 'approved' && result.merchant.kyc_status !== 'verified')) {
+        setError("Le compte de ce marchand n'est pas vérifié ou est inactif. Le transfert ne peut pas être effectué.");
+        setVerifiedMerchant(null);
+      } else {
+        setVerifiedMerchant(result.merchant);
+      }
     } else {
       setError(result.error || "Marchand introuvable");
     }
@@ -97,9 +107,10 @@ export default function TransferScreen() {
     
     if (result.success) {
       queryClient.invalidateQueries({ queryKey: ['balance'] });
-      Alert.alert("Succès", "Transfert effectué avec succès.", [
-        { text: "OK", onPress: () => router.back() }
-      ]);
+      router.replace({ 
+        pathname: '/(modals)/success', 
+        params: { amount, recipient: verifiedMerchant.business_name, type: 'transfer' } 
+      });
     } else {
       setError(result.error || "Une erreur s'est produite");
     }

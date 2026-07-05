@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Lookup merchant by email or id
-    let query = supabaseAdmin.from('merchants').select('id, business_name, email');
+    let query = supabaseAdmin.from('merchants').select('id, business_name, email, status, kyc_status');
     
     if (email) {
       query = query.eq('email', email.trim());
@@ -47,7 +47,9 @@ export async function GET(req: NextRequest) {
       merchant: {
         id: merchant.id,
         business_name: merchant.business_name,
-        email: merchant.email
+        email: merchant.email,
+        status: merchant.status,
+        kyc_status: merchant.kyc_status
       }
     });
     
