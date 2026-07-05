@@ -25,11 +25,14 @@ export async function GET(
       return NextResponse.json({ error: "Profil marchand introuvable.", code: "MERCHANT_NOT_FOUND" }, { status: 404 });
     }
 
+    const environment = merchant.current_environment || 'test';
+
     // 2. Fetch Customer Details
     const { data: customer, error: customerError } = await supabaseAdmin
       .from("customers")
       .select("*")
       .eq("merchant_id", merchant.id)
+      .eq("environment", environment)
       .eq("id", params.id)
       .single();
 
@@ -40,8 +43,9 @@ export async function GET(
     // 3. Fetch Customer Payments
     const { data: payments, error: paymentsError } = await supabaseAdmin
       .from("payments")
-      .select("id, amount, net_amount, fee_amount, currency, status, provider, payment_method, created_at, transaction_reference")
+      .select("id, amount, net_amount, fee_amount, currency, status, provider, payment_method, created_at, kobara_reference")
       .eq("merchant_id", merchant.id)
+      .eq("environment", environment)
       .eq("customer_id", customer.id)
       .order("created_at", { ascending: false });
 

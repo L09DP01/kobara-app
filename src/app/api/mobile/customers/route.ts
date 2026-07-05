@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
       .from("customers")
       .select("*")
       .eq("merchant_id", merchant.id)
+      .eq("environment", environment)
       .order("created_at", { ascending: false });
 
     if (customersError) {
