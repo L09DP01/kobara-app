@@ -41,28 +41,10 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     
-    // Handle 401 Unauthorized errors for token refresh
+    // Handle 401 Unauthorized errors (auto-logout without refresh)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      try {
-        const refreshToken = await SecureStore.getItemAsync('kobara_refresh_token');
-        if (refreshToken) {
-          const newTokens = await authService.refreshToken(refreshToken);
-          await SecureStore.setItemAsync('kobara_access_token', newTokens.accessToken);
-          await SecureStore.setItemAsync('kobara_refresh_token', newTokens.refreshToken);
-          
-          if (originalRequest.headers) {
-             originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
-          }
-          return apiClient(originalRequest);
-        } else {
-          useAuthStore.getState().logout();
-        }
-      } catch (refreshError: any) {
-        if (refreshError.code === 'UNAUTHORIZED') {
-          useAuthStore.getState().logout();
-        }
-      }
+      useAuthStore.getState().logout();
     }
     
     return Promise.reject(error);

@@ -132,13 +132,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           }
         } catch (err: any) {
           if (err.code === 'UNAUTHORIZED') {
-            // Le token est expiré, on tente un refresh
-            try {
-              await get().refreshSession();
-              // Si le refresh réussit, le state est déjà mis à jour, et l'API interceptera le nouveau token
-            } catch (refreshErr) {
-              // Si le refresh échoue, l'utilisateur est déconnecté par refreshSession()
-            }
+            // Token expiré, déconnexion immédiate (pas de refresh demandé)
+            await get().logout();
           }
           // Si c'est une erreur réseau, on garde simplement les données en cache
         }
