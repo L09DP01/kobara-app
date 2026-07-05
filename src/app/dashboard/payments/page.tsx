@@ -193,7 +193,7 @@ export default async function PaymentsPage({
                         </div>
                         <div className="min-w-0">
                           <div className="font-bold text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px] md:max-w-none">{payment.customers?.name || 'Client Inconnu'}</div>
-                          <div className="text-slate-400 text-[10px] sm:text-[11px] font-mono truncate max-w-[100px] sm:max-w-[140px] md:max-w-none">{payment.transaction_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
+                          <div className="text-slate-400 text-[10px] sm:text-[11px] font-mono truncate max-w-[100px] sm:max-w-[140px] md:max-w-none">{payment.kobara_reference || `KOB-${payment.id.substring(0, 8).toUpperCase()}`}</div>
                         </div>
                       </div>
                     </td>

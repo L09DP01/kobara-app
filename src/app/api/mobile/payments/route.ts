@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     // 3. Query Payments
     let query = supabaseAdmin
       .from('payments')
-      .select('id, amount, net_amount, currency, status, provider, payment_method, created_at, kobara_reference:transaction_reference, bazik_transaction_id, customers(name, email)', { count: 'exact' })
+      .select('id, amount, net_amount, currency, status, provider, payment_method, created_at, kobara_reference, bazik_transaction_id, customers(name, email)', { count: 'exact' })
       .eq('merchant_id', merchant.id)
       .eq('environment', environment)
       .order('created_at', { ascending: false })

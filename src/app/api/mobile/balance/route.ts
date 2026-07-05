@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     // 2. Fetch Withdrawals
     const { data: withdrawals } = await supabaseAdmin
       .from("withdrawals")
-      .select("id, amount, status, created_at, kobara_reference, provider, wallet, total, fees, method")
+      .select("id, amount, status, created_at, kobara_reference, provider, wallet, total, fees")
       .eq("merchant_id", merchant.id)
       .eq("environment", environment)
       .order("created_at", { ascending: false })
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
           status: w.status,
           date: w.created_at,
           kobara_reference: w.kobara_reference,
-          provider: w.provider || w.method,
+          provider: w.provider,
           wallet: w.wallet,
           total: w.total,
           fees: w.fees,

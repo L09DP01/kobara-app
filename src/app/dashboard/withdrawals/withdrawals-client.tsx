@@ -494,7 +494,7 @@ export function WithdrawalsClient({
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-2">
                           <span className="material-symbols-outlined text-[16px] text-slate-400">smartphone</span>
-                          <span className="font-bold text-white text-sm">{w.method}</span>
+                          <span className="font-bold text-white text-sm">{w.provider || 'MonCash'}</span>
                         </div>
                       </td>
                       <td className="py-4 px-5">
