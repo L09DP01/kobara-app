@@ -44,8 +44,8 @@ export function PwaInstallPrompt() {
       // Redirect to the PWA hosted on app.kobara.app
       window.location.href = 'https://app.kobara.app';
     } else if (osType === 'android') {
-      // Redirect to download the APK
-      window.location.href = '/downloads/kobara-android.apk';
+      // Redirect to download the APK from Google Drive
+      window.location.href = 'https://drive.google.com/file/d/1sEgdgo4UsOYW-zf-IfyR6qMj7qdPy_jm/view?usp=sharing';
       handleDismiss(); // Hide after clicking download
     }
   };
