@@ -209,7 +209,6 @@ export default function WithdrawalScreen() {
                 )}
               </TouchableOpacity>
             </View>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
