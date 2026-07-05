@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation';
 
 export function PwaInstallPrompt() {
   const pathname = usePathname();
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [osType, setOsType] = useState<'ios' | 'android' | 'desktop'>('desktop');
 
   useEffect(() => {
     if (pathname?.startsWith('/pay')) return;
@@ -18,55 +18,36 @@ export function PwaInstallPrompt() {
       return; // Hide for 7 days if dismissed
     }
 
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/.test(userAgent);
+    const isAndroid = /android/.test(userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || ('standalone' in window.navigator && (window.navigator as any).standalone);
 
     if (isStandalone) return;
 
     if (isIos) {
-      // For iOS, beforeinstallprompt is not supported. Show our own manual instruction banner.
-      const timer = setTimeout(() => {
-        setShowPrompt(true);
-      }, 3000);
+      setOsType('ios');
+      const timer = setTimeout(() => setShowPrompt(true), 3000);
+      return () => clearTimeout(timer);
+    } else if (isAndroid) {
+      setOsType('android');
+      const timer = setTimeout(() => setShowPrompt(true), 3000);
       return () => clearTimeout(timer);
     }
+    
+    // On Desktop, we don't show the install prompt anymore as per requirement.
+    setOsType('desktop');
+  }, [pathname]);
 
-    const handler = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(e);
-      // Update UI notify the user they can install the PWA
-      setShowPrompt(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    // If it's iOS, they need to do it manually from the Share menu.
-    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-    if (isIos) {
-      alert("Sur iPhone/iPad : Appuyez sur le bouton 'Partager' en bas (le carré avec une flèche vers le haut), puis sélectionnez 'Sur l'écran d'accueil'.");
-      handleDismiss();
-      return;
+  const handleInstallClick = () => {
+    if (osType === 'ios') {
+      // Redirect to the PWA hosted on app.kobara.app
+      window.location.href = 'https://app.kobara.app';
+    } else if (osType === 'android') {
+      // Redirect to download the APK
+      window.location.href = '/downloads/kobara-android.apk';
+      handleDismiss(); // Hide after clicking download
     }
-
-    if (!deferredPrompt) return;
-    
-    // Show the install prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    // We've used the prompt, and can't use it again, throw it away
-    setDeferredPrompt(null);
-    setShowPrompt(false);
   };
 
   const handleDismiss = () => {
@@ -75,6 +56,7 @@ export function PwaInstallPrompt() {
   };
 
   if (pathname?.startsWith('/pay')) return null;
+  if (osType === 'desktop') return null; // Don't show on desktop
 
   return (
     <AnimatePresence>
@@ -83,19 +65,27 @@ export function PwaInstallPrompt() {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[100] bg-surface-card border border-border-subtle rounded-2xl shadow-2xl p-4 flex flex-col gap-3"
+          className="fixed bottom-4 left-4 right-4 z-[100] bg-surface-card border border-border-subtle rounded-2xl shadow-2xl p-4 flex flex-col gap-3"
         >
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-white">download</span>
+              <span className="material-symbols-outlined text-white">
+                {osType === 'android' ? 'android' : 'phone_iphone'}
+              </span>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-text-primary text-sm">Installer Kobara</h3>
-              <p className="text-xs text-text-secondary mt-0.5">Installez l'application pour un accès rapide et hors-ligne.</p>
+              <h3 className="font-bold text-text-primary text-sm">
+                {osType === 'android' ? 'Application Android' : 'Application iPhone'}
+              </h3>
+              <p className="text-xs text-text-secondary mt-0.5">
+                {osType === 'android' 
+                  ? 'Téléchargez notre application officielle pour Android.' 
+                  : 'Installez l\'application Kobara pour une meilleure expérience.'}
+              </p>
             </div>
             <button 
               onClick={handleDismiss}
-              className="p-1 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-container"
+              className="p-1 text-text-secondary hover:text-text-primary rounded-full hover:bg-surface-container transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -104,7 +94,7 @@ export function PwaInstallPrompt() {
             onClick={handleInstallClick}
             className="w-full py-2.5 bg-primary text-on-primary rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
           >
-            Ajouter à l'écran d'accueil
+            {osType === 'android' ? 'Télécharger l\'APK' : 'Installer l\'application'}
           </button>
         </motion.div>
       )}
