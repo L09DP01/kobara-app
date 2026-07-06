@@ -37,7 +37,7 @@ export function ApiKeysClient({
   const handleGenerate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (hasReachedLimit) {
-      setError("Vous avez atteint la limite d'une clé API sur le plan gratuit. Passez au plan Pro pour en créer d'autres.");
+      setError("Vous avez atteint la limite d'une clé API sur le plan gratuit. Veuillez révoquer votre clé existante pour en créer une nouvelle.");
       return;
     }
     if (!keyName.trim()) {
@@ -202,8 +202,14 @@ export function ApiKeysClient({
             </p>
           </div>
           <button 
-            onClick={() => setShowCreateModal(true)}
-            disabled={loading || hasReachedLimit}
+            onClick={() => {
+              if (hasReachedLimit) {
+                setError("Vous avez atteint la limite d'une clé API sur le plan gratuit. Veuillez révoquer votre clé existante pour en créer une nouvelle.");
+              } else {
+                setShowCreateModal(true);
+              }
+            }}
+            disabled={loading}
             className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl font-bold text-sm hover:bg-orange-600 transition-all disabled:opacity-50 shadow-sm"
           >
             <span className="material-symbols-outlined text-[18px]">vpn_key</span>

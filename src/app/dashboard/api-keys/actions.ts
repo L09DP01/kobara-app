@@ -23,7 +23,7 @@ export async function generateApiKey(name: string, environment: 'live' | 'test' 
     const accessCheck = await canCreateApiKey(merchantId, environment);
     if (!accessCheck.allowed) {
       if (accessCheck.reason === 'kyc_required') return { error: "Vous devez vérifier votre compte (KYC) pour créer une clé Live." };
-      if (accessCheck.reason === 'api_key_limit_reached') return { error: "Vous avez atteint la limite de clés API de votre plan." };
+      if (accessCheck.reason === 'api_key_limit_reached') return { error: "Vous avez atteint la limite de clés API de votre plan. Veuillez révoquer votre clé existante pour en créer une nouvelle." };
       return { error: "Accès refusé" };
     }
 
