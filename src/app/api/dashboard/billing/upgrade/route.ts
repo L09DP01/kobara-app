@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       } else {
         // MonCash Logic
         const { BazikService } = await import("@/lib/server/bazik/bazik.service");
-        const reference = `UPG::${merchant.id}::${planSlug}::${billingCycle}::${Date.now()}`;
+        const reference = `UPGRADE::${merchant.id}::${planSlug}::${billingCycle}::${Date.now()}`;
         
         const bazikResponse = await BazikService.createMoncashPayment({
           amount: amount,
