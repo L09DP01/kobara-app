@@ -8,7 +8,7 @@
     "scheme": "kobara",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#0F1626"
     },
@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#0F1626"
       },
       "package": "com.kobara.merchantapp"
