@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "kobara-mobile",
+    "name": "Kobara",
     "slug": "kobara-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,9 +8,9 @@
     "scheme": "kobara",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0F1626"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,8 +21,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0F1626"
       },
       "package": "com.kobara.merchantapp"
     },
