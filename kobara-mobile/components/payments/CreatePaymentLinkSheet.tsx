@@ -169,7 +169,7 @@ export function CreatePaymentLinkSheet({ visible, onClose, onSuccess }: CreatePa
     await Clipboard.setStringAsync(getFullUrl());
   };
 
-  if (!visible && fadeAnim._value === 0) return null;
+  if (!visible) return null;
 
   return (
     <Modal transparent visible={visible} onRequestClose={onClose} animationType="none">

@@ -191,7 +191,6 @@ export default function BalanceScreen() {
         <FlashList
           data={balanceData?.history || []}
           renderItem={renderActivityItem}
-          estimatedItemSize={88}
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={ListEmpty}
           contentContainerStyle={{ paddingBottom: 100 }}

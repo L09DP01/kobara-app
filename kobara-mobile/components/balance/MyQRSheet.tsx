@@ -65,7 +65,7 @@ export function MyQRSheet({ visible, onClose, merchant }: MyQRSheetProps) {
     });
   };
 
-  if (!visible && fadeAnim._value === 0) return null;
+  if (!visible) return null;
 
   // Si on n'a pas encore le merchant, on ne montre pas le QR
   if (!merchant) return null;

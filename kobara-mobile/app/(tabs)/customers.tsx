@@ -248,7 +248,6 @@ export default function CustomersScreen() {
         <FlashList
           data={filteredCustomers}
           renderItem={renderCustomerItem}
-          estimatedItemSize={88}
           ListHeaderComponent={ListHeader}
           ListEmptyComponent={ListEmpty}
           contentContainerStyle={{ paddingBottom: 100 }}

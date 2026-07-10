@@ -14,7 +14,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function MoreScreen() {
   const router = useRouter();
-  const { session, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

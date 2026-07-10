@@ -42,7 +42,7 @@ export interface LoginResponse {
 
 export interface AuthError {
   message: string;
-  code: 'INVALID_CREDENTIALS' | 'ACCOUNT_INACTIVE' | 'ACCOUNT_NOT_VERIFIED' | 'SERVER_ERROR' | 'NETWORK_ERROR';
+  code: 'INVALID_CREDENTIALS' | 'ACCOUNT_INACTIVE' | 'ACCOUNT_NOT_VERIFIED' | 'SERVER_ERROR' | 'NETWORK_ERROR' | 'UNAUTHORIZED';
 }
 
 class AuthService {

@@ -27,6 +27,10 @@ export interface DashboardMerchant {
   id: string;
   business_name: string;
   logo_url: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  status?: string | null;
 }
 
 export interface DashboardSummaryResponse {

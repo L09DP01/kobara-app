@@ -16,6 +16,7 @@ export interface MobilePayment {
 
 export interface MobilePaymentLink {
   id: string;
+  slug: string;
   title: string;
   description: string;
   amount: number;
