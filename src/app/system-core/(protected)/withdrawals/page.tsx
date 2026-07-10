@@ -118,23 +118,15 @@ export default async function AdminWithdrawalsPage() {
     try {
       const { data: mData } = await adminClient.from('merchants').select('email').eq('id', merchantId).single();
       if (mData?.email) {
-        // Notification in-app
+        // Notification in-app (qui envoie aussi l'email car l'email est passé en paramètre)
         const { createNotification } = await import('@/lib/server/notifications');
         await createNotification(
           merchantId,
           'withdrawal_rejected',
-          '❌ Retrait refusé',
-          `Votre demande de retrait de ${total} HTG a été refusée. Raison : ${reason}. Le montant n'a pas été débité de votre solde.`,
+          '❌ Votre demande de retrait a été refusée',
+          `Bonjour,\n\nVotre récente demande de retrait de ${total} HTG a été examinée et refusée par notre équipe.\n\n📋 Raison du refus :\n${reason}\n\n💰 Votre solde n'a pas été affecté. Vous pouvez soumettre une nouvelle demande si nécessaire.\n\nCordialement,\nL'équipe Kobara`,
           mData.email
         );
-
-        // Email détaillé avec la raison
-        const { sendEmail } = await import('@/lib/server/mail');
-        await sendEmail({
-          to: mData.email,
-          subject: "❌ Votre demande de retrait a été refusée — Kobara",
-          text: `Bonjour,\n\nVotre récente demande de retrait de ${total} HTG a été examinée et refusée par notre équipe.\n\n📋 Raison du refus :\n${reason}\n\n💰 Votre solde n'a pas été affecté. Vous pouvez soumettre une nouvelle demande si nécessaire.\n\nSi vous avez des questions, n'hésitez pas à contacter notre support.\n\nCordialement,\nL'équipe Kobara`
-        });
       }
     } catch(e) { console.error("Reject notification failed", e); }
 
