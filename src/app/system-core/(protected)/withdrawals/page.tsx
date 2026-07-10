@@ -98,11 +98,21 @@ export default async function AdminWithdrawalsPage() {
     }
 
     // 2. Marquer comme rejeté avec la raison
-    await adminClient.from('withdrawals').update({
+    const { error: updateError } = await adminClient.from('withdrawals').update({
       status: 'rejected',
       processed_at: new Date().toISOString(),
       rejection_reason: reason
     }).eq('id', id);
+
+    if (updateError) {
+      console.error("Error updating withdrawal status:", updateError);
+      // Fallback au cas où la colonne rejection_reason n'existe pas encore en base de données
+      const { error: fallbackError } = await adminClient.from('withdrawals').update({
+        status: 'rejected',
+        processed_at: new Date().toISOString()
+      }).eq('id', id);
+      if (fallbackError) console.error("Fallback error:", fallbackError);
+    }
 
     // 3. Notifier le marchand du rejet avec la raison (email + notification in-app)
     try {
