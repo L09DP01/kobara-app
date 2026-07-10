@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/cron/sync-balances",
+      "schedule": "*/10 * * * *"
+    },
+    {
       "path": "/api/cron/expire-payments",
       "schedule": "0 0 * * *"
     },

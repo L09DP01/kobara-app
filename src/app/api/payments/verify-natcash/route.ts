@@ -57,11 +57,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Valider le paiement
-    await supabase.from('payments').update({
+    const { data: updatedVerifyPayments, error: updateError } = await supabase.from('payments').update({
       status: 'succeeded',
       paid_at: new Date().toISOString(),
       trans_code: transCode
-    }).eq('id', payment.id);
+    }).eq('id', payment.id).neq('status', 'succeeded').select();
+
+    if (!updatedVerifyPayments || updatedVerifyPayments.length === 0) {
+      return NextResponse.json({ success: true, message: "Paiement déjà validé en arrière-plan !" });
+    }
 
     // Mettre à jour le statut du SMS pour dire qu'il a été lié manuellement
     await supabase.from('sms_inbox').update({

@@ -70,11 +70,15 @@ export async function POST(
     }
 
     // 4. Update the payment as succeeded
-    await supabaseAdmin.from('payments').update({
+    const { data: updatedClaimPayments, error: updateError } = await supabaseAdmin.from('payments').update({
       status: 'succeeded',
       paid_at: new Date().toISOString(),
       trans_code: transCode
-    }).eq('id', payment.id);
+    }).eq('id', payment.id).neq('status', 'succeeded').select();
+
+    if (!updatedClaimPayments || updatedClaimPayments.length === 0) {
+      return NextResponse.json({ success: true, message: "Déjà payé en arrière-plan" }, { status: 200 });
+    }
 
     // 5. Update the SMS inbox
     await supabaseAdmin.from('sms_inbox').update({

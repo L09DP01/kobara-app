@@ -161,13 +161,18 @@ export function WithdrawalsClient({
   const totalWithdrawn = withdrawals.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0);
   const filteredWithdrawals = filterStatus === 'all'
     ? withdrawals
-    : withdrawals.filter(w => w.status === filterStatus);
+    : filterStatus === 'pending'
+      ? withdrawals.filter(w => w.status === 'pending' || w.status === 'pending_approval')
+      : withdrawals.filter(w => w.status === filterStatus);
 
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'completed': return { label: 'Complété', bg: 'bg-green-500/10', text: 'text-green-400', dot: 'bg-green-500', border: 'border-l-green-500' };
-      case 'pending': return { label: 'En attente', bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500', border: 'border-l-amber-500' };
+      case 'paid': return { label: 'Complété', bg: 'bg-green-500/10', text: 'text-green-400', dot: 'bg-green-500', border: 'border-l-green-500' };
+      case 'pending': return { label: 'En traitement', bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500', border: 'border-l-amber-500' };
+      case 'pending_approval': return { label: 'En attente', bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500', border: 'border-l-blue-500' };
       case 'processing': return { label: 'En traitement', bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500', border: 'border-l-blue-500' };
+      case 'rejected': return { label: 'Refusé', bg: 'bg-red-500/10', text: 'text-red-400', dot: 'bg-red-500', border: 'border-l-red-500' };
       case 'failed': return { label: 'Échoué', bg: 'bg-red-500/10', text: 'text-red-400', dot: 'bg-red-500', border: 'border-l-red-500' };
       default: return { label: status, bg: 'bg-white/5', text: 'text-slate-400', dot: 'bg-slate-500', border: 'border-l-white/10' };
     }
@@ -469,8 +474,8 @@ export function WithdrawalsClient({
           >
             <option value="all">Tous les statuts</option>
             <option value="completed">Complétés</option>
-            <option value="pending">En attente</option>
-            <option value="processing">En traitement</option>
+            <option value="pending">En attente / En traitement</option>
+            <option value="rejected">Refusés</option>
             <option value="failed">Échoués</option>
           </select>
         </div>
@@ -623,6 +628,12 @@ export function WithdrawalsClient({
                     )
                   })()}
                 </div>
+                {selectedWithdrawal.status === 'rejected' && selectedWithdrawal.rejection_reason && (
+                  <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <p className="text-xs text-red-400 font-bold mb-1">Raison du refus :</p>
+                    <p className="text-sm text-red-300">{selectedWithdrawal.rejection_reason}</p>
+                  </div>
+                )}
               </div>
             </div>
 

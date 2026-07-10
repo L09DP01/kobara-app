@@ -136,15 +136,19 @@ export async function POST(request: NextRequest) {
 
         // If matched successfully, update payment
         if (matchedPayment) {
-          await supabase.from('payments').update({
+          const { data: updatedNatcashPayments, error: updateError } = await supabase.from('payments').update({
             status: 'succeeded',
             paid_at: new Date().toISOString(),
             trans_code: parsed.transCode
-          }).eq('id', matchedPayment.id);
+          }).eq('id', matchedPayment.id).neq('status', 'succeeded').select();
           
-          // Centralized post-success handler (balance, webhooks, notifications, plan upgrade)
-          const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
-          await onPaymentSucceeded(matchedPayment.id);
+          if (!updatedNatcashPayments || updatedNatcashPayments.length === 0) {
+             console.log(`Natcash Webhook deduplicated: Payment ${matchedPayment.id} already succeeded`);
+          } else {
+             // Centralized post-success handler (balance, webhooks, notifications, plan upgrade)
+             const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
+             await onPaymentSucceeded(matchedPayment.id);
+          }
           
           return NextResponse.json({ success: true, processed: true, payment_id: matchedPayment.id }, { status: 200 });
         } else {

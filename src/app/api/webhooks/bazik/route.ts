@@ -194,22 +194,30 @@ export async function POST(request: NextRequest) {
       newStatus = "failed";
     }
 
-    // Update payment
-    const { error: updateError } = await supabaseAdmin
+    // Update payment with optimistic locking
+    const { data: updatedPayments, error: updateError } = await supabaseAdmin
       .from('payments')
       .update({
         status: newStatus,
         bazik_transaction_id: transaction_id || payment.bazik_transaction_id,
         paid_at: paidAt
       })
-      .eq('id', payment.id);
+      .eq('id', payment.id)
+      .neq('status', newStatus) // Prevent double-crediting if concurrent request already updated it
+      .select();
 
     if (updateError) {
       throw updateError;
     }
 
+    // If payment was already processed by a concurrent request, updatedPayments will be empty
+    if (!updatedPayments || updatedPayments.length === 0) {
+      console.log(`Webhook deduplicated via optimistic locking: Payment ${payment.id} already has status ${newStatus}`);
+      return NextResponse.json({ received: true });
+    }
+
     // If payment succeeded, use centralized handler for balance, webhooks, notifications
-    if (newStatus === "succeeded" && payment.status !== "succeeded") {
+    if (newStatus === "succeeded") {
       const { onPaymentSucceeded } = await import('@/lib/server/payments/on-payment-succeeded');
       await onPaymentSucceeded(payment.id);
     } else if (newStatus === "failed" && payment.status !== "failed") {

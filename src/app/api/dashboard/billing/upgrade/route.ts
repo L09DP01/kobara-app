@@ -119,24 +119,18 @@ export async function POST(request: NextRequest) {
         await supabase.from('merchants').update({ available_balance: newBalance }).eq('id', merchant.id);
 
         // Enregistrer la transaction pour historique
-        const referenceCode = `BAL-${Date.now()}`;
-        const { data: paymentIntent, error: insertError } = await supabase.from('payments').insert({
+        const referenceCode = `SUB-${Date.now()}`;
+        const { error: insertError } = await supabase.from('withdrawals').insert({
           merchant_id: merchant.id,
           amount: amount,
-          net_amount: amount,
-          currency: 'HTG',
-          status: 'succeeded',
-          provider: 'system',
-          payment_method: 'balance',
+          total: amount,
+          fees: 0,
+          status: 'completed',
+          provider: 'system_subscription',
           kobara_reference: referenceCode,
-          metadata: {
-            is_subscription_upgrade: true,
-            plan_slug: planSlug,
-            billing_cycle: billingCycle,
-            promo_code: promoCode,
-            promo_code_id: promoCodeId
-          }
-        }).select('id').single();
+          environment: 'live',
+          processed_at: new Date().toISOString()
+        });
 
         // Upgrade the plan
         await upgradeMerchantPlan(merchant.id, planSlug);
