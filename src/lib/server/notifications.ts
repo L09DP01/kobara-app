@@ -78,16 +78,17 @@ export async function notifyAdminWithdrawalCreated(merchantId: string, amount: n
   const { data: merchant } = await supabase.from('merchants').select('business_name, email, phone').eq('id', merchantId).single();
   const businessName = merchant?.business_name || 'Un marchand';
   const merchantEmail = merchant?.email || '';
-  const isNatcash = method.toLowerCase() === 'natcash';
+  
+  const requiresManualApproval = method.toLowerCase() === 'natcash' || method.toLowerCase() === 'zelle';
 
-  const subject = isNatcash
-    ? `⚠️ APPROBATION REQUISE — Retrait NatCash ${(totalWithFees || amount).toLocaleString('fr-FR')} HTG — ${businessName}`
-    : `💸 Nouveau retrait ${method} — ${(totalWithFees || amount).toLocaleString('fr-FR')} HTG — ${businessName}`;
+  const subject = requiresManualApproval
+    ? `[APPROBATION REQUISE] Retrait ${method} de ${(totalWithFees || amount).toLocaleString('fr-FR')} HTG — ${businessName}`
+    : `[NOUVEAU RETRAIT] ${method} — ${(totalWithFees || amount).toLocaleString('fr-FR')} HTG — ${businessName}`;
 
   const body = `
 Bonjour Admin,
 
-${isNatcash ? '⚠️ Un retrait NatCash est en attente de votre approbation.' : `Un retrait ${method} vient d'être effectué.`}
+${requiresManualApproval ? `Un retrait ${method} est en attente de votre approbation manuelle.` : `Un retrait ${method} vient d'être effectué.`}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 DÉTAILS DU RETRAIT
@@ -98,13 +99,13 @@ Méthode    : ${method}
 ${wallet ? `Portefeuille: ${wallet}` : ''}
 Montant net: ${amount.toLocaleString('fr-FR')} HTG
 ${totalWithFees ? `Total débité: ${totalWithFees.toLocaleString('fr-FR')} HTG` : ''}
-Statut     : ${isNatcash ? 'EN ATTENTE D\'APPROBATION' : 'TRAITÉ'}
+Statut     : ${requiresManualApproval ? 'EN ATTENTE D\'APPROBATION' : 'TRAITÉ'}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
-${isNatcash ? `👉 Connectez-vous au panneau admin pour approuver ou rejeter:\n${appUrl}/system-core/withdrawals` : `👉 Voir le panneau admin:\n${appUrl}/system-core/withdrawals`}
+${requiresManualApproval ? `👉 Connectez-vous au panneau admin pour approuver ou rejeter:\n${appUrl}/system-core/withdrawals` : `👉 Voir le panneau admin:\n${appUrl}/system-core/withdrawals`}
 
 Cordialement,
-Kobara System
+L'équipe technique Kobara
   `.trim();
 
   await sendEmail({ to: adminEmail, subject, text: body });
