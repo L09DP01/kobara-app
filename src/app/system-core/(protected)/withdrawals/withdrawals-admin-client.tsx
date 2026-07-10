@@ -10,12 +10,15 @@ interface AdminWithdrawalsClientProps {
   markAsPaidAction: (formData: FormData) => Promise<void>;
 }
 
+import { useRouter } from 'next/navigation';
+
 export function AdminWithdrawalsClient({
   withdrawals,
   approveAction,
   rejectAction,
   markAsPaidAction
 }: AdminWithdrawalsClientProps) {
+  const router = useRouter();
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -59,6 +62,7 @@ export function AdminWithdrawalsClient({
     
     try {
       await rejectAction(formData);
+      router.refresh(); // Forcer le rafraîchissement des données
     } catch (e) {
       console.error("Reject failed", e);
     } finally {
@@ -79,6 +83,7 @@ export function AdminWithdrawalsClient({
     
     try {
       await approveAction(formData);
+      router.refresh();
     } catch (e) {
       console.error("Approve failed", e);
     } finally {
@@ -94,6 +99,7 @@ export function AdminWithdrawalsClient({
     
     try {
       await markAsPaidAction(formData);
+      router.refresh();
     } catch (e) {
       console.error("Mark as paid failed", e);
     } finally {
