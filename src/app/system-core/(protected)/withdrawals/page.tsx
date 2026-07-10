@@ -40,7 +40,7 @@ export default async function AdminWithdrawalsPage() {
     // 2. Marquer comme complété
     await adminClient.from('withdrawals').update({
       status: 'completed',
-      processed_at: new Date().toISOString()
+      completed_at: new Date().toISOString()
     }).eq('id', id);
 
     // 3. Notifier le marchand du succès
@@ -100,7 +100,7 @@ export default async function AdminWithdrawalsPage() {
     // 2. Marquer comme rejeté avec la raison
     const { error: updateError } = await adminClient.from('withdrawals').update({
       status: 'rejected',
-      processed_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
       rejection_reason: reason
     }).eq('id', id);
 
@@ -109,7 +109,7 @@ export default async function AdminWithdrawalsPage() {
       // Fallback au cas où la colonne rejection_reason n'existe pas encore en base de données
       const { error: fallbackError } = await adminClient.from('withdrawals').update({
         status: 'rejected',
-        processed_at: new Date().toISOString()
+        completed_at: new Date().toISOString()
       }).eq('id', id);
       if (fallbackError) console.error("Fallback error:", fallbackError);
     }
@@ -142,7 +142,7 @@ export default async function AdminWithdrawalsPage() {
 
     await adminClient.from('withdrawals').update({
       status: 'paid',
-      processed_at: new Date().toISOString()
+      completed_at: new Date().toISOString()
     }).eq('id', id);
 
     // Notifier le marchand

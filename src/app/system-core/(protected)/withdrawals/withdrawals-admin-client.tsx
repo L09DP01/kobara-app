@@ -243,7 +243,7 @@ export function AdminWithdrawalsClient({
 
                     {(w.status === 'paid' || w.status === 'completed') && (
                       <span className="text-[10px] text-slate-500 font-mono">
-                        {w.processed_at ? new Date(w.processed_at).toLocaleString('fr-FR') : '—'}
+                        {w.completed_at ? new Date(w.completed_at).toLocaleString('fr-FR') : '—'}
                       </span>
                     )}
 
