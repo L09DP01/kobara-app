@@ -26,11 +26,15 @@ export interface DashboardStats {
 export interface DashboardMerchant {
   id: string;
   business_name: string;
+  business_slug?: string | null;
   logo_url: string | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
+  category?: string | null;
   status?: string | null;
+  kyc_status?: string | null;
+  plan_slug?: string | null;
 }
 
 export interface DashboardSummaryResponse {

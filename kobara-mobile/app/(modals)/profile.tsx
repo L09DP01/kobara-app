@@ -54,6 +54,10 @@ export default function ProfileScreen() {
     return name.charAt(0).toUpperCase();
   };
 
+  const statusLabel = merchant?.status === 'active'
+    ? 'Compte Actif'
+    : merchant?.status || 'Statut non défini';
+
   let addressData = {
     address: merchant?.address || 'Non définie',
     city: '',
@@ -95,7 +99,7 @@ export default function ProfileScreen() {
           </View>
           <Text style={styles.businessName}>{merchant?.business_name || 'Marchand'}</Text>
           <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{merchant?.status === 'active' ? 'Compte Actif' : merchant?.status}</Text>
+            <Text style={styles.statusText}>{statusLabel}</Text>
           </View>
         </View>
 
