@@ -5,6 +5,7 @@ import { ChevronLeft, ArrowDownCircle, CheckCircle2 } from 'lucide-react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { balanceService } from '../../services/balance';
 import { useQueryClient } from '@tanstack/react-query';
+import { requireBiometricAuthentication } from '@/services/security';
 
 const WITHDRAWAL_METHODS = [
   { id: 'moncash', name: 'MonCash', icon: '📱' },
@@ -37,34 +38,10 @@ export default function WithdrawalScreen() {
     setIsLoading(true);
     setError(null);
     
-    // Check biometrics
-    try {
-      const { storage: SecureStore } = await import('@/utils/storage');
-      const LocalAuthentication = await import('expo-local-authentication');
-      
-      const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
-      if (bioEnabled === 'true') {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        
-        if (hasHardware && isEnrolled) {
-          /*
-          (global as any).isAuthenticatingBiometrics = true;
-          const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: 'Confirmez votre identité pour valider ce retrait',
-            fallbackLabel: 'Utiliser le code',
-          });
-          (global as any).isAuthenticatingBiometrics = false;
-          
-          if (!result.success) {
-            setIsLoading(false);
-            return;
-          }
-          */
-        }
-      }
-    } catch (e) {
-      console.error(e);
+    const confirmed = await requireBiometricAuthentication('Confirmez votre identite pour valider ce retrait');
+    if (!confirmed) {
+      setIsLoading(false);
+      return;
     }
     
     const result = await balanceService.requestWithdrawal(method, Number(amount), reference);

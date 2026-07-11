@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { apiClient } from '@/api/client';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -24,7 +25,19 @@ export function usePushNotifications() {
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => {
-      if (token) setExpoPushToken(token);
+      if (!token) return;
+
+      setExpoPushToken(token);
+      apiClient.post('/mobile/notifications/register', {
+        expo_push_token: token,
+        device_info: {
+          os: Platform.OS,
+          model: Device.modelName,
+          osVersion: Device.osVersion,
+        },
+      }).catch(error => {
+        console.log('Error registering push token:', error);
+      });
     });
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -93,10 +106,6 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log("Expo Push Token:", token);
-      
-      // TODO: Send this token to the backend `/api/mobile/notifications/token`
-      
     } catch (e) {
       console.log('Error getting push token:', e);
     }

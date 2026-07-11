@@ -11,6 +11,11 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { apiClient } from '@/api/client';
 import { storage as SecureStore } from '@/utils/storage';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import {
+  authenticateWithDeviceBiometrics,
+  canUseDeviceBiometrics,
+  setBiometricProtectionEnabled,
+} from '@/services/security';
 
 export default function MoreScreen() {
   const router = useRouter();
@@ -75,34 +80,19 @@ export default function MoreScreen() {
 
   const toggleBiometrics = async () => {
     const newValue = !biometricsEnabled;
-    
-    // Si on veut activer, on doit vérifier l'identité d'abord
+
     if (newValue) {
-      const { authenticateAsync, hasHardwareAsync, isEnrolledAsync } = await import('expo-local-authentication');
-      const hasHardware = await hasHardwareAsync();
-      const isEnrolled = await isEnrolledAsync();
-      
-      if (!hasHardware || !isEnrolled) {
-        Alert.alert("Erreur", "Votre appareil ne supporte pas la biométrie ou elle n'est pas configurée.");
+      if (!(await canUseDeviceBiometrics())) {
+        Alert.alert("Erreur", "Votre appareil ne supporte pas la biometrie ou elle n'est pas configuree.");
         return;
       }
-      
-      /*
-      (global as any).isAuthenticatingBiometrics = true;
-      const result = await authenticateAsync({
-        promptMessage: 'Confirmez votre identité pour activer la biométrie',
-        fallbackLabel: 'Utiliser le code',
-      });
-      (global as any).isAuthenticatingBiometrics = false;
-      
-      if (!result.success) {
-        return; // Annulé ou échec
-      }
-      */
+
+      const confirmed = await authenticateWithDeviceBiometrics('Confirmez votre identite pour activer la biometrie');
+      if (!confirmed) return;
     }
-    
+
     setBiometricsEnabled(newValue);
-    await SecureStore.setItemAsync('kobara_biometrics_enabled', newValue.toString());
+    await setBiometricProtectionEnabled(newValue);
   };
 
   const toggleHidePreview = async () => {

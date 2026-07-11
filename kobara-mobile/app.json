@@ -38,6 +38,13 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Autoriser Kobara a utiliser Face ID pour proteger votre compte."
+        }
+      ],
+      "expo-notifications",
       "expo-splash-screen",
       "expo-web-browser"
     ],

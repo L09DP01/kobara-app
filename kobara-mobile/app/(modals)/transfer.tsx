@@ -5,6 +5,7 @@ import { ChevronLeft, Send, Search, User } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { balanceService } from '../../services/balance';
 import { useQueryClient } from '@tanstack/react-query';
+import { requireBiometricAuthentication } from '@/services/security';
 
 export default function TransferScreen() {
   const { recipientId } = useLocalSearchParams<{ recipientId: string }>();
@@ -71,34 +72,10 @@ export default function TransferScreen() {
     setIsLoading(true);
     setError(null);
     
-    // Check biometrics
-    try {
-      const { storage: SecureStore } = await import('@/utils/storage');
-      const LocalAuthentication = await import('expo-local-authentication');
-      
-      const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
-      if (bioEnabled === 'true') {
-        const hasHardware = await LocalAuthentication.hasHardwareAsync();
-        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-        
-        if (hasHardware && isEnrolled) {
-          /*
-          (global as any).isAuthenticatingBiometrics = true;
-          const result = await LocalAuthentication.authenticateAsync({
-            promptMessage: 'Confirmez votre identité pour valider ce transfert',
-            fallbackLabel: 'Utiliser le code',
-          });
-          (global as any).isAuthenticatingBiometrics = false;
-          
-          if (!result.success) {
-            setIsLoading(false);
-            return;
-          }
-          */
-        }
-      }
-    } catch (e) {
-      console.error(e);
+    const confirmed = await requireBiometricAuthentication('Confirmez votre identite pour valider ce transfert');
+    if (!confirmed) {
+      setIsLoading(false);
+      return;
     }
     
     const result = await balanceService.sendB2BTransfer(verifiedMerchant.id, Number(amount));

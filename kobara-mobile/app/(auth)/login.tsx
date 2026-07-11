@@ -21,6 +21,7 @@ import LoginIllustration from '@/components/illustrations/LoginIllustration';
 import ENV from '@/config/env';
 import { storage as SecureStore } from '@/utils/storage';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { canUseDeviceBiometrics } from '@/services/security';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -87,11 +88,8 @@ export default function LoginScreen() {
     const bioEnabled = await SecureStore.getItemAsync('kobara_biometrics_enabled');
     const pwd = await getSavedPassword();
     if (bioEnabled === 'true' && saved && pwd) {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      if (hasHardware && isEnrolled) {
-        // DÉSACTIVÉ TEMPORAIREMENT
-        setCanUseBiometrics(false);
+      if (await canUseDeviceBiometrics()) {
+        setCanUseBiometrics(true);
         setSavedPassword(pwd);
         // On pourrait auto-lancer handleBiometricLogin ici, mais c'est mieux de laisser l'utilisateur cliquer
       }
@@ -125,6 +123,7 @@ export default function LoginScreen() {
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Connectez-vous à Kobara',
         fallbackLabel: 'Utiliser le mot de passe',
+        disableDeviceFallback: false,
       });
       (global as any).isAuthenticatingBiometrics = false;
       

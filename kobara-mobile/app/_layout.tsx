@@ -7,8 +7,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { storage } from '@/utils/storage';
-import * as LocalAuthentication from 'expo-local-authentication';
 import * as ScreenCapture from 'expo-screen-capture';
+import { isBiometricProtectionEnabled, requireBiometricAuthentication } from '@/services/security';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -63,37 +63,16 @@ export default function RootLayout() {
   }, []);
 
   const checkBiometrics = async () => {
-    // DÉSACTIVÉ TEMPORAIREMENT À LA DEMANDE DE L'UTILISATEUR
-    setIsUnlocked(true);
-    return;
-    
     if ((global as any).isAuthenticatingBiometrics) return;
-    
-    const bioEnabled = await storage.getItemAsync('kobara_biometrics_enabled');
-    if (bioEnabled === 'true') {
-      setIsUnlocked(false);
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
-      
-      if (hasHardware && isEnrolled) {
-        (global as any).isAuthenticatingBiometrics = true;
-        const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: 'Déverrouillez Kobara',
-          fallbackLabel: 'Utiliser le code',
-        });
-        (global as any).isAuthenticatingBiometrics = false;
-        if (result.success) {
-          setIsUnlocked(true);
-        } else {
-          // Si l'utilisateur annule, on reste bloqué
-          setIsUnlocked(false);
-        }
-      } else {
-        setIsUnlocked(true); // Pas de bio dispo, on débloque
-      }
-    } else {
+
+    if (!useAuthStore.getState().isAuthenticated || !(await isBiometricProtectionEnabled())) {
       setIsUnlocked(true);
+      return;
     }
+
+    setIsUnlocked(false);
+    const success = await requireBiometricAuthentication('Deverrouillez Kobara');
+    setIsUnlocked(success);
   };
 
   useEffect(() => {
