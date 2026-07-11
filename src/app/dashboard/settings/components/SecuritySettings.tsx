@@ -647,15 +647,17 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
         )}
       </div>
 
-      {/* Passkeys Management Card */}
+      {/* Passkey Management Card */}
       <div className="bg-white/5 rounded-3xl border border-white/10 p-6 shadow-sm">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-3 bg-green-500/20 rounded-xl text-green-400">
             <span className="material-symbols-outlined">fingerprint</span>
           </div>
           <div>
-            <h2 className="text-headline-md font-headline-md text-white">Connexion Biométrique (Passkey)</h2>
-            <p className="text-body-sm text-slate-400 mt-0.5">Utilisez Touch ID, Face ID ou Windows Hello pour vous connecter sans mot de passe.</p>
+            <h2 className="text-headline-md font-headline-md text-white">Passkey</h2>
+            <p className="text-body-sm text-slate-400 mt-0.5">
+              Utilisez la securite de votre appareil pour vous connecter sans mot de passe: Face ID, empreinte digitale, Windows Hello, Android, ou code de deverrouillage selon l'appareil.
+            </p>
           </div>
         </div>
 
@@ -668,6 +670,10 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
               setMfaError('');
               setMfaSuccess('');
               try {
+                if (!window.isSecureContext || !navigator.credentials) {
+                  throw new Error("Passkey necessite une PWA installee ou une page HTTPS compatible.");
+                }
+
                 const { startRegistration } = await import('@simplewebauthn/browser');
                 const resp = await fetch('/api/auth/passkey/generate-registration-options');
                 if (!resp.ok) throw new Error("Erreur de génération des options");
@@ -681,8 +687,8 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                   body: JSON.stringify(attResp),
                 });
                 
-                if (!verifyResp.ok) throw new Error("Échec de la validation de la clé");
-                setMfaSuccess("Clé biométrique ajoutée avec succès ! Rechargez la page pour la voir.");
+                if (!verifyResp.ok) throw new Error("Échec de la validation du Passkey");
+                setMfaSuccess("Passkey ajouté avec succès ! Rechargez la page pour le voir.");
               } catch (e: any) {
                 console.error(e);
                 setMfaError(e.message || "Impossible d'ajouter le Passkey.");
@@ -694,7 +700,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
           >
             {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
             <span className="material-symbols-outlined text-[18px]">add</span>
-            Ajouter un appareil biométrique
+            Ajouter un Passkey
           </button>
 
           {(settings?.security_json?.passkeys?.length || 0) > 0 && (
@@ -702,7 +708,7 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
               <table className="w-full text-left text-sm">
                 <thead className="bg-transparent border-b border-white/10 text-slate-400">
                   <tr>
-                    <th className="py-3 px-4 font-semibold">Appareil</th>
+                    <th className="py-3 px-4 font-semibold">Passkey</th>
                     <th className="py-3 px-4 font-semibold">Date d'ajout</th>
                     <th className="py-3 px-4 text-right font-semibold">Action</th>
                   </tr>
@@ -722,11 +728,11 @@ export function SecuritySettings({ user, settings }: { user: any; settings: any 
                           type="button"
                           disabled={actionLoading}
                           onClick={async () => {
-                            if (!confirm("Voulez-vous vraiment supprimer cet appareil biométrique ?")) return;
+                            if (!confirm("Voulez-vous vraiment supprimer ce Passkey ?")) return;
                             setActionLoading(true);
                             try {
                               await deletePasskeyAction(pk.id);
-                              setMfaSuccess("Clé biométrique supprimée.");
+                              setMfaSuccess("Passkey supprimé.");
                             } catch (e: any) {
                               setMfaError("Erreur lors de la suppression.");
                             } finally {

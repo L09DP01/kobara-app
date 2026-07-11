@@ -29,7 +29,9 @@ export function NotificationPrompt() {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         setShowPrompt(false);
-        // We could also subscribe to push notifications here
+        new Notification('Kobara', {
+          body: 'Les notifications de la PWA sont maintenant actives.',
+        });
       } else {
         setShowPrompt(false);
         localStorage.setItem('kobara_notif_dismissed', Date.now().toString());
@@ -58,8 +60,8 @@ export function NotificationPrompt() {
               <span className="material-symbols-outlined text-blue-500">notifications_active</span>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-text-primary text-sm">Activer les notifications</h3>
-              <p className="text-xs text-text-secondary mt-0.5">Soyez alerté instantanément lors d'un nouveau paiement.</p>
+              <h3 className="font-bold text-text-primary text-sm">Activer les notifications PWA</h3>
+              <p className="text-xs text-text-secondary mt-0.5">Recevez les alertes Kobara sur cet appareil.</p>
             </div>
             <button 
               onClick={handleDismiss}
