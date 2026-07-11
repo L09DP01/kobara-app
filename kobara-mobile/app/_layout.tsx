@@ -71,7 +71,7 @@ export default function RootLayout() {
     }
 
     setIsUnlocked(false);
-    const success = await requireBiometricAuthentication('Deverrouillez Kobara');
+    const success = await requireBiometricAuthentication('Deverrouillez Kobara avec Passkey');
     setIsUnlocked(success);
   };
 

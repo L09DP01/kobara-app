@@ -72,7 +72,7 @@ export default function TransferScreen() {
     setIsLoading(true);
     setError(null);
     
-    const confirmed = await requireBiometricAuthentication('Confirmez votre identite pour valider ce transfert');
+    const confirmed = await requireBiometricAuthentication('Validez ce transfert avec Passkey');
     if (!confirmed) {
       setIsLoading(false);
       return;

@@ -41,7 +41,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Autoriser Kobara a utiliser Face ID pour proteger votre compte."
+          "faceIDPermission": "Autoriser Kobara a utiliser Passkey pour proteger votre compte."
         }
       ],
       "expo-notifications",

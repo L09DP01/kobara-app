@@ -83,11 +83,11 @@ export default function MoreScreen() {
 
     if (newValue) {
       if (!(await canUseDeviceBiometrics())) {
-        Alert.alert("Erreur", "Votre appareil ne supporte pas la biometrie ou elle n'est pas configuree.");
+        Alert.alert("Erreur", "Configurez Face ID, une empreinte digitale ou un code de deverrouillage sur cet appareil.");
         return;
       }
 
-      const confirmed = await authenticateWithDeviceBiometrics('Confirmez votre identite pour activer la biometrie');
+      const confirmed = await authenticateWithDeviceBiometrics('Confirmez votre identite pour activer Passkey');
       if (!confirmed) return;
     }
 
@@ -209,7 +209,12 @@ export default function MoreScreen() {
           <View className="flex-row items-center justify-between py-3">
             <View className="flex-row items-center flex-1">
               <ScanFace size={20} color="#F97316" />
-              <Text className="ml-3 text-white font-medium text-base">Reconnaissance faciale</Text>
+              <View className="ml-3 flex-1">
+                <Text className="text-white font-medium text-base">Passkey</Text>
+                <Text className="text-slate-400 text-xs mt-1">
+                  Face ID, empreinte ou code de l'appareil
+                </Text>
+              </View>
             </View>
             <TouchableOpacity 
               onPress={toggleBiometrics}

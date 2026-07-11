@@ -15,20 +15,17 @@ export async function setBiometricProtectionEnabled(enabled: boolean) {
 export async function canUseDeviceBiometrics() {
   if (Platform.OS === 'web') return false;
 
-  const [hasHardware, isEnrolled] = await Promise.all([
-    LocalAuthentication.hasHardwareAsync(),
-    LocalAuthentication.isEnrolledAsync(),
-  ]);
+  const enrolledLevel = await LocalAuthentication.getEnrolledLevelAsync();
 
-  return hasHardware && isEnrolled;
+  return enrolledLevel !== LocalAuthentication.SecurityLevel.NONE;
 }
 
 export async function authenticateWithDeviceBiometrics(promptMessage: string) {
   const available = await canUseDeviceBiometrics();
   if (!available) {
     Alert.alert(
-      'Biometrie indisponible',
-      "La reconnaissance faciale ou l'empreinte digitale n'est pas configuree sur cet appareil."
+      'Passkey indisponible',
+      "Configurez Face ID, une empreinte digitale ou un code de deverrouillage sur cet appareil."
     );
     return false;
   }
@@ -37,7 +34,7 @@ export async function authenticateWithDeviceBiometrics(promptMessage: string) {
     (global as any).isAuthenticatingBiometrics = true;
     const result = await LocalAuthentication.authenticateAsync({
       promptMessage,
-      fallbackLabel: 'Utiliser le code',
+      fallbackLabel: 'Utiliser le code de l’appareil',
       disableDeviceFallback: false,
     });
 

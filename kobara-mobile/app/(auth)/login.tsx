@@ -121,8 +121,8 @@ export default function LoginScreen() {
     try {
       (global as any).isAuthenticatingBiometrics = true;
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Connectez-vous à Kobara',
-        fallbackLabel: 'Utiliser le mot de passe',
+        promptMessage: 'Connectez-vous avec Passkey',
+        fallbackLabel: "Utiliser le code de l'appareil",
         disableDeviceFallback: false,
       });
       (global as any).isAuthenticatingBiometrics = false;
@@ -327,10 +327,10 @@ export default function LoginScreen() {
               disabled={isLoading}
               style={[styles.bioButton, isLoading && styles.loginButtonDisabled]}
               accessibilityRole="button"
-              accessibilityLabel="Se connecter avec la biométrie"
+              accessibilityLabel="Se connecter avec Passkey"
             >
               <ScanFace size={20} color="#F97316" />
-              <Text style={styles.bioButtonText}>Se connecter avec Face ID / Touch ID</Text>
+              <Text style={styles.bioButtonText}>Se connecter avec Passkey</Text>
             </TouchableOpacity>
           )}
         </Animated.View>

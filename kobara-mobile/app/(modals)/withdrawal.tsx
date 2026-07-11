@@ -38,7 +38,7 @@ export default function WithdrawalScreen() {
     setIsLoading(true);
     setError(null);
     
-    const confirmed = await requireBiometricAuthentication('Confirmez votre identite pour valider ce retrait');
+    const confirmed = await requireBiometricAuthentication('Validez ce retrait avec Passkey');
     if (!confirmed) {
       setIsLoading(false);
       return;
