@@ -19,6 +19,16 @@ export function MobileStepperClient({ token }: { token: string }) {
 
   const headers = { 'Authorization': `Bearer ${token}` };
 
+  useEffect(() => {
+    if (step !== 6) return;
+
+    const closeTimer = window.setTimeout(() => {
+      window.close();
+    }, 1500);
+
+    return () => window.clearTimeout(closeTimer);
+  }, [step]);
+
   const uploadDocument = async (blob: Blob, side: string) => {
     const formData = new FormData();
     formData.append('file', blob);
@@ -231,7 +241,7 @@ export function MobileStepperClient({ token }: { token: string }) {
             <div className="w-24 h-24 bg-status-success/10 text-status-success rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="material-symbols-outlined text-[48px]">check_circle</span>
             </div>
-            <h3 className="font-headline-md text-text-primary">Documents soumis !</h3>
+            <h3 className="font-headline-md text-text-primary">Verification terminee</h3>
             <p className="text-body-base text-text-secondary max-w-sm mx-auto mt-4">
               La vérification sur mobile est terminée. <br/><br/>
               <strong className="text-text-primary">Regardez votre ordinateur, l'écran s'est mis à jour automatiquement.</strong>

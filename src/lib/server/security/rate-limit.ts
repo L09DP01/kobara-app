@@ -35,53 +35,66 @@ class MemoryRateLimiter {
   }
 }
 
+class SafeRateLimiter {
+  private upstashLimiter: Ratelimit;
+  private memoryFallback: MemoryRateLimiter;
+
+  constructor(upstashLimiter: Ratelimit, memoryFallback: MemoryRateLimiter) {
+    this.upstashLimiter = upstashLimiter;
+    this.memoryFallback = memoryFallback;
+  }
+
+  async limit(identifier: string) {
+    try {
+      return await this.upstashLimiter.limit(identifier);
+    } catch (error) {
+      console.error("Upstash RateLimit error, failing open to memory:", error);
+      // Fallback au limiteur en mémoire si Upstash échoue (ex: quota atteint)
+      return await this.memoryFallback.limit(identifier);
+    }
+  }
+}
+
 // Singleton instances
-let authLimiter: Ratelimit | MemoryRateLimiter;
-let apiLimiter: Ratelimit | MemoryRateLimiter;
-let paymentsLimiter: Ratelimit | MemoryRateLimiter;
-let paymentLinksLimiter: Ratelimit | MemoryRateLimiter;
-let withdrawalsLimiter: Ratelimit | MemoryRateLimiter;
-let webhooksTestLimiter: Ratelimit | MemoryRateLimiter;
+let authLimiter: SafeRateLimiter | MemoryRateLimiter;
+let apiLimiter: SafeRateLimiter | MemoryRateLimiter;
+let paymentsLimiter: SafeRateLimiter | MemoryRateLimiter;
+let paymentLinksLimiter: SafeRateLimiter | MemoryRateLimiter;
+let withdrawalsLimiter: SafeRateLimiter | MemoryRateLimiter;
+let webhooksTestLimiter: SafeRateLimiter | MemoryRateLimiter;
 
 const { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } = process.env;
 
 if (hasRedis && redis) {
+  authLimiter = new SafeRateLimiter(
+    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "5 m"), analytics: true }),
+    new MemoryRateLimiter(5, 5 * 60 * 1000)
+  );
 
-  authLimiter = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(5, "5 m"), // 5 requests per 5 minutes for Auth
-    analytics: true,
-  });
+  apiLimiter = new SafeRateLimiter(
+    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, "1 m"), analytics: true }),
+    new MemoryRateLimiter(100, 60 * 1000)
+  );
 
-  apiLimiter = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(100, "1 m"), // 100 requests per minute for API
-    analytics: true,
-  });
+  paymentsLimiter = new SafeRateLimiter(
+    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "1 m"), analytics: true }),
+    new MemoryRateLimiter(60, 60 * 1000)
+  );
 
-  paymentsLimiter = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(60, "1 m"), // 60 requests per minute
-    analytics: true,
-  });
+  paymentLinksLimiter = new SafeRateLimiter(
+    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "1 m"), analytics: true }),
+    new MemoryRateLimiter(30, 60 * 1000)
+  );
 
-  paymentLinksLimiter = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(30, "1 m"), // 30 requests per minute
-    analytics: true,
-  });
+  withdrawalsLimiter = new SafeRateLimiter(
+    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "1 m"), analytics: true }),
+    new MemoryRateLimiter(10, 60 * 1000)
+  );
 
-  withdrawalsLimiter = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(10, "1 m"), // 10 requests per minute
-    analytics: true,
-  });
-
-  webhooksTestLimiter = new Ratelimit({
-    redis: redis,
-    limiter: Ratelimit.slidingWindow(100, "1 m"), // 100 requests per minute
-    analytics: true,
-  });
+  webhooksTestLimiter = new SafeRateLimiter(
+    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, "1 m"), analytics: true }),
+    new MemoryRateLimiter(100, 60 * 1000)
+  );
 } else {
   // Fallback memory rate limiters
   authLimiter = new MemoryRateLimiter(5, 5 * 60 * 1000);

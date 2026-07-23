@@ -1,6 +1,8 @@
-# Payments API
+# API MonCash, MonCash API, API NatCash et NatCash API
 
 L'objet **Payment** représente une transaction de paiement initiée via Kobara.
+
+Kobara sert de couche d'integration pour les recherches **api moncash**, **moncash api**, **api natcash** et **natcash api**. Une seule API permet de creer un paiement HTG, choisir MonCash ou NatCash, suivre le statut et recevoir les confirmations webhook.
 
 Cette API permet de :
 

@@ -41,6 +41,10 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const hostname = request.headers.get("host")?.split(":")[0] || request.nextUrl.hostname;
+
+  if (pathname.startsWith('/kyc/mobile')) {
+    return supabaseResponse;
+  }
   
   // Custom subdomains are public
   if (hostname === 'pay.kobara.app' || hostname === 'api.kobara.app') {

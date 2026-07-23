@@ -1,4 +1,6 @@
-# Authentication
+# Authentification API MonCash et API NatCash
+
+Cette page explique comment authentifier vos appels **API MonCash**, **MonCash API**, **API NatCash** et **NatCash API** via Kobara.
 
 L’API Kobara utilise un système d’authentification sécurisé basé sur des clés API afin de protéger les paiements, les retraits et toutes les opérations sensibles effectuées sur votre compte marchand.
 
@@ -71,7 +73,7 @@ kbr_pk_live_
 ## Exemple clé publique
 
 ```txt id="x16y2t"
-kbr_pk_test_a1b2c3d4e5f6
+kbr_pk_test_xxxxxxxxx
 ```
 
 ---
@@ -121,7 +123,7 @@ kbr_sk_live_
 ## Exemple clé secrète
 
 ```txt id="9h1z9e"
-kbr_sk_test_a1b2c3d4e5f6g7h8i9j
+kbr_sk_test_xxxxxxxxx
 ```
 
 ---

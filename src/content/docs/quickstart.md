@@ -2,6 +2,8 @@
 
 Bienvenue dans la documentation officielle de **Kobara**, la passerelle de paiement de référence pour accepter MonCash et NatCash en Haïti. 
 
+Si vous cherchez **api moncash**, **moncash api**, **api natcash** ou **natcash api**, Kobara fournit une API unique pour creer un paiement, rediriger le client vers le checkout et recevoir la confirmation via webhook.
+
 Ce guide rapide vous montrera comment accepter votre premier paiement en moins de 10 minutes.
 
 ---

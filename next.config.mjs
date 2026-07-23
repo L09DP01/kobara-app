@@ -71,6 +71,16 @@ const nextConfig = {
         destination: '/api/:path*',
       },
       {
+        source: '/kyc/mobile/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'dashboard.kobara.app',
+          },
+        ],
+        destination: '/kyc/mobile/:path*',
+      },
+      {
         source: '/:path*',
         has: [
           {

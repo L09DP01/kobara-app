@@ -51,7 +51,7 @@ kbr_pk_live_
 ## Exemple Public Key
 
 ```txt id="mujbhn"
-kbr_pk_test_a1b2c3d4e5f6
+kbr_pk_test_xxxxxxxxx
 ```
 
 ---
@@ -102,7 +102,7 @@ kbr_sk_live_
 ## Exemple Secret Key
 
 ```txt id="r82o8n"
-kbr_sk_test_a1b2c3d4e5f6g7h8i9j
+kbr_sk_test_xxxxxxxxx
 ```
 
 ---

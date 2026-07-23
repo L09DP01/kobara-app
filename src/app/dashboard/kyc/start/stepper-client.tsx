@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { DocumentCapture } from "@/components/kyc/DocumentCapture";
 import { SelfieCapture } from "@/components/kyc/SelfieCapture";
@@ -11,7 +11,25 @@ import { Loader2 } from "lucide-react";
 // For MVP, we'll just show a message. Ideally we'd use a package.
 import { QRCodeSVG } from 'qrcode.react';
 
-import { generateHandoffToken, checkHandoffStatus } from "./actions";
+import { generateHandoffToken, checkHandoffStatus, sendKycHandoffLinkEmail } from "./actions";
+
+function getMobileHandoffOrigin() {
+  const { origin, hostname, port, protocol } = window.location;
+
+  if (hostname === "dashboard.kobara.app" || hostname === "api.kobara.app" || hostname === "pay.kobara.app") {
+    return "https://kobara.app";
+  }
+
+  if (hostname === "dashboard.localhost" || hostname === "api.localhost" || hostname === "pay.localhost") {
+    return `http://localhost${port ? `:${port}` : ":3000"}`;
+  }
+
+  if (hostname === "dashboard.kobara.local" || hostname === "api.kobara.local" || hostname === "pay.kobara.local") {
+    return `${protocol}//kobara.local${port ? `:${port}` : ""}`;
+  }
+
+  return origin;
+}
 
 export function KycStepperClient() {
   const [step, setStep] = useState(0);
@@ -22,6 +40,11 @@ export function KycStepperClient() {
   const [documentType, setDocumentType] = useState('national_id');
   const [isDesktop, setIsDesktop] = useState(false);
   const [handoffUrl, setHandoffUrl] = useState('');
+  const [handoffToken, setHandoffToken] = useState('');
+  const [handoffEmail, setHandoffEmail] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [handoffDetected, setHandoffDetected] = useState(false);
 
   // Liveness State
   const [livenessChallengeId, setLivenessChallengeId] = useState('');
@@ -40,7 +63,8 @@ export function KycStepperClient() {
           return;
         }
 
-        const url = new URL(window.location.origin + `/kyc/mobile/${token}`);
+        const url = new URL(`${getMobileHandoffOrigin()}/kyc/mobile/${token}`);
+        setHandoffToken(token);
         setHandoffUrl(url.toString());
 
         // Polling
@@ -51,6 +75,7 @@ export function KycStepperClient() {
             clearInterval(intervalId);
           } else if (status.completed) {
             clearInterval(intervalId);
+            setHandoffDetected(true);
             setIsDesktop(false);
             setStep(6);
             submitKyc();
@@ -141,6 +166,96 @@ export function KycStepperClient() {
     setError(null);
     setStep(next);
   };
+
+  const sendHandoffEmail = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setEmailSent(false);
+    setEmailSending(true);
+
+    const result = await sendKycHandoffLinkEmail(handoffEmail, handoffToken);
+    setEmailSending(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setEmailSent(true);
+  };
+
+  if (isDesktop && step === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 sm:p-12 bg-surface-container-lowest h-full border-b border-border-subtle">
+        <span className="material-symbols-outlined text-6xl text-primary mb-6">smartphone</span>
+        <h2 className="font-headline-md text-text-primary mb-4 text-center">Continuez sur votre telephone</h2>
+        <p className="text-body-base text-text-secondary max-w-xl text-center mb-8">
+          Pour proteger votre compte, la capture du document et du selfie doit etre faite sur telephone.
+          Scannez le QR code ou envoyez le lien par email, puis gardez cette page ouverte: elle se mettra a jour automatiquement.
+        </p>
+
+        {error && (
+          <div className="w-full max-w-xl mb-6 bg-error-container/20 border border-status-error/30 text-status-error p-4 rounded-xl flex items-start gap-3">
+            <span className="material-symbols-outlined text-[20px] shrink-0 mt-0.5">error</span>
+            <p className="font-body-sm font-medium">{error}</p>
+          </div>
+        )}
+
+        <div className="grid w-full max-w-3xl gap-4 md:grid-cols-[260px_1fr] items-stretch mb-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-border-subtle flex items-center justify-center">
+            {handoffUrl ? <QRCodeSVG value={handoffUrl} size={200} /> : <Loader2 className="w-10 h-10 animate-spin text-primary" />}
+          </div>
+
+          <div className="rounded-2xl border border-border-subtle bg-surface-container-low p-5 flex flex-col justify-between gap-5">
+            <div>
+              <h3 className="font-title-md text-text-primary mb-2">Envoyer le lien par email</h3>
+              <p className="text-body-sm text-text-secondary">
+                Entrez l'adresse email ouverte sur le telephone du client. Le lien expire dans 15 minutes.
+              </p>
+            </div>
+
+            <form onSubmit={sendHandoffEmail} className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="email"
+                value={handoffEmail}
+                onChange={(event) => {
+                  setHandoffEmail(event.target.value);
+                  setEmailSent(false);
+                }}
+                placeholder="client@email.com"
+                className="min-w-0 flex-1 rounded-xl border border-border-subtle bg-white px-4 py-3 text-text-primary outline-none focus:border-primary"
+                required
+              />
+              <button
+                type="submit"
+                disabled={!handoffToken || emailSending}
+                className="rounded-xl bg-primary px-5 py-3 font-medium text-on-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {emailSending ? "Envoi..." : "Envoyer"}
+              </button>
+            </form>
+
+            {emailSent && (
+              <p className="text-body-sm font-medium text-status-success">
+                Lien envoye. Ouvrez l'email sur le telephone pour continuer.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-full border border-border-subtle bg-surface-container-low px-5 py-3 text-text-secondary mb-6">
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          <span className="text-body-sm">
+            {handoffDetected ? "Verification recue, analyse en cours..." : "En attente de la verification sur telephone..."}
+          </span>
+        </div>
+
+        <button onClick={() => { setIsDesktop(false); setStep(1); }} className="text-sm text-text-secondary underline hover:text-text-primary">
+          J'ai un ordinateur avec une bonne webcam (non recommande)
+        </button>
+      </div>
+    );
+  }
 
   if (isDesktop && step === 0) {
     return (

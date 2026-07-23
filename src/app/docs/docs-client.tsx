@@ -10,17 +10,11 @@ import { Terminal } from 'lucide-react';
 
 import { DocsAIAssistant } from '@/components/docs/DocsAIAssistant';
 
-export function DocsClient({ 
-  testPublicKey, 
-  testSecretKey,
-  livePublicKey,
+export function DocsClient({
   isAuthenticated,
   markdownContent,
   currentSlug = 'quickstart'
-}: { 
-  testPublicKey: string, 
-  testSecretKey: string,
-  livePublicKey: string,
+}: {
   isAuthenticated: boolean,
   markdownContent: string,
   currentSlug?: string

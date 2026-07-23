@@ -8,15 +8,15 @@ import { Metadata } from "next";
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await props.params;
   const titleMap: Record<string, string> = {
-    'quickstart': 'Quickstart Integration',
-    'authentication': 'Authentication API',
+    'quickstart': 'API MonCash et API NatCash - Quickstart Kobara',
+    'authentication': 'Authentification API MonCash et API NatCash',
     'api-keys': 'API Keys Management',
     'javascript-sdk': 'JavaScript SDK',
     'nodejs-sdk': 'Node.js SDK',
     'python-sdk': 'Python SDK',
     'php-sdk': 'PHP SDK',
     'wordpress-plugin': 'WordPress Plugin',
-    'payments': 'Payments API',
+    'payments': 'API MonCash, MonCash API, API NatCash et NatCash API',
     'payment-links': 'Payment Links API',
     'webhooks': 'Webhooks Integration',
     'withdrawals': 'Withdrawals API',
@@ -28,8 +28,15 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const title = titleMap[resolvedParams.slug] || 'Documentation';
   return {
     title: `${title} | Kobara Docs`,
-    description: `Learn how to integrate ${title} with the Kobara Payment Gateway API for MonCash & NatCash in Haiti.`,
-    keywords: [`Kobara ${title}`, `MonCash API ${title}`, `NatCash API ${title}`, "Haiti Payment API"]
+    description: `Documentation Kobara pour integrer une API MonCash, MonCash API, API NatCash ou NatCash API sur un site web, une application ou WooCommerce en Haiti.`,
+    keywords: [
+      "API MonCash",
+      "MonCash API",
+      "API NatCash",
+      "NatCash API",
+      `Kobara ${title}`,
+      "Haiti Payment API",
+    ]
   };
 }
 
@@ -38,10 +45,6 @@ export default async function DocsDocPage(props: { params: Promise<{ slug: strin
   const isAuthenticated = !!session?.user;
   const resolvedParams = await props.params;
   const { slug } = resolvedParams;
-
-  const testPublicKey = 'kbr_pk_test_a1b2c3d4e5f6';
-  const livePublicKey = 'kbr_pk_live_a1b2c3d4e5f6';
-  const testSecretKey = 'kbr_sk_test_a1b2c3d4e5f6g7h8i9j0';
 
   let markdownContent = "";
   try {
@@ -58,9 +61,6 @@ export default async function DocsDocPage(props: { params: Promise<{ slug: strin
   return (
     <div className="min-h-[100dvh] bg-background">
       <DocsClient 
-        testPublicKey={testPublicKey} 
-        testSecretKey={testSecretKey}
-        livePublicKey={livePublicKey}
         isAuthenticated={isAuthenticated}
         markdownContent={markdownContent}
         currentSlug={slug}

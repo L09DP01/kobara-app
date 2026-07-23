@@ -71,7 +71,7 @@ NEXT_PUBLIC_KOBARA_PUBLIC_KEY=
 ```js
 import Kobara from "kobara-js";
 
-const kobara = new Kobara("kbr_pk_test_a1b2c3d4e5f6");
+const kobara = new Kobara("kbr_pk_test_xxxxxxxxx");
 ```
 
 ---
@@ -114,7 +114,7 @@ Exemple simple :
 ```js
 import Kobara from "kobara-js";
 
-const kobara = new Kobara("kbr_pk_test_a1b2c3d4e5f6");
+const kobara = new Kobara("kbr_pk_test_xxxxxxxxx");
 
 async function handleCheckout() {
   const { error } = await kobara.checkout.create({
